@@ -6,10 +6,12 @@ const router = express.Router();
 // add token verification (if required)
 // wrap code inside of this (data collecting from database) to function so that two server can just point to that function to retrieve data
 router.get("/page/:pageno", async (req, res, next) => {
-  let { pageno, lattitude, longitude } = req.params;
+  let { pageno } = req.params;
+  let { lattitude, longitude } = req.query;
   pageno = parseInt(pageno);
-  lat = parseFloat(lattitude)
+  lat = parseFloat(lattitude);
   lon = parseFloat(longitude);
+  console.log(req.query);
   const data = await dataForHomePage(pageno, lon, lat);
   return res.json(data);
 });

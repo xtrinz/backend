@@ -11,9 +11,16 @@ const dataForHomePage = async function (pageno, longitude, lattitude) {
   // find return a cursor limit returened data (for dynamic loading)
   const nPerPage = 30;
   const shopinfo = await shopInfoCollection
-    .find({ 'location': { $near : { $geometry: {
-		type: "Point",
-		coordinates: [ longitude, lattitude ] } } })
+    .find({
+      location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [longitude, lattitude],
+          },
+        },
+      },
+    })
     .skip(pageno > 0 ? (pageno - 1) * nPerPage : 0)
     .limit(nPerPage);
   // convert that to array
