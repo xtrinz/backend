@@ -7,11 +7,20 @@ const {
  * @param {It is The number of the page (let's assume our website as a lot of pages)} pageno
  * @param {*number of result in a page} nPerPage
  */
-const dataForHomePage = async function (pageno) {
+const dataForHomePage = async function (pageno, longitude, lattitude) {
   // find return a cursor limit returened data (for dynamic loading)
   const nPerPage = 30;
   const shopinfo = await shopInfoCollection
-    .find({})
+    .find({
+      location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [longitude, lattitude],
+          },
+        },
+      },
+    })
     .skip(pageno > 0 ? (pageno - 1) * nPerPage : 0)
     .limit(nPerPage);
   // convert that to array
