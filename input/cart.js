@@ -1,12 +1,12 @@
 const { Validator } = require('node-input-validator');
 
-const auth_login = function (req, res, next)
+const cart = function (shopinfoid, productsid, quantity)
 {
   const v = new Validator(req.body,
   {
-    password: 'required',
-    phonenumber: ['required', 'regex:^+91[0-9]{10}$'],
-    email: 'email'
+    shopinfoid: 'required',
+    productsid: 'required',
+    quantity: 'required',
   })
 
   v.check()
@@ -19,4 +19,3 @@ const auth_login = function (req, res, next)
   })
   next()
 }
-
