@@ -1,51 +1,58 @@
-const { ObjectId } = require("mongodb");
+const { ObjectId, ObjectID } = require("mongodb");
 const {
   userCollection,
   shopInfoCollection,
   productsCollection,
   cartCollection,
 } = require("../databaseconnections/mongoconnection");
+const { Api403Error } = require("../error/errorclass/errorclass");
+const { isArrayEmpty } = require("../functions");
 
 // data for payment page
-const dataForPaymentPage = async function (userid) {
-  //take product details from user collection for payment page
-  const query1 = {
-    _id: ObjectId(userid),
-  };
-  const options1 = {
-    projection: {
-      temporaryproducts: 1,
-      _id: 0,
-      location: 1,
-    },
-  };
-  const user = await userCollection.findOne(query1, options1);
+const dataForPaymentPage = async function (user) {
   let data = [];
   let totalPrice = 0;
   // get detatiled info regarding product from shop info and products
+  if (isArrayEmpty(user.temporaryproducts)) {
+    throw new Api403Error("Forbidden", "Please checkout your cart");
+  }
   for (let product of user.temporaryproducts) {
-    const query2 = {
+    const query1 = {
       _id: ObjectId(product.shopinfoid),
     };
-    const options2 = {
+    const options1 = {
       projection: {
         products: { $elemMatch: { productid: ObjectId(product.productsid) } },
         _id: 1,
         shopname: 1,
       },
     };
-    const shopinfo = await shopInfoCollection.findOne(query2, options2);
-    const query3 = {
+    const shopinfo = await shopInfoCollection.findOne(query1, options1);
+    const query2 = {
       _id: ObjectId(product.productsid),
     };
-    const options3 = {
+    const options2 = {
       projection: {
         _id: 1,
         productname: 1,
         productimage: 1,
       },
     };
-    const products = await productsCollection.findOne(query3, options3);
+    const products = await productsCollection.findOne(query2, options2);
+    if (!shopinfo || !products) {
+      const query3 = {
+        _id: ObjectId(user._id),
+      };
+      const options3 = {
+        $pull: {
+          temporaryproducts: {
+            _id: ObjectId(product._id),
+          },
+        },
+      };
+      await userCollection.updateOne(query3, options3);
+      continue;
+    }
     const arrayData = {
       shopId: shopinfo._id,
       shopName: shopinfo.shopname,
@@ -57,6 +64,12 @@ const dataForPaymentPage = async function (userid) {
     };
     data.push(arrayData);
   }
+  if (isArrayEmpty(data)) {
+    throw new Api404Error(
+      "Not found",
+      "Something went wrong. Please try again"
+    );
+  }
   // calculate total price
   for (const { price, quantity } of data) {
     totalPrice = totalPrice + price * quantity;
@@ -64,13 +77,13 @@ const dataForPaymentPage = async function (userid) {
   const returnData = {
     data,
     totalPrice,
-    location: user.location,
+    location: user.location, // Todo : this should handle properly
   };
   return returnData;
 };
 
 const addTemporaryProductInUserForPaymentPage = async function (
-  userid,
+  user,
   isRequestFromCart,
   quantity,
   shopinfoid,
@@ -79,44 +92,63 @@ const addTemporaryProductInUserForPaymentPage = async function (
   let temporaryData = [];
   if (isRequestFromCart) {
     const query1 = {
-      _id: ObjectId(userid),
-    };
-    const options1 = {
-      projection: {
-        cartid: 1,
-        _id: 0,
-      },
-    };
-    const user = await userCollection.findOne(query1, options1);
-    const query2 = {
       _id: ObjectId(user.cartid),
     };
-    const options2 = {
+    const options1 = {
       projection: {
         products: 1,
       },
     };
-    const cart = await cartCollection.findOne(query2, options2);
+    let cart = await cartCollection.findOne(query1, options1);
+    if (!cart) {
+      const insertOptions = {
+        products: [],
+      };
+      cart = await cartCollection.insertOne(insertOptions);
+      const query2 = {
+        _id: ObjectId(user._id),
+      };
+      const options2 = {
+        $set: {
+          cartid: ObjectId(cart.insertedId),
+        },
+      };
+      await userCollection.updateOne(query2, options2);
+      // we should send error because request to this api forbidden for the above error case
+      throw new Api403Error(
+        "Forbidden",
+        "Something went wrong. Please try again"
+      );
+    }
+    if (isArrayEmpty(cart.products)) {
+      throw new Api403Error(
+        "Forbidden",
+        "Your cart is empty. Please add items to your cart"
+      );
+    }
     temporaryData = cart.products;
   } else {
     const arrayData = {
+      _id: new ObjectID(),
       shopinfoid: ObjectId(shopinfoid),
       productsid: ObjectId(productsid),
       quantity,
     };
     temporaryData.push(arrayData);
   }
-  const query = {
-    _id: ObjectId(userid),
+  const query3 = {
+    _id: ObjectId(user._id),
   };
-  const options = {
+  const options3 = {
     $set: {
       temporaryproducts: temporaryData,
     },
   };
   // update product into user collection
-  await userCollection.updateOne(query, options);
+  await userCollection.updateOne(query3, options3);
 };
 
-module.exports.dataForPaymentPage = dataForPaymentPage;
-module.exports.addTemporaryProductInUserForPaymentPage = addTemporaryProductInUserForPaymentPage;
+module.exports = {
+  dataForPaymentPage,
+  addTemporaryProductInUserForPaymentPage,
+};

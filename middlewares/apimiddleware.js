@@ -1,11 +1,19 @@
 require("dotenv").config();
 
+const { ObjectId } = require("mongodb");
 // json web token for authentication
 const jwt = require("jsonwebtoken");
 const {
   userCollection,
   temporaryUserCollection,
 } = require("../databaseconnections/mongoconnection");
+const {
+  Api400Error,
+  Api401Error,
+  Api403Error,
+  Api409Error,
+  Api404Error,
+} = require("../error/errorclass/errorclass");
 const {
   comparePassword,
   validatePhoneNumber,
@@ -16,158 +24,227 @@ const {
 
 const JWT_TOKEN_SECRET = process.env.JWT_TOKEN_SECRET;
 
-const verifyJwtToken = function (req, res, next) {
-  const token = req.headers["x-access-token"];
-  // verify jwt token
-  jwt.verify(token, JWT_TOKEN_SECRET, function (err, decoded) {
-    if (err) {
-      console.log(err);
-      return res.json(err);
-    } else {
-      req.body.userid = decoded.id;
-      next();
+const verifyJwtToken = async function (req, res, next) {
+  try {
+    const token = req.headers["x-access-token"];
+    // verify jwt token
+    const decoded = jwt.verify(token, JWT_TOKEN_SECRET);
+    const query = {
+      _id: ObjectId(decoded._id),
+    };
+    const user = await userCollection.findOne(query);
+    if (!user) {
+      throw new Api401Error("Unauthorized", "Please login to your accound"); // Todo: we should revoke token
     }
-  });
+    req.body.user = user;
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
 
 const phoneEmailSyntaxVerification = function (req, res, next) {
-  let { uid } = req.body;
-  const phonenumber = validatePhoneNumber(uid);
-  if (phonenumber) {
-    req.body.phonenumber = phonenumber;
-  } else {
-    const email = validateEmail(uid);
-    if (!email) {
-      // send error
+  try {
+    let { uid } = req.body;
+    const phonenumber = validatePhoneNumber(uid);
+    if (phonenumber) {
+      req.body.phonenumber = phonenumber;
+    } else {
+      const email = validateEmail(uid);
+      if (!email) {
+        throw new Api400Error("Bad Request", "Invalid input");
+      }
+      req.body.email = email;
     }
-    req.body.email = email;
+    return next();
+  } catch (error) {
+    next(error);
   }
-  return next();
 };
 
 const isUserNotExist = async function (req, res, next) {
-  const { phonenumber, email } = req.body;
-  let query;
-  if (phonenumber) {
-    query = {
-      phonenumber,
-    };
-  } else if (email) {
-    query = {
-      email,
-    };
+  try {
+    const { phonenumber, email } = req.body;
+    let query;
+    if (phonenumber) {
+      query = {
+        phonenumber,
+      };
+    } else if (email) {
+      query = {
+        email,
+      };
+    }
+    const user = await userCollection.findOne(query); // it return object or null
+    if (user) {
+      throw new Api409Error("Conflict", "User already exist");
+    }
+    return next();
+  } catch (error) {
+    next(error);
   }
-  const user = await userCollection.findOne(query);
-  if (user) {
-    // send error
-  }
-  return next();
 };
 
 const isUserExist = async function (req, res, next) {
-  const { phonenumber, email } = req.body;
-  // if phone number then retrieve info regarding that phone number(user info)
-  let query;
-  if (phonenumber) {
-    query = {
-      phonenumber,
+  try {
+    const { phonenumber, email } = req.body;
+    // if phone number then retrieve info regarding that phone number(user info)
+    let query;
+    if (phonenumber) {
+      query = {
+        phonenumber,
+      };
+    } else if (email) {
+      query = {
+        email,
+      };
+    }
+    const options = {
+      projection: {
+        _id: 1,
+        password: 1,
+      },
     };
-  } else if (email) {
-    query = {
-      email,
-    };
+    const user = await userCollection.findOne(query, options);
+    if (!user) {
+      throw new Api401Error(
+        "Unauthorized",
+        "Your username or password is incorrect"
+      );
+    }
+    req.body.user = user;
+    return next();
+  } catch (error) {
+    next(error);
   }
-  const options = {
-    projection: {
-      _id: 1,
-      password: 1,
-    },
-  };
-  req.body.user = await userCollection.findOne(query, options);
-  return next();
 };
 
 const sendOtp = async function (req, res, next) {
-  let { phonenumber } = req.body;
-  await sendOtpPhoneNumber(phonenumber);
-  // send success message
-  next();
+  try {
+    let { phonenumber } = req.body;
+    await sendOtpPhoneNumber(phonenumber);
+    // send success message
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
 
 const verifyOtp = async function (req, res, next) {
-  const { otp, phonenumber, email } = req.body;
-  let query;
-  if (phonenumber) {
-    query = {
-      phonenumber: phonenumber,
+  try {
+    const { otp, phonenumber, email } = req.body;
+    let query;
+    if (phonenumber) {
+      query = {
+        phonenumber: phonenumber,
+      };
+    } else if (email) {
+      query = {
+        email: email,
+      };
+    }
+    const options1 = {
+      projection: {
+        otp: 1,
+        _id: 0,
+      },
     };
-  } else if (email) {
-    query = {
-      email: email,
-    };
+    const temporaryuser = await temporaryUserCollection.findOne(
+      query,
+      options1
+    );
+    if (!temporaryuser) {
+      throw new Api401Error("Unauthorized", "Phone number not verified");
+    }
+    const isValid = await comparePassword(otp, temporaryuser.otp);
+    if (!isValid) {
+      throw new Api401Error("Unauthorized", "Enter valid otp");
+    }
+    const options2 = { $set: { isOtpVerified: true } };
+    await temporaryUserCollection.updateOne(query, options2);
+    next();
+  } catch (error) {
+    next(error);
   }
-  const options1 = {
-    projection: {
-      otp: 1,
-      _id: 0,
-    },
-  };
-  const temporaryuser = await temporaryUserCollection.findOne(query, options1);
-  const isValid = await comparePassword(otp, temporaryuser.otp);
-  if (!isValid) {
-    // send error
-  }
-  const options2 = { $set: { isOtpVerified: true } };
-  await temporaryUserCollection.updateOne(query, options2);
-  next();
 };
 
 const checkOtpVerifiedStatus = async function (req, res, next) {
-  const { phonenumber } = req.body;
-  const query = {
-    phonenumber: phonenumber,
-  };
-  const options = {
-    projection: {
-      isOtpVerified: 1,
-      _id: 0,
-    },
-  };
-  const data = await temporaryUserCollection.findOne(query, options);
-  if (!data || (data && !data.isOtpVerified)) {
-    // send error
+  try {
+    const { phonenumber } = req.body;
+    const query = {
+      phonenumber: phonenumber,
+    };
+    const options = {
+      projection: {
+        isOtpVerified: 1,
+        _id: 0,
+      },
+    };
+    const data = await temporaryUserCollection.findOne(query, options);
+    if (!data || !data.isOtpVerified) {
+      throw new Api401Error(
+        "Unauthorized",
+        "Phone number verification required"
+      );
+    }
+    return next();
+  } catch (error) {
+    next(error);
   }
-  return next();
 };
 
 const updatePasswordCredentials = async function (req, res, next) {
-  let { phonenumber, email, password } = req.body;
-  password = await hashPassword(password, 12);
-  let query;
-  if (phonenumber) {
-    query = {
-      phonenumber,
+  try {
+    let { phonenumber, email, password } = req.body;
+    password = await hashPassword(password, 12);
+    let query;
+    if (phonenumber) {
+      query = {
+        phonenumber,
+      };
+    } else if (email) {
+      query = {
+        email,
+      };
+    }
+    const options = {
+      $set: {
+        password,
+      },
     };
-  } else if (email) {
-    query = {
-      email,
-    };
+    await userCollection.updateOne(query, options);
+    await temporaryUserCollection.deleteMany(query);
+    next();
+  } catch (error) {
+    next(error);
   }
-  const options = {
-    $set: {
-      password,
-    },
-  };
-  await userCollection.updateOne(query, options);
-  await temporaryUserCollection.deleteMany(query);
+};
+
+const verifyCredentialChangePermmision = async function (req, res, next) {
+  const { user } = req.body;
+  if (!user.credentialchangepermission) {
+    throw new Api403Error("Forbidden", "Please verify your account");
+  }
   next();
 };
 
-module.exports.verifyJwtToken = verifyJwtToken;
-module.exports.isUserExist = isUserExist;
-module.exports.sendOtp = sendOtp;
-module.exports.checkOtpVerifiedStatus = checkOtpVerifiedStatus;
-module.exports.phoneEmailSyntaxVerification = phoneEmailSyntaxVerification;
-module.exports.isUserNotExist = isUserNotExist;
-module.exports.verifyOtp = verifyOtp;
-module.exports.updatePasswordCredentials = updatePasswordCredentials;
+const forbiddenApiCall = (req, res, next) => {
+  try {
+    throw new Api404Error("Not found", "Page not found");
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  verifyJwtToken,
+  isUserExist,
+  isUserNotExist,
+  sendOtp,
+  verifyOtp,
+  checkOtpVerifiedStatus,
+  phoneEmailSyntaxVerification,
+  updatePasswordCredentials,
+  verifyCredentialChangePermmision,
+  forbiddenApiCall,
+};

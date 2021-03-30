@@ -1,27 +1,21 @@
 const { ObjectId } = require("mongodb");
 const { userCollection } = require("../databaseconnections/mongoconnection");
-const { comparePassword, hashPassword } = require("../functions");
+const { Api403Error } = require("../error/errorclass/errorclass");
+const { comparePassword, hashPassword, compareTwo } = require("../functions");
 
-const dataForProfilePage = async function (userid) {
-  const query = {
-    _id: ObjectId(userid),
+const dataForProfilePage = function (user) {
+  const returnData = {
+    firstname: user.firstname,
+    lastname: user.lastname,
+    phonenumber: user.phonenumber,
+    email: user.email,
   };
-  const options = {
-    projection: {
-      firstname: 1,
-      lastname: 1,
-      phonenumber: 1,
-      email: 1,
-      _id: 0,
-    },
-  };
-  const user = await userCollection.findOne(query, options);
-  return user;
+  return returnData;
 };
 
-const updateUserDetails = async function (userid, firstname, lastname) {
+const updateUserDetails = async function (user, firstname, lastname) {
   const query = {
-    _id: ObjectId(userid),
+    _id: ObjectId(user._id),
   };
   const options = {
     $set: {
@@ -32,68 +26,83 @@ const updateUserDetails = async function (userid, firstname, lastname) {
   await userCollection.updateOne(query, options);
 };
 
-const verifyUser = async function (userid, phonenumber, email, password) {
-  let query;
+const verifyUser = async function (user, phonenumber, email, password) {
   if (phonenumber) {
-    query = {
-      _id: ObjectId(userid),
-      phonenumber,
-    };
+    if (!compareTwo(phonenumber, user.phonenumber)) {
+      throw new Api403Error(
+        "Forbidden",
+        "Your username or password is incorrect"
+      );
+    }
   } else if (email) {
-    query = {
-      _id: ObjectId(userid),
-      email,
-    };
+    if (!compareTwo(email, user.email)) {
+      throw new Api403Error(
+        "Forbidden",
+        "Your username or password is incorrect"
+      );
+    }
   }
-  const options = {
-    projection: {
-      password: 1,
-      _id: 0,
-    },
-  };
-  const user = await userCollection.findOne(query, options);
   const isValid = await comparePassword(password, user.password);
-  return isValid;
-};
-
-const updateUserPhoneEmail = async function (userid, phonenumber) {
+  if (!isValid) {
+    throw new Api403Error(
+      "Forbidden",
+      "Your username or password is incorrect"
+    );
+  }
   const query = {
-    _id: ObjectId(userid),
+    _id: ObjectId(user._id),
   };
   const options = {
     $set: {
-      phonenumber,
+      credentialchangepermission: true,
+    },
+  };
+  await userCollection.updateOne(query, options);
+  return isValid;
+};
+
+const updateUserPhoneEmail = async function (user, phonenumber, email) {
+  const query = {
+    _id: ObjectId(user._id),
+  };
+  let options;
+  if (phonenumber) {
+    options = {
+      $set: {
+        phonenumber,
+      },
+    };
+  } else if (email) {
+    options = {
+      $set: {
+        email,
+      },
+    };
+  }
+  await userCollection.updateOne(query, options);
+};
+
+const updateUserPassword = async function (user, oldpassword, newpassword) {
+  const query = {
+    _id: ObjectId(user._id),
+  };
+  const isValid = await comparePassword(oldpassword, user.password);
+  if (!isValid) {
+    throw new Api403Error("Forbidden", "Your password is incorrect");
+  }
+  const password = await hashPassword(newpassword, 12);
+  const options = {
+    $set: {
+      password,
     },
   };
   await userCollection.updateOne(query, options);
 };
 
-const updateUserPassword = async function (userid, oldpassword, newpassword) {
-  const query = {
-    _id: ObjectId(userid),
-  };
-  const options1 = {
-    projection: {
-      password: 1,
-      _id: 0,
-    },
-  };
-  const user = await userCollection.findOne(query, options1);
-  const isValid = await comparePassword(oldpassword, user.password);
-  if (!isValid) {
-    // send error
-  }
-  const password = await hashPassword(newpassword, 12);
-  const options2 = {
-    $set: {
-      password,
-    },
-  };
-  await userCollection.updateOne(query, options2);
+module.exports = {
+  dataForProfilePage,
+  updateUserDetails,
+  verifyUser,
+  updateUserPassword,
+  updateUserPhoneEmail,
 };
-
-module.exports.dataForProfilePage = dataForProfilePage;
-module.exports.updateUserDetails = updateUserDetails;
-module.exports.verifyUser = verifyUser;
-module.exports.updateUserPassword = updateUserPassword;
-module.exports.updateUserPhoneEmail = updateUserPhoneEmail;

@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const httpStatusCodes = require("../error/httpstatuscode");
 
 // json web token for authentication
 
@@ -21,11 +22,15 @@ router.post(
   phoneEmailSyntaxVerification,
   isUserExist,
   async (req, res, next) => {
-    // uid will be either phone or email
-    const { user, password } = req.body;
-    console.log(user);
-    const token = await verifyLoginCredentials(user, password);
-    return res.json({ message: "Success Fully Login", token: token });
+    try {
+      const { user, password } = req.body;
+      const token = await verifyLoginCredentials(user, password);
+      return res
+        .status(httpStatusCodes.OK)
+        .json({ message: "Success Fully Logged in", token });
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
@@ -34,32 +39,61 @@ router.post(
 router.post(
   "/forgotpassword",
   phoneEmailSyntaxVerification,
-  isUserExist,
+  isUserExist, // doubt : is it required . because it reveals to the client side that user with that phone / email exist in out database
   sendOtp,
   (req, res, next) => {
-    const { phonenumber } = req.body;
-    return res.json({ message: "Success", phonenumber: phonenumber });
+    const { phonenumber, email } = req.body;
+    if (phonenumber) {
+      const lastDigitsPhoneNumber = String(phonenumber).slice(-4);
+      return res.status(httpStatusCodes.OK).json({
+        message:
+          "An otp send to your phone number ending " + lastDigitsPhoneNumber,
+        phonenumber,
+      });
+    } else {
+      const lastDigitsEmail = String(email).slice(-15);
+      return res.status(httpStatusCodes.OK).json({
+        message: "An otp send to your email ending " + lastDigitsEmail,
+        email,
+      });
+    }
   }
 );
 
 router.post(
   "/verifyotp",
   phoneEmailSyntaxVerification,
+  isUserExist, // doubt : is it required . because it reveals to the client side that user with that phone / email exist in out database
   verifyOtp,
   (req, res, next) => {
-    const { phonenumber } = req.body;
-    return res.json({ message: "Success", phonenumber: phonenumber });
+    const { phonenumber, email } = req.body;
+    if (phonenumber) {
+      return res.json({ message: "Otp verified success fully", phonenumber });
+    } else {
+      return res.json({ message: "Otp verified success fully", email });
+    }
   }
 );
 
 router.post(
   "/updatepassword",
   phoneEmailSyntaxVerification,
+  isUserExist, // doubt : is it required . because it reveals to the client side that user with that phone / email exist in out database
   checkOtpVerifiedStatus,
   updatePasswordCredentials,
   (req, res, next) => {
-    const { phonenumber } = req.body;
-    return res.json({ message: "Success", phonenumber: phonenumber });
+    const { phonenumber, email } = req.body;
+    if (phonenumber) {
+      return res.json({
+        message: "Password updated success fully",
+        phonenumber,
+      });
+    } else {
+      return res.json({
+        message: "Password updated success fully",
+        email,
+      });
+    }
   }
 );
 

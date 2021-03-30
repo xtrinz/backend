@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const httpStatusCodes = require("../error/httpstatuscode");
 const {
   sendOtp,
   checkOtpVerifiedStatus,
@@ -12,6 +13,7 @@ const { registerUser } = require("../retrievedatafromdatabase/register");
 const router = express.Router();
 
 // request for validating phone number
+
 router.post(
   "/",
   phoneEmailSyntaxVerification,
@@ -19,7 +21,12 @@ router.post(
   sendOtp,
   (req, res, next) => {
     const { phonenumber } = req.body;
-    return res.json({ message: "Success", phonenumber: phonenumber });
+    const lastDigitsPhoneNumber = String(phonenumber).slice(-4);
+    return res.status(httpStatusCodes.OK).json({
+      message:
+        "An otp send to your phone number ending " + lastDigitsPhoneNumber,
+      phonenumber,
+    });
   }
 );
 
@@ -27,10 +34,14 @@ router.post(
 router.post(
   "/verifyphonenumber",
   phoneEmailSyntaxVerification,
+  isUserNotExist,
   verifyOtp,
   (req, res, next) => {
     const { phonenumber } = req.body;
-    return res.json({ message: "Success", phonenumber: phonenumber });
+    return res.status(httpStatusCodes.OK).json({
+      message: "Otp verified success fully",
+      phonenumber,
+    });
   }
 );
 
@@ -38,18 +49,25 @@ router.post(
 router.post(
   "/user",
   phoneEmailSyntaxVerification,
+  isUserNotExist,
   checkOtpVerifiedStatus,
   async (req, res, next) => {
-    let { firstname, lastname, password, phonenumber, email } = req.body;
-    // hash password
-    const token = await registerUser(
-      firstname,
-      lastname,
-      password,
-      phonenumber,
-      email
-    );
-    return res.json({ message: "Success Fully registered", token: token });
+    try {
+      let { firstname, lastname, password, phonenumber, email } = req.body;
+      // hash password
+      const token = await registerUser(
+        firstname,
+        lastname,
+        password,
+        phonenumber,
+        email
+      );
+      return res
+        .status(httpStatusCodes.OK)
+        .json({ message: "Success Fully registered", token });
+    } catch (error) {
+      next(error);
+    }
   }
 );
 

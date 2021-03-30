@@ -1,0 +1,870 @@
+                                                API DOCUMENTATION
+                                                =================
+
+
+1) Register 
+   ========
+        /register :
+            1.1) / :
+                    post :
+                        description : validating phone number and send otp
+                            parameters : 
+                                body :
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true
+                                        unique      : true
+                            response : 
+                                200 :
+                                    description : otp send success fully
+                                        parameters :
+                                            json : 
+                                                type : object 
+                                                    message : 
+                                                        type        : string
+                                                        description : success message
+                                                    phonenumber :
+                                                        type        : string
+                                                        description : user phone number
+            1.2) /verifyphonenumber :
+                    post :
+                        description : verify otp
+                            parameters :
+                                body :
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true
+                                        unique      : true
+                                    otp :
+                                        type        : string
+                                        description : 6 digit otp
+                                        required    : true
+                                        unique      : false
+                            response :
+                                200 :
+                                    description : otp verified success fully
+                                        parameters :
+                                            json :
+                                                type : object
+                                                    message : 
+                                                        type        : string
+                                                        description : success message
+                                                    phonenumber :
+                                                        type        : string
+                                                        description : user phone number
+            1.3) /user :
+                    post :
+                        description : user registration final step
+                            parameters :
+                                body :
+                                    firstname :
+                                        type        : string
+                                        description : first name of the user
+                                        required    : true
+                                        unique      : false
+                                    lastname :
+                                        type        : string
+                                        description : last name of the user
+                                        required    : false
+                                        unique      : false
+                                    password :
+                                        type        : string
+                                        description : password to protect user authentication and authorization
+                                        required    : true
+                                        unique      : false
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true
+                                        unique      : true
+                                    email :
+                                        type        : string
+                                        description : email address of the user
+                                        required    : false
+                                        unique      : true
+                            response :
+                                200 :
+                                    description : user registration success fully completed
+                                        parameters :
+                                            json :
+                                                type : object
+                                                    message : 
+                                                        type        : string
+                                                        description : success message
+                                                    token :
+                                                        type        : string
+                                                        description : jwt token for keeping user signed in
+
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------
+
+2) Login
+    =====
+        /login :
+            2.1) / :
+                    post :
+                        description : verify login credentials
+                            parameters : 
+                                body :
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true if email not provided
+                                        unique      : true
+                                    email :
+                                        type        : string
+                                        description : email address of the user
+                                        required    : true if phone number not provided
+                                        unique      : true
+                                    password :
+                                        type        : string
+                                        description : login password of the user
+                                        required    : true
+                                        unique      : false
+                            response :
+                                200 :
+                                    description : user login success fully
+                                        parameters :
+                                            json :
+                                                type : object
+                                                    message : 
+                                                        type        : string
+                                                        description : success message
+                                                    token :
+                                                        type        : string
+                                                        description : jwt token for keeping user signed in
+            2.2) /forgotpassword :
+                    post : 
+                        description : validate email or phonenumber and send otp
+                            parameters :
+                                body :
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true if email not provided
+                                        unique      : true
+                                    email :
+                                        type        : string
+                                        description : email address of the user
+                                        required    : true if phone number not provided
+                                        unique      : true
+                            response :
+                                200 :
+                                    description : otp send success fully
+                                        parameters :
+                                            json :
+                                                type : object
+                                                    message : 
+                                                        type        : string
+                                                        description : success message
+                                                    phonenumber :
+                                                        type        : string
+                                                        description : user phone number
+            2.3) /verifyotp :
+                    post :
+                        description : otp verification
+                            parameters :
+                                body :
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true if email not provided
+                                        unique      : true
+                                    email :
+                                        type        : string
+                                        description : email address of the user
+                                        required    : true if phone number not provided
+                                        unique      : true
+                                    otp :
+                                        type        : string
+                                        description : 6 digit otp
+                                        required    : true
+                                        unique      : false
+                            response :
+                                200 :
+                                    description : otp verified success fully
+                                        parameters :
+                                            json : object
+                                                message : 
+                                                        type        : string
+                                                        description : success message
+                                                phonenumber :
+                                                    type        : string
+                                                    description : user phone number
+            2.4) /updatepassword :
+                    post :
+                        description : update new password
+                            parameters :
+                                body :
+                                   phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true if email not provided
+                                        unique      : true
+                                    email :
+                                        type        : string
+                                        description : email address of the user
+                                        required    : true if phone number not provided
+                                        unique      : true
+                                    password :
+                                        type        : string
+                                        description : login password of the user
+                                        required    : true
+                                        unique      : false
+                            response :
+                                200 :
+                                    description : password updated success fully
+                                        parameters :
+                                            json : object
+                                                message : 
+                                                        type        : string
+                                                        description : success message
+                                                phonenumber :
+                                                    type        : string
+                                                    description : user phone number
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------  
+
+3) Home
+   ====
+        / :
+            3.1) /page/:pageno :
+                    get :
+                        description : get data for home page
+                            parameters :
+                                header :
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                params :
+                                    pageno :
+                                        type : number
+                                        description : considering collection data as pages
+                                        required : true
+                                        unique : false
+                                querystring:
+                                    lattitude :
+                                        type : double
+                                        description : lattitude of the point
+                                        required : true
+                                        unique : false
+                                    longitude :
+                                        type : double
+                                        description : longitude of the point
+                                        required : true
+                                        unique : false
+                            response :
+                                200 :
+                                    description : data for home page send succes fully
+                                        parameters :
+                                            json : array
+                                                data :
+
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------
+
+4) Cart
+    ====
+        /cart :
+            4.1) / :
+                    get :
+                        description : getting data for cart page
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+            4.2) / :
+                    post :
+                        description : add data to cart
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    shopinfoid :
+                                        type : string
+                                        description : id of the shop
+                                        required : true
+                                        unique : true
+                                    productsid :
+                                        type : string
+                                        description : id of the product
+                                        required : true
+                                        unique : true
+                                    quantity :
+                                        type : number 
+                                        description : quantity of the product
+                                        required : true
+                                        unique : false
+            4.3) / :
+                    delete :
+                        description : delete item from cart
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    cartitemid :
+                                        type : string
+                                        description : id to uniquely identify each item in the cart
+                                        required : true
+                                        unique : true    
+
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------
+
+5) Location
+    =======
+        /location :
+            5.1) / :
+                    get :
+                        description : get all saved addressess
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+            5.2) /:addressid :
+                    get :
+                        description : get a specific address
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                params :
+                                    addressid :
+                                        type : string
+                                        description : id to uniquely identify each addressess saved in user collection
+                                        required : true
+                                        unique : true
+            5.3) / :
+                    post :
+                        description : add a new user address
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    lat :
+                                        type : number
+                                        description : lattitude of the user location
+                                        required : true if plain address not available
+                                        unique : false
+                                    lng :
+                                        type : number
+                                        description : longitude of the user location
+                                        required : true if plain address not available
+                                        unique : false
+                                    house :
+                                        type : string 
+                                        description : either house number or name
+                                        required : false
+                                        unique : false
+                                    street :
+                                        type : string
+                                        description : street/area name
+                                        required : true if lat lng not available
+                                        unique : false
+                                    landmark :
+                                        type : string
+                                        description : landmark of that address
+                                        required : true if lat lng not available
+                                        unique : false
+                                    town :
+                                        type : string
+                                        description : town name
+                                        required : true if lat lng not available
+                                        unique : false
+                                    state :
+                                        type : string
+                                        description : state name
+                                        required : true if lat lng not available
+                                        unique : false
+                                    country :
+                                        type : string
+                                        description : country name
+                                        required : true if lat lng not available
+                                        unique : false
+                                    pincode :
+                                        type : number
+                                        description : pincode of the address
+                                        required : true if lat lng not available
+                                        unique : false 
+            5.4) /fav :
+                    post :
+                        description : make a address favourite
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    addressid :
+                                        type : string
+                                        description : id to uniquely identify each addressess saved in user collection
+                                        required : true
+                                        unique : true
+                                    isfavourite :
+                                        type : boolean
+                                        description : true if a specific address have to be favourite
+                                        required : true
+                                        unique : false
+            5.5) / :
+                    post :
+                        description : delete an address from user collection
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    addressid :
+                                        type : string
+                                        description : id to uniquely identify each addressess saved in user collection
+                                        required : true
+                                        unique : true
+            5.6) /edit :
+                    post :
+                        description : edit an address
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    lat :
+                                        type : number
+                                        description : lattitude of the user location
+                                        required : true if plain address not available
+                                        unique : false
+                                    lng :
+                                        type : number
+                                        description : longitude of the user location
+                                        required : true if plain address not available
+                                        unique : false
+                                    house :
+                                        type : string 
+                                        description : either house number or name
+                                        required : false
+                                        unique : false
+                                    street :
+                                        type : string
+                                        description : street/area name
+                                        required : true if lat lng not available
+                                        unique : false
+                                    landmark :
+                                        type : string
+                                        description : landmark of that address
+                                        required : true if lat lng not available
+                                        unique : false
+                                    town :
+                                        type : string
+                                        description : town name
+                                        required : true if lat lng not available
+                                        unique : false
+                                    state :
+                                        type : string
+                                        description : state name
+                                        required : true if lat lng not available
+                                        unique : false
+                                    country :
+                                        type : string
+                                        description : country name
+                                        required : true if lat lng not available
+                                        unique : false
+                                    pincode :
+                                        type : number
+                                        description : pincode of the address
+                                        required : true if lat lng not available
+                                        unique : false
+
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------
+
+6) Order History
+    ============
+        /orderhistory :
+            6.1) / :
+                    get :
+                        description : get all previous order status
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+            6.2) / :
+                    post :
+                        description : place a new order
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    customername :
+                                        type : string
+                                        description : name of the user
+                                        required : true
+                                        unique : false
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true
+                                        unique      : true
+                                    addressid :
+                                        type : string
+                                        description : id to uniquely identify each addressess saved in user collection
+                                        required : true
+                                        unique : true
+                                    lat :
+                                        type : number
+                                        description : lattitude of the user location
+                                        required : true if plain address and addressid not available
+                                        unique : false
+                                    lng :
+                                        type : number
+                                        description : longitude of the user location
+                                        required : true if plain address and addressid not available
+                                        unique : false
+                                    house :
+                                        type : string 
+                                        description : either house number or name
+                                        required : false
+                                        unique : false
+                                    street :
+                                        type : string
+                                        description : street/area name
+                                        required : true if lat lng and addressid not available
+                                        unique : false
+                                    landmark :
+                                        type : string
+                                        description : landmark of that address
+                                        required : true if lat lng and addressid not available
+                                        unique : false
+                                    town :
+                                        type : string
+                                        description : town name
+                                        required : true if lat lng and addressid not available
+                                        unique : false
+                                    state :
+                                        type : string
+                                        description : state name
+                                        required : true if lat lng and addressid not available
+                                        unique : false
+                                    country :
+                                        type : string
+                                        description : country name
+                                        required : true if lat lng and addressid not available
+                                        unique : false
+                                    pincode :
+                                        type : number
+                                        description : pincode of the address
+                                        required : true if lat lng and addressid not available
+                                        unique : false
+            6.3) /:purchaseId :
+                    get :
+                        description : get status about a specific order
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                params :
+                                    purchaseId :
+                                        type : string
+                                        description : id to uniquely identify a specific order
+                                        required : true
+                                        unique : true
+
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------
+
+7) Payment
+    ======
+        /payment :
+            7.1) / :
+                    get :
+                        description : get payment page data
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+            7.2) / :
+                    post :
+                        description : first stage of placing an order
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    isRequestFromCart :
+                                        type : boolean
+                                        description : to check whether request coming from cart or not
+                                        required : true if request coming from cart page
+                                        unique : false
+                                    shopinfoid :
+                                        type : string
+                                        description : id of the shop
+                                        required : true if isRequestFromCart is false
+                                        unique : true
+                                    productsid :
+                                        type : string
+                                        description : id of the product
+                                        required : true if isRequestFromCart is false
+                                        unique : true
+                                    quantity :
+                                        type : number 
+                                        description : quantity of the product
+                                        required : true if isRequestFromCart is false
+                                        unique : false
+
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------
+
+8) Profile
+    ======
+        /profile :
+            8.1) / :
+                    get :
+                        description : get user profile data
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+            8.2) / :
+                    post :
+                        description : change data that not required special permissions
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    firstname :
+                                        type : string 
+                                        description : firstname of the user
+                                        required : false
+                                        unique : false
+                                    lastname :
+                                        type : string 
+                                        description : lastname of the user
+                                        required : false
+                                        unique : false
+            8.3) /pe/verifyuser :
+                    post : 
+                        description : verify user authorization to change phonenumber or email
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true if email not provided
+                                        unique      : true
+                                    email :
+                                        type        : string
+                                        description : email address of the user
+                                        required    : true if phone number not provided
+                                        unique      : true
+                                    password :
+                                        type        : string
+                                        description : login password of the user
+                                        required    : true
+                                        unique      : false
+            8.4) /pe/sendotp :
+                    post :
+                        description : send otp to phonenumber or email
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true if email not provided
+                                        unique      : true
+                                    email :
+                                        type        : string
+                                        description : email address of the user
+                                        required    : true if phone number not provided
+                                        unique      : true
+            8.5) /pe/verifyotp :
+                    post :
+                        description : verify otp
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true
+                                        unique      : true
+                                    otp :
+                                        type        : string
+                                        description : 6 digit otp
+                                        required    : true
+                                        unique      : false
+            8.6) /password :
+                    post :
+                        description : verify old password and update a new password
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    oldpassword :
+                                        type : string
+                                        description : user old password
+                                        required : true
+                                        unique : false
+                                    newpassword :
+                                        type : string
+                                        description : user new password
+                                        required : true
+                                        unique : false
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------
+
+9) Search
+    =====
+        /search :
+            9.1) / :
+                    get :
+                        description : search product and shops
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    searchresult :
+                                        type : string
+                                        description : the word that has to be querried
+                                        required : true
+                                        unique : false
+
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------
+
+10) ShopItem
+    ========
+        /shopitem :
+            10.1) /:shopid :
+                    get :
+                        description : get products in a specific shop
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                params :
+                                    shopid :
+                                        type : string
+                                        description : id of the shop
+                                        required : true
+                                        unique : true
+            10.2) /:shopid/item/:itemid :
+                    get :
+                        description : get detalied information about a product
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                params :
+                                    shopid :
+                                        type : string
+                                        description : id of the shop
+                                        required : true
+                                        unique : true
+                                    itemid :
+                                        type : string
+                                        description : id of the product
+                                        required : true
+                                        unique : true
+
+                                    
+                                    
+
+                                    
+
+
+                                
+
+ 

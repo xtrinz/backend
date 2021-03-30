@@ -3,6 +3,8 @@ const {
   productsCollection,
   shopInfoCollection,
 } = require("../databaseconnections/mongoconnection");
+const { Api404Error } = require("../error/errorclass/errorclass");
+const { isArrayEmpty } = require("../functions");
 
 const dataForShopItemPage = async function (shopid) {
   const query1 = {
@@ -16,6 +18,12 @@ const dataForShopItemPage = async function (shopid) {
     },
   };
   const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  if (!shopinfo) {
+    throw new Api404Error("Not Found", "Not Found");
+  }
+  if (isArrayEmpty(shopinfo.products)) {
+    throw new Api404Error("Not Found", "Not Found");
+  }
   const data = [];
   for (const product of shopinfo.products) {
     const query2 = {
@@ -28,14 +36,20 @@ const dataForShopItemPage = async function (shopid) {
         productimage: 1,
       },
     };
-    const products = await productsCollection.findOne(query2, options2);
+    const products1 = await productsCollection.findOne(query2, options2);
+    if (!products1) {
+      continue;
+    }
     const arrayData = {
       price: product.price,
-      productid: products._id,
-      productName: products.productname,
-      productImage: products.productimage,
+      productid: products1._id,
+      productName: products1.productname,
+      productImage: products1.productimage,
     };
     data.push(arrayData);
+  }
+  if (isArrayEmpty(data)) {
+    throw new Api404Error("Not Found", "Not Found");
   }
   const returnData = {
     data,
@@ -59,6 +73,7 @@ const dataForItemDescriptionPage = async function (shopid, itemid) {
   const products = await productsCollection.findOne(query1, options1);
   const query2 = {
     _id: ObjectId(shopid),
+    products: { $elemMatch: { productid: ObjectId(itemid) } },
   };
   const options2 = {
     projection: {
@@ -68,6 +83,9 @@ const dataForItemDescriptionPage = async function (shopid, itemid) {
     },
   };
   const shopinfo = await shopInfoCollection.findOne(query2, options2);
+  if (!shopinfo || !products) {
+    throw new Api404Error("Not found", "Not found");
+  }
   const returnData = {
     shopId: shopinfo._id,
     shopName: shopinfo.shopname,
@@ -79,5 +97,7 @@ const dataForItemDescriptionPage = async function (shopid, itemid) {
   return returnData;
 };
 
-module.exports.dataForShopItemPage = dataForShopItemPage;
-module.exports.dataForItemDescriptionPage = dataForItemDescriptionPage;
+module.exports = {
+  dataForShopItemPage,
+  dataForItemDescriptionPage,
+};
