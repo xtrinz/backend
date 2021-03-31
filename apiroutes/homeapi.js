@@ -9,8 +9,11 @@ const router = express.Router();
 router.get("/page/:pageno", async (req, res, next) => {
   try {
     let { pageno } = req.params;
+    let { lattitude, longitude } = req.query;
     pageno = parseInt(pageno);
-    const data = await dataForHomePage(pageno);
+    lat = parseFloat(lattitude);
+    lon = parseFloat(longitude);
+    const data = await dataForHomePage(pageno, lon, lat);
     return res.status(httpStatusCodes.OK).json(data);
   } catch (error) {
     next(error);
