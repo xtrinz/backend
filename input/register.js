@@ -1,8 +1,8 @@
-const { Validator } = require('node-input-validator');
+const niv = require('./common')
 
 const register = function (req, res, next)
 {
-  const v = new Validator(req.body,
+  const v = new niv.Validator(req.body,
   {
     phonenumber: ['required', 'regex:^+91[0-9]{10}$'],
     password: 'required|string'
@@ -19,9 +19,9 @@ const register = function (req, res, next)
   })
 }
 
-const register_verifyno = function (req, res, next)
+const register_test_mobno = function (req, res, next)
 {
-  const v = new Validator(req.body,
+  const v = new niv.Validator(req.body,
   {
     phonenumber: ['required', 'regex:^+91[0-9]{10}$'],
     otp: 'required'
@@ -40,7 +40,7 @@ const register_verifyno = function (req, res, next)
 
 const register_user = function (req, res, next)
 {
-  const v = new Validator(req.body,
+  const v = new niv.Validator(req.body,
   {
     firstname: 'required|string',
     lastname: 'required|string',
@@ -58,4 +58,11 @@ const register_user = function (req, res, next)
     }
     next()
   })
+}
+
+module.exports =
+{
+  Reg   : register,
+  MobNo : register_test_mobno,
+  User  : register_user
 }
