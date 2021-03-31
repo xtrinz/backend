@@ -11,20 +11,20 @@ const { Api404Error } = require("../error/errorclass/errorclass");
 const dataForHomePage = async function (pageno, longitude, lattitude) {
   // find return a cursor limit returened data (for dynamic loading)
   const nPerPage = 30;
-  const query = {};
-  const skipOption = pageno > 0 ? (pageno - 1) * nPerPage : 0;
-  const shopinfo = await shopInfoCollection
-    .find({
-      location: {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [longitude, lattitude],
-          },
+  const query = {
+    location: {
+      $near: {
+        $geometry: {
+          type: "Point",
+          coordinates: [longitude, lattitude],
         },
       },
-    })
-    .skip(pageno > 0 ? (pageno - 1) * nPerPage : 0)
+    },
+  };
+  const skipOption = pageno > 0 ? (pageno - 1) * nPerPage : 0;
+  const shopinfo = await shopInfoCollection
+    .find(query)
+    .skip(skipOption)
     .limit(nPerPage);
   // convert that to array
   const data = await shopinfo.toArray(); // Todo : Geographical querries

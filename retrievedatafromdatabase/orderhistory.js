@@ -6,7 +6,11 @@ const {
   productsCollection,
 } = require("../databaseconnections/mongoconnection");
 const { Api404Error, Api403Error } = require("../error/errorclass/errorclass");
-const { validatePhoneNumber, isArrayEmpty } = require("../functions");
+const {
+  validatePhoneNumber,
+  isArrayEmpty,
+  compareTwo,
+} = require("../functions");
 
 // retrieve purchase data
 const dataForOrderHistory = async function (user) {
@@ -59,11 +63,29 @@ const placeOrderAddDataToOrderHistory = async function (
   user,
   customername,
   phonenumber,
-  lat,
-  lng
+  addressid
 ) {
   let products = [];
   let totalPrice = 0;
+  if (isArrayEmpty(user.address)) {
+    throw new Api403Error(
+      "Forbidden",
+      "Please provide an address to deliver your item"
+    );
+  }
+  let delAddress;
+  for (const address of user.address) {
+    if (compareTwo(address._id, addressid)) {
+      delAddress = address;
+      break;
+    }
+  }
+  if (!delAddress) {
+    throw new Api403Error(
+      "Forbidden",
+      "Please provide an address to deliver your item"
+    );
+  }
   if (isArrayEmpty(user.temporaryproducts)) {
     throw new Api403Error("Forbidden", "Please checkout your cart");
   }
@@ -118,7 +140,7 @@ const placeOrderAddDataToOrderHistory = async function (
     phonenumber,
     products,
     totalPrice,
-    location: { lat, lng },
+    location: delAddress,
     statusdelivery: "ongoing",
     isdelivered: false,
   };

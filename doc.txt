@@ -552,51 +552,7 @@
                                         description : id to uniquely identify each addressess saved in user collection
                                         required : true
                                         unique : true
-                                    lat :
-                                        type : number
-                                        description : lattitude of the user location
-                                        required : true if plain address and addressid not available
-                                        unique : false
-                                    lng :
-                                        type : number
-                                        description : longitude of the user location
-                                        required : true if plain address and addressid not available
-                                        unique : false
-                                    house :
-                                        type : string 
-                                        description : either house number or name
-                                        required : false
-                                        unique : false
-                                    street :
-                                        type : string
-                                        description : street/area name
-                                        required : true if lat lng and addressid not available
-                                        unique : false
-                                    landmark :
-                                        type : string
-                                        description : landmark of that address
-                                        required : true if lat lng and addressid not available
-                                        unique : false
-                                    town :
-                                        type : string
-                                        description : town name
-                                        required : true if lat lng and addressid not available
-                                        unique : false
-                                    state :
-                                        type : string
-                                        description : state name
-                                        required : true if lat lng and addressid not available
-                                        unique : false
-                                    country :
-                                        type : string
-                                        description : country name
-                                        required : true if lat lng and addressid not available
-                                        unique : false
-                                    pincode :
-                                        type : number
-                                        description : pincode of the address
-                                        required : true if lat lng and addressid not available
-                                        unique : false
+                                    
             6.3) /:purchaseId :
                     get :
                         description : get status about a specific order

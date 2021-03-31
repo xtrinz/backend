@@ -21,16 +21,12 @@ router.get("/", async (req, res, next) => {
 
 router.post("/", async (req, res, next) => {
   try {
-    // retrieve incoming info
-    let { user, customername, phonenumber, lat, lng } = req.body;
-    lat = parseFloat(lat);
-    lng = parseFloat(lng);
+    let { user, customername, phonenumber, addressid } = req.body;
     const purchaseid = await placeOrderAddDataToOrderHistory(
       user,
       customername,
       phonenumber,
-      lat,
-      lng
+      addressid
     );
     // send success message
     return res.status(httpStatusCodes.OK).json({
