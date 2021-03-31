@@ -526,7 +526,7 @@
                                         description : token for validating authentication
                                         required : true
                                         unique : true
-            6.2) / :
+            6.2) / : ///////// -- this route will under go changes after payemnt gateway coding completed
                     post :
                         description : place a new order
                             parameters :
@@ -618,6 +618,43 @@
                                         description : quantity of the product
                                         required : true if isRequestFromCart is false
                                         unique : false
+            7.3) /location :
+                    get :
+                        description : get default delivery address if any
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+            7.4) /location :
+                    post :
+                        description : set delivery location
+                            parameters :
+                                header :    
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                body :
+                                    customername :
+                                        type : string
+                                        description : name of the user
+                                        required : true
+                                        unique : false
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true
+                                        unique      : true
+                                    addressid :
+                                        type : string
+                                        description : id to uniquely identify each addressess saved in user collection
+                                        required : true
+                                        unique : true
+
 
         -----------------------------------------------------------------------------------------------------------------------------
         *****************************************************************************************************************************

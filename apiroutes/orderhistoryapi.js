@@ -18,7 +18,7 @@ router.get("/", async (req, res, next) => {
     next(error);
   }
 });
-
+// Todo : should modify this. this api will be called only after payement become success
 router.post("/", async (req, res, next) => {
   try {
     let { user, customername, phonenumber, addressid } = req.body;

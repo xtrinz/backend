@@ -31,16 +31,19 @@ const addLocationToDatabase = async function (
   town,
   state,
   country,
-  pincode
+  pincode,
+  isdefault,
+  isfavourite
 ) {
   // updating location info into database
+  const addressId = new ObjectID();
   const query = {
     _id: ObjectId(user._id),
   };
   const options = {
     $push: {
       address: {
-        _id: new ObjectID(),
+        _id: addressId,
         house,
         street,
         landmark,
@@ -52,11 +55,13 @@ const addLocationToDatabase = async function (
           lat,
           lng,
         },
-        isfavourite: false,
+        isfavourite,
+        isdefault,
       },
     },
   };
   await userCollection.updateOne(query, options);
+  return addressId;
 };
 
 const makeAddressFavourite = async function (user, addressid, isfavourite) {

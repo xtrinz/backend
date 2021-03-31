@@ -1,9 +1,12 @@
 const express = require("express");
 const httpStatusCodes = require("../error/httpstatuscode");
+const { compareTwo } = require("../functions");
 const {
   dataForPaymentPage,
   addTemporaryProductInUserForPaymentPage,
+  getDefaultAddress,
 } = require("../retrievedatafromdatabase/payment");
+const { route } = require("./homeapi");
 
 const router = express.Router();
 
@@ -38,6 +41,26 @@ router.post("/", async (req, res, next) => {
     return res
       .status(httpStatusCodes.OK)
       .json({ message: "Succesfully Updated" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/location", async (req, res, next) => {
+  try {
+    const { user } = req.body;
+    const data = getDefaultAddress(user);
+    return res.status(httpStatusCodes.OK).json(data);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/location", async (req, res, next) => {
+  try {
+    const { user, customername, phonenumber, addressid } = req.body;
+    await tempStoreDelDetails(user, customername, phonenumber, addressid);
+    return res.status(httpStatusCodes.OK).json("Success");
   } catch (error) {
     next(error);
   }

@@ -77,7 +77,6 @@ const dataForPaymentPage = async function (user) {
   const returnData = {
     data,
     totalPrice,
-    location: user.location, // Todo : this should handle properly
   };
   return returnData;
 };
@@ -148,7 +147,50 @@ const addTemporaryProductInUserForPaymentPage = async function (
   await userCollection.updateOne(query3, options3);
 };
 
+const getDefaultAddress = function (user) {
+  let delAddress;
+  for (const address of user.address) {
+    if (address.isdefault) {
+      delAddress = address;
+      break;
+    } else {
+      if (compareTwo(user.lastdeladdressid, address._id)) {
+        delAddress = address;
+      }
+    }
+  }
+  const returnData = {
+    customername: user.firstname + " " + user.lastname,
+    phonnumber: user.phonnumber,
+    delAddress,
+  };
+  return returnData;
+};
+
+const tempStoreDelDetails = async function (
+  user,
+  customername,
+  phonenumber,
+  addressid
+) {
+  const query = {
+    _id: ObjectId(user._id),
+  };
+  const options = {
+    $set: {
+      tempdeldetails: {
+        customername,
+        phonenumber,
+        addressid,
+      },
+    },
+  };
+  await userCollection.updateOne(query, options);
+};
+
 module.exports = {
   dataForPaymentPage,
   addTemporaryProductInUserForPaymentPage,
+  getDefaultAddress,
+  tempStoreDelDetails,
 };
