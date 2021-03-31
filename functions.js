@@ -12,7 +12,6 @@ const clientTwilio = require("twilio")(accountSid, authToken);
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const {
-  userCollection,
   temporaryUserCollection,
   client,
 } = require("./databaseconnections/mongoconnection");

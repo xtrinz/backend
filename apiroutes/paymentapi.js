@@ -1,12 +1,10 @@
 const express = require("express");
 const httpStatusCodes = require("../error/httpstatuscode");
-const { compareTwo } = require("../functions");
 const {
   dataForPaymentPage,
   addTemporaryProductInUserForPaymentPage,
   getDefaultAddress,
 } = require("../retrievedatafromdatabase/payment");
-const { route } = require("./homeapi");
 
 const router = express.Router();
 

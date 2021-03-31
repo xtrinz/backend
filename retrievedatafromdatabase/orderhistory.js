@@ -6,11 +6,7 @@ const {
   productsCollection,
 } = require("../databaseconnections/mongoconnection");
 const { Api404Error, Api403Error } = require("../error/errorclass/errorclass");
-const {
-  validatePhoneNumber,
-  isArrayEmpty,
-  compareTwo,
-} = require("../functions");
+const { isArrayEmpty, compareTwo } = require("../functions");
 
 // retrieve purchase data
 const dataForOrderHistory = async function (user) {

@@ -6,8 +6,7 @@ const {
 } = require("../databaseconnections/mongoconnection");
 // json web token for authentication
 const jwt = require("jsonwebtoken");
-const { hashPassword, isObjectEmpty } = require("../functions");
-const { Api500Error } = require("../error/errorclass/errorclass");
+const { hashPassword } = require("../functions");
 
 const JWT_TOKEN_SECRET = process.env.JWT_TOKEN_SECRET;
 

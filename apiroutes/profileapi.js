@@ -2,7 +2,6 @@ const express = require("express");
 const httpStatusCodes = require("../error/httpstatuscode");
 const {
   phoneEmailSyntaxVerification,
-  isUserNotExist,
   sendOtp,
   verifyOtp,
   verifyCredentialChangePermmision,
