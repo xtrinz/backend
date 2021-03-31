@@ -38,7 +38,7 @@ appApi.use("/login", loginapi);
 // middleware for verifieying jwt token
 appApi.use(verifyJwtToken);
 
-appApi.use("/", homeapi); // Incomplete
+appApi.use("/", homeapi);
 appApi.use("/cart", cartapi);
 appApi.use("/location", locationapi);
 appApi.use("/orderhistory", orderhistoryapi);
