@@ -1,31 +1,17 @@
 const { userCollection } = require("../databaseconnections/mongoconnection");
 const { ObjectId, ObjectID } = require("mongodb");
 
-const getAllAddresses = async function (userid) {
-  const query = {
-    _id: ObjectId(userid),
-  };
-  const options = {
-    projection: {
-      address: 1,
-      _id: 0,
-    },
-  };
-  const user = await userCollection.findOne(query, options);
+const getAllAddresses = function (user) {
   return user.address;
 };
-const getAddress = async function (userid, addressid) {
-  const query = {
-    _id: ObjectId(userid),
-  };
-  const options = {
-    projection: {
-      address: { $elemMatch: { _id: ObjectId(addressid) } },
-      _id: 0,
-    },
-  };
-  const user = await userCollection.findOne(query, options);
-  return user.address[0];
+const getAddress = function (user, addressid) {
+  for (const address of user.address) {
+    if (address._id == addressid) {
+      // addressid coming from params are the type of objectid so no need to convert to string
+      console.log("true");
+      return address;
+    }
+  }
 };
 
 /**
@@ -36,7 +22,7 @@ const getAddress = async function (userid, addressid) {
  * add user location to database
  */
 const addLocationToDatabase = async function (
-  userid,
+  user,
   lat,
   lng,
   house,
@@ -49,7 +35,7 @@ const addLocationToDatabase = async function (
 ) {
   // updating location info into database
   const query = {
-    _id: ObjectId(userid),
+    _id: ObjectId(user._id),
   };
   const options = {
     $push: {
@@ -73,9 +59,9 @@ const addLocationToDatabase = async function (
   await userCollection.updateOne(query, options);
 };
 
-const makeAddressFavourite = async function (userid, addressid, isfavourite) {
+const makeAddressFavourite = async function (user, addressid, isfavourite) {
   const query = {
-    _id: ObjectId(userid),
+    _id: ObjectId(user._id),
     address: { $elemMatch: { _id: ObjectId(addressid) } },
   };
   const options = {
@@ -86,9 +72,9 @@ const makeAddressFavourite = async function (userid, addressid, isfavourite) {
   await userCollection.updateOne(query, options);
 };
 
-const removeAddress = async function (userid, addressid) {
+const removeAddress = async function (user, addressid) {
   const query = {
-    _id: ObjectId(userid),
+    _id: ObjectId(user._id),
   };
   const options = {
     $pull: {
@@ -101,7 +87,7 @@ const removeAddress = async function (userid, addressid) {
 };
 
 const editAddress = async function (
-  userid,
+  user,
   addressid,
   lat,
   lng,
@@ -114,7 +100,7 @@ const editAddress = async function (
   pincode
 ) {
   const query = {
-    _id: ObjectId(userid),
+    _id: ObjectId(user._id),
     address: { $elemMatch: { _id: ObjectId(addressid) } },
   };
   const options = {
@@ -135,9 +121,11 @@ const editAddress = async function (
   await userCollection.updateOne(query, options);
 };
 
-module.exports.addLocationToDatabase = addLocationToDatabase;
-module.exports.getAllAddresses = getAllAddresses;
-module.exports.makeAddressFavourite = makeAddressFavourite;
-module.exports.removeAddress = removeAddress;
-module.exports.editAddress = editAddress;
-module.exports.getAddress = getAddress;
+module.exports = {
+  getAllAddresses,
+  getAddress,
+  addLocationToDatabase,
+  makeAddressFavourite,
+  removeAddress,
+  editAddress,
+};

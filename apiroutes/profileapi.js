@@ -1,9 +1,11 @@
 const express = require("express");
+const httpStatusCodes = require("../error/httpstatuscode");
 const {
   phoneEmailSyntaxVerification,
   isUserNotExist,
   sendOtp,
   verifyOtp,
+  verifyCredentialChangePermmision,
 } = require("../middlewares/apimiddleware");
 const {
   dataForProfilePage,
@@ -15,17 +17,25 @@ const {
 
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
-  const { userid } = req.body;
-  const data = await dataForProfilePage(userid);
-  // send response
-  return res.json(data);
+router.get("/", (req, res, next) => {
+  try {
+    const { user } = req.body;
+    const data = dataForProfilePage(user);
+    // send response
+    return res.status(httpStatusCodes.OK).json(data);
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post("/", async (req, res, next) => {
-  const { userid, firstname, lastname } = req.body;
-  await updateUserDetails(userid, firstname, lastname);
-  return res.json("Success");
+  try {
+    const { user, firstname, lastname } = req.body;
+    await updateUserDetails(user, firstname, lastname);
+    return res.status(httpStatusCodes.OK).json("Success fully updated");
+  } catch (error) {
+    next(error);
+  }
 });
 
 /* 
@@ -40,41 +50,74 @@ router.post(
   "/pe/verifyuser",
   phoneEmailSyntaxVerification,
   async (req, res, next) => {
-    const { userid, phonenumber, email, password } = req.body;
-    const isValid = await verifyUser(userid, phonenumber, email, password);
-    if (!isValid) {
-      // send error
+    try {
+      const { user, phonenumber, email, password } = req.body;
+      await verifyUser(user, phonenumber, email, password);
+      return res.status(httpStatusCodes.OK).json("Success");
+    } catch (error) {
+      next(error);
     }
-    return res.json("Success");
   }
 );
 
 router.post(
   "/pe/sendotp",
   phoneEmailSyntaxVerification,
-  isUserNotExist,
+  verifyCredentialChangePermmision,
   sendOtp,
-  async (req, res, next) => {
-    const { phonenumber } = req.body;
-    return res.json({ message: "Success", phonenumber: phonenumber });
+  (req, res, next) => {
+    const { phonenumber, email } = req.body;
+    if (phonenumber) {
+      const lastDigitsPhoneNumber = String(phonenumber).slice(-4);
+      return res.status(httpStatusCodes.OK).json({
+        message:
+          "An otp send to your phone number ending " + lastDigitsPhoneNumber,
+        phonenumber,
+      });
+    } else {
+      const lastDigitsEmail = String(email).slice(-15);
+      return res.status(httpStatusCodes.OK).json({
+        message: "An otp send to your email ending " + lastDigitsEmail,
+        email,
+      });
+    }
   }
 );
 
 router.post(
   "/pe/verifyotp",
   phoneEmailSyntaxVerification,
+  verifyCredentialChangePermmision,
   verifyOtp,
   async (req, res, next) => {
-    const { userid, phonenumber } = req.body;
-    await updateUserPhoneEmail(userid, phonenumber);
-    return res.json({ message: "Success", phonenumber: phonenumber });
+    try {
+      const { user, phonenumber, email } = req.body;
+      await updateUserPhoneEmail(user, phonenumber, email);
+      if (phonenumber) {
+        return res
+          .status(httpStatusCodes.OK)
+          .json({ message: "Otp verified success fully", phonenumber });
+      } else {
+        return res
+          .status(httpStatusCodes.OK)
+          .json({ message: "Otp verified success fully", email });
+      }
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
 router.post("/password", async (req, res, next) => {
-  const { userid, oldpassword, newpassword } = req.body;
-  await updateUserPassword(userid, oldpassword, newpassword);
-  return res.json("Success");
+  try {
+    const { user, oldpassword, newpassword } = req.body;
+    await updateUserPassword(user, oldpassword, newpassword);
+    return res
+      .status(httpStatusCodes.OK)
+      .json("Password updated success fully");
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

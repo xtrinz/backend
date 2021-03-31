@@ -1,6 +1,7 @@
 const {
   shopInfoCollection,
 } = require("../databaseconnections/mongoconnection");
+const { Api404Error } = require("../error/errorclass/errorclass");
 
 /**
  *
@@ -10,6 +11,8 @@ const {
 const dataForHomePage = async function (pageno, longitude, lattitude) {
   // find return a cursor limit returened data (for dynamic loading)
   const nPerPage = 30;
+  const query = {};
+  const skipOption = pageno > 0 ? (pageno - 1) * nPerPage : 0;
   const shopinfo = await shopInfoCollection
     .find({
       location: {
@@ -24,8 +27,17 @@ const dataForHomePage = async function (pageno, longitude, lattitude) {
     .skip(pageno > 0 ? (pageno - 1) * nPerPage : 0)
     .limit(nPerPage);
   // convert that to array
-  const data = await shopinfo.toArray();
+  const data = await shopinfo.toArray(); // Todo : Geographical querries
+  if (data.length == 0) {
+    if (pageno == 1) {
+      throw new Api404Error(
+        "Not found",
+        "Our services are not available at this location. Please change to another location"
+      );
+    }
+  }
+
   return data;
 };
 
-module.exports.dataForHomePage = dataForHomePage;
+module.exports = { dataForHomePage };

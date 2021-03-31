@@ -7,15 +7,23 @@ const {
 const router = express.Router();
 
 router.get("/:shopid", async (req, res, next) => {
-  const { shopid } = req.params;
-  const data = await dataForShopItemPage(shopid);
-  return res.json(data);
+  try {
+    const { shopid } = req.params;
+    const data = await dataForShopItemPage(shopid);
+    return res.status(httpStatusCodes.OK).json(data);
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get("/:shopid/item/:itemid", async (req, res, next) => {
-  const { shopid, itemid } = req.params;
-  const data = await dataForItemDescriptionPage(shopid, itemid);
-  return res.json(data);
+  try {
+    const { shopid, itemid } = req.params;
+    const data = await dataForItemDescriptionPage(shopid, itemid);
+    return res.status(httpStatusCodes.OK).json(data);
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

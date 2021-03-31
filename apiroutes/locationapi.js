@@ -1,4 +1,5 @@
 const express = require("express");
+const httpStatusCodes = require("../error/httpstatuscode");
 const {
   addLocationToDatabase,
   makeAddressFavourite,
@@ -10,95 +11,125 @@ const {
 
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
-  const { userid } = req.body;
-  const data = await getAllAddresses(userid);
-  return res.json(data);
+router.get("/", (req, res, next) => {
+  try {
+    const { user } = req.body;
+    const data = getAllAddresses(user);
+    return res.status(httpStatusCodes.OK).json(data);
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.get("/:addressid", async (req, res, next) => {
-  const { userid } = req.body;
-  const { addressid } = req.params;
-  const data = await getAddress(userid, addressid);
-  return res.json(data);
+router.get("/:addressid", (req, res, next) => {
+  try {
+    const { user } = req.body;
+    const { addressid } = req.params;
+    const data = getAddress(user, addressid);
+    return res.status(httpStatusCodes.OK).json(data);
+  } catch (error) {
+    next(error);
+  }
 });
 
 /**
  * it set user location
  */
 router.post("/", async (req, res, next) => {
-  let {
-    userid,
-    lat,
-    lng,
-    house,
-    street,
-    landmark,
-    town,
-    state,
-    country,
-    pincode,
-  } = req.body;
-  lat = parseFloat(lat);
-  lng = parseFloat(lng);
-  // add user location to database
-  await addLocationToDatabase(
-    userid,
-    lat,
-    lng,
-    house,
-    street,
-    landmark,
-    town,
-    state,
-    country,
-    pincode
-  );
-  return res.json({ message: "Success Fully Updated" });
+  try {
+    let {
+      user,
+      lat,
+      lng,
+      house,
+      street,
+      landmark,
+      town,
+      state,
+      country,
+      pincode,
+    } = req.body;
+    lat = parseFloat(lat);
+    lng = parseFloat(lng);
+    // add user location to database
+    await addLocationToDatabase(
+      user,
+      lat,
+      lng,
+      house,
+      street,
+      landmark,
+      town,
+      state,
+      country,
+      pincode
+    );
+    return res
+      .status(httpStatusCodes.OK)
+      .json({ message: "Address added success fully" });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post("/fav", async (req, res, next) => {
-  const { userid, addressid, isfavourite } = req.body;
-  await makeAddressFavourite(userid, addressid, isfavourite);
-  return res.json({ message: "Success Fully Updated" });
+  try {
+    const { user, addressid, isfavourite } = req.body;
+    await makeAddressFavourite(user, addressid, isfavourite);
+    return res
+      .status(httpStatusCodes.OK)
+      .json({ message: "Success Fully Updated" });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.delete("/", async (req, res, next) => {
-  const { userid, addressid } = req.body;
-  await removeAddress(userid, addressid);
-  return res.json({ message: "Success Fully Updated" });
+  try {
+    const { user, addressid } = req.body;
+    await removeAddress(user, addressid);
+    return res.status(httpStatusCodes.OK).json({ message: "Address removed" });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.post("/edit", async (req, res, next) => {
-  let {
-    userid,
-    addressid,
-    lat,
-    lng,
-    house,
-    street,
-    landmark,
-    town,
-    state,
-    country,
-    pincode,
-  } = req.body;
-  lat = parseFloat(lat);
-  lng = parseFloat(lng);
-  await editAddress(
-    userid,
-    addressid,
-    lat,
-    lng,
-    house,
-    street,
-    landmark,
-    town,
-    state,
-    country,
-    pincode
-  );
-  return res.json({ message: "Success Fully Updated" });
+  try {
+    let {
+      user,
+      addressid,
+      lat,
+      lng,
+      house,
+      street,
+      landmark,
+      town,
+      state,
+      country,
+      pincode,
+    } = req.body;
+    lat = parseFloat(lat);
+    lng = parseFloat(lng);
+    await editAddress(
+      user,
+      addressid,
+      lat,
+      lng,
+      house,
+      street,
+      landmark,
+      town,
+      state,
+      country,
+      pincode
+    );
+    return res
+      .status(httpStatusCodes.OK)
+      .json({ message: "Address success fully updated" });
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

@@ -16,10 +16,8 @@ module.exports.client = client;
 module.exports.shopInfoCollection = database.collection("shopinfo");
 module.exports.userCollection = database.collection("user");
 module.exports.cartCollection = database.collection("cart");
-module.exports.shopProductCollection = database.collection("shopproduct");
 module.exports.productsCollection = database.collection("products");
 module.exports.purchaseHistoryCollection = database.collection(
   "purchasehistory"
 );
-module.exports.productShopsCollection = database.collection("productshops");
 module.exports.temporaryUserCollection = database.collection("temporaryuser");

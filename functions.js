@@ -14,6 +14,7 @@ const bcrypt = require("bcryptjs");
 const {
   userCollection,
   temporaryUserCollection,
+  client,
 } = require("./databaseconnections/mongoconnection");
 
 // to generate 6 digit otp
@@ -38,13 +39,11 @@ async function comparePassword(pass, hash) {
 }
 // sendsms via twilio library
 async function sendSms(smsContent) {
-  try {
-    await clientTwilio.messages.create({
-      body: smsContent.body,
-      from: "+12566084484",
-      to: smsContent.to,
-    });
-  } catch (error) {}
+  await clientTwilio.messages.create({
+    body: smsContent.body,
+    from: "+12566084484",
+    to: smsContent.to,
+  });
 }
 // send email via node mailer
 function sendMail(emailContent) {
@@ -115,7 +114,7 @@ const sendOtpPhoneNumber = async function (phonenumber) {
   const query = {
     phonenumber: phonenumber,
   };
-  await temporaryUserCollection.deleteMany(query);
+  await temporaryUserCollection.deleteOne(query);
   const data = {
     phonenumber: phonenumber,
     otp: hashedOtp,
@@ -125,12 +124,38 @@ const sendOtpPhoneNumber = async function (phonenumber) {
   await temporaryUserCollection.insertOne(data);
 };
 
+const isObjectEmpty = function (obj) {
+  return Object.keys(obj).length === 0;
+};
+
+const isArrayEmpty = function (arr) {
+  return !Array.isArray(arr) || arr.length == 0;
+};
+
+const compareTwo = function (arg1, arg2) {
+  return arg1 == arg2;
+};
+
+const gracefulShutdown = async function () {
+  try {
+    await client.close();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 // exporting all the functions
-module.exports.generateOTP = generateOTP;
-module.exports.hashPassword = hashPassword;
-module.exports.comparePassword = comparePassword;
-module.exports.sendSms = sendSms;
-module.exports.sendMail = sendMail;
-module.exports.validatePhoneNumber = validatePhoneNumber;
-module.exports.validateEmail = validateEmail;
-module.exports.sendOtpPhoneNumber = sendOtpPhoneNumber;
+module.exports = {
+  generateOTP,
+  hashPassword,
+  comparePassword,
+  sendSms,
+  sendMail,
+  validatePhoneNumber,
+  validateEmail,
+  sendOtpPhoneNumber,
+  isObjectEmpty,
+  isArrayEmpty,
+  compareTwo,
+  gracefulShutdown,
+};

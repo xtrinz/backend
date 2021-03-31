@@ -45,6 +45,9 @@ const dataForSearchResultPage = async function (searchresult) {
         shopname: 1,
       };
       const shopinfo2 = await shopInfoCollection.findOne(query3, options3);
+      if (!shopinfo2) {
+        continue; // throwing error or removing shopinfo id from product is inapproppriate(because this api is requested by customer)
+      }
       const arrayData1 = {
         shopId: shopinfo2._id,
         shopName: shopinfo2.shopname,
@@ -63,4 +66,4 @@ const dataForSearchResultPage = async function (searchresult) {
   return returnData;
 };
 
-module.exports.dataForSearchResultPage = dataForSearchResultPage;
+module.exports = { dataForSearchResultPage };
