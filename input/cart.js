@@ -1,11 +1,11 @@
-const { Validator } = require('node-input-validator');
+const niv = require('./common')
 
-const cart = function (shopinfoid, productsid, quantity)
+const cart = function (req, res, next)
 {
-  const v = new Validator(req.body,
+  const v = new niv.Validator(req.body,
   {
-    shopinfoid: 'required',
-    productsid: 'required',
+    shopinfoid: 'required|is_id:shopinfoid',
+    productsid: 'required|is_id:productsid',
     quantity: 'required',
   })
 
@@ -16,6 +16,12 @@ const cart = function (shopinfoid, productsid, quantity)
     {
     	return res.status(422).send(v.errors)
     }
+    next()
   })
-  next()
+}
+
+module.exports =
+{
+  Cart  : cart,
+  
 }
