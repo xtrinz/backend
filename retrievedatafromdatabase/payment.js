@@ -334,6 +334,7 @@ const placeOrder = async function (
       continue;
     } // Todo : stock status should be consider
     const arrayData = {
+      _id: new ObjectID(),
       shopinfoid: ObjectId(shopinfo._id),
       shopname: shopinfo.shopname,
       producstid: ObjectId(products._id),
@@ -360,7 +361,7 @@ const placeOrder = async function (
     phonenumber,
     products,
     totalPrice,
-    location: delAddress,
+    address: delAddress,
     statusdelivery: "ongoing",
     isdelivered: false,
     paymentstatus: "pending",
