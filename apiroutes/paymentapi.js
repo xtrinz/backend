@@ -1,18 +1,20 @@
 const express = require("express");
 const httpStatusCodes = require("../error/httpstatuscode");
+const { verifySessionToken } = require("../middlewares/apimiddleware");
 const {
   dataForPaymentPage,
   addTemporaryProductInUserForPaymentPage,
   getDefaultAddress,
+  placeOrder,
 } = require("../retrievedatafromdatabase/payment");
 
 const router = express.Router();
 
 // to get payment page
-router.get("/", async (req, res, next) => {
+router.get("/", verifySessionToken, async (req, res, next) => {
   try {
-    const { user } = req.body;
-    const data = await dataForPaymentPage(user);
+    const { session } = req.body;
+    const data = await dataForPaymentPage(session); // Todo : total amount also should be here
     // send data
     return res.status(httpStatusCodes.OK).json(data);
   } catch (error) {
@@ -29,7 +31,7 @@ router.post("/", async (req, res, next) => {
       shopinfoid,
       productsid,
     } = req.body;
-    await addTemporaryProductInUserForPaymentPage(
+    const token = await addTemporaryProductInUserForPaymentPage(
       user,
       isRequestFromCart,
       quantity,
@@ -38,7 +40,7 @@ router.post("/", async (req, res, next) => {
     );
     return res
       .status(httpStatusCodes.OK)
-      .json({ message: "Succesfully Updated" });
+      .json({ message: "Succesfully Updated", token });
   } catch (error) {
     next(error);
   }
@@ -54,10 +56,11 @@ router.get("/location", async (req, res, next) => {
   }
 });
 
-router.post("/location", async (req, res, next) => {
+router.post("/location", verifySessionToken, async (req, res, next) => {
   try {
-    const { user, customername, phonenumber, addressid } = req.body;
-    await tempStoreDelDetails(user, customername, phonenumber, addressid);
+    const { user, session, customername, phonenumber, addressid } = req.body;
+    // Create a PaymentIntent with the order amount and currency
+    await placeOrder(user, session, customername, phonenumber, addressid);
     return res.status(httpStatusCodes.OK).json("Success");
   } catch (error) {
     next(error);

@@ -5,8 +5,7 @@ const {
   shopInfoCollection,
   productsCollection,
 } = require("../databaseconnections/mongoconnection");
-const { Api404Error, Api403Error } = require("../error/errorclass/errorclass");
-const { isArrayEmpty, compareTwo } = require("../functions");
+const { Api404Error } = require("../error/errorclass/errorclass");
 
 // retrieve purchase data
 const dataForOrderHistory = async function (user) {
@@ -52,107 +51,6 @@ const dataForOrderHistory = async function (user) {
     data.push(arrayData);
   }
   return data;
-};
-
-// place order request coming from payment page
-const placeOrderAddDataToOrderHistory = async function (
-  user,
-  customername,
-  phonenumber,
-  addressid
-) {
-  let products = [];
-  let totalPrice = 0;
-  if (isArrayEmpty(user.address)) {
-    throw new Api403Error(
-      "Forbidden",
-      "Please provide an address to deliver your item"
-    );
-  }
-  let delAddress;
-  for (const address of user.address) {
-    if (compareTwo(address._id, addressid)) {
-      delAddress = address;
-      break;
-    }
-  }
-  if (!delAddress) {
-    throw new Api403Error(
-      "Forbidden",
-      "Please provide an address to deliver your item"
-    );
-  }
-  if (isArrayEmpty(user.temporaryproducts)) {
-    throw new Api403Error("Forbidden", "Please checkout your cart");
-  }
-  // loop through temporary products and take price of that products from shopproduct collection
-  // project methode is used to retrieve a specific field in a collection
-  // $elemMatch is used for giving more specification
-  // refer mongodb doc for more info
-  for (let product of user.temporaryproducts) {
-    const query1 = {
-      _id: ObjectId(product.shopinfoid),
-    };
-    const options1 = {
-      projection: {
-        products: { $elemMatch: { productid: ObjectId(product.productsid) } },
-        _id: 0,
-      },
-    };
-    const shopinfo = await shopInfoCollection.findOne(query1, options1);
-    if (!shopinfo) {
-      const query2 = {
-        _id: ObjectId(user._id),
-      };
-      const options2 = {
-        $pull: {
-          temporaryproducts: {
-            _id: ObjectId(product._id),
-          },
-        },
-      };
-      await userCollection.updateOne(query2, options2);
-      continue;
-    } // Todo : stock status should be consider
-    const arrayData = {
-      ...product,
-      price: shopinfo.products[0].price,
-    };
-    products.push(arrayData);
-  }
-  if (isArrayEmpty(products)) {
-    throw new Api404Error(
-      "Not found",
-      "Something went wrong. Please try again"
-    );
-  }
-  // calculate total price
-  for (const { price, quantity } of products) {
-    totalPrice = totalPrice + price * quantity;
-  }
-  const insertData = {
-    userid: ObjectId(user._id),
-    customername,
-    phonenumber,
-    products,
-    totalPrice,
-    location: delAddress,
-    statusdelivery: "ongoing",
-    isdelivered: false,
-  };
-  // update all the info regarding the purchase into purchase history collection
-  const insertedData = await purchaseHistoryCollection.insertOne(insertData);
-  const query3 = {
-    _id: ObjectId(user._id),
-  };
-  const options3 = {
-    $push: {
-      purchaseid: insertedData.insertedId,
-    },
-  };
-  // retrieve the purchase id of that purchase and store that in user collection
-  await userCollection.updateOne(query3, options3);
-  return insertedData.insertedId;
 };
 
 const dataForOrderStatusPage = async function (user, purchaseId) {
@@ -265,6 +163,5 @@ const dataForOrderStatusPage = async function (user, purchaseId) {
 
 module.exports = {
   dataForOrderHistory,
-  placeOrderAddDataToOrderHistory,
   dataForOrderStatusPage,
 };

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { ObjectId } = require("mongodb");
 const {
   cartCollection,
@@ -8,7 +9,8 @@ const {
 const jwt = require("jsonwebtoken");
 const { hashPassword } = require("../functions");
 
-const JWT_TOKEN_SECRET = process.env.JWT_TOKEN_SECRET;
+const JWT_AUTHORIZATION_TOKEN_SECRET =
+  process.env.JWT_AUTHORIZATION_TOKEN_SECRET;
 
 const registerUser = async function (
   firstname,
@@ -36,7 +38,10 @@ const registerUser = async function (
   };
   const user = await userCollection.insertOne(insertOptions2);
   await temporaryUserCollection.deleteMany({ phonenumber });
-  const token = jwt.sign({ _id: user.insertedId }, JWT_TOKEN_SECRET);
+  const token = jwt.sign(
+    { _id: user.insertedId },
+    JWT_AUTHORIZATION_TOKEN_SECRET
+  );
   return token;
 };
 

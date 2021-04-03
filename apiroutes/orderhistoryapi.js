@@ -2,7 +2,6 @@ const express = require("express");
 const httpStatusCodes = require("../error/httpstatuscode");
 const {
   dataForOrderHistory,
-  placeOrderAddDataToOrderHistory,
   dataForOrderStatusPage,
 } = require("../retrievedatafromdatabase/orderhistory");
 
@@ -14,25 +13,6 @@ router.get("/", async (req, res, next) => {
     const data = await dataForOrderHistory(user);
     // send response
     return res.status(httpStatusCodes.OK).json(data);
-  } catch (error) {
-    next(error);
-  }
-});
-// Todo : should modify this. this api will be called only after payement become success
-router.post("/", async (req, res, next) => {
-  try {
-    let { user, customername, phonenumber, addressid } = req.body;
-    const purchaseid = await placeOrderAddDataToOrderHistory(
-      user,
-      customername,
-      phonenumber,
-      addressid
-    );
-    // send success message
-    return res.status(httpStatusCodes.OK).json({
-      message: "Order placed success fully",
-      purchaseid: purchaseid,
-    });
   } catch (error) {
     next(error);
   }
