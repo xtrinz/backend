@@ -10,6 +10,10 @@ const {
 const { Api403Error, Api404Error } = require("../error/errorclass/errorclass");
 const { isArrayEmpty, isObjectEmpty } = require("../functions");
 const JWT_SESSION_TOKEN_SECRET = process.env.JWT_SESSION_TOKEN_SECRET;
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripePublishableKey = process.env.STRIPE_PUBLISHABLE_KEY;
+
+const stripe = require("stripe")(stripeSecretKey);
 
 // data for payment page
 const dataForPaymentPage = async function (session) {
@@ -385,6 +389,32 @@ const placeOrder = async function (
   await sessionCollection.updateOne(query5, options5);
 };
 
+const createPaymentIntent = async function (user, session, charges) {
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: charges.totalPrice * 100,
+    currency: "inr",
+    metadata: {
+      userid: user._id,
+      sessionid: session._id,
+      purchaseid: session.transaction.purchaseid,
+    },
+  }); // add idempotent key also
+  const query = {
+    _id: ObjectId(session._id),
+  };
+  const options = {
+    $set: {
+      "transaction.paymentintentid": paymentIntent.id,
+    },
+  };
+  await sessionCollection.updateOne(query, options);
+  const returnData = {
+    publishableKey: stripePublishableKey,
+    clientSecret: paymentIntent.client_secret,
+  };
+  return returnData;
+};
+
 module.exports = {
   dataForPaymentPage,
   addTemporaryProductInUserForPaymentPage,
@@ -392,4 +422,5 @@ module.exports = {
   tempStoreDelDetails,
   calculateOrderAmount,
   placeOrder,
+  createPaymentIntent,
 };

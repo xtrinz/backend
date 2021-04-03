@@ -18,7 +18,7 @@ const profileapi = require("./apiroutes/profileapi");
 const searchapi = require("./apiroutes/searchapi");
 const shopitemapi = require("./apiroutes/shopitemapi");
 const registerapi = require("./apiroutes/registerapi");
-const transactionapi = require("./apiroutes/transactionapi");
+const webhookapi = require("./apiroutes/webhookapi");
 const {
   logErrorMiddleware,
   returnError,
@@ -46,6 +46,7 @@ appApi.use(
 // jwt token verification not required for login and register
 appApi.use("/register", registerapi);
 appApi.use("/login", loginapi);
+appApi.use("/webhook", webhookapi);
 // middleware for verifieying jwt token
 appApi.use(verifyAuthorizationToken);
 
@@ -57,7 +58,6 @@ appApi.use("/payment", paymentapi);
 appApi.use("/profile", profileapi);
 appApi.use("/search", searchapi);
 appApi.use("/shopitem", shopitemapi);
-appApi.use("/transaction", transactionapi);
 appApi.use(forbiddenApiCall);
 
 // error handling
