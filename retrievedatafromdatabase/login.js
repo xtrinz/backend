@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
 const { Api401Error } = require("../error/errorclass/errorclass");
 const { comparePassword } = require("../functions");
-const JWT_TOKEN_SECRET = process.env.JWT_TOKEN_SECRET;
+const JWT_AUTHORIZATION_TOKEN_SECRET =
+  process.env.JWT_AUTHORIZATION_TOKEN_SECRET;
 
 const verifyLoginCredentials = async function (user, password) {
   // then compare incoming password with one that stored in database
@@ -12,7 +13,7 @@ const verifyLoginCredentials = async function (user, password) {
       "Your username or password is incorrect"
     );
   }
-  const token = jwt.sign({ _id: user._id }, JWT_TOKEN_SECRET);
+  const token = jwt.sign({ _id: user._id }, JWT_AUTHORIZATION_TOKEN_SECRET);
   return token;
 };
 

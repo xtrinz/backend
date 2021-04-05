@@ -237,7 +237,7 @@
                         description : get data for home page
                             parameters :
                                 header :
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -278,7 +278,7 @@
                         description : getting data for cart page
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -288,7 +288,7 @@
                         description : add data to cart
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -314,7 +314,7 @@
                         description : delete item from cart
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -338,7 +338,7 @@
                         description : get all saved addressess
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -348,7 +348,7 @@
                         description : get a specific address
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -364,7 +364,7 @@
                         description : add a new user address
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -420,7 +420,7 @@
                         description : make a address favourite
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -437,11 +437,11 @@
                                         required : true
                                         unique : false
             5.5) / :
-                    post :
+                    delete :
                         description : delete an address from user collection
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -457,7 +457,7 @@
                         description : edit an address
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -521,44 +521,17 @@
                         description : get all previous order status
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
                                         unique : true
-            6.2) / :
-                    post :
-                        description : place a new order
-                            parameters :
-                                header :    
-                                    x-access-token :
-                                        type : string
-                                        description : token for validating authentication
-                                        required : true
-                                        unique : true
-                                body :
-                                    customername :
-                                        type : string
-                                        description : name of the user
-                                        required : true
-                                        unique : false
-                                    phonenumber :
-                                        type        : string
-                                        description : user phone number
-                                        required    : true
-                                        unique      : true
-                                    addressid :
-                                        type : string
-                                        description : id to uniquely identify each addressess saved in user collection
-                                        required : true
-                                        unique : true
-                                    
-            6.3) /:purchaseId :
+            6.2) /:purchaseId :
                     get :
                         description : get status about a specific order
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -582,9 +555,14 @@
                         description : get payment page data
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating session
                                         required : true
                                         unique : true
             7.2) / :
@@ -592,7 +570,7 @@
                         description : first stage of placing an order
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -618,6 +596,67 @@
                                         description : quantity of the product
                                         required : true if isRequestFromCart is false
                                         unique : false
+            7.3) /location :
+                    get :
+                        description : get default delivery address if any
+                            parameters :
+                                header :    
+                                    authorization :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating session
+                                        required : true
+                                        unique : true
+            7.4) /location :
+                    post :
+                        description : set delivery location
+                            parameters :
+                                header :    
+                                    authorization :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating session
+                                        required : true
+                                        unique : true
+                                body :
+                                    customername :
+                                        type : string
+                                        description : name of the user
+                                        required : true
+                                        unique : false
+                                    phonenumber :
+                                        type        : string
+                                        description : user phone number
+                                        required    : true
+                                        unique      : true
+                                    addressid :
+                                        type : string
+                                        description : id to uniquely identify each addressess saved in user collection
+                                        required : true
+                                        unique : true
+            7.5) /create-payment-intent :
+                    post :
+                        description : create payment intent for starting payment process
+                            parameters :
+                                header :    
+                                    authorization :
+                                        type : string
+                                        description : token for validating authentication
+                                        required : true
+                                        unique : true
+                                    x-access-token :
+                                        type : string
+                                        description : token for validating session
+                                        required : true
+                                        unique : true
 
         -----------------------------------------------------------------------------------------------------------------------------
         *****************************************************************************************************************************
@@ -631,7 +670,7 @@
                         description : get user profile data
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -641,7 +680,7 @@
                         description : change data that not required special permissions
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -662,7 +701,7 @@
                         description : verify user authorization to change phonenumber or email
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -688,7 +727,7 @@
                         description : send otp to phonenumber or email
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -709,7 +748,7 @@
                         description : verify otp
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -730,7 +769,7 @@
                         description : verify old password and update a new password
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -758,7 +797,7 @@
                         description : search product and shops
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -782,7 +821,7 @@
                         description : get products in a specific shop
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -798,7 +837,7 @@
                         description : get detalied information about a product
                             parameters :
                                 header :    
-                                    x-access-token :
+                                    authorization :
                                         type : string
                                         description : token for validating authentication
                                         required : true
@@ -814,6 +853,19 @@
                                         description : id of the product
                                         required : true
                                         unique : true
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------
+
+11) Transaction
+    ===========
+        /transaction :           
+            11.1) /webhook :
+                    post : 
+                        description : stripe will send notification regarding payment to this end point
+                            
+
+                                                                            
 
                                     
                                     

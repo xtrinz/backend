@@ -3,7 +3,7 @@ require("dotenv").config();
 // express instance
 const express = require("express");
 const {
-  verifyJwtToken,
+  verifyAuthorizationToken,
   forbiddenApiCall,
 } = require("./middlewares/apimiddleware");
 
@@ -18,6 +18,7 @@ const profileapi = require("./apiroutes/profileapi");
 const searchapi = require("./apiroutes/searchapi");
 const shopitemapi = require("./apiroutes/shopitemapi");
 const registerapi = require("./apiroutes/registerapi");
+const webhookapi = require("./apiroutes/webhookapi");
 const {
   logErrorMiddleware,
   returnError,
@@ -30,13 +31,24 @@ const { gracefulShutdown } = require("./functions");
 const appApi = express();
 
 appApi.use(express.urlencoded({ extended: true }));
-appApi.use(express.json());
+appApi.use(
+  express.json({
+    // We need the raw body to verify webhook signatures.
+    // Let's compute it only when hitting the Stripe webhook endpoint.
+    verify: function (req, res, buf) {
+      if (req.originalUrl.startsWith("/transaction/webhook")) {
+        req.rawBody = buf.toString();
+      }
+    },
+  })
+);
 
 // jwt token verification not required for login and register
 appApi.use("/register", registerapi);
 appApi.use("/login", loginapi);
+appApi.use("/webhook", webhookapi);
 // middleware for verifieying jwt token
-appApi.use(verifyJwtToken);
+appApi.use(verifyAuthorizationToken);
 
 appApi.use("/", homeapi);
 appApi.use("/cart", cartapi);
@@ -46,7 +58,6 @@ appApi.use("/payment", paymentapi);
 appApi.use("/profile", profileapi);
 appApi.use("/search", searchapi);
 appApi.use("/shopitem", shopitemapi);
-
 appApi.use(forbiddenApiCall);
 
 // error handling

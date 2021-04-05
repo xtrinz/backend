@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const {
   userCollection,
   temporaryUserCollection,
+  sessionCollection,
 } = require("../databaseconnections/mongoconnection");
 const {
   Api400Error,
@@ -22,13 +23,23 @@ const {
   hashPassword,
 } = require("../functions");
 
-const JWT_TOKEN_SECRET = process.env.JWT_TOKEN_SECRET;
+const JWT_AUTHORIZATION_TOKEN_SECRET =
+  process.env.JWT_AUTHORIZATION_TOKEN_SECRET;
+const JWT_SESSION_TOKEN_SECRET = process.env.JWT_SESSION_TOKEN_SECRET;
 
-const verifyJwtToken = async function (req, res, next) {
+const verifyAuthorizationToken = async function (req, res, next) {
   try {
-    const token = req.headers["x-access-token"];
+    let token = req.headers["authorization"]; // should change from x-access-token to authorization in client side
+    if (!token) {
+      throw new Api401Error("Unauthorized", "Please login to your accound");
+    }
+    // should add Bearer in header in client side
+    if (token.startsWith("Bearer ")) {
+      // Remove Bearer from string
+      token = token.slice(7, token.length);
+    }
     // verify jwt token
-    const decoded = jwt.verify(token, JWT_TOKEN_SECRET);
+    const decoded = jwt.verify(token, JWT_AUTHORIZATION_TOKEN_SECRET);
     const query = {
       _id: ObjectId(decoded._id),
     };
@@ -37,6 +48,29 @@ const verifyJwtToken = async function (req, res, next) {
       throw new Api401Error("Unauthorized", "Please login to your accound"); // Todo: we should revoke token
     }
     req.body.user = user;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const verifySessionToken = async function (req, res, next) {
+  try {
+    let token = req.headers["x-access-token"];
+    if (!token) {
+      throw new Api403Error("Forbidden", "Something went wrong");
+    }
+    // verify jwt token
+    const decoded = jwt.verify(token, JWT_SESSION_TOKEN_SECRET);
+    const query = {
+      _id: ObjectId(decoded._id),
+      userid: ObjectId(req.body.user._id),
+    };
+    const session = await sessionCollection.findOne(query);
+    if (!session) {
+      throw new Api403Error("Forbidden", "Something went wrong");
+    }
+    req.body.session = session;
     next();
   } catch (error) {
     next(error);
@@ -237,7 +271,7 @@ const forbiddenApiCall = (req, res, next) => {
 };
 
 module.exports = {
-  verifyJwtToken,
+  verifyAuthorizationToken,
   isUserExist,
   isUserNotExist,
   sendOtp,
@@ -247,4 +281,5 @@ module.exports = {
   updatePasswordCredentials,
   verifyCredentialChangePermmision,
   forbiddenApiCall,
+  verifySessionToken,
 };

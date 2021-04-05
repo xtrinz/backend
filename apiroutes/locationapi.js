@@ -48,11 +48,13 @@ router.post("/", async (req, res, next) => {
       state,
       country,
       pincode,
+      isdefault = false,
+      isfavourite = false,
     } = req.body;
     lat = parseFloat(lat);
     lng = parseFloat(lng);
     // add user location to database
-    await addLocationToDatabase(
+    const addressId = await addLocationToDatabase(
       user,
       lat,
       lng,
@@ -62,11 +64,13 @@ router.post("/", async (req, res, next) => {
       town,
       state,
       country,
-      pincode
+      pincode,
+      isdefault,
+      isfavourite
     );
     return res
       .status(httpStatusCodes.OK)
-      .json({ message: "Address added success fully" });
+      .json({ message: "Address added success fully", addressId });
   } catch (error) {
     next(error);
   }

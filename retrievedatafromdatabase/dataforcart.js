@@ -5,7 +5,6 @@ const {
   productsCollection,
 } = require("../databaseconnections/mongoconnection");
 const { ObjectId, ObjectID } = require("mongodb");
-const { Api401Error } = require("../error/errorclass/errorclass");
 
 /**
  *

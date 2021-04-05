@@ -10,14 +10,22 @@ const client = new MongoClient(url, {
 });
 client.connect().catch(e => console.log(e));
 const database = client.db(dbName);
+const shopInfoCollection = database.collection("shopinfo");
+const userCollection = database.collection("user");
+const cartCollection = database.collection("cart");
+const productsCollection = database.collection("products");
+const purchaseHistoryCollection = database.collection("purchasehistory");
+const temporaryUserCollection = database.collection("temporaryuser");
+const sessionCollection = database.collection("session");
 
-module.exports.database = database;
-module.exports.client = client;
-module.exports.shopInfoCollection = database.collection("shopinfo");
-module.exports.userCollection = database.collection("user");
-module.exports.cartCollection = database.collection("cart");
-module.exports.productsCollection = database.collection("products");
-module.exports.purchaseHistoryCollection = database.collection(
-  "purchasehistory"
-);
-module.exports.temporaryUserCollection = database.collection("temporaryuser");
+module.exports = {
+  client,
+  database,
+  shopInfoCollection,
+  userCollection,
+  cartCollection,
+  productsCollection,
+  purchaseHistoryCollection,
+  temporaryUserCollection,
+  sessionCollection,
+};
