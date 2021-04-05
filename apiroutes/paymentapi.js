@@ -70,12 +70,16 @@ router.post("/location", verifySessionToken, async (req, res, next) => {
 });
 
 router.post("/create-payment-intent", verifySessionToken, async (req, res) => {
-  const { user, session } = req.body; //Todo : cleint should send idempotent key also
-  // Create a PaymentIntent with the order amount and currency
-  const charges = await calculateOrderAmount(session);
-  const data = await createPaymentIntent(user, session, charges);
-  // Send publishable key and PaymentIntent details to client
-  return res.status(httpStatusCodes.OK).send(data);
+  try {
+    const { user, session } = req.body; //Todo : cleint should send idempotent key also
+    // Create a PaymentIntent with the order amount and currency
+    const charges = await calculateOrderAmount(session);
+    const data = await createPaymentIntent(user, session, charges);
+    // Send publishable key and PaymentIntent details to client
+    return res.status(httpStatusCodes.OK).send(data);
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;
