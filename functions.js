@@ -105,17 +105,39 @@ const sendOtpPhoneNumber = async function (phonenumber) {
   const hashedOtp = await hashPassword(generatedOtp, 5);
   // send otp via sms
   const smsContent = {
-    to: `${phonenumber}`,
+    to: phonenumber,
     body: `This is your Otp for verification - ${generatedOtp}`,
   };
   await sendSms(smsContent);
   // delete otp if already there
   const query = {
-    phonenumber: phonenumber,
+    phonenumber,
   };
   await temporaryUserCollection.deleteOne(query);
   const data = {
-    phonenumber: phonenumber,
+    phonenumber,
+    otp: hashedOtp,
+    isOtpVerified: false,
+    createdAt: new Date(),
+  };
+  await temporaryUserCollection.insertOne(data);
+};
+
+const sendOtpEmail = async function (email) {
+  const generatedOtp = generateOTP();
+  const hashedOtp = await hashPassword(generatedOtp, 5);
+  const emailContent = {
+    to: email,
+    subject: "Verification Email",
+    html: `<h3>This is your Otp for verification - ${generatedOtp}</h3>`,
+  };
+  await sendMail(emailContent);
+  const query = {
+    email,
+  };
+  await temporaryUserCollection.deleteOne(query);
+  const data = {
+    email,
     otp: hashedOtp,
     isOtpVerified: false,
     createdAt: new Date(),
@@ -153,6 +175,7 @@ module.exports = {
   validatePhoneNumber,
   validateEmail,
   sendOtpPhoneNumber,
+  sendOtpEmail,
   isObjectEmpty,
   isArrayEmpty,
   compareTwo,

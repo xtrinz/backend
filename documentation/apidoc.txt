@@ -214,6 +214,11 @@
                                         description : login password of the user
                                         required    : true
                                         unique      : false
+                                    confirmPassword :
+                                        type        : string
+                                        description : confirmation of login password
+                                        required    : true
+                                        unique      : false
                             response :
                                 200 :
                                     description : password updated success fully

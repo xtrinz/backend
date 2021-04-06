@@ -19,6 +19,7 @@ const {
   comparePassword,
   validatePhoneNumber,
   sendOtpPhoneNumber,
+  sendOtpEmail,
   validateEmail,
   hashPassword,
 } = require("../functions");
@@ -155,9 +156,12 @@ const isUserExist = async function (req, res, next) {
 
 const sendOtp = async function (req, res, next) {
   try {
-    let { phonenumber } = req.body;
-    await sendOtpPhoneNumber(phonenumber);
-    // send success message
+    let { phonenumber, email } = req.body;
+    if (phonenumber) {
+      await sendOtpPhoneNumber(phonenumber);
+    } else if (email) {
+      await sendOtpEmail(email);
+    }
     next();
   } catch (error) {
     next(error);
@@ -204,10 +208,17 @@ const verifyOtp = async function (req, res, next) {
 
 const checkOtpVerifiedStatus = async function (req, res, next) {
   try {
-    const { phonenumber } = req.body;
-    const query = {
-      phonenumber: phonenumber,
-    };
+    const { phonenumber, email } = req.body;
+    let query;
+    if (phonenumber) {
+      query = {
+        phonenumber,
+      };
+    } else if (email) {
+      query = {
+        email,
+      };
+    }
     const options = {
       projection: {
         isOtpVerified: 1,
@@ -216,10 +227,7 @@ const checkOtpVerifiedStatus = async function (req, res, next) {
     };
     const data = await temporaryUserCollection.findOne(query, options);
     if (!data || !data.isOtpVerified) {
-      throw new Api401Error(
-        "Unauthorized",
-        "Phone number verification required"
-      );
+      throw new Api401Error("Unauthorized", "Something went wrong");
     }
     return next();
   } catch (error) {

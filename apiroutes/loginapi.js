@@ -14,32 +14,27 @@ const {
   sendOtp,
 } = require("../middlewares/apimiddleware");
 const { verifyLoginCredentials } = require("../retrievedatafromdatabase/login");
+const validator = require("../validators/login");
 
 const router = express.Router();
 
-router.post(
-  "/",
-  phoneEmailSyntaxVerification,
-  isUserExist,
-  async (req, res, next) => {
-    try {
-      const { user, password } = req.body;
-      const token = await verifyLoginCredentials(user, password);
-      return res
-        .status(httpStatusCodes.OK)
-        .json({ message: "Success Fully Logged in", token });
-    } catch (error) {
-      next(error);
-    }
+router.post("/", validator.verify_login, async (req, res, next) => {
+  try {
+    const { user, password } = req.body;
+    const token = await verifyLoginCredentials(user, password);
+    return res
+      .status(httpStatusCodes.OK)
+      .json({ message: "Success Fully Logged in", token });
+  } catch (error) {
+    next(error);
   }
-);
+});
 
 // changes happened
 // validate uid and send otp
 router.post(
   "/forgotpassword",
-  phoneEmailSyntaxVerification,
-  isUserExist, // doubt : is it required . because it reveals to the client side that user with that phone / email exist in out database
+  validator.validate_uid,
   sendOtp,
   (req, res, next) => {
     const { phonenumber, email } = req.body;
@@ -60,25 +55,18 @@ router.post(
   }
 );
 
-router.post(
-  "/verifyotp",
-  phoneEmailSyntaxVerification,
-  isUserExist, // doubt : is it required . because it reveals to the client side that user with that phone / email exist in out database
-  verifyOtp,
-  (req, res, next) => {
-    const { phonenumber, email } = req.body;
-    if (phonenumber) {
-      return res.json({ message: "Otp verified success fully", phonenumber });
-    } else {
-      return res.json({ message: "Otp verified success fully", email });
-    }
+router.post("/verifyotp", validator.verify_otp, verifyOtp, (req, res, next) => {
+  const { phonenumber, email } = req.body;
+  if (phonenumber) {
+    return res.json({ message: "Otp verified success fully", phonenumber });
+  } else {
+    return res.json({ message: "Otp verified success fully", email });
   }
-);
+});
 
 router.post(
   "/updatepassword",
-  phoneEmailSyntaxVerification,
-  isUserExist, // doubt : is it required . because it reveals to the client side that user with that phone / email exist in out database
+  validator.update_pass,
   checkOtpVerifiedStatus,
   updatePasswordCredentials,
   (req, res, next) => {
