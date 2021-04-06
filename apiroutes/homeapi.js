@@ -1,12 +1,13 @@
 const express = require("express");
 const httpStatusCodes = require("../error/httpstatuscode");
 const { dataForHomePage } = require("../retrievedatafromdatabase/dataforhome");
+const validator = require("../validators/home");
 // creating router object
 const router = express.Router();
 // route to get data for home page
 // add token verification (if required)
 // wrap code inside of this (data collecting from database) to function so that two server can just point to that function to retrieve data
-router.get("/page/:pageno", async (req, res, next) => {
+router.get("/page/:pageno", validator.validate_home, async (req, res, next) => {
   try {
     let { pageno } = req.params;
     let { lattitude, longitude } = req.query;

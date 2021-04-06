@@ -4,6 +4,7 @@ const {
   dataForOrderHistory,
   dataForOrderStatusPage,
 } = require("../retrievedatafromdatabase/orderhistory");
+const validator = require("../validators/orderhistory");
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/:purchaseId", async (req, res, next) => {
+router.get("/:purchaseId", validator.order_status, async (req, res, next) => {
   try {
     const { user } = req.body;
     const { purchaseId } = req.params;

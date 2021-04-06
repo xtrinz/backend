@@ -13,6 +13,8 @@ const {
   updateUserPhoneEmail,
   updateUserPassword,
 } = require("../retrievedatafromdatabase/profile");
+const { pe_pass } = require("../validators/profile");
+const validator = require("../validators/profile");
 
 const router = express.Router();
 
@@ -27,7 +29,7 @@ router.get("/", (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", validator.edit_normal, async (req, res, next) => {
   try {
     const { user, firstname, lastname } = req.body;
     await updateUserDetails(user, firstname, lastname);
@@ -47,6 +49,7 @@ pe : - phone email
 
 router.post(
   "/pe/verifyuser",
+  validator.pe_pass,
   phoneEmailSyntaxVerification,
   async (req, res, next) => {
     try {
@@ -61,7 +64,7 @@ router.post(
 
 router.post(
   "/pe/sendotp",
-  phoneEmailSyntaxVerification,
+  validator.pe_send_otp,
   verifyCredentialChangePermmision,
   sendOtp,
   (req, res, next) => {
@@ -85,7 +88,7 @@ router.post(
 
 router.post(
   "/pe/verifyotp",
-  phoneEmailSyntaxVerification,
+  validator.pe_verify_otp,
   verifyCredentialChangePermmision,
   verifyOtp,
   async (req, res, next) => {
@@ -107,7 +110,7 @@ router.post(
   }
 );
 
-router.post("/password", async (req, res, next) => {
+router.post("/password", validator.update_pass, async (req, res, next) => {
   try {
     const { user, oldpassword, newpassword } = req.body;
     await updateUserPassword(user, oldpassword, newpassword);
