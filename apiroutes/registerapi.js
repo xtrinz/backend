@@ -8,32 +8,25 @@ const {
   phoneEmailSyntaxVerification,
 } = require("../middlewares/apimiddleware");
 const { registerUser } = require("../retrievedatafromdatabase/register");
+const validator = require("../validators/register");
 
 const router = express.Router();
 
 // request for validating phone number
 
-router.post(
-  "/",
-  phoneEmailSyntaxVerification,
-  isUserNotExist,
-  sendOtp,
-  (req, res, next) => {
-    const { phonenumber } = req.body;
-    const lastDigitsPhoneNumber = String(phonenumber).slice(-4);
-    return res.status(httpStatusCodes.OK).json({
-      message:
-        "An otp send to your phone number ending " + lastDigitsPhoneNumber,
-      phonenumber,
-    });
-  }
-);
+router.post("/", validator.validate_phonenumber, sendOtp, (req, res, next) => {
+  const { phonenumber } = req.body;
+  const lastDigitsPhoneNumber = String(phonenumber).slice(-4);
+  return res.status(httpStatusCodes.OK).json({
+    message: "An otp send to your phone number ending " + lastDigitsPhoneNumber,
+    phonenumber,
+  });
+});
 
 // verify phone number with otp
 router.post(
   "/verifyphonenumber",
-  phoneEmailSyntaxVerification,
-  isUserNotExist,
+  validator.verify_otp,
   verifyOtp,
   (req, res, next) => {
     const { phonenumber } = req.body;
@@ -47,8 +40,7 @@ router.post(
 // register user
 router.post(
   "/user",
-  phoneEmailSyntaxVerification,
-  isUserNotExist,
+  validator.reg_user,
   checkOtpVerifiedStatus,
   async (req, res, next) => {
     try {
