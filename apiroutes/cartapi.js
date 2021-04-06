@@ -5,6 +5,7 @@ const {
   addItemToCart,
   deleteCartItem,
 } = require("../retrievedatafromdatabase/dataforcart");
+const validator = require("../validators/cart");
 
 const router = express.Router();
 
@@ -23,7 +24,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", validator.add_cart, async (req, res, next) => {
   try {
     const { user, shopinfoid, productsid, quantity } = req.body;
     // call function to add item
@@ -37,7 +38,7 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.delete("/", async (req, res, next) => {
+router.delete("/", validator.delete_cart, async (req, res, next) => {
   try {
     const { user, cartitemid } = req.body;
     await deleteCartItem(user, cartitemid);

@@ -8,6 +8,7 @@ const {
   getAllAddresses,
   getAddress,
 } = require("../retrievedatafromdatabase/location");
+const validator = require("../validators/location");
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ router.get("/", (req, res, next) => {
   }
 });
 
-router.get("/:addressid", (req, res, next) => {
+router.get("/:addressid", validator.addr_with_id, (req, res, next) => {
   try {
     const { user } = req.body;
     const { addressid } = req.params;
@@ -33,7 +34,7 @@ router.get("/:addressid", (req, res, next) => {
 });
 
 /**
- * it set user location
+ * This route is not complete. has some doubts
  */
 router.post("/", async (req, res, next) => {
   try {
@@ -76,7 +77,7 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.post("/fav", async (req, res, next) => {
+router.post("/fav", validator.addr_fav, async (req, res, next) => {
   try {
     const { user, addressid, isfavourite } = req.body;
     await makeAddressFavourite(user, addressid, isfavourite);
@@ -88,7 +89,7 @@ router.post("/fav", async (req, res, next) => {
   }
 });
 
-router.delete("/", async (req, res, next) => {
+router.delete("/", validator.addr_with_id, async (req, res, next) => {
   try {
     const { user, addressid } = req.body;
     await removeAddress(user, addressid);
@@ -97,7 +98,9 @@ router.delete("/", async (req, res, next) => {
     next(error);
   }
 });
-
+/* 
+Todo : some doubts still exist
+*/
 router.post("/edit", async (req, res, next) => {
   try {
     let {

@@ -9,6 +9,7 @@ const {
   calculateOrderAmount,
   createPaymentIntent,
 } = require("../retrievedatafromdatabase/payment");
+const validator = require("../validators/payment");
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ router.get("/", verifySessionToken, async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", validator.payment_add, async (req, res, next) => {
   try {
     const {
       user,
