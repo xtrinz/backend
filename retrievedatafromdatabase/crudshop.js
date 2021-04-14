@@ -2,6 +2,145 @@ const {
   productsCollection,
   shopInfoCollection,
 } = require("../databaseconnections/mongoconnection");
+const { Api409Error } = require("../error/errorclass/errorclass");
+
+const getProductInfoFromUniqueid = async function (shopinfoid, uniqueid) {
+  const query1 = {
+    _id: shopinfoid,
+  };
+  const options1 = {
+    $projection: {
+      products: 1,
+    },
+  };
+  const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  const query2 = {
+    $and: [
+      {
+        _id: {
+          $in: shopinfo.products,
+        },
+      },
+      {
+        $or: [
+          {
+            "productvariations.color.uniqueid": uniqueid,
+          },
+          {
+            "productvariations.default.uniqueid": uniqueid,
+          },
+        ],
+      },
+    ],
+  };
+  const products = await productsCollection.findOne(query2);
+  return products;
+};
+
+const getAllProductInShop = async function (shopinfoid) {
+  const query1 = {
+    _id: shopinfoid,
+  };
+  const options1 = {
+    $projection: {
+      products: 1,
+    },
+  };
+  const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  const query2 = {
+    _id: {
+      $in: shopinfo.products,
+    },
+  };
+  let products = await productsCollection.find(query2);
+  products = products.toArray();
+  let data = [];
+  for (const product of products) {
+    const arrayData = {
+      shopname: shopinfo.shopname,
+      productname: product.productname,
+      productimage: product.productimage,
+      productvariations: product.productvariations,
+    };
+    data.push(arrayData);
+  }
+  return data;
+};
+
+const getSingleProductFromShop = async function (shopinfoid, productid) {
+  const query1 = {
+    _id: shopinfoid,
+  };
+  const options1 = {
+    $projection: {
+      shopname: 1,
+    },
+  };
+  const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  const query2 = {
+    _id: productid,
+    shopinfoid: shopinfoid,
+  };
+  const products = await productsCollection.findOne(query2);
+  const returnData = {
+    shopname: shopinfo.shopname,
+    productname: products.productname,
+    productimage: products.productimage,
+    productvariations: products.productvariations,
+    producttype: products.producttype,
+    gstcategory: products.gstcategory,
+    warrentycard: products.warrentycard,
+    extradiscount: products.extradiscount,
+    keywords: products.keywords,
+    productdescription: products.productdescription,
+    productdetails: products.productdetails,
+  };
+  return returnData;
+};
+
+const getSingleProductByUniqueId = async function (shopinfoid, uniqueid) {
+  const products = await getProductInfoFromUniqueid(shopinfoid, uniqueid);
+  let quantity, productcolor, productimage, variation;
+  if (products.productvariations.default.uniqueid) {
+    quantity = products.productvariations.default.quantity;
+    productimage = products.productvariations.default.productimage;
+    productcolor = products.productvariations.default.productcolor; // none
+    variation = "default";
+  } else if (products.productvariations.color) {
+    for (const varient of products.productvariations.color) {
+      if (varient.uniqueid == uniqueid) {
+        quantity = products.productvariations.color.quantity;
+        productimage = products.productvariations.color.productimage;
+        productcolor = products.productvariations.color.productcolor;
+        variation = "color";
+      }
+    }
+  }
+  const returnData = {
+    productname: products.productname,
+    productimage,
+    productcolor,
+    quantity,
+    variation,
+    uniqueid,
+    productid: products._id,
+    producttype: products.producttype,
+    gstcategory: products.gstcategory,
+    warrentycard: products.warrentycard,
+    extradiscount: products.extradiscount,
+    keywords: products.keywords,
+    productdescription: products.productdescription,
+    productdetails: products.productdetails,
+  };
+  return returnData;
+};
+
+const existUniqueidProduct = async function (shopinfoid, uniqueid) {
+  const products = await getProductInfoFromUniqueid(shopinfoid, uniqueid);
+  if (products) {
+    throw Api409Error("Conflict", "Product with This UniqueId Already Exist");
+  }
+};
 
 const addProduct = async function (
   shopinfoid,
@@ -10,14 +149,29 @@ const addProduct = async function (
   productvariations,
   productdescription,
   productdetails,
-  uniqueid,
   gstcategory,
   warrentycard,
   extradiscount,
   keywords
 ) {
+  let uniqueidArray = [];
+  if (productvariations.default) {
+    uniqueidArray.push(productvariations.default.uniqueid);
+  } else if (productvariations.color) {
+    for (const varient of productvariations.color) {
+      uniqueidArray.push(varient.uniqueid);
+    }
+  }
+  for (const uniqueId of uniqueidArray) {
+    const products = await getProductInfoFromUniqueid(shopinfoid, uniqueId);
+    if (products) {
+      throw Api409Error(
+        "Conflict",
+        `Product with ${uniqueId} UniqueId Already Exist`
+      );
+    }
+  }
   const insertOptions = {
-    uniqueid,
     productname,
     producttype,
     productvariations,
@@ -42,35 +196,7 @@ const addProduct = async function (
 };
 
 const getProductDataToRemove = async function (shopinfoid, uniqueid) {
-  const query = {
-    _id: shopinfoid,
-  };
-  const options = {
-    $projection: {
-      products: 1,
-    },
-  };
-  const shopinfo = await shopInfoCollection.findOne(query, options);
-  const query = {
-    $and: [
-      {
-        _id: {
-          $in: shopinfo.products,
-        },
-      },
-      {
-        $or: [
-          {
-            "productvariations.color.uniqueid": uniqueid,
-          },
-          {
-            "productvariations.default.uniqueid": uniqueid,
-          },
-        ],
-      },
-    ],
-  };
-  const products = await productsCollection.findOne(query);
+  const products = await getProductInfoFromUniqueid(shopinfoid, uniqueid);
   let quantity, productcolor, productimage, variation;
   if (products.productvariations.default.uniqueid) {
     quantity = products.productvariations.default.quantity;
@@ -130,35 +256,7 @@ const removeProduct = async function (
 };
 
 const getProductDataToUpdate = async function (shopinfoid, uniqueid, ch) {
-  const query = {
-    _id: shopinfoid,
-  };
-  const options = {
-    $projection: {
-      products: 1,
-    },
-  };
-  const shopinfo = await shopInfoCollection.findOne(query, options);
-  const query = {
-    $and: [
-      {
-        _id: {
-          $in: shopinfo.products,
-        },
-      },
-      {
-        $or: [
-          {
-            "productvariations.color.uniqueid": uniqueid,
-          },
-          {
-            "productvariations.default.uniqueid": uniqueid,
-          },
-        ],
-      },
-    ],
-  };
-  const products = await productsCollection.findOne(query);
+  const products = await getProductInfoFromUniqueid(shopinfoid, uniqueid);
   let quantity, productcolor, productimage, variation;
   if (products.productvariations.default.uniqueid) {
     quantity = products.productvariations.default.quantity;
@@ -247,10 +345,58 @@ const updateUniqueId = async function (
   await productsCollection.updateOne(query, options);
 };
 
+const updateBasic = async function (
+  productid,
+  productname,
+  producttype,
+  gstcategory,
+  warrentycard,
+  extradiscount,
+  keywords
+) {
+  const query = {
+    _id: productid,
+  };
+  const options = {
+    $set: {
+      productname,
+      producttype,
+      gstcategory,
+      warrentycard,
+      extradiscount,
+      keywords,
+    },
+  };
+  await productsCollection.updateOne(query, options);
+};
+
+const updateDetails = async function (
+  productid,
+  productdescription,
+  productdetails
+) {
+  const query = {
+    _id: productid,
+  };
+  const options = {
+    $set: {
+      productdescription,
+      productdetails,
+    },
+  };
+  await productsCollection.updateOne(query, options);
+};
+
 module.exports = {
+  existUniqueidProduct,
   addProduct,
   getProductDataToRemove,
   removeProduct,
   getProductDataToUpdate,
   updateUniqueId,
+  updateBasic,
+  updateDetails,
+  getAllProductInShop,
+  getSingleProductFromShop,
+  getSingleProductByUniqueId,
 };
