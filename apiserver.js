@@ -19,6 +19,7 @@ const searchapi = require("./apiroutes/searchapi");
 const shopitemapi = require("./apiroutes/shopitemapi");
 const registerapi = require("./apiroutes/registerapi");
 const webhookapi = require("./apiroutes/webhookapi");
+const createshopapi = require("./apiroutes/createshopapi");
 const {
   logErrorMiddleware,
   returnError,
@@ -58,6 +59,7 @@ appApi.use("/payment", paymentapi);
 appApi.use("/profile", profileapi);
 appApi.use("/search", searchapi);
 appApi.use("/shopitem", shopitemapi);
+appApi.use("/sell", createshopapi);
 appApi.use(forbiddenApiCall);
 
 // error handling
