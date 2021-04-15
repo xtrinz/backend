@@ -58,7 +58,7 @@ appApi.use("/location", locationapi);
 appApi.use("/orderhistory", orderhistoryapi);
 appApi.use("/payment", paymentapi);
 appApi.use("/profile", profileapi);
-appApi.use("/search", searchapi);
+appApi.use("/search", searchapi); // Todo : Incomplete. we need a proper algorithm (elastic search)
 appApi.use("/shopitem", shopitemapi);
 
 appApi.use("/sell", createshopapi);

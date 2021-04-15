@@ -14,7 +14,7 @@ const { ObjectId, ObjectID } = require("mongodb");
 const dataForCartPage = async function (user) {
   // collect info regarding that cartid from cart collection
   const query1 = {
-    _id: ObjectId(user.cartid),
+    _id: user.cartid,
   };
   const options1 = {
     projection: {
@@ -29,11 +29,11 @@ const dataForCartPage = async function (user) {
     };
     cart = await cartCollection.insertOne(insertOptions);
     const query2 = {
-      _id: ObjectId(user._id),
+      _id: user._id,
     };
     const options2 = {
       $set: {
-        cartid: ObjectId(cart.insertedId),
+        cartid: cart.insertedId,
       },
     };
     await userCollection.updateOne(query2, options2);
@@ -46,52 +46,77 @@ const dataForCartPage = async function (user) {
   if (cart.products) {
     for (let product of cart.products) {
       const query3 = {
-        _id: ObjectId(product.shopinfoid),
-        products: { $elemMatch: { productid: ObjectId(product.productsid) } },
+        _id: product.shopinfoid,
       };
       const options3 = {
         projection: {
-          products: { $elemMatch: { productid: ObjectId(product.productsid) } },
           _id: 1,
           shopname: 1,
         },
       };
       const shopinfo = await shopInfoCollection.findOne(query3, options3);
       const query4 = {
-        _id: ObjectId(product.productsid),
+        $and: [
+          {
+            _id: product.productsid,
+            shopinfoid: product.shopinfoid,
+          },
+          {
+            $or: [
+              {
+                "productvariations.color.uniqueid": product.uniqueid,
+              },
+              {
+                "productvariations.default.uniqueid": product.uniqueid,
+              },
+            ],
+          },
+        ],
       };
-      const options4 = {
-        projection: {
-          _id: 1,
-          productname: 1,
-          productimage: 1,
-        },
-      };
-      const products = await productsCollection.findOne(query4, options4);
+      const products = await productsCollection.findOne(query4);
       if (!shopinfo || !products) {
         // if any of the one doesn't exist then we should delete refence to that from cart
         const query5 = {
-          _id: ObjectId(cart._id),
+          _id: cart._id,
         };
         const options5 = {
           $pull: {
             products: {
-              _id: ObjectId(product._id),
+              _id: product._id,
             },
           },
         };
         await cartCollection.updateOne(query5, options5);
         continue;
       } // Todo : if stock of the product is false . then we should do something
+      let productcolor, productprice, productimage, variation;
+      if (products.productvariations.default) {
+        productimage = products.productvariations.default.productimage;
+        productcolor = products.productvariations.default.productcolor; // none
+        productprice = products.productvariations.default.productprice;
+        variation = "default";
+      } else if (products.productvariations.color) {
+        for (const varient of products.productvariations.color) {
+          if (varient.uniqueid == product.uniqueid) {
+            productimage = varient.productimage;
+            productcolor = varient.productcolor;
+            productprice = varient.productprice;
+            variation = "color";
+            break;
+          }
+        }
+      }
       const arrayData = {
         shopId: shopinfo._id,
         shopName: shopinfo.shopname,
-        price: shopinfo.products[0].price,
         productId: products._id,
         productName: products.productname,
-        productImage: products.productimage,
+        productImage: productimage,
+        productColor: productcolor,
+        productPrice: productprice,
+        variation,
+        uniqueId: product.uniqueid,
         quantity: product.quantity,
-        stockStatus: shopinfo.products[0].stockstatus,
         cartItemId: product._id,
       };
       data.push(arrayData);
@@ -100,19 +125,26 @@ const dataForCartPage = async function (user) {
   return data;
 };
 
-const addItemToCart = async function (user, shopinfoid, productsid, quantity) {
+const addItemToCart = async function (
+  user,
+  shopinfoid,
+  productsid,
+  uniqueid,
+  quantity
+) {
   // updating cart collection with incoming data
   // refer mongo db doc for more info
   const query1 = {
-    _id: ObjectId(user.cartid),
+    _id: user.cartid,
   };
   const options1 = {
     $push: {
       products: {
         _id: new ObjectID(),
-        shopinfoid: ObjectId(shopinfoid),
-        productsid: ObjectId(productsid),
-        quantity: quantity,
+        shopinfoid,
+        productsid,
+        uniqueid,
+        quantity,
       },
     },
   };
@@ -128,16 +160,16 @@ const addItemToCart = async function (user, shopinfoid, productsid, quantity) {
       };
       cart = await cartCollection.insertOne(insertOptions);
       const query2 = {
-        _id: ObjectId(user._id),
+        _id: user._id,
       };
       const options2 = {
         $set: {
-          cartid: ObjectId(cart.insertedId),
+          cartid: cart.insertedId,
         },
       };
       await userCollection.updateOne(query2, options2);
       const query3 = {
-        _id: ObjectId(cart.insertedId),
+        _id: cart.insertedId,
       };
       await cartCollection.updateOne(query3, options1);
     }
@@ -147,12 +179,12 @@ const addItemToCart = async function (user, shopinfoid, productsid, quantity) {
 const deleteCartItem = async function (user, cartitemid) {
   // deleting that item from cart
   const query1 = {
-    _id: ObjectId(user.cartid),
+    _id: user.cartid,
   };
   const options1 = {
     $pull: {
       products: {
-        _id: ObjectId(cartitemid),
+        _id: cartitemid,
       },
     },
   };

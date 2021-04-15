@@ -94,6 +94,11 @@ router.get("/edit/:ch", async (req, res, next) => {
   return res.status(httpStatusCodes.OK).json(data);
 });
 // update unique id
+// It will make a bigger head ache if customer add this product to thier cart or
+// they are about to order this product. If we change unique id to another value then
+// that will generate error for customer. to avaod that
+// either we should n't allow shop owner to change barcode id once it is posted
+// or we should have a proper algorithm to deal with that
 router.post("/edit/uniqueid", async (req, res, next) => {
   const { olduniqueid, newuniqueid, productid, variation } = req.body;
   await updateUniqueId(olduniqueid, newuniqueid, productid, variation);

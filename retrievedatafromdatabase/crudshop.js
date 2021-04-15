@@ -44,6 +44,7 @@ const getAllProductInShop = async function (shopinfoid) {
   const options1 = {
     $projection: {
       products: 1,
+      shopname: 1,
     },
   };
   const shopinfo = await shopInfoCollection.findOne(query1, options1);
@@ -258,7 +259,7 @@ const removeProduct = async function (
 const getProductDataToUpdate = async function (shopinfoid, uniqueid, ch) {
   const products = await getProductInfoFromUniqueid(shopinfoid, uniqueid);
   let quantity, productcolor, productimage, variation;
-  if (products.productvariations.default.uniqueid) {
+  if (products.productvariations.default) {
     quantity = products.productvariations.default.quantity;
     productimage = products.productvariations.default.productimage;
     productcolor = products.productvariations.default.productcolor; // none
@@ -266,10 +267,11 @@ const getProductDataToUpdate = async function (shopinfoid, uniqueid, ch) {
   } else if (products.productvariations.color) {
     for (const varient of products.productvariations.color) {
       if (varient.uniqueid == uniqueid) {
-        quantity = products.productvariations.color.quantity;
-        productimage = products.productvariations.color.productimage;
-        productcolor = products.productvariations.color.productcolor;
+        quantity = varient.quantity;
+        productimage = varient.productimage;
+        productcolor = varient.productcolor;
         variation = "color";
+        break;
       }
     }
   }
