@@ -1,4 +1,4 @@
-const { userCollection } = require("../databaseconnections/mongoconnection");
+const { userCollection } = require("./connect");
 const { ObjectId, ObjectID } = require("mongodb");
 
 const getAllAddresses = function (user) {

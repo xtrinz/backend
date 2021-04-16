@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb");
-const { userCollection } = require("../databaseconnections/mongoconnection");
+const { userCollection } = require("./connect");
 const { Api403Error } = require("../error/errorclass/errorclass");
 const { comparePassword, hashPassword, compareTwo } = require("../functions");
 

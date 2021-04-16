@@ -1,5 +1,5 @@
 const express = require("express");
-const { paymentStatus } = require("../retrievedatafromdatabase/webhook");
+const { paymentStatus } = require("../db/webhook");
 const router = express.Router();
 
 router.post("/", async (req, res) => {

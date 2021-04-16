@@ -4,7 +4,7 @@ const {
   purchaseHistoryCollection,
   shopInfoCollection,
   productsCollection,
-} = require("../databaseconnections/mongoconnection");
+} = require("./connect");
 const { Api404Error } = require("../error/errorclass/errorclass");
 
 // retrieve purchase data

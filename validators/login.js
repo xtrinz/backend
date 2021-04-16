@@ -1,5 +1,5 @@
 const { body, oneOf } = require("express-validator");
-const { userCollection } = require("../databaseconnections/mongoconnection");
+const { userCollection } = require("../db/connect");
 const { validationError } = require("../error/errorhandlers");
 
 const v1 = body("phonenumber", "401:Your username or password is incorrect")

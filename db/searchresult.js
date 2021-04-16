@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const {
   shopInfoCollection,
   productsCollection,
-} = require("../databaseconnections/mongoconnection");
+} = require("./connect");
 
 const dataForSearchResultPage = async function (searchresult) {
   // if search type is shop then query in shop info

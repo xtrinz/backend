@@ -14,7 +14,7 @@ const bcrypt = require("bcryptjs");
 const {
   temporaryUserCollection,
   client,
-} = require("./databaseconnections/mongoconnection");
+} = require("./db/connect");
 
 // to generate 6 digit otp
 function generateOTP() {

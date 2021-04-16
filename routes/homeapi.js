@@ -1,6 +1,6 @@
 const express = require("express");
 const httpStatusCodes = require("../error/httpstatuscode");
-const { dataForHomePage } = require("../retrievedatafromdatabase/dataforhome");
+const { dataForHomePage } = require("../db/dataforhome");
 const validator = require("../validators/home");
 // creating router object
 const router = express.Router();

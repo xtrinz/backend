@@ -8,17 +8,17 @@ const {
 } = require("./middlewares/apimiddleware");
 
 // routes requering
-const homeapi = require("./apiroutes/homeapi");
-const cartapi = require("./apiroutes/cartapi");
-const locationapi = require("./apiroutes/locationapi");
-const loginapi = require("./apiroutes/loginapi");
-const orderhistoryapi = require("./apiroutes/orderhistoryapi");
-const paymentapi = require("./apiroutes/paymentapi");
-const profileapi = require("./apiroutes/profileapi");
-const searchapi = require("./apiroutes/searchapi");
-const shopitemapi = require("./apiroutes/shopitemapi");
-const registerapi = require("./apiroutes/registerapi");
-const webhookapi = require("./apiroutes/webhookapi");
+const homeapi = require("./routes/homeapi");
+const cartapi = require("./routes/cartapi");
+const locationapi = require("./routes/locationapi");
+const loginapi = require("./routes/loginapi");
+const orderhistoryapi = require("./routes/orderhistoryapi");
+const paymentapi = require("./routes/paymentapi");
+const profileapi = require("./routes/profileapi");
+const searchapi = require("./routes/searchapi");
+const shopitemapi = require("./routes/shopitemapi");
+const registerapi = require("./routes/registerapi");
+const webhookapi = require("./routes/webhookapi");
 const {
   logErrorMiddleware,
   returnError,

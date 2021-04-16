@@ -4,7 +4,7 @@ const {
   cartCollection,
   userCollection,
   temporaryUserCollection,
-} = require("../databaseconnections/mongoconnection");
+} = require("./connect");
 // json web token for authentication
 const jwt = require("jsonwebtoken");
 const { hashPassword } = require("../functions");
