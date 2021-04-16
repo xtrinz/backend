@@ -5,7 +5,7 @@ const {
   sendOtp,
   verifyOtp,
   verifyCredentialChangePermmision,
-} = require("../middlewares/apimiddleware");
+} = require("../common/middleware");
 const {
   dataForProfilePage,
   updateUserDetails,

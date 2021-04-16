@@ -12,7 +12,7 @@ const {
   checkOtpVerifiedStatus,
   updatePasswordCredentials,
   sendOtp,
-} = require("../middlewares/apimiddleware");
+} = require("../common/middleware");
 const { verifyLoginCredentials } = require("../database/login");
 const validator = require("../validators/login");
 

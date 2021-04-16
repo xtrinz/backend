@@ -14,7 +14,7 @@ const bcrypt = require("bcryptjs");
 const {
   temporaryUserCollection,
   client,
-} = require("./database/connect");
+} = require("../database/connect");
 
 // to generate 6 digit otp
 function generateOTP() {
@@ -165,7 +165,7 @@ const gracefulShutdown = async function () {
   }
 };
 
-// exporting all the functions
+// exporting all the common/utils
 module.exports = {
   generateOTP,
   hashPassword,

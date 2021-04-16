@@ -22,7 +22,7 @@ const {
   sendOtpEmail,
   validateEmail,
   hashPassword,
-} = require("../functions");
+} = require("../common/utils");
 
 const JWT_AUTHORIZATION_TOKEN_SECRET =
   process.env.JWT_AUTHORIZATION_TOKEN_SECRET;

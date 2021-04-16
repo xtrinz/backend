@@ -6,7 +6,7 @@ const {
   isUserNotExist,
   verifyOtp,
   phoneEmailSyntaxVerification,
-} = require("../middlewares/apimiddleware");
+} = require("../common/middleware");
 const { registerUser } = require("../database/register");
 const validator = require("../validators/register");
 

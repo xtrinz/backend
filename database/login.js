@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { Api401Error } = require("../error/errorclass/errorclass");
-const { comparePassword } = require("../functions");
+const { comparePassword } = require("../common/utils");
 const JWT_AUTHORIZATION_TOKEN_SECRET =
   process.env.JWT_AUTHORIZATION_TOKEN_SECRET;
 

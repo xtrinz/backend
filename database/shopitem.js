@@ -4,7 +4,7 @@ const {
   shopInfoCollection,
 } = require("./connect");
 const { Api404Error } = require("../error/errorclass/errorclass");
-const { isArrayEmpty } = require("../functions");
+const { isArrayEmpty } = require("../common/utils");
 
 const dataForShopItemPage = async function (shopid) {
   const query1 = {
