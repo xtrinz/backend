@@ -13,7 +13,7 @@ const {
   updatePasswordCredentials,
   sendOtp,
 } = require("../middlewares/apimiddleware");
-const { verifyLoginCredentials } = require("../retrievedatafromdatabase/login");
+const { verifyLoginCredentials } = require("../db/login");
 const validator = require("../validators/login");
 
 const router = express.Router();

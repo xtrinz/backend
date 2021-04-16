@@ -3,7 +3,7 @@ const {
   cartCollection,
   shopInfoCollection,
   productsCollection,
-} = require("../databaseconnections/mongoconnection");
+} = require("./connect");
 const { ObjectId, ObjectID } = require("mongodb");
 
 /**

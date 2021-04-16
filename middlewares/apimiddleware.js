@@ -7,7 +7,7 @@ const {
   userCollection,
   temporaryUserCollection,
   sessionCollection,
-} = require("../databaseconnections/mongoconnection");
+} = require("../db/connect");
 const {
   Api400Error,
   Api401Error,

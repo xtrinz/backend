@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const {
   productsCollection,
   shopInfoCollection,
-} = require("../databaseconnections/mongoconnection");
+} = require("./connect");
 const { Api404Error } = require("../error/errorclass/errorclass");
 const { isArrayEmpty } = require("../functions");
 

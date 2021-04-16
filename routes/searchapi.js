@@ -1,7 +1,7 @@
 const express = require("express");
 const {
   dataForSearchResultPage,
-} = require("../retrievedatafromdatabase/searchresult");
+} = require("../db/searchresult");
 const validator = require("../validators/search");
 
 const router = express.Router();

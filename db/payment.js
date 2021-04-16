@@ -6,7 +6,7 @@ const {
   productsCollection,
   cartCollection,
   sessionCollection,
-} = require("../databaseconnections/mongoconnection");
+} = require("./connect");
 const { Api403Error, Api404Error } = require("../error/errorclass/errorclass");
 const { isArrayEmpty, isObjectEmpty } = require("../functions");
 const JWT_SESSION_TOKEN_SECRET = process.env.JWT_SESSION_TOKEN_SECRET;

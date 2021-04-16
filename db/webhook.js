@@ -5,7 +5,7 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = require("stripe")(stripeSecretKey);
 const {
   purchaseHistoryCollection,
-} = require("../databaseconnections/mongoconnection");
+} = require("./connect");
 
 const paymentStatus = async function (rawBody, data, eventType, signature) {
   // Check if webhook signing is configured.

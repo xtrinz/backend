@@ -7,7 +7,7 @@ const {
   editAddress,
   getAllAddresses,
   getAddress,
-} = require("../retrievedatafromdatabase/location");
+} = require("../db/location");
 const validator = require("../validators/location");
 
 const router = express.Router();
