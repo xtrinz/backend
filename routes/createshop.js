@@ -1,8 +1,5 @@
-const httpStatusCodes = require("../error/httpstatuscode");
-const {
-  createShop,
-  verificationstatus,
-} = require("../retrievedatafromdatabase/createshop");
+const code = require("../error/code");
+const { createShop, verificationstatus } = require("../database/createshop");
 
 const router = require("express").Router();
 
@@ -26,13 +23,13 @@ router.post("/create", async (req, res, next) => {
     certificates,
     contactdetails
   );
-  return res.status(httpStatusCodes.OK).json("Success");
+  return res.status(code.OK).json("Success");
 });
 
 router.get("/status", async (req, res) => {
   const { user } = req.body;
   const data = await verificationstatus(user);
-  return res.status(httpStatusCodes.OK).json(data);
+  return res.status(code.OK).json(data);
 });
 
 module.exports = router;

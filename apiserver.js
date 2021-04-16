@@ -5,40 +5,40 @@ const express = require("express");
 const {
   verifyAuthorizationToken,
   forbiddenApiCall,
-} = require("./middlewares/apimiddleware");
+} = require("./common/middleware");
 
 // routes requering
-const homeapi = require("./apiroutes/homeapi");
-const cartapi = require("./apiroutes/cartapi");
-const locationapi = require("./apiroutes/locationapi");
-const loginapi = require("./apiroutes/loginapi");
-const orderhistoryapi = require("./apiroutes/orderhistoryapi");
-const paymentapi = require("./apiroutes/paymentapi");
-const profileapi = require("./apiroutes/profileapi");
-const searchapi = require("./apiroutes/searchapi");
-const shopitemapi = require("./apiroutes/shopitemapi");
-const registerapi = require("./apiroutes/registerapi");
-const webhookapi = require("./apiroutes/webhookapi");
-const createshopapi = require("./apiroutes/createshopapi");
-const crudshopapi = require("./apiroutes/crudshopapi");
+const home = require("./routes/home");
+const cart = require("./routes/cart");
+const location = require("./routes/location");
+const login = require("./routes/login");
+const orderhistory = require("./routes/orderhistory");
+const payment = require("./routes/payment");
+const profile = require("./routes/profile");
+const search = require("./routes/search");
+const shopitem = require("./routes/shopitem");
+const register = require("./routes/register");
+const webhook = require("./routes/webhook");
+const createshop = require("./routes/createshop");
+const crudshop = require("./routes/crudshop");
 const {
   logErrorMiddleware,
   returnError,
   handleUnCaughtException,
   handlePromiseRejection,
 } = require("./error/errorhandlers");
-const { gracefulShutdown } = require("./functions");
+const { gracefulShutdown } = require("./common/utils");
 
 // creating application
-const appApi = express();
+const app = express();
 
-appApi.use(express.urlencoded({ extended: true }));
-appApi.use(
+app.use(express.urlencoded({ extended: true }));
+app.use(
   express.json({
     // We need the raw body to verify webhook signatures.
     // Let's compute it only when hitting the Stripe webhook endpoint.
     verify: function (req, res, buf) {
-      if (req.originalUrl.startsWith("/transaction/webhook")) {
+      if (req.originalUrl.startsWith("/webhook")) {
         req.rawBody = buf.toString();
       }
     },
@@ -46,28 +46,28 @@ appApi.use(
 );
 
 // jwt token verification not required for login and register
-appApi.use("/register", registerapi);
-appApi.use("/login", loginapi);
-appApi.use("/webhook", webhookapi);
+app.use("/register", register);
+app.use("/login", login);
+app.use("/webhook", webhook);
 // middleware for verifieying jwt token
-appApi.use(verifyAuthorizationToken);
+app.use(verifyAuthorizationToken);
 
-appApi.use("/", homeapi);
-appApi.use("/cart", cartapi);
-appApi.use("/location", locationapi);
-appApi.use("/orderhistory", orderhistoryapi);
-appApi.use("/payment", paymentapi);
-appApi.use("/profile", profileapi);
-appApi.use("/search", searchapi); // Todo : Incomplete. we need a proper algorithm (elastic search)
-appApi.use("/shopitem", shopitemapi);
+app.use("/", home);
+app.use("/cart", cart);
+app.use("/location", location);
+app.use("/orderhistory", orderhistory);
+app.use("/payment", payment);
+app.use("/profile", profile);
+app.use("/search", search); // Todo : Incomplete. we need a proper algorithm (elastic search)
+app.use("/shopitem", shopitem);
 
-appApi.use("/sell", createshopapi);
-appApi.use("/crud", crudshopapi);
-appApi.use(forbiddenApiCall);
+app.use("/sell", createshop);
+app.use("/crud", crudshop);
+app.use(forbiddenApiCall);
 
 // error handling
-appApi.use(logErrorMiddleware);
-appApi.use(returnError);
+app.use(logErrorMiddleware);
+app.use(returnError);
 
 // This will prevent dirty exit on code-fault crashes:
 process.on("uncaughtException", handleUnCaughtException);
@@ -80,6 +80,6 @@ process.on("SIGTERM", gracefulShutdown);
 process.on("SIGKILL", gracefulShutdown);
 
 // listening on port 3001
-appApi.listen(3001, () => {
+app.listen(3001, () => {
   console.log("Server Running On Port 3001");
 });
