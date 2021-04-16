@@ -2,7 +2,7 @@ const express = require("express");
 const {
   dataForShopItemPage,
   dataForItemDescriptionPage,
-} = require("../db/shopitem");
+} = require("../database/shopitem");
 const validator = require("../validators/shopitem");
 
 const router = express.Router();

@@ -4,7 +4,7 @@ const {
   dataForCartPage,
   addItemToCart,
   deleteCartItem,
-} = require("../db/dataforcart");
+} = require("../database/dataforcart");
 const validator = require("../validators/cart");
 
 const router = express.Router();

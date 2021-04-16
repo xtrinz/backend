@@ -8,7 +8,7 @@ const {
   placeOrder,
   calculateOrderAmount,
   createPaymentIntent,
-} = require("../db/payment");
+} = require("../database/payment");
 const validator = require("../validators/payment");
 
 const router = express.Router();
