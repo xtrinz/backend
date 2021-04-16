@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
-const httpStatusCodes = require("../error/httpstatuscode");
+const code = require("../error/code");
 
 // json web token for authentication
 
@@ -23,7 +23,7 @@ router.post("/", validator.verify_login, async (req, res, next) => {
     const { user, password } = req.body;
     const token = await verifyLoginCredentials(user, password);
     return res
-      .status(httpStatusCodes.OK)
+      .status(code.OK)
       .json({ message: "Success Fully Logged in", token });
   } catch (error) {
     next(error);
@@ -40,14 +40,14 @@ router.post(
     const { phonenumber, email } = req.body;
     if (phonenumber) {
       const lastDigitsPhoneNumber = String(phonenumber).slice(-4);
-      return res.status(httpStatusCodes.OK).json({
+      return res.status(code.OK).json({
         message:
           "An otp send to your phone number ending " + lastDigitsPhoneNumber,
         phonenumber,
       });
     } else {
       const lastDigitsEmail = String(email).slice(-15);
-      return res.status(httpStatusCodes.OK).json({
+      return res.status(code.OK).json({
         message: "An otp send to your email ending " + lastDigitsEmail,
         email,
       });

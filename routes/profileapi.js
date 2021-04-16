@@ -1,5 +1,5 @@
 const express = require("express");
-const httpStatusCodes = require("../error/httpstatuscode");
+const code = require("../error/code");
 const {
   phoneEmailSyntaxVerification,
   sendOtp,
@@ -23,7 +23,7 @@ router.get("/", (req, res, next) => {
     const { user } = req.body;
     const data = dataForProfilePage(user);
     // send response
-    return res.status(httpStatusCodes.OK).json(data);
+    return res.status(code.OK).json(data);
   } catch (error) {
     next(error);
   }
@@ -33,7 +33,7 @@ router.post("/", validator.edit_normal, async (req, res, next) => {
   try {
     const { user, firstname, lastname } = req.body;
     await updateUserDetails(user, firstname, lastname);
-    return res.status(httpStatusCodes.OK).json("Success fully updated");
+    return res.status(code.OK).json("Success fully updated");
   } catch (error) {
     next(error);
   }
@@ -55,7 +55,7 @@ router.post(
     try {
       const { user, phonenumber, email, password } = req.body;
       await verifyUser(user, phonenumber, email, password);
-      return res.status(httpStatusCodes.OK).json("Success");
+      return res.status(code.OK).json("Success");
     } catch (error) {
       next(error);
     }
@@ -71,14 +71,14 @@ router.post(
     const { phonenumber, email } = req.body;
     if (phonenumber) {
       const lastDigitsPhoneNumber = String(phonenumber).slice(-4);
-      return res.status(httpStatusCodes.OK).json({
+      return res.status(code.OK).json({
         message:
           "An otp send to your phone number ending " + lastDigitsPhoneNumber,
         phonenumber,
       });
     } else {
       const lastDigitsEmail = String(email).slice(-15);
-      return res.status(httpStatusCodes.OK).json({
+      return res.status(code.OK).json({
         message: "An otp send to your email ending " + lastDigitsEmail,
         email,
       });
@@ -97,11 +97,11 @@ router.post(
       await updateUserPhoneEmail(user, phonenumber, email);
       if (phonenumber) {
         return res
-          .status(httpStatusCodes.OK)
+          .status(code.OK)
           .json({ message: "Otp verified success fully", phonenumber });
       } else {
         return res
-          .status(httpStatusCodes.OK)
+          .status(code.OK)
           .json({ message: "Otp verified success fully", email });
       }
     } catch (error) {
@@ -115,7 +115,7 @@ router.post("/password", validator.update_pass, async (req, res, next) => {
     const { user, oldpassword, newpassword } = req.body;
     await updateUserPassword(user, oldpassword, newpassword);
     return res
-      .status(httpStatusCodes.OK)
+      .status(code.OK)
       .json("Password updated success fully");
   } catch (error) {
     next(error);

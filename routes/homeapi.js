@@ -1,5 +1,5 @@
 const express = require("express");
-const httpStatusCodes = require("../error/httpstatuscode");
+const code = require("../error/code");
 const { dataForHomePage } = require("../database/dataforhome");
 const validator = require("../validators/home");
 // creating router object
@@ -15,7 +15,7 @@ router.get("/page/:pageno", validator.validate_home, async (req, res, next) => {
     lat = parseFloat(lattitude);
     lon = parseFloat(longitude);
     const data = await dataForHomePage(pageno, lon, lat);
-    return res.status(httpStatusCodes.OK).json(data);
+    return res.status(code.OK).json(data);
   } catch (error) {
     next(error);
   }

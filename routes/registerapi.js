@@ -1,5 +1,5 @@
 const express = require("express");
-const httpStatusCodes = require("../error/httpstatuscode");
+const code = require("../error/code");
 const {
   sendOtp,
   checkOtpVerifiedStatus,
@@ -17,7 +17,7 @@ const router = express.Router();
 router.post("/", validator.validate_phonenumber, sendOtp, (req, res, next) => {
   const { phonenumber } = req.body;
   const lastDigitsPhoneNumber = String(phonenumber).slice(-4);
-  return res.status(httpStatusCodes.OK).json({
+  return res.status(code.OK).json({
     message: "An otp send to your phone number ending " + lastDigitsPhoneNumber,
     phonenumber,
   });
@@ -30,7 +30,7 @@ router.post(
   verifyOtp,
   (req, res, next) => {
     const { phonenumber } = req.body;
-    return res.status(httpStatusCodes.OK).json({
+    return res.status(code.OK).json({
       message: "Otp verified success fully",
       phonenumber,
     });
@@ -54,7 +54,7 @@ router.post(
         email
       );
       return res
-        .status(httpStatusCodes.OK)
+        .status(code.OK)
         .json({ message: "Success Fully registered", token });
     } catch (error) {
       next(error);

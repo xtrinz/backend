@@ -1,6 +1,6 @@
 const { gracefulShutdown } = require("../functions");
 const BaseError = require("./errorclass/baserror");
-const httpStatusCodes = require("./httpstatuscode");
+const code = require("./code");
 const { validationResult } = require("express-validator");
 const {
   Api400Error,
@@ -19,7 +19,7 @@ function logErrorMiddleware(err, req, res, next) {
 
 function returnError(err, req, res, next) {
   res
-    .status(err.statusCode || httpStatusCodes.INTERNAL_SERVER)
+    .status(err.statusCode || code.INTERNAL_SERVER)
     .send(err.message);
 }
 
