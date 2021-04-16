@@ -14,39 +14,18 @@ const dataForOrderHistory = async function (user) {
    * loop throgh array of purchase id
    * query purchase history with that id to retrieve info regarding purchase
    */
-  for (const purchaseId of user.purchaseid) {
-    const query1 = {
-      _id: ObjectId(purchaseId),
-    };
-    const options1 = {
-      projection: {
-        products: 1,
-        statusdelivery: 1,
-        totalPrice: 1,
-      },
-    };
-    let purchaseHistory = await purchaseHistoryCollection.findOne(
-      query1,
-      options1
-    );
-    if (!purchaseHistory) {
-      // if we can't find any document matching that . then we should remove that purchase id from user collection
-      const query2 = {
-        _id: ObjectId(user._id),
-      };
-      const options2 = {
-        $pull: {
-          purchaseid: ObjectId(purchaseId),
-        },
-      };
-      await userCollection.updateOne(query2, options2);
-      continue;
-    }
+  const query1 = {
+    _id: {
+      $in: user.purchaseid,
+    },
+  };
+  let purchaseHistory = await purchaseHistoryCollection.find(query1);
+  for await (const order of purchaseHistory) {
     const arrayData = {
-      itemCount: purchaseHistory.products.length,
-      statusdelivery: purchaseHistory.statusdelivery,
-      totalPrice: purchaseHistory.totalPrice,
-      purchaseId: purchaseId,
+      itemCount: order.products.length,
+      statusdelivery: order.statusdelivery,
+      totalPrice: order.totalPrice,
+      purchaseId: order._id,
     };
     data.push(arrayData);
   }
@@ -61,7 +40,7 @@ const dataForOrderStatusPage = async function (user, purchaseId) {
   }
   // retrieve info about that purchase id from purchase history
   const query1 = {
-    _id: ObjectId(purchaseId),
+    _id: purchaseId,
   };
   const options1 = {
     projection: {
@@ -93,46 +72,36 @@ const dataForOrderStatusPage = async function (user, purchaseId) {
     for (const purchaseHistoryProduct of purchaseHistory.products) {
       const {
         shopinfoid,
+        shopname,
         productsid,
-        price,
+        productname,
+        productimage,
+        productcolor,
+        uniqueid,
+        variation,
+        productprice,
         quantity,
       } = purchaseHistoryProduct;
-      const query3 = {
-        _id: ObjectId(shopinfoid),
-      };
-      const options3 = {
-        projection: {
-          _id: 1,
-          shopname: 1,
-        },
-      };
       // Todo : how do we handle if shop closed permenetly?. or change their name or location
       // Todo : error handling . we can't just delete data if shopinfo or products empty. because purchase is already happened so we must show
       // status to customer if they requested
-      const shopinfo = await shopInfoCollection.findOne(query3, options3);
-      const query4 = {
-        _id: ObjectId(productsid),
-      };
-      const options4 = {
-        projection: {
-          _id: 1,
-          productname: 1,
-          productimage: 1,
-        },
-      };
-      const products = await productsCollection.findOne(query4, options4);
       const arrayData = {
-        shopId: shopinfo._id,
-        shopName: shopinfo.shopname,
-        productid: products._id,
-        productName: products.productname,
-        productImage: products.productimage,
-        price: price,
+        shopId: shopinfoid,
+        shopName: shopname,
+        productid: productsid,
+        productName: productname,
+        productImage: productimage,
+        productprice: productprice,
         quantity: quantity,
+        productColor: productcolor,
+        uniqueId: uniqueid,
+        variation: variation,
       };
       dataForId.push(arrayData);
       //make an array that contain location of shop
       // this is used for rendering direction on google map
+      // I think this is not required now (It will make our app complicated at initial stage
+      // and we are now focusing on electronics so tight delivery not required(food delivery it is required because people may eagorly waiting for food))
       if (!purchaseHistory.isdelivered) {
         if (uniqueShopIds.indexOf(shopinfo._id.toString()) == -1) {
           // this is required only if the delivery didn't happen
@@ -151,7 +120,7 @@ const dataForOrderStatusPage = async function (user, purchaseId) {
     statusdelivery: purchaseHistory.statusdelivery,
     totalPrice: purchaseHistory.totalPrice,
     deliveryLocation: {
-      ...purchaseHistory.location,
+      ...purchaseHistory.address,
       content: "Delivery Location",
     },
   };

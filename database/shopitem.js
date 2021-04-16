@@ -6,9 +6,9 @@ const {
 const { Api404Error } = require("../error/errorclass/errorclass");
 const { isArrayEmpty } = require("../common/utils");
 
-const dataForShopItemPage = async function (shopid) {
+const dataForShopItemPage = async function (shopinfoid) {
   const query1 = {
-    _id: ObjectId(shopid),
+    _id: shopinfoid,
   };
   const options1 = {
     projection: {
@@ -25,26 +25,21 @@ const dataForShopItemPage = async function (shopid) {
     throw new Api404Error("Not Found", "Not Found");
   }
   const data = [];
-  for (const product of shopinfo.products) {
-    const query2 = {
-      _id: ObjectId(product.productid),
-    };
-    const options2 = {
-      projection: {
-        _id: 1,
-        productname: 1,
-        productimage: 1,
-      },
-    };
-    const products1 = await productsCollection.findOne(query2, options2);
-    if (!products1) {
-      continue;
-    }
+  const query2 = {
+    _id: {
+      $in: shopinfo.products,
+    },
+  };
+  let products = await productsCollection.find(query2);
+  products = products.toArray();
+  const data = [];
+  for (const product of products) {
     const arrayData = {
-      price: product.price,
-      productid: products1._id,
-      productName: products1.productname,
-      productImage: products1.productimage,
+      productname: product.productname,
+      productvariations: product.productvariations,
+      producttype: product.producttype,
+      gstcategory: product.gstcategory,
+      extradiscount: product.extradiscount,
     };
     data.push(arrayData);
   }
@@ -59,26 +54,16 @@ const dataForShopItemPage = async function (shopid) {
   return returnData;
 };
 
-const dataForItemDescriptionPage = async function (shopid, itemid) {
+const dataForItemDescriptionPage = async function (shopinfoid, productid) {
   const query1 = {
-    _id: ObjectId(itemid),
+    _id: productid,
   };
-  const options1 = {
-    projection: {
-      _id: 1,
-      productname: 1,
-      productimage: 1,
-    },
-  };
-  const products = await productsCollection.findOne(query1, options1);
+  const products = await productsCollection.findOne(query1);
   const query2 = {
-    _id: ObjectId(shopid),
-    products: { $elemMatch: { productid: ObjectId(itemid) } },
+    _id: shopinfoid,
   };
   const options2 = {
-    projection: {
-      _id: 1,
-      products: { $elemMatch: { productid: ObjectId(itemid) } },
+    $projection: {
       shopname: 1,
     },
   };
@@ -91,8 +76,13 @@ const dataForItemDescriptionPage = async function (shopid, itemid) {
     shopName: shopinfo.shopname,
     productid: products._id,
     productName: products.productname,
-    productImage: products.productimage,
-    price: shopinfo.products[0].price,
+    productvariations: products.productvariations,
+    producttype: products.producttype,
+    gstcategory: products.gstcategory,
+    warrentycard: products.warrentycard,
+    extradiscount: products.extradiscount,
+    productdescription: products.productdescription,
+    productdetails: products.productdetails,
   };
   return returnData;
 };

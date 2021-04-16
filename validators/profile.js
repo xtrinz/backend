@@ -1,4 +1,8 @@
 const { body, oneOf } = require("express-validator");
+<<<<<<< HEAD
+const { userCollection } = require("../databaseconnections/mongoconnection");
+=======
+>>>>>>> ebf13505400fd1710f496962b7e21c64a14e4743
 const { validationError } = require("../error/errorhandlers");
 
 const v1 = body("firstname", "400:Please provide a valid name")
@@ -14,7 +18,10 @@ const v2 = body("lastname", "400:Please provide a valid name")
   .isString()
   .trim()
   .escape();
+<<<<<<< HEAD
+=======
 const { userCollection } = require("../database/connect");
+>>>>>>> ebf13505400fd1710f496962b7e21c64a14e4743
 
 const v3 = body("phonenumber", "401:Your username or password is incorrect")
   .custom(async (value, { req }) => {

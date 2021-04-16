@@ -30,7 +30,7 @@ const v5 = body("phonenumber", "400:Invalid Phonenumber")
   .matches(/^\+91[0-9]{10}$/, "i")
   .trim()
   .escape();
-const v6 = check("addressid", "400:Invalid Address Id")
+const v6 = body("addressid", "400:Invalid Address Id")
   .exists()
   .isMongoId()
   .customSanitizer(value => {

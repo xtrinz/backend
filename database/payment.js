@@ -30,49 +30,75 @@ const dataForPaymentPage = async function (session) {
   const temporaryproducts = session.transaction.temporaryproducts;
   for (let product of temporaryproducts) {
     const query1 = {
-      _id: ObjectId(product.shopinfoid),
-      products: { $elemMatch: { productid: ObjectId(product.productsid) } },
+      _id: product.shopinfoid,
     };
     const options1 = {
       projection: {
-        products: { $elemMatch: { productid: ObjectId(product.productsid) } },
         _id: 1,
         shopname: 1,
       },
     };
     const shopinfo = await shopInfoCollection.findOne(query1, options1);
     const query2 = {
-      _id: ObjectId(product.productsid),
+      $and: [
+        {
+          _id: product.productsid,
+          shopinfoid: product.shopinfoid,
+        },
+        {
+          $or: [
+            {
+              "productvariations.color.uniqueid": product.uniqueid,
+            },
+            {
+              "productvariations.default.uniqueid": product.uniqueid,
+            },
+          ],
+        },
+      ],
     };
-    const options2 = {
-      projection: {
-        _id: 1,
-        productname: 1,
-        productimage: 1,
-      },
-    };
-    const products = await productsCollection.findOne(query2, options2);
+    const products = await productsCollection.findOne(query2);
     if (!shopinfo || !products) {
       const query3 = {
-        _id: ObjectId(session._id),
+        _id: session._id,
       };
       const options3 = {
         $pull: {
           "transaction.$.temporaryproducts": {
-            _id: ObjectId(product._id),
+            _id: product._id,
           },
         },
       };
       await sessionCollection.updateOne(query3, options3);
       continue;
     }
+    let productcolor, productprice, productimage, variation;
+    if (products.productvariations.default) {
+      productimage = products.productvariations.default.productimage;
+      productcolor = products.productvariations.default.productcolor; // none
+      productprice = products.productvariations.default.productprice;
+      variation = "default";
+    } else if (products.productvariations.color) {
+      for (const varient of products.productvariations.color) {
+        if (varient.uniqueid == product.uniqueid) {
+          productimage = varient.productimage;
+          productcolor = varient.productcolor;
+          productprice = varient.productprice;
+          variation = "color";
+          break;
+        }
+      }
+    }
     const arrayData = {
       shopId: shopinfo._id,
       shopName: shopinfo.shopname,
       productid: products._id,
       productName: products.productname,
-      productImage: products.productimage,
-      price: shopinfo.products[0].price,
+      productImage: productimage,
+      productColor: productcolor,
+      productPrice: productprice,
+      variation,
+      uniqueId: product.uniqueid,
       quantity: product.quantity,
     };
     data.push(arrayData);
@@ -84,8 +110,8 @@ const dataForPaymentPage = async function (session) {
     );
   }
   // calculate total price
-  for (const { price, quantity } of data) {
-    totalPrice = totalPrice + price * quantity;
+  for (const { productPrice, quantity } of data) {
+    totalPrice = totalPrice + productPrice * quantity;
   }
   const returnData = {
     data,
@@ -99,12 +125,13 @@ const addTemporaryProductInUserForPaymentPage = async function (
   isRequestFromCart,
   quantity,
   shopinfoid,
-  productsid
+  productsid,
+  uniqueid
 ) {
   let temporaryData = [];
   if (isRequestFromCart) {
     const query1 = {
-      _id: ObjectId(user.cartid),
+      _id: user.cartid,
     };
     const options1 = {
       projection: {
@@ -118,11 +145,11 @@ const addTemporaryProductInUserForPaymentPage = async function (
       };
       cart = await cartCollection.insertOne(insertOptions);
       const query2 = {
-        _id: ObjectId(user._id),
+        _id: user._id,
       };
       const options2 = {
         $set: {
-          cartid: ObjectId(cart.insertedId),
+          cartid: cart.insertedId,
         },
       };
       await userCollection.updateOne(query2, options2);
@@ -142,14 +169,15 @@ const addTemporaryProductInUserForPaymentPage = async function (
   } else {
     const arrayData = {
       _id: new ObjectID(),
-      shopinfoid: ObjectId(shopinfoid),
-      productsid: ObjectId(productsid),
+      shopinfoid,
+      productsid,
+      uniqueid,
       quantity,
     };
     temporaryData.push(arrayData);
   }
   const insertOptions = {
-    userid: ObjectId(user._id),
+    userid: user._id,
     transaction: {
       temporaryproducts: temporaryData,
     },
@@ -211,44 +239,51 @@ const calculateOrderAmount = async function (session) {
 
   const temporaryproducts = session.transaction.temporaryproducts;
   for (let product of temporaryproducts) {
-    const query1 = {
-      _id: ObjectId(product.shopinfoid),
-      products: { $elemMatch: { productid: ObjectId(product.productsid) } },
-    };
-    const options1 = {
-      projection: {
-        products: { $elemMatch: { productid: ObjectId(product.productsid) } },
-        _id: 1,
-        shopname: 1,
-      },
-    };
-    const shopinfo = await shopInfoCollection.findOne(query1, options1);
     const query2 = {
-      _id: ObjectId(product.productsid),
+      $and: [
+        {
+          _id: product.productsid,
+          shopinfoid: product.shopinfoid,
+        },
+        {
+          $or: [
+            {
+              "productvariations.color.uniqueid": product.uniqueid,
+            },
+            {
+              "productvariations.default.uniqueid": product.uniqueid,
+            },
+          ],
+        },
+      ],
     };
-    const options2 = {
-      projection: {
-        _id: 1,
-        productname: 1,
-        productimage: 1,
-      },
-    };
-    const products = await productsCollection.findOne(query2, options2);
-    if (!shopinfo || !products) {
+    const products = await productsCollection.findOne(query2);
+    if (!products) {
       const query3 = {
-        _id: ObjectId(session._id),
+        _id: session._id,
       };
       const options3 = {
         $pull: {
           "transaction.$.temporaryproducts": {
-            _id: ObjectId(product._id),
+            _id: product._id,
           },
         },
       };
       await sessionCollection.updateOne(query3, options3);
       continue;
     }
-    cartValue = cartValue + shopinfo.products[0].price;
+    let productprice;
+    if (products.productvariations.default) {
+      productprice = products.productvariations.default.productprice;
+    } else if (products.productvariations.color) {
+      for (const varient of products.productvariations.color) {
+        if (varient.uniqueid == product.uniqueid) {
+          productprice = varient.productprice;
+          break;
+        }
+      }
+    }
+    cartValue = cartValue + productprice;
   }
   // Todo : Delivery Charge need to be calculated
   const returnData = {
@@ -267,7 +302,7 @@ const placeOrder = async function (
   phonenumber,
   addressid
 ) {
-  let products = [];
+  let productData = [];
   let totalPrice = 0;
   if (isArrayEmpty(user.address)) {
     throw new Api403Error(
@@ -298,27 +333,33 @@ const placeOrder = async function (
   for (let product of temporaryproducts) {
     const query1 = {
       _id: ObjectId(product.shopinfoid),
-      products: { $elemMatch: { productid: ObjectId(product.productsid) } },
     };
     const options1 = {
       projection: {
-        products: { $elemMatch: { productid: ObjectId(product.productsid) } },
         _id: 1,
         shopname: 1,
       },
     };
     const shopinfo = await shopInfoCollection.findOne(query1, options1);
     const query2 = {
-      _id: ObjectId(product.productsid),
+      $and: [
+        {
+          _id: product.productsid,
+          shopinfoid: product.shopinfoid,
+        },
+        {
+          $or: [
+            {
+              "productvariations.color.uniqueid": product.uniqueid,
+            },
+            {
+              "productvariations.default.uniqueid": product.uniqueid,
+            },
+          ],
+        },
+      ],
     };
-    const options2 = {
-      projection: {
-        _id: 1,
-        productname: 1,
-        productimage: 1,
-      },
-    };
-    const products = await productsCollection.findOne(query2, options2);
+    const products = await productsCollection.findOne(query2);
     if (!shopinfo || !products) {
       const query3 = {
         _id: ObjectId(session._id),
@@ -333,33 +374,54 @@ const placeOrder = async function (
       await sessionCollection.updateOne(query3, options3);
       continue;
     } // Todo : stock status should be consider
+    let productcolor, productprice, productimage, variation;
+    if (products.productvariations.default) {
+      productimage = products.productvariations.default.productimage;
+      productcolor = products.productvariations.default.productcolor; // none
+      productprice = products.productvariations.default.productprice;
+      variation = "default";
+    } else if (products.productvariations.color) {
+      for (const varient of products.productvariations.color) {
+        if (varient.uniqueid == product.uniqueid) {
+          productimage = varient.productimage;
+          productcolor = varient.productcolor;
+          productprice = varient.productprice;
+          variation = "color";
+          break;
+        }
+      }
+    }
     const arrayData = {
       _id: new ObjectID(),
-      shopinfoid: ObjectId(shopinfo._id),
+      shopinfoid: shopinfo._id,
       shopname: shopinfo.shopname,
-      producstid: ObjectId(products._id),
+      producstid: products._id,
       productsname: products.productname,
-      productsimage: products.productimage,
-      price: shopinfo.products[0].price,
+      productimage: productimage,
+      productcolor: productcolor,
+      productprice: productprice,
+      variation,
+      uniqueid: product.uniqueid,
       quantity: product.quantity,
     };
-    products.push(arrayData);
+    productData.push(arrayData);
   }
-  if (isArrayEmpty(products)) {
+  if (isArrayEmpty(productData)) {
     throw new Api404Error(
       "Not found",
       "Something went wrong. Please try again"
     );
   }
   // calculate total price
-  for (const { price, quantity } of products) {
-    totalPrice = totalPrice + price * quantity;
+  // Todo : we should consider all other charges too like delivery charge ,gst etc
+  for (const { productPrice, quantity } of productData) {
+    totalPrice = totalPrice + productPrice * quantity;
   }
   const insertData = {
-    userid: ObjectId(user._id),
+    userid: user._id,
     customername,
     phonenumber,
-    products,
+    products: productData,
     totalPrice,
     address: delAddress,
     statusdelivery: "ongoing",
@@ -370,7 +432,7 @@ const placeOrder = async function (
   const insertedData = await purchaseHistoryCollection.insertOne(insertData);
   const purchaseid = insertedData.insertedId;
   const query4 = {
-    _id: ObjectId(user._id),
+    _id: user._id,
   };
   const options4 = {
     $push: {
@@ -380,7 +442,7 @@ const placeOrder = async function (
   // retrieve the purchase id of that purchase and store that in user collection
   await userCollection.updateOne(query4, options4);
   const query5 = {
-    _id: ObjectId(session._id),
+    _id: session._id,
   };
   const options5 = {
     $set: {
@@ -391,6 +453,8 @@ const placeOrder = async function (
 };
 
 const createPaymentIntent = async function (user, session, charges) {
+  // allow only one user per account to access this and if any other user try to
+  // access from same account at the same time then timout his session
   const paymentIntent = await stripe.paymentIntents.create({
     amount: charges.totalPrice * 100,
     currency: "inr",
@@ -401,7 +465,7 @@ const createPaymentIntent = async function (user, session, charges) {
     },
   }); // add idempotent key also
   const query = {
-    _id: ObjectId(session._id),
+    _id: session._id,
   };
   const options = {
     $set: {
