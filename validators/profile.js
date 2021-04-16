@@ -14,7 +14,7 @@ const v2 = body("lastname", "400:Please provide a valid name")
   .isString()
   .trim()
   .escape();
-const { userCollection } = require("../db/connect");
+const { userCollection } = require("../database/connect");
 
 const v3 = body("phonenumber", "401:Your username or password is incorrect")
   .custom(async (value, { req }) => {

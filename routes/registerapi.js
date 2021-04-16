@@ -7,7 +7,7 @@ const {
   verifyOtp,
   phoneEmailSyntaxVerification,
 } = require("../middlewares/apimiddleware");
-const { registerUser } = require("../db/register");
+const { registerUser } = require("../database/register");
 const validator = require("../validators/register");
 
 const router = express.Router();

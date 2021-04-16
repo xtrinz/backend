@@ -7,7 +7,7 @@ const {
   userCollection,
   temporaryUserCollection,
   sessionCollection,
-} = require("../db/connect");
+} = require("../database/connect");
 const {
   Api400Error,
   Api401Error,

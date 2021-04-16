@@ -12,7 +12,7 @@ const {
   verifyUser,
   updateUserPhoneEmail,
   updateUserPassword,
-} = require("../db/profile");
+} = require("../database/profile");
 const { pe_pass } = require("../validators/profile");
 const validator = require("../validators/profile");
 

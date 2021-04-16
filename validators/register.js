@@ -1,5 +1,5 @@
 const { body } = require("express-validator");
-const { userCollection } = require("../db/connect");
+const { userCollection } = require("../database/connect");
 const { validationError } = require("../error/errorhandlers");
 
 const v1 = body("phonenumber", "400:Invalid Phonenumber")

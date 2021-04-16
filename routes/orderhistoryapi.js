@@ -3,7 +3,7 @@ const httpStatusCodes = require("../error/httpstatuscode");
 const {
   dataForOrderHistory,
   dataForOrderStatusPage,
-} = require("../db/orderhistory");
+} = require("../database/orderhistory");
 const validator = require("../validators/orderhistory");
 
 const router = express.Router();
