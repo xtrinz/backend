@@ -7,7 +7,7 @@ const {
 } = require("./connect");
 // json web token for authentication
 const jwt = require("jsonwebtoken");
-const { hashPassword } = require("../functions");
+const { hashPassword } = require("../common/utils");
 
 const JWT_AUTHORIZATION_TOKEN_SECRET =
   process.env.JWT_AUTHORIZATION_TOKEN_SECRET;

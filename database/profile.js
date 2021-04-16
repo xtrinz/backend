@@ -1,7 +1,7 @@
 const { ObjectId } = require("mongodb");
 const { userCollection } = require("./connect");
 const { Api403Error } = require("../error/errorclass/errorclass");
-const { comparePassword, hashPassword, compareTwo } = require("../functions");
+const { comparePassword, hashPassword, compareTwo } = require("../common/utils");
 
 const dataForProfilePage = function (user) {
   const returnData = {

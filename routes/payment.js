@@ -1,6 +1,6 @@
 const express = require("express");
 const code = require("../error/code");
-const { verifySessionToken } = require("../middlewares/apimiddleware");
+const { verifySessionToken } = require("../common/middleware");
 const {
   dataForPaymentPage,
   addTemporaryProductInUserForPaymentPage,

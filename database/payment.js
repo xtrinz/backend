@@ -8,7 +8,7 @@ const {
   sessionCollection,
 } = require("./connect");
 const { Api403Error, Api404Error } = require("../error/errorclass/errorclass");
-const { isArrayEmpty, isObjectEmpty } = require("../functions");
+const { isArrayEmpty, isObjectEmpty } = require("../common/utils");
 const JWT_SESSION_TOKEN_SECRET = process.env.JWT_SESSION_TOKEN_SECRET;
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripePublishableKey = process.env.STRIPE_PUBLISHABLE_KEY;

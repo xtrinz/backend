@@ -5,7 +5,7 @@ const express = require("express")
 const {
   verifyAuthorizationToken,
   forbiddenApiCall,
-} = require("./middlewares/apimiddleware")
+} = require("./common/middleware")
 
 // routes requering
 const home = require("./routes/home")
@@ -25,7 +25,7 @@ const {
   handleUnCaughtException,
   handlePromiseRejection,
 } = require("./error/errorhandlers")
-const { gracefulShutdown } = require("./functions")
+const { gracefulShutdown } = require("./common/utils")
 
 // creating application
 const app = express()

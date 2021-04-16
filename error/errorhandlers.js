@@ -1,4 +1,4 @@
-const { gracefulShutdown } = require("../functions");
+const { gracefulShutdown } = require("../common/utils");
 const BaseError = require("./errorclass/baserror");
 const code = require("./code");
 const { validationResult } = require("express-validator");
