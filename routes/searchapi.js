@@ -14,7 +14,7 @@ router.get("/", validator.search_res, async (req, res, next) => {
     let { searchresult } = req.query;
     searchresult = searchresult.toLowerCase().trim();
     const data = await dataForSearchResultPage(searchresult);
-    return res.status(httpStatusCodes.OK).json(data);
+    return res.status(code.OK).json(data);
   } catch (error) {
     next(error);
   }

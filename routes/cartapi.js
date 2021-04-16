@@ -1,5 +1,5 @@
 const express = require("express");
-const httpStatusCodes = require("../error/httpstatuscode");
+const code = require("../error/code");
 const {
   dataForCartPage,
   addItemToCart,
@@ -18,7 +18,7 @@ router.get("/", async (req, res, next) => {
     // getting data for cart page
     const data = await dataForCartPage(user);
     // send response
-    return res.status(httpStatusCodes.OK).json(data);
+    return res.status(code.OK).json(data);
   } catch (error) {
     next(error);
   }
@@ -31,7 +31,7 @@ router.post("/", validator.add_cart, async (req, res, next) => {
     await addItemToCart(user, shopinfoid, productsid, quantity);
     // send success response
     return res
-      .status(httpStatusCodes.OK)
+      .status(code.OK)
       .json({ message: "Item added to your cart" });
   } catch (error) {
     next(error);
@@ -43,7 +43,7 @@ router.delete("/", validator.delete_cart, async (req, res, next) => {
     const { user, cartitemid } = req.body;
     await deleteCartItem(user, cartitemid);
     return res
-      .status(httpStatusCodes.OK)
+      .status(code.OK)
       .json({ message: "item removed from your cart" });
   } catch (error) {
     next(error);

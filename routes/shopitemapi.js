@@ -11,7 +11,7 @@ router.get("/:shopid", validator.get_shop, async (req, res, next) => {
   try {
     const { shopid } = req.params;
     const data = await dataForShopItemPage(shopid);
-    return res.status(httpStatusCodes.OK).json(data);
+    return res.status(code.OK).json(data);
   } catch (error) {
     next(error);
   }
@@ -24,7 +24,7 @@ router.get(
     try {
       const { shopid, itemid } = req.params;
       const data = await dataForItemDescriptionPage(shopid, itemid);
-      return res.status(httpStatusCodes.OK).json(data);
+      return res.status(code.OK).json(data);
     } catch (error) {
       next(error);
     }
