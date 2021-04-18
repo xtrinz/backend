@@ -19,7 +19,7 @@ const dataForShopOrderHistory = async function (shopinfoid) {
     const arrayData = {
       Status: order.orderstatus,
       Count: order.products.length,
-      data: order.createddate, // we need date and time
+      date: order.createddate, // we need date and time
     };
     data.push(arrayData);
   }

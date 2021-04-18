@@ -24,6 +24,7 @@ const webhook = require("./routes/stripe/webhook");
 const createshop = require("./routes/shop/createshop");
 const crudshop = require("./routes/shop/crudshop");
 const shoporderhistory = require("./routes/shop/shoporderhistory");
+const paymentstatement = require("./routes/shop/paymentstatement");
 
 const {
   logErrorMiddleware,
@@ -68,6 +69,7 @@ app.use("/shopitem", shopitem);
 app.use("/sell", createshop);
 app.use("/crud", crudshop);
 app.use("/order", shoporderhistory);
+app.use("/paymentstatement", paymentstatement);
 app.use(forbiddenApiCall);
 
 // error handling
