@@ -4,11 +4,18 @@ const {
   rejectedEmployee,
   removeEmployee,
   updateEmployee,
+  getEmployeeDetails,
 } = require("../../database/shop/crudemployee");
 const code = require("../../error/code");
 
 const router = require("express").Router();
 
+// required permission(owner)
+router.get("/", async (req, res, next) => {
+  const { shopinfoid } = req.query;
+  const data = await getEmployeeDetails(shopinfoid);
+  return res.status(code.OK).json(data);
+});
 // add parters and staff
 // Todo : invitation send
 // required permission(owner)

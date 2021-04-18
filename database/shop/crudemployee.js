@@ -1,5 +1,27 @@
 const { ObjectID } = require("mongodb");
 const { userCollection, shopInfoCollection } = require("../connect");
+
+const getEmployeeDetails = async function (shopinfoid) {
+  const query1 = {
+    shopinfoid,
+  };
+  const shopinfo = await shopInfoCollection.findOne(query1);
+  let data = [];
+  for (const employee of shopinfo.employee) {
+    const query2 = {
+      _id: employee.userid,
+    };
+    const user = await userCollection.findOne(query2);
+    const arrayData = {
+      name: user.firstname + user.lastname,
+      phonenumber: user.phonenumber,
+      jobtitle: employee.jobtitle,
+    };
+    data.push(arrayData);
+  }
+  return data;
+};
+
 // Todo : we should sent an invitation to that phone number
 const addEmployee = async function (shopinfoid, jobtitle, phonenumber) {
   const query1 = {
@@ -144,6 +166,7 @@ const updateEmployee = async function (shopinfoid, userid, jobtitle) {
 };
 
 module.exports = {
+  getEmployeeDetails,
   addEmployee,
   acceptedEmployee,
   rejectedEmployee,

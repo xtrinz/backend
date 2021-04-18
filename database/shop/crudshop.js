@@ -5,6 +5,26 @@ const {
 } = require("../connect");
 const { Api409Error } = require("../../error/errorclass/errorclass");
 
+const getShops = async function (user) {
+  const query = {
+    _id: {
+      $in: user.shopinfoids,
+    },
+  };
+  let shopinfo = await shopInfoCollection.find(query);
+  let data = [];
+  for await (const shop of shopinfo) {
+    const arrayData = {
+      shopname: shop.shopname,
+      location: shop.location,
+      shopimage: shop.shopimage,
+      shopinfoid: shop._id,
+    };
+    data.push(arrayData);
+  }
+  return data;
+};
+
 const getProductInfoFromUniqueid = async function (shopinfoid, uniqueid) {
   const query1 = {
     _id: shopinfoid,
@@ -391,6 +411,7 @@ const updateDetails = async function (
 };
 
 module.exports = {
+  getShops,
   existUniqueidProduct,
   addProduct,
   getProductDataToRemove,

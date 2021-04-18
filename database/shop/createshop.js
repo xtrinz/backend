@@ -3,6 +3,7 @@ const { tempShopInfoCollection, userCollection } = require("../connect");
 const createShop = async function (
   user,
   shopname,
+  shopimage,
   location,
   brandname,
   shoptype,
@@ -19,6 +20,7 @@ const createShop = async function (
   const insertOptions = {
     shopname,
     location,
+    shopimage,
     brandname,
     shoptype,
     certificates,
