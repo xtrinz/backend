@@ -10,6 +10,7 @@ router.post("/create", async (req, res, next) => {
   const {
     user,
     shopname,
+    shopimage,
     location,
     brandname,
     shoptype,
@@ -20,6 +21,7 @@ router.post("/create", async (req, res, next) => {
   await createShop(
     user,
     shopname,
+    shopimage,
     location,
     brandname,
     shoptype,
