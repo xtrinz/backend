@@ -81,4 +81,6 @@ router.post("/create-payment-intent", verifySessionToken, async (req, res) => {
   }
 });
 
+// Todo : we should handle cash on delivery
+
 module.exports = router;

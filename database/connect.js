@@ -18,6 +18,7 @@ const purchaseHistoryCollection = database.collection("purchasehistory");
 const temporaryUserCollection = database.collection("temporaryuser");
 const sessionCollection = database.collection("session");
 const tempShopInfoCollection = database.collection("tempshopinfo");
+const shopOrderHistoryCollection = database.collection("shoporderhistory");
 
 module.exports = {
   client,
@@ -30,4 +31,5 @@ module.exports = {
   temporaryUserCollection,
   sessionCollection,
   tempShopInfoCollection,
+  shopOrderHistoryCollection,
 };
