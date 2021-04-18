@@ -1,4 +1,8 @@
-const { productsCollection, shopInfoCollection } = require("../connect");
+const {
+  productsCollection,
+  shopInfoCollection,
+  userCollection,
+} = require("../connect");
 const { Api409Error } = require("../../error/errorclass/errorclass");
 
 const getProductInfoFromUniqueid = async function (shopinfoid, uniqueid) {

@@ -12,9 +12,7 @@ const {
   getSingleProductFromShop,
   getSingleProductByUniqueId,
 } = require("../../database/shop/crudshop");
-
 const router = require("express").Router();
-
 // get all products in a shop
 router.get("/:shopinfoid", async (req, res, next) => {
   const { shopinfoid } = req.params;

@@ -23,6 +23,7 @@ const webhook = require("./routes/stripe/webhook");
 // routes shop
 const createshop = require("./routes/shop/createshop");
 const crudshop = require("./routes/shop/crudshop");
+const crudemployee = require("./routes/shop/crudemployee");
 const shoporderhistory = require("./routes/shop/shoporderhistory");
 const paymentstatement = require("./routes/shop/paymentstatement");
 
@@ -67,7 +68,8 @@ app.use("/search", search); // Todo : Incomplete. we need a proper algorithm (el
 app.use("/shopitem", shopitem);
 
 app.use("/sell", createshop);
-app.use("/crud", crudshop);
+app.use("/crudshop", crudshop);
+app.use("/crudemployee", crudemployee);
 app.use("/order", shoporderhistory);
 app.use("/paymentstatement", paymentstatement);
 app.use(forbiddenApiCall);
