@@ -1,5 +1,5 @@
 // Definition of the machine
-const {state, event}	= require("./models")
+const {state, events}	= require("./models")
 const method		= require("./methods")
 const Machine 		=
 {
@@ -7,14 +7,14 @@ const Machine 		=
 	{
 		  state.None 				:
 		{
-			  event.EventInitiationByUser 		: method.CargoInitiatedByUser
+			  events.EventInitiationByUser 		: method.CargoInitiatedByUser
 		}
 		, state.CargoInitiated 		:
 		{ 
-			  event.EventCancellationByUser 	: method.CargoCancelledByUser
-			, event.EventRejectionByShop 		: method.OrderRejectedByShop // #02
-			, event.EventAcceptanceTimeout		: method.OrderAcceptanceTimeout
-			, event.EventAcceptanceByShop		: method.OrderAcceptedByShop
+			  events.EventCancellationByUser 	: method.CargoCancelledByUser
+			, events.EventRejectionByShop 		: method.OrderRejectedByShop // #02
+			, events.EventAcceptanceTimeout		: method.OrderAcceptanceTimeout
+			, events.EventAcceptanceByShop		: method.OrderAcceptedByShop
 		}
 		, state.CargoCancelled 		:
 		{
@@ -32,10 +32,10 @@ const Machine 		=
 
 		, state.OrderAccepted 		:
 		{ 
-			  event.EventIgnoranceByAgent 		: method.TransitIgnoredByAgent
-			, event.EventRespTimeoutByAgent 	: method.TransitAcceptanceTimeout
-			, event.EventRejectionByShop 		: method.OrderRejectedByShop// handler separately #02
-			, event.EventAcceptanceByAgent 		: method.TransitAcceptedByAgent
+			  events.EventIgnoranceByAgent 		: method.TransitIgnoredByAgent
+			, events.EventRespTimeoutByAgent 	: method.TransitAcceptanceTimeout
+			, events.EventRejectionByShop 		: method.OrderRejectedByShop// handler separately #02
+			, events.EventAcceptanceByAgent 	: method.TransitAcceptedByAgent
 		}
 
 		, state.TransitIgnored 		:
@@ -50,15 +50,15 @@ const Machine 		=
 
 		, state.TransitAccepted 	:
 		{
-			  event.EventRejectionByAgent 		: method.TransitRejectedByAgent // handle separately?#01 
-			, event.EventRejectionByShop  		: method.CargoCancelledByUser
-			, event.EventDespatchmentByShop 	: method.OrderDespatchedByShop
+			  events.EventRejectionByAgent 		: method.TransitRejectedByAgent // handle separately?#01 
+			, events.EventRejectionByShop  		: method.CargoCancelledByUser
+			, events.EventDespatchmentByShop 	: method.OrderDespatchedByShop
 		}
 
 		, state.OrderDespatched 	:
 		{
-			  event.EventRejectionByAgent 		: method.TransitRejectedByAgent // #01 
-			, event.EventCompletionByAgent 		: method.TranistCompleteByAgent
+			  events.EventRejectionByAgent 		: method.TransitRejectedByAgent // #01 
+			, events.EventCompletionByAgent 	: method.TranistCompleteByAgent
 		}
 
 		, state.TransitRejected 	:
@@ -72,10 +72,7 @@ const Machine 		=
 		}
 	}
 
-	, GetHandler: function (present_state, event) 
-	{ 
-		return this.Handler.present_state.event 
-	}
+	, GetHandler: (state, events) => { return this.Handler.state.events }
 
 	, Transition: function (ctxt)
 	{

@@ -44,7 +44,7 @@ module.exports =
 	},
 
 		// Types of events triggered by endpoints. 
-	event:
+	events:
 	{
 		// EventInitiationByUser 	: event cargo initiated by user
 		, EventInitiationByUser		: 'EventInitiationByUser'
