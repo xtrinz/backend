@@ -72,7 +72,7 @@ const Machine 		=
 		}
 	}
 
-	, GetHandler: (state, events) => { return this.Handler.state.events }
+	, GetHandler: (state, event_) => { return this.Handler.state.event_ }
 
 	, Transition: function (ctxt)
 	{
