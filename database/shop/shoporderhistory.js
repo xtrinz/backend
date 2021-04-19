@@ -1,3 +1,5 @@
+const { isObjectEmpty, isArrayEmpty } = require("../../common/utils");
+const { Api404Error } = require("../../error/errorclass/errorclass");
 const {
   shopInfoCollection,
   shopOrderHistoryCollection,
@@ -8,6 +10,9 @@ const dataForShopOrderHistory = async function (shopinfoid) {
     _id: shopinfoid,
   };
   const shopinfo = await shopInfoCollection.findOne(query1);
+  if (isObjectEmpty(shopinfo)) {
+    throw new Api404Error();
+  }
   const query2 = {
     _id: {
       $in: shopinfo.shoporderhistoryid,
@@ -17,8 +22,9 @@ const dataForShopOrderHistory = async function (shopinfoid) {
   const shoporderhistory = await shopOrderHistoryCollection.find(query2);
   for await (const order of shoporderhistory) {
     const arrayData = {
-      Status: order.orderstatus,
-      Count: order.products.length,
+      orderid: order._id,
+      status: order.orderstatus,
+      count: order.products.length,
       date: order.createddate, // we need date and time
     };
     data.push(arrayData);
@@ -33,24 +39,36 @@ const dataForOrderStatusPage = async function (shopinfoid, orderid) {
   };
   let dataForId = [];
   const shoporderhistory = await shopOrderHistoryCollection.findOne(query);
-  for (const products of shoporderhistory) {
-    const arrayData = {
-      shopId: products.shopinfoid,
-      shopName: products.shopname,
+  if (isObjectEmpty(shoporderhistory)) {
+    throw new Api404Error();
+  }
+  for (const products of shoporderhistory.products) {
+    let arrayData = {
+      shopid: products.shopinfoid,
+      shopname: products.shopname,
       productid: products.productsid,
-      productName: products.productname,
-      productImage: products.productimage,
+      productname: products.productname,
+      productimage: products.productimage,
       productprice: products.productprice,
       quantity: products.quantity,
-      productColor: products.productcolor,
       uniqueId: products.uniqueid,
-      variation: products.variation,
     };
+    if (isArrayEmpty(variationtype)) {
+      dataForId.push(arrayData);
+      continue;
+    }
+    if (variationtype.indexOf("color")) {
+      arrayData = {
+        ...arrayData,
+        productcolor: products.productcolor,
+        variationtype: products.type,
+      };
+    }
     dataForId.push(arrayData);
   }
   const returnData = {
     dataForId,
-    totalPrice: shoporderhistory.totalprice,
+    totalprice: shoporderhistory.totalprice,
     status: shoporderhistory.orderstatus,
   };
   return returnData;

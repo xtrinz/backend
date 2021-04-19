@@ -1,3 +1,4 @@
+const { isArrayEmpty } = require("../../common/utils");
 const { tempShopInfoCollection, userCollection } = require("../connect");
 
 const createShop = async function (
@@ -40,23 +41,28 @@ const createShop = async function (
 };
 
 const verificationstatus = async function (user) {
-  const tempshopinfoids = user.tempshopinfoids;
+  if (isArrayEmpty(user.tempshopinfoids)) {
+    return;
+  }
+  const query = {
+    _id: {
+      $in: user.tempshopinfoids,
+    },
+  };
+  const tempshopinfo = await tempShopInfoCollection.find(query);
   let data = [];
-  for (const tempshopinfoid of tempshopinfoids) {
-    const query = {
-      tempshopinfoid,
-    };
-    const tempshopinfo = await tempShopInfoCollection.findOne(query);
+  for await (const tempshop of tempshopinfo) {
     const arrayData = {
-      shopname: tempshopinfo.shopname,
+      shopname: tempshop.shopname,
+      shopimage: tempshop.shopimage,
       location: {
-        addressline: tempshopinfo.location.addressline,
-        feature: tempshopinfo.location.feature,
-        landmark: tempshopinfo.location.landmark,
+        addressline: tempshop.location.addressline,
+        feature: tempshop.location.feature,
+        landmark: tempshop.location.landmark,
       },
-      shoptype: tempshopinfo.shoptype,
-      brandname: tempshopinfo.brandname,
-      verificationstatus: tempshopinfo.verificationstatus,
+      shoptype: tempshop.shoptype,
+      brandname: tempshop.brandname,
+      verificationstatus: tempshop.verificationstatus,
     };
     data.push(arrayData);
   }

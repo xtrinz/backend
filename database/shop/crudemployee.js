@@ -1,4 +1,9 @@
 const { ObjectID } = require("mongodb");
+const { isObjectEmpty } = require("../../common/utils");
+const {
+  Api404Error,
+  Api409Error,
+} = require("../../error/errorclass/errorclass");
 const { userCollection, shopInfoCollection } = require("../connect");
 
 const getEmployeeDetails = async function (shopinfoid) {
@@ -6,13 +11,26 @@ const getEmployeeDetails = async function (shopinfoid) {
     shopinfoid,
   };
   const shopinfo = await shopInfoCollection.findOne(query1);
+  if (isObjectEmpty(shopinfo)) {
+    throw new Api404Error("Not found", "Not found");
+  }
   let data = [];
   for (const employee of shopinfo.employee) {
     const query2 = {
       _id: employee.userid,
     };
     const user = await userCollection.findOne(query2);
+    if (isObjectEmpty(user)) {
+      const options3 = {
+        $pull: {
+          employee: { userid: employee.userid },
+        },
+      };
+      await shopInfoCollection.updateOne(query1, options3);
+      continue;
+    }
     const arrayData = {
+      userid: user._id,
       name: user.firstname + user.lastname,
       phonenumber: user.phonenumber,
       jobtitle: employee.jobtitle,
@@ -28,8 +46,11 @@ const addEmployee = async function (shopinfoid, jobtitle, phonenumber) {
     phonenumber,
   };
   const user = await userCollection.findOne(query1);
-  if (!user) {
-    // send error
+  if (isObjectEmpty(user)) {
+    throw new Api404Error(
+      "Not found",
+      `user with ${phonenumber} dosn't have an account`
+    );
   }
   const query2 = {
     $and: [
@@ -43,8 +64,11 @@ const addEmployee = async function (shopinfoid, jobtitle, phonenumber) {
     ],
   };
   const shopinfo = await shopInfoCollection.findOne(query2);
-  if (shopinfo) {
-    // send invitation already send or something like that
+  if (!isObjectEmpty(shopinfo)) {
+    throw new Api409Error(
+      "Conflict",
+      `Invitation Already send to this ${phonenumber}`
+    );
   }
   const query3 = {
     _id: user._id,
@@ -83,6 +107,9 @@ const acceptedEmployee = async function (shopinfoid, user, invitepassword) {
     tempemployee: { $elemMatch: { userid: user._id } },
   };
   const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  if (isObjectEmpty(shopinfo)) {
+    throw new Api404Error("Not found", "Not found");
+  }
   const options2 = {
     $pull: {
       tempemployee: { userid: user._id },

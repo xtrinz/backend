@@ -1,3 +1,5 @@
+const { isObjectEmpty, isArrayEmpty } = require("../../common/utils");
+const { Api404Error } = require("../../error/errorclass/errorclass");
 const {
   shopInfoCollection,
   shopOrderHistoryCollection,
@@ -8,6 +10,12 @@ const getPaymentStatement = async function (shopinfoid) {
     _id: shopinfoid,
   };
   const shopinfo = await shopInfoCollection.findOne(query1);
+  if (isObjectEmpty(shopinfo)) {
+    throw new Api404Error();
+  }
+  if (isArrayEmpty(shopinfo.shoporderhistoryid)) {
+    return;
+  }
   const query2 = {
     _id: {
       $in: shopinfo.shoporderhistoryid,
@@ -46,6 +54,12 @@ const getPendingPaymentStatement = async function (shopinfoid) {
     _id: shopinfoid,
   };
   const shopinfo = await shopInfoCollection.findOne(query1);
+  if (isObjectEmpty(shopinfo)) {
+    throw new Api404Error();
+  }
+  if (isArrayEmpty(shopinfo.shoporderhistoryid)) {
+    return;
+  }
   const query2 = {
     _id: {
       $in: shopinfo.shoporderhistoryid,
@@ -70,6 +84,12 @@ const getSuccessPaymentStatement = async function (shopinfoid) {
     _id: shopinfoid,
   };
   const shopinfo = await shopInfoCollection.findOne(query1);
+  if (isObjectEmpty(shopinfo)) {
+    throw new Api404Error();
+  }
+  if (isArrayEmpty(shopinfo.shoporderhistoryid)) {
+    return;
+  }
   const query2 = {
     _id: {
       $in: shopinfo.shoporderhistoryid,

@@ -3,21 +3,33 @@ const {
   shopInfoCollection,
   userCollection,
 } = require("../connect");
-const { Api409Error } = require("../../error/errorclass/errorclass");
+const {
+  Api409Error,
+  Api404Error,
+} = require("../../error/errorclass/errorclass");
+const { isArrayEmpty, isObjectEmpty } = require("../../common/utils");
 
 const getShops = async function (user) {
+  if (isArrayEmpty(user.shopinfoids)) {
+    return;
+  }
   const query = {
     _id: {
       $in: user.shopinfoids,
     },
   };
-  let shopinfo = await shopInfoCollection.find(query);
+  const shopinfo = await shopInfoCollection.find(query);
   let data = [];
   for await (const shop of shopinfo) {
     const arrayData = {
       shopname: shop.shopname,
-      location: shop.location,
+      location: {
+        addressline: shop.location.addressline,
+        feature: shop.location.feature,
+        landmark: shop.location.landmark,
+      },
       shopimage: shop.shopimage,
+      brandname: shop.brandname,
       shopinfoid: shop._id,
     };
     data.push(arrayData);
@@ -31,28 +43,18 @@ const getProductInfoFromUniqueid = async function (shopinfoid, uniqueid) {
   };
   const options1 = {
     $projection: {
-      products: 1,
+      productids: 1,
     },
   };
   const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  if (isObjectEmpty(shopinfo)) {
+    throw Api404Error("Not found", "Not Found");
+  }
   const query2 = {
-    $and: [
-      {
-        _id: {
-          $in: shopinfo.products,
-        },
-      },
-      {
-        $or: [
-          {
-            "productvariations.color.uniqueid": uniqueid,
-          },
-          {
-            "productvariations.default.uniqueid": uniqueid,
-          },
-        ],
-      },
-    ],
+    _id: {
+      $in: shopinfo.productids,
+    },
+    "productvariations.uniqueid": uniqueid,
   };
   const products = await productsCollection.findOne(query2);
   return products;
@@ -64,25 +66,29 @@ const getAllProductInShop = async function (shopinfoid) {
   };
   const options1 = {
     $projection: {
-      products: 1,
+      productids: 1,
       shopname: 1,
     },
   };
   const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  if (isObjectEmpty(shopinfo)) {
+    throw Api404Error("Not found", "Not Found");
+  }
+  if (isArrayEmpty(shopinfo.productids)) {
+    return;
+  }
   const query2 = {
     _id: {
-      $in: shopinfo.products,
+      $in: shopinfo.productids,
     },
   };
-  let products = await productsCollection.find(query2);
-  products = products.toArray();
+  const products = await productsCollection.find(query2);
   let data = [];
-  for (const product of products) {
+  for await (const product of products) {
     const arrayData = {
       shopname: shopinfo.shopname,
       productname: product.productname,
-      productimage: product.productimage,
-      productvariations: product.productvariations,
+      productvariations: product.productvariations, // we need a default setup. which variation should show by default
     };
     data.push(arrayData);
   }
@@ -99,15 +105,20 @@ const getSingleProductFromShop = async function (shopinfoid, productid) {
     },
   };
   const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  if (isObjectEmpty(shopinfo)) {
+    throw Api404Error("Not found", "Not Found");
+  }
   const query2 = {
     _id: productid,
     shopinfoid: shopinfoid,
   };
   const products = await productsCollection.findOne(query2);
+  if (isObjectEmpty(products)) {
+    throw Api404Error("Not found", "Not Found");
+  }
   const returnData = {
     shopname: shopinfo.shopname,
     productname: products.productname,
-    productimage: products.productimage,
     productvariations: products.productvariations,
     producttype: products.producttype,
     gstcategory: products.gstcategory,
@@ -122,44 +133,53 @@ const getSingleProductFromShop = async function (shopinfoid, productid) {
 
 const getSingleProductByUniqueId = async function (shopinfoid, uniqueid) {
   const products = await getProductInfoFromUniqueid(shopinfoid, uniqueid);
-  let quantity, productcolor, productimage, variation;
-  if (products.productvariations.default.uniqueid) {
-    quantity = products.productvariations.default.quantity;
-    productimage = products.productvariations.default.productimage;
-    productcolor = products.productvariations.default.productcolor; // none
-    variation = "default";
-  } else if (products.productvariations.color) {
-    for (const varient of products.productvariations.color) {
-      if (varient.uniqueid == uniqueid) {
-        quantity = products.productvariations.color.quantity;
-        productimage = products.productvariations.color.productimage;
-        productcolor = products.productvariations.color.productcolor;
-        variation = "color";
+  if (isObjectEmpty(products)) {
+    throw new Api404Error("Not found", "Not found");
+  }
+  let quantity, productcolor, productimage, variationtype, productprice;
+  const variation = products.productvariations;
+  for (const varient of variation) {
+    if (varient.uniqueid == uniqueid) {
+      quantity = varient.quantity;
+      productprice = varient.productprice;
+      productimage = varient.productimage;
+      variationtype = varient.type;
+      if (isArrayEmpty(variationtype)) {
+        break;
       }
+      if (variationtype.indexOf("color")) {
+        productcolor = varient.productcolor;
+      }
+      break;
     }
   }
-  const returnData = {
+  let returnData = {
     productname: products.productname,
+    productprice,
     productimage,
-    productcolor,
     quantity,
-    variation,
     uniqueid,
     productid: products._id,
     producttype: products.producttype,
     gstcategory: products.gstcategory,
     warrentycard: products.warrentycard,
     extradiscount: products.extradiscount,
-    keywords: products.keywords,
     productdescription: products.productdescription,
     productdetails: products.productdetails,
+    keywords: products.keywords,
   };
+  if (isArrayEmpty(variationtype)) {
+    return returnData;
+  }
+  if (variationtype.indexOf("color")) {
+    returnData = { ...returnData, productcolor, variationtype };
+  }
   return returnData;
 };
 
 const existUniqueidProduct = async function (shopinfoid, uniqueid) {
   const products = await getProductInfoFromUniqueid(shopinfoid, uniqueid);
-  if (products) {
+  if (!isObjectEmpty(products)) {
     throw Api409Error("Conflict", "Product with This UniqueId Already Exist");
   }
 };
@@ -176,17 +196,16 @@ const addProduct = async function (
   extradiscount,
   keywords
 ) {
+  // check product with this unique id already exist
   let uniqueidArray = [];
-  if (productvariations.default) {
-    uniqueidArray.push(productvariations.default.uniqueid);
-  } else if (productvariations.color) {
-    for (const varient of productvariations.color) {
+  if (!isArrayEmpty(productvariations)) {
+    for (const varient of productvariations) {
       uniqueidArray.push(varient.uniqueid);
     }
   }
   for (const uniqueId of uniqueidArray) {
     const products = await getProductInfoFromUniqueid(shopinfoid, uniqueId);
-    if (products) {
+    if (!isObjectEmpty(products)) {
       throw Api409Error(
         "Conflict",
         `Product with ${uniqueId} UniqueId Already Exist`
@@ -211,7 +230,7 @@ const addProduct = async function (
   };
   const options = {
     $push: {
-      products: products.insertedId,
+      productids: products.insertedId,
     },
   };
   await shopInfoCollection.updateOne(query, options);
@@ -219,81 +238,75 @@ const addProduct = async function (
 
 const getProductDataToRemove = async function (shopinfoid, uniqueid) {
   const products = await getProductInfoFromUniqueid(shopinfoid, uniqueid);
-  let quantity, productcolor, productimage, variation;
-  if (products.productvariations.default.uniqueid) {
-    quantity = products.productvariations.default.quantity;
-    productimage = products.productvariations.default.productimage;
-    productcolor = products.productvariations.default.productcolor;
-    variation = "default";
-  } else if (products.productvariations.color) {
-    for (const varient of products.productvariations.color) {
-      if (varient.uniqueid == uniqueid) {
-        quantity = products.productvariations.color.quantity;
-        productimage = products.productvariations.color.productimage;
-        productcolor = products.productvariations.color.productcolor;
-        variation = "color";
+  if (isObjectEmpty(products)) {
+    throw new Api404Error("Not found", "Not found");
+  }
+  let quantity, productcolor, productimage, variationtype, productprice;
+  const variation = products.productvariations;
+  for (const varient of variation) {
+    if (varient.uniqueid == uniqueid) {
+      quantity = varient.quantity;
+      productprice = varient.productprice;
+      productimage = varient.productimage;
+      variationtype = varient.type;
+      if (isArrayEmpty(variationtype)) {
+        break;
       }
+      if (variationtype.indexOf("color")) {
+        productcolor = varient.productcolor;
+      }
+      break;
     }
   }
-  const returnData = {
+  let returnData = {
     productname: products.productname,
     productimage,
-    productcolor,
     quantity,
-    variation,
+    productprice,
     productid: products._id,
   };
+  if (isArrayEmpty(variationtype)) {
+    return returnData;
+  }
+  if (variationtype.indexOf("color")) {
+    returnData = { ...returnData, productcolor, variationtype };
+  }
   return returnData;
 };
 
-const removeProduct = async function (
-  productid,
-  uniqueid,
-  remquantity,
-  variation
-) {
-  let query, options;
-  if (variation == "default") {
-    query = {
-      _id: productid,
-      "productvariations.default.uniqueid": uniqueid,
-    };
-    options = {
-      $inc: {
-        "productvariations.default.quantity": -remquantity,
-      },
-    };
-  } else if (variation == "color") {
-    query = {
-      _id: productid,
-      "productvariations.color.uniqueid": uniqueid,
-    };
-    options = {
-      $inc: {
-        "productvariations.color.$.quantity": -remquantity,
-      },
-    };
-  }
+const removeProduct = async function (productid, uniqueid, remquantity) {
+  const query = {
+    _id: productid,
+    "productvariations.uniqueid": uniqueid,
+  };
+  const options = {
+    $inc: {
+      "productvariations.$.quantity": -remquantity,
+    },
+  };
   await productsCollection.updateOne(query, options);
 };
 
 const getProductDataToUpdate = async function (shopinfoid, uniqueid, ch) {
   const products = await getProductInfoFromUniqueid(shopinfoid, uniqueid);
-  let quantity, productcolor, productimage, variation;
-  if (products.productvariations.default) {
-    quantity = products.productvariations.default.quantity;
-    productimage = products.productvariations.default.productimage;
-    productcolor = products.productvariations.default.productcolor; // none
-    variation = "default";
-  } else if (products.productvariations.color) {
-    for (const varient of products.productvariations.color) {
-      if (varient.uniqueid == uniqueid) {
-        quantity = varient.quantity;
-        productimage = varient.productimage;
-        productcolor = varient.productcolor;
-        variation = "color";
+  if (isObjectEmpty(products)) {
+    throw new Api404Error("Not found", "Not found");
+  }
+  let quantity, productcolor, productimage, variationtype, productprice;
+  const variation = products.productvariations;
+  for (const varient of variation) {
+    if (varient.uniqueid == uniqueid) {
+      quantity = varient.quantity;
+      productprice = varient.productprice;
+      productimage = varient.productimage;
+      variationtype = varient.type;
+      if (isArrayEmpty(variationtype)) {
         break;
       }
+      if (variationtype.indexOf("color")) {
+        productcolor = varient.productcolor;
+      }
+      break;
     }
   }
   let returnData;
@@ -302,92 +315,83 @@ const getProductDataToUpdate = async function (shopinfoid, uniqueid, ch) {
     returnData = {
       productname: products.productname,
       productimage,
-      productcolor,
+      productprice,
       quantity,
-      variation,
       uniqueid,
       productid: products._id,
       producttype: products.producttype,
       gstcategory: products.gstcategory,
-      warrentycard: products.warrentycard,
       extradiscount: products.extradiscount,
-      keywords: products.keywords,
     };
   } else if (ch == "details") {
     returnData = {
       productname: products.productname,
       productimage,
-      productcolor,
-      variation,
       uniqueid,
       productid: products._id,
       productdescription: products.productdescription,
       productdetails: products.productdetails,
+      warrentycard: products.warrentycard,
+      keywords: products.keywords,
     };
   } else if (ch == "uniqueid") {
     returnData = {
       productname: products.productname,
       productimage,
-      productcolor,
-      variation,
       uniqueid,
       productid: products._id,
     };
   }
+  if (isArrayEmpty(variationtype)) {
+    return returnData;
+  }
+  if (variationtype.indexOf("color")) {
+    returnData = { ...returnData, productcolor, variationtype };
+  }
   return returnData;
 };
 
-const updateUniqueId = async function (
-  olduniqueid,
-  newuniqueid,
-  productid,
-  variation
-) {
-  let query, options;
-  if (variation == "default") {
-    query = {
-      _id: productid,
-      "productvariations.default.uniqueid": olduniqueid,
-    };
-    options = {
-      $set: {
-        "productvariations.default.uniqueid": newuniqueid,
-      },
-    };
-  } else if (variation == "color") {
-    query = {
-      _id: productid,
-      "productvariations.color.uniqueid": olduniqueid,
-    };
-    options = {
-      $set: {
-        "productvariations.color.$.uniqueid": newuniqueid,
-      },
-    };
-  }
+const updateUniqueId = async function (olduniqueid, newuniqueid, productid) {
+  const query = {
+    _id: productid,
+    "productvariations.uniqueid": olduniqueid,
+  };
+  const options = {
+    $set: {
+      "productvariations.$.uniqueid": newuniqueid,
+    },
+  };
   await productsCollection.updateOne(query, options);
 };
 
 const updateBasic = async function (
   productid,
+  uniqueid,
   productname,
+  productimage,
+  productprice,
+  variationtype,
+  productcolor,
+  quantity,
   producttype,
   gstcategory,
-  warrentycard,
-  extradiscount,
-  keywords
+  extradiscount
 ) {
   const query = {
     _id: productid,
+    "productvariations.uniqueid": uniqueid,
   };
   const options = {
     $set: {
       productname,
       producttype,
       gstcategory,
-      warrentycard,
       extradiscount,
-      keywords,
+      "productvariations.$.productimage": productimage,
+      "productvariations.$.productprice": productprice,
+      "productvariations.$.productcolor": productcolor,
+      "productvariations.$.type": variationtype,
+      "productvariations.$.quantity": quantity,
     },
   };
   await productsCollection.updateOne(query, options);
@@ -396,7 +400,9 @@ const updateBasic = async function (
 const updateDetails = async function (
   productid,
   productdescription,
-  productdetails
+  productdetails,
+  warrentycard,
+  keywords
 ) {
   const query = {
     _id: productid,
@@ -405,6 +411,8 @@ const updateDetails = async function (
     $set: {
       productdescription,
       productdetails,
+      warrentycard,
+      keywords,
     },
   };
   await productsCollection.updateOne(query, options);
