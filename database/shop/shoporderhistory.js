@@ -1,15 +1,15 @@
 const { isObjectEmpty, isArrayEmpty } = require("../../common/utils");
 const { Api404Error } = require("../../error/errorclass/errorclass");
 const {
-  shopInfoCollection,
-  shopOrderHistoryCollection,
+  shops,
+  orders,
 } = require("../connect");
 
 const dataForShopOrderHistory = async function (shopinfoid) {
   const query1 = {
     _id: shopinfoid,
   };
-  const shopinfo = await shopInfoCollection.findOne(query1);
+  const shopinfo = await shops.findOne(query1);
   if (isObjectEmpty(shopinfo)) {
     throw new Api404Error();
   }
@@ -19,7 +19,7 @@ const dataForShopOrderHistory = async function (shopinfoid) {
     },
   };
   let data = [];
-  const shoporderhistory = await shopOrderHistoryCollection.find(query2);
+  const shoporderhistory = await orders.find(query2);
   for await (const order of shoporderhistory) {
     const arrayData = {
       orderid: order._id,
@@ -38,7 +38,7 @@ const dataForOrderStatusPage = async function (shopinfoid, orderid) {
     shopinfoid: shopinfoid,
   };
   let dataForId = [];
-  const shoporderhistory = await shopOrderHistoryCollection.findOne(query);
+  const shoporderhistory = await orders.findOne(query);
   if (isObjectEmpty(shoporderhistory)) {
     throw new Api404Error();
   }

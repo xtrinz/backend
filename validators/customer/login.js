@@ -1,5 +1,5 @@
 const { body, oneOf } = require("express-validator");
-const { userCollection } = require("../../database/connect");
+const { users } = require("../../database/connect");
 const { validationError } = require("../../error/errorhandlers");
 
 const v1 = body("phonenumber", "401:Your username or password is incorrect")
@@ -21,7 +21,7 @@ const v1 = body("phonenumber", "401:Your username or password is incorrect")
         password: 1,
       },
     };
-    const user = await userCollection.findOne(query, options);
+    const user = await users.findOne(query, options);
     if (!user) {
       return Promise.reject("401:Your username or password is incorrect");
     }
@@ -47,7 +47,7 @@ const v2 = body("email", "401:Your username or password is incorrect")
         password: 1,
       },
     };
-    const user = await userCollection.findOne(query, options);
+    const user = await users.findOne(query, options);
     if (!user) {
       return Promise.reject("401:Your username or password is incorrect");
     }

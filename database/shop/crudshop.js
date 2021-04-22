@@ -1,7 +1,7 @@
 const {
-  productsCollection,
-  shopInfoCollection,
-  userCollection,
+  products,
+  shops,
+  users,
 } = require("../connect");
 const {
   Api409Error,
@@ -18,7 +18,7 @@ const getShops = async function (user) {
       $in: user.shopinfoids,
     },
   };
-  const shopinfo = await shopInfoCollection.find(query);
+  const shopinfo = await shops.find(query);
   let data = [];
   for await (const shop of shopinfo) {
     const arrayData = {
@@ -46,7 +46,7 @@ const getProductInfoFromUniqueid = async function (shopinfoid, uniqueid) {
       productids: 1,
     },
   };
-  const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  const shopinfo = await shops.findOne(query1, options1);
   if (isObjectEmpty(shopinfo)) {
     throw Api404Error("Not found", "Not Found");
   }
@@ -56,7 +56,7 @@ const getProductInfoFromUniqueid = async function (shopinfoid, uniqueid) {
     },
     "productvariations.uniqueid": uniqueid,
   };
-  const products = await productsCollection.findOne(query2);
+  const products = await products.findOne(query2);
   return products;
 };
 
@@ -70,7 +70,7 @@ const getAllProductInShop = async function (shopinfoid) {
       shopname: 1,
     },
   };
-  const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  const shopinfo = await shops.findOne(query1, options1);
   if (isObjectEmpty(shopinfo)) {
     throw Api404Error("Not found", "Not Found");
   }
@@ -82,7 +82,7 @@ const getAllProductInShop = async function (shopinfoid) {
       $in: shopinfo.productids,
     },
   };
-  const products = await productsCollection.find(query2);
+  const products = await products.find(query2);
   let data = [];
   for await (const product of products) {
     const arrayData = {
@@ -104,7 +104,7 @@ const getSingleProductFromShop = async function (shopinfoid, productid) {
       shopname: 1,
     },
   };
-  const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  const shopinfo = await shops.findOne(query1, options1);
   if (isObjectEmpty(shopinfo)) {
     throw Api404Error("Not found", "Not Found");
   }
@@ -112,7 +112,7 @@ const getSingleProductFromShop = async function (shopinfoid, productid) {
     _id: productid,
     shopinfoid: shopinfoid,
   };
-  const products = await productsCollection.findOne(query2);
+  const products = await products.findOne(query2);
   if (isObjectEmpty(products)) {
     throw Api404Error("Not found", "Not Found");
   }
@@ -224,7 +224,7 @@ const addProduct = async function (
     keywords,
     shopinfoid,
   };
-  const products = await productsCollection.insertOne(insertOptions);
+  const products = await products.insertOne(insertOptions);
   const query = {
     _id: shopinfoid,
   };
@@ -233,7 +233,7 @@ const addProduct = async function (
       productids: products.insertedId,
     },
   };
-  await shopInfoCollection.updateOne(query, options);
+  await shops.updateOne(query, options);
 };
 
 const getProductDataToRemove = async function (shopinfoid, uniqueid) {
@@ -284,7 +284,7 @@ const removeProduct = async function (productid, uniqueid, remquantity) {
       "productvariations.$.quantity": -remquantity,
     },
   };
-  await productsCollection.updateOne(query, options);
+  await products.updateOne(query, options);
 };
 
 const getProductDataToUpdate = async function (shopinfoid, uniqueid, ch) {
@@ -361,7 +361,7 @@ const updateUniqueId = async function (olduniqueid, newuniqueid, productid) {
       "productvariations.$.uniqueid": newuniqueid,
     },
   };
-  await productsCollection.updateOne(query, options);
+  await products.updateOne(query, options);
 };
 
 const updateBasic = async function (
@@ -394,7 +394,7 @@ const updateBasic = async function (
       "productvariations.$.quantity": quantity,
     },
   };
-  await productsCollection.updateOne(query, options);
+  await products.updateOne(query, options);
 };
 
 const updateDetails = async function (
@@ -415,7 +415,7 @@ const updateDetails = async function (
       keywords,
     },
   };
-  await productsCollection.updateOne(query, options);
+  await products.updateOne(query, options);
 };
 
 module.exports = {

@@ -4,13 +4,13 @@ const {
   Api404Error,
   Api409Error,
 } = require("../../error/errorclass/errorclass");
-const { userCollection, shopInfoCollection } = require("../connect");
+const { users, shops } = require("../connect");
 
 const getEmployeeDetails = async function (shopinfoid) {
   const query1 = {
     shopinfoid,
   };
-  const shopinfo = await shopInfoCollection.findOne(query1);
+  const shopinfo = await shops.findOne(query1);
   if (isObjectEmpty(shopinfo)) {
     throw new Api404Error("Not found", "Not found");
   }
@@ -19,14 +19,14 @@ const getEmployeeDetails = async function (shopinfoid) {
     const query2 = {
       _id: employee.userid,
     };
-    const user = await userCollection.findOne(query2);
+    const user = await users.findOne(query2);
     if (isObjectEmpty(user)) {
       const options3 = {
         $pull: {
           employee: { userid: employee.userid },
         },
       };
-      await shopInfoCollection.updateOne(query1, options3);
+      await shops.updateOne(query1, options3);
       continue;
     }
     const arrayData = {
@@ -45,7 +45,7 @@ const addEmployee = async function (shopinfoid, jobtitle, phonenumber) {
   const query1 = {
     phonenumber,
   };
-  const user = await userCollection.findOne(query1);
+  const user = await users.findOne(query1);
   if (isObjectEmpty(user)) {
     throw new Api404Error(
       "Not found",
@@ -63,7 +63,7 @@ const addEmployee = async function (shopinfoid, jobtitle, phonenumber) {
       },
     ],
   };
-  const shopinfo = await shopInfoCollection.findOne(query2);
+  const shopinfo = await shops.findOne(query2);
   if (!isObjectEmpty(shopinfo)) {
     throw new Api409Error(
       "Conflict",
@@ -82,7 +82,7 @@ const addEmployee = async function (shopinfoid, jobtitle, phonenumber) {
       },
     },
   };
-  await userCollection.updateOne(query3, options3);
+  await users.updateOne(query3, options3);
   const query4 = {
     _id: shopinfoid,
   };
@@ -94,7 +94,7 @@ const addEmployee = async function (shopinfoid, jobtitle, phonenumber) {
       },
     },
   };
-  await shopInfoCollection.updateOne(query4, options4);
+  await shops.updateOne(query4, options4);
 };
 
 const acceptedEmployee = async function (shopinfoid, user, invitepassword) {
@@ -106,7 +106,7 @@ const acceptedEmployee = async function (shopinfoid, user, invitepassword) {
   const options1 = {
     tempemployee: { $elemMatch: { userid: user._id } },
   };
-  const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  const shopinfo = await shops.findOne(query1, options1);
   if (isObjectEmpty(shopinfo)) {
     throw new Api404Error("Not found", "Not found");
   }
@@ -118,7 +118,7 @@ const acceptedEmployee = async function (shopinfoid, user, invitepassword) {
       employee: shopinfo.tempemployee[0],
     },
   };
-  await shopInfoCollection.updateOne(query1, options2);
+  await shops.updateOne(query1, options2);
   const query3 = {
     _id: user._id,
     notification: { shopinfoid, type: "shop employee invitation" },
@@ -131,7 +131,7 @@ const acceptedEmployee = async function (shopinfoid, user, invitepassword) {
       shopinfoids: shopinfoid,
     },
   };
-  await userCollection.updateOne(query3, options3);
+  await users.updateOne(query3, options3);
 };
 
 const rejectedEmployee = async function (shopinfoid, user) {
@@ -144,7 +144,7 @@ const rejectedEmployee = async function (shopinfoid, user) {
       tempemployee: { userid: user._id },
     },
   };
-  await shopInfoCollection.updateOne(query1, options1);
+  await shops.updateOne(query1, options1);
   const query2 = {
     _id: user._id,
     notification: { shopinfoid, type: "shop employee invitation" },
@@ -154,7 +154,7 @@ const rejectedEmployee = async function (shopinfoid, user) {
       notification: { shopinfoid, type: "shop employee invitation" },
     },
   };
-  await userCollection.updateOne(query2, options2);
+  await users.updateOne(query2, options2);
 };
 
 const removeEmployee = async function (shopinfoid, userid) {
@@ -167,7 +167,7 @@ const removeEmployee = async function (shopinfoid, userid) {
       employee: { userid },
     },
   };
-  await shopInfoCollection.updateOne(query1, options1);
+  await shops.updateOne(query1, options1);
   const query2 = {
     _id: userid,
   };
@@ -176,7 +176,7 @@ const removeEmployee = async function (shopinfoid, userid) {
       shopinfoids: shopinfoid,
     },
   };
-  await userCollection.updateOne(query2, options2);
+  await users.updateOne(query2, options2);
 };
 
 const updateEmployee = async function (shopinfoid, userid, jobtitle) {
@@ -189,7 +189,7 @@ const updateEmployee = async function (shopinfoid, userid, jobtitle) {
       "employee.$.jobtitle": jobtitle,
     },
   };
-  await shopInfoCollection.updateOne(query1, options1);
+  await shops.updateOne(query1, options1);
 };
 
 module.exports = {

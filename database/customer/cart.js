@@ -1,8 +1,8 @@
 const {
-  userCollection,
-  cartCollection,
-  shopInfoCollection,
-  productsCollection,
+  users,
+  carts,
+  shops,
+  products,
 } = require("../connect");
 const { ObjectID } = require("mongodb");
 
@@ -21,13 +21,13 @@ const dataForCartPage = async function (user) {
       products: 1,
     },
   };
-  let cart = await cartCollection.findOne(query1, options1);
+  let cart = await carts.findOne(query1, options1);
   if (!cart) {
     // bychance if cart collection deleted or cart id become invalid
     const insertOptions = {
       products: [],
     };
-    cart = await cartCollection.insertOne(insertOptions);
+    cart = await carts.insertOne(insertOptions);
     const query2 = {
       _id: user._id,
     };
@@ -36,7 +36,7 @@ const dataForCartPage = async function (user) {
         cartid: cart.insertedId,
       },
     };
-    await userCollection.updateOne(query2, options2);
+    await users.updateOne(query2, options2);
   }
 
   // cart collection contain only ids . to populate info regarding ids we need more database queries and because that
@@ -54,7 +54,7 @@ const dataForCartPage = async function (user) {
           shopname: 1,
         },
       };
-      const shopinfo = await shopInfoCollection.findOne(query3, options3);
+      const shopinfo = await shops.findOne(query3, options3);
       const query4 = {
         $and: [
           {
@@ -73,7 +73,7 @@ const dataForCartPage = async function (user) {
           },
         ],
       };
-      const products = await productsCollection.findOne(query4);
+      const products = await products.findOne(query4);
       if (!shopinfo || !products) {
         // if any of the one doesn't exist then we should delete refence to that from cart
         const query5 = {
@@ -86,7 +86,7 @@ const dataForCartPage = async function (user) {
             },
           },
         };
-        await cartCollection.updateOne(query5, options5);
+        await carts.updateOne(query5, options5);
         continue;
       } // Todo : if stock of the product is false . then we should do something
       let productcolor, productprice, productimage, variation;
@@ -148,17 +148,17 @@ const addItemToCart = async function (
       },
     },
   };
-  let cart = await cartCollection.updateOne(query1, options1);
+  let cart = await carts.updateOne(query1, options1);
 
   // bychance if cart collection deleted or cart id become invalid : worst case scenarios like if admin want
   //to delete cart collection or something like that
   if (cart.modifiedCount == 0) {
-    cart = await cartCollection.findOne(query1);
+    cart = await carts.findOne(query1);
     if (!cart) {
       const insertOptions = {
         products: [],
       };
-      cart = await cartCollection.insertOne(insertOptions);
+      cart = await carts.insertOne(insertOptions);
       const query2 = {
         _id: user._id,
       };
@@ -167,11 +167,11 @@ const addItemToCart = async function (
           cartid: cart.insertedId,
         },
       };
-      await userCollection.updateOne(query2, options2);
+      await users.updateOne(query2, options2);
       const query3 = {
         _id: cart.insertedId,
       };
-      await cartCollection.updateOne(query3, options1);
+      await carts.updateOne(query3, options1);
     }
   }
 };
@@ -188,7 +188,7 @@ const deleteCartItem = async function (user, cartitemid) {
       },
     },
   };
-  await cartCollection.updateOne(query1, options1);
+  await carts.updateOne(query1, options1);
 };
 
 module.exports = {

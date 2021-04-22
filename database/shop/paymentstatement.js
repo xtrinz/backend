@@ -1,15 +1,15 @@
 const { isObjectEmpty, isArrayEmpty } = require("../../common/utils");
 const { Api404Error } = require("../../error/errorclass/errorclass");
 const {
-  shopInfoCollection,
-  shopOrderHistoryCollection,
+  shops,
+  orders,
 } = require("../connect");
 
 const getPaymentStatement = async function (shopinfoid) {
   const query1 = {
     _id: shopinfoid,
   };
-  const shopinfo = await shopInfoCollection.findOne(query1);
+  const shopinfo = await shops.findOne(query1);
   if (isObjectEmpty(shopinfo)) {
     throw new Api404Error();
   }
@@ -21,7 +21,7 @@ const getPaymentStatement = async function (shopinfoid) {
       $in: shopinfo.shoporderhistoryid,
     },
   };
-  const shoporderhistory = await shopOrderHistoryCollection.find(query2);
+  const shoporderhistory = await orders.find(query2);
   let data = [];
   let total = 0,
     success = 0,
@@ -53,7 +53,7 @@ const getPendingPaymentStatement = async function (shopinfoid) {
   const query1 = {
     _id: shopinfoid,
   };
-  const shopinfo = await shopInfoCollection.findOne(query1);
+  const shopinfo = await shops.findOne(query1);
   if (isObjectEmpty(shopinfo)) {
     throw new Api404Error();
   }
@@ -66,7 +66,7 @@ const getPendingPaymentStatement = async function (shopinfoid) {
     },
     paymentstatus: false,
   };
-  const shoporderhistory = await shopOrderHistoryCollection.find(query2);
+  const shoporderhistory = await orders.find(query2);
   let data = [];
   for await (const order of shoporderhistory) {
     const arrayData = {
@@ -83,7 +83,7 @@ const getSuccessPaymentStatement = async function (shopinfoid) {
   const query1 = {
     _id: shopinfoid,
   };
-  const shopinfo = await shopInfoCollection.findOne(query1);
+  const shopinfo = await shops.findOne(query1);
   if (isObjectEmpty(shopinfo)) {
     throw new Api404Error();
   }
@@ -96,7 +96,7 @@ const getSuccessPaymentStatement = async function (shopinfoid) {
     },
     paymentstatus: true,
   };
-  const shoporderhistory = await shopOrderHistoryCollection.find(query2);
+  const shoporderhistory = await orders.find(query2);
   let data = [];
   for await (const order of shoporderhistory) {
     const arrayData = {
