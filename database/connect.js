@@ -1,35 +1,36 @@
-// mongo  client to create connection between node and mongodb
 const { MongoClient } = require("mongodb");
 
-// mongodb database
-const url = "mongodb://localhost:27017";
-const dbName = "database";
-const client = new MongoClient(url, {
+const client = new MongoClient(process.env.DB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-});
-client.connect().catch(e => console.log(e));
-const database = client.db(dbName);
-const shopInfoCollection = database.collection("shopinfo");
-const userCollection = database.collection("user");
-const cartCollection = database.collection("cart");
-const productsCollection = database.collection("products");
-const purchaseHistoryCollection = database.collection("purchasehistory");
-const temporaryUserCollection = database.collection("temporaryuser");
-const sessionCollection = database.collection("session");
-const tempShopInfoCollection = database.collection("tempshopinfo");
-const shopOrderHistoryCollection = database.collection("shoporderhistory");
+})
+
+client.connect()
+      .then(result => console.log(`DB-connected. URL: ${process.env.DB_URL}`))
+      .catch(e => console.log(e))
+
+const database = client.db(process.env.DB_NAME)
+
+const shops 	= database.collection("shopinfo")
+const users 	= database.collection("user")
+const carts 	= database.collection("cart")
+const products 	= database.collection("products")
+const purchases = database.collection("purchasehistory")
+const tempUsers = database.collection("temporaryuser")
+const sessions 	= database.collection("session")
+const tempShops = database.collection("tempshopinfo")
+const orders 	= database.collection("shoporderhistory")
 
 module.exports = {
   client,
   database,
-  shopInfoCollection,
-  userCollection,
-  cartCollection,
-  productsCollection,
-  purchaseHistoryCollection,
-  temporaryUserCollection,
-  sessionCollection,
-  tempShopInfoCollection,
-  shopOrderHistoryCollection,
+  shops,
+  users,
+  carts,
+  products,
+  purchases,
+  tempUsers,
+  sessions,
+  tempShops,
+  orders,
 };

@@ -4,9 +4,9 @@ const { ObjectId } = require("mongodb");
 // json web token for authentication
 const jwt = require("jsonwebtoken");
 const {
-  userCollection,
-  temporaryUserCollection,
-  sessionCollection,
+  users,
+  tempUsers,
+  sessions,
 } = require("../database/connect");
 const {
   Api400Error,
@@ -44,7 +44,7 @@ const verifyAuthorizationToken = async function (req, res, next) {
     const query = {
       _id: ObjectId(decoded._id),
     };
-    const user = await userCollection.findOne(query);
+    const user = await users.findOne(query);
     if (!user) {
       throw new Api401Error("Unauthorized", "Please login to your accound"); // Todo: we should revoke token
     }
@@ -67,7 +67,7 @@ const verifySessionToken = async function (req, res, next) {
       _id: ObjectId(decoded._id),
       userid: ObjectId(req.body.user._id),
     };
-    const session = await sessionCollection.findOne(query);
+    const session = await sessions.findOne(query);
     if (!session) {
       throw new Api403Error("Forbidden", "Something went wrong");
     }
@@ -110,7 +110,7 @@ const isUserNotExist = async function (req, res, next) {
         email,
       };
     }
-    const user = await userCollection.findOne(query); // it return object or null
+    const user = await users.findOne(query); // it return object or null
     if (user) {
       throw new Api409Error("Conflict", "User already exist");
     }
@@ -140,7 +140,7 @@ const isUserExist = async function (req, res, next) {
         password: 1,
       },
     };
-    const user = await userCollection.findOne(query, options);
+    const user = await users.findOne(query, options);
     if (!user) {
       throw new Api401Error(
         "Unauthorized",
@@ -187,7 +187,7 @@ const verifyOtp = async function (req, res, next) {
         _id: 0,
       },
     };
-    const temporaryuser = await temporaryUserCollection.findOne(
+    const temporaryuser = await tempUsers.findOne(
       query,
       options1
     );
@@ -199,7 +199,7 @@ const verifyOtp = async function (req, res, next) {
       throw new Api401Error("Unauthorized", "Enter valid otp");
     }
     const options2 = { $set: { isOtpVerified: true } };
-    await temporaryUserCollection.updateOne(query, options2);
+    await tempUsers.updateOne(query, options2);
     next();
   } catch (error) {
     next(error);
@@ -225,7 +225,7 @@ const checkOtpVerifiedStatus = async function (req, res, next) {
         _id: 0,
       },
     };
-    const data = await temporaryUserCollection.findOne(query, options);
+    const data = await tempUsers.findOne(query, options);
     if (!data || !data.isOtpVerified) {
       throw new Api401Error("Unauthorized", "Something went wrong");
     }
@@ -254,8 +254,8 @@ const updatePasswordCredentials = async function (req, res, next) {
         password,
       },
     };
-    await userCollection.updateOne(query, options);
-    await temporaryUserCollection.deleteMany(query);
+    await users.updateOne(query, options);
+    await tempUsers.deleteMany(query);
     next();
   } catch (error) {
     next(error);

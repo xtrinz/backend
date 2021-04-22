@@ -2,7 +2,7 @@ require("dotenv").config();
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripe = require("stripe")(stripeSecretKey);
-const { purchaseHistoryCollection } = require("../connect");
+const { purchases } = require("../connect");
 
 const paymentStatus = async function (rawBody, data, eventType, signature) {
   // Check if webhook signing is configured.
@@ -40,7 +40,7 @@ const paymentStatus = async function (rawBody, data, eventType, signature) {
         paymentstatus: "payment succeeded",
       },
     };
-    await purchaseHistoryCollection.updateOne(query, options);
+    await purchases.updateOne(query, options);
   } else if (eventType === "payment_intent.payment_failed") {
     console.log(" Payment failed.");
     options = {

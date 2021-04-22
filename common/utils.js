@@ -11,7 +11,7 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const clientTwilio = require("twilio")(accountSid, authToken);
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
-const { temporaryUserCollection, client } = require("../database/connect");
+const { tempUsers, client } = require("../database/connect");
 
 // to generate 6 digit otp
 function generateOTP() {
@@ -110,14 +110,14 @@ const sendOtpPhoneNumber = async function (phonenumber) {
   const query = {
     phonenumber,
   };
-  await temporaryUserCollection.deleteOne(query);
+  await tempUsers.deleteOne(query);
   const data = {
     phonenumber,
     otp: hashedOtp,
     isOtpVerified: false,
     createdAt: new Date(),
   };
-  await temporaryUserCollection.insertOne(data);
+  await tempUsers.insertOne(data);
 };
 
 const sendOtpEmail = async function (email) {
@@ -132,14 +132,14 @@ const sendOtpEmail = async function (email) {
   const query = {
     email,
   };
-  await temporaryUserCollection.deleteOne(query);
+  await tempUsers.deleteOne(query);
   const data = {
     email,
     otp: hashedOtp,
     isOtpVerified: false,
     createdAt: new Date(),
   };
-  await temporaryUserCollection.insertOne(data);
+  await tempUsers.insertOne(data);
 };
 
 const isObjectEmpty = function (obj) {

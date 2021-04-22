@@ -1,5 +1,5 @@
 const { isArrayEmpty } = require("../../common/utils");
-const { tempShopInfoCollection, userCollection } = require("../connect");
+const { tempShops, users } = require("../connect");
 
 const createShop = async function (
   user,
@@ -28,7 +28,7 @@ const createShop = async function (
     contactdetails,
     verificationstatus: "Not started",
   };
-  const tempshopinfo = await tempShopInfoCollection.insertOne(insertOptions);
+  const tempshopinfo = await tempShops.insertOne(insertOptions);
   const query = {
     _id: user._id,
   };
@@ -37,7 +37,7 @@ const createShop = async function (
       tempshopinfoids: tempshopinfo.insertedId,
     },
   };
-  await userCollection.updateOne(query, options);
+  await users.updateOne(query, options);
 };
 
 const verificationstatus = async function (user) {
@@ -49,7 +49,7 @@ const verificationstatus = async function (user) {
       $in: user.tempshopinfoids,
     },
   };
-  const tempshopinfo = await tempShopInfoCollection.find(query);
+  const tempshopinfo = await tempShops.find(query);
   let data = [];
   for await (const tempshop of tempshopinfo) {
     const arrayData = {

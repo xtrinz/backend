@@ -1,11 +1,11 @@
 require("dotenv").config();
 const { ObjectID } = require("mongodb");
 const {
-  userCollection,
-  shopInfoCollection,
-  productsCollection,
-  cartCollection,
-  sessionCollection,
+  users,
+  shops,
+  products,
+  carts,
+  sessions,
 } = require("../connect");
 const {
   Api403Error,
@@ -41,7 +41,7 @@ const dataForPaymentPage = async function (session) {
         shopname: 1,
       },
     };
-    const shopinfo = await shopInfoCollection.findOne(query1, options1);
+    const shopinfo = await shops.findOne(query1, options1);
     const query2 = {
       $and: [
         {
@@ -60,7 +60,7 @@ const dataForPaymentPage = async function (session) {
         },
       ],
     };
-    const products = await productsCollection.findOne(query2);
+    const products = await products.findOne(query2);
     if (!shopinfo || !products) {
       const query3 = {
         _id: session._id,
@@ -72,7 +72,7 @@ const dataForPaymentPage = async function (session) {
           },
         },
       };
-      await sessionCollection.updateOne(query3, options3);
+      await sessions.updateOne(query3, options3);
       continue;
     }
     let productcolor, productprice, productimage, variation;
@@ -141,12 +141,12 @@ const addTemporaryProductInUserForPaymentPage = async function (
         products: 1,
       },
     };
-    let cart = await cartCollection.findOne(query1, options1);
+    let cart = await carts.findOne(query1, options1);
     if (!cart) {
       const insertOptions = {
         products: [],
       };
-      cart = await cartCollection.insertOne(insertOptions);
+      cart = await carts.insertOne(insertOptions);
       const query2 = {
         _id: user._id,
       };
@@ -155,7 +155,7 @@ const addTemporaryProductInUserForPaymentPage = async function (
           cartid: cart.insertedId,
         },
       };
-      await userCollection.updateOne(query2, options2);
+      await users.updateOne(query2, options2);
       // we should send error because request to this api forbidden for the above error case
       throw new Api403Error(
         "Forbidden",
@@ -185,7 +185,7 @@ const addTemporaryProductInUserForPaymentPage = async function (
       temporaryproducts: temporaryData,
     },
   };
-  const session = await sessionCollection.insertOne(insertOptions);
+  const session = await sessions.insertOne(insertOptions);
   const token = jwt.sign({ _id: session.insertedId }, JWT_SESSION_TOKEN_SECRET);
   return token;
 };
@@ -228,7 +228,7 @@ const tempStoreDelDetails = async function (
       },
     },
   };
-  await sessionCollection.updateOne(query, options);
+  await sessions.updateOne(query, options);
 };
 
 const calculateOrderAmount = async function (session) {
@@ -260,7 +260,7 @@ const calculateOrderAmount = async function (session) {
         },
       ],
     };
-    const products = await productsCollection.findOne(query2);
+    const products = await products.findOne(query2);
     if (!products) {
       const query3 = {
         _id: session._id,
@@ -272,7 +272,7 @@ const calculateOrderAmount = async function (session) {
           },
         },
       };
-      await sessionCollection.updateOne(query3, options3);
+      await sessions.updateOne(query3, options3);
       continue;
     }
     let productprice;
@@ -343,7 +343,7 @@ const placeOrder = async function (
         shopname: 1,
       },
     };
-    const shopinfo = await shopInfoCollection.findOne(query1, options1);
+    const shopinfo = await shops.findOne(query1, options1);
     const query2 = {
       $and: [
         {
@@ -362,7 +362,7 @@ const placeOrder = async function (
         },
       ],
     };
-    const products = await productsCollection.findOne(query2);
+    const products = await products.findOne(query2);
     if (!shopinfo || !products) {
       const query3 = {
         _id: session._id,
@@ -374,7 +374,7 @@ const placeOrder = async function (
           },
         },
       };
-      await sessionCollection.updateOne(query3, options3);
+      await sessions.updateOne(query3, options3);
       continue;
     } // Todo : stock status should be consider
     let productcolor, productprice, productimage, variation;
@@ -432,7 +432,7 @@ const placeOrder = async function (
     paymentstatus: "pending",
   };
   // update all the info regarding the purchase into purchase history collection
-  const insertedData = await purchaseHistoryCollection.insertOne(insertData);
+  const insertedData = await purchases.insertOne(insertData);
   const purchaseid = insertedData.insertedId;
   const query4 = {
     _id: user._id,
@@ -443,7 +443,7 @@ const placeOrder = async function (
     },
   };
   // retrieve the purchase id of that purchase and store that in user collection
-  await userCollection.updateOne(query4, options4);
+  await users.updateOne(query4, options4);
   const query5 = {
     _id: session._id,
   };
@@ -452,7 +452,7 @@ const placeOrder = async function (
       "transaction.purchaseid": purchaseid,
     },
   };
-  await sessionCollection.updateOne(query5, options5);
+  await sessions.updateOne(query5, options5);
 };
 
 const createPaymentIntent = async function (user, session, charges) {
@@ -475,7 +475,7 @@ const createPaymentIntent = async function (user, session, charges) {
       "transaction.paymentintentid": paymentIntent.id,
     },
   };
-  await sessionCollection.updateOne(query, options);
+  await sessions.updateOne(query, options);
   const returnData = {
     publishableKey: stripePublishableKey,
     clientSecret: paymentIntent.client_secret,

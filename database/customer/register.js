@@ -1,8 +1,8 @@
 require("dotenv").config();
 const {
-  cartCollection,
-  userCollection,
-  temporaryUserCollection,
+  carts,
+  users,
+  tempUsers,
 } = require("../connect");
 // json web token for authentication
 const jwt = require("jsonwebtoken");
@@ -22,7 +22,7 @@ const registerUser = async function (
   const insertOptions1 = {
     products: [],
   };
-  const cart = await cartCollection.insertOne(insertOptions1);
+  const cart = await carts.insertOne(insertOptions1);
   // store data into user collection
   const insertOptions2 = {
     firstname,
@@ -35,8 +35,8 @@ const registerUser = async function (
     temporaryproducts: [],
     purchaseid: [],
   };
-  const user = await userCollection.insertOne(insertOptions2);
-  await temporaryUserCollection.deleteMany({ phonenumber });
+  const user = await users.insertOne(insertOptions2);
+  await tempUsers.deleteMany({ phonenumber });
   const token = jwt.sign(
     { _id: user.insertedId },
     JWT_AUTHORIZATION_TOKEN_SECRET

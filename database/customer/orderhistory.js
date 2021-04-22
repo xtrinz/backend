@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb");
-const { userCollection, purchaseHistoryCollection } = require("../connect");
+const { users, purchases } = require("../connect");
 const { Api404Error } = require("../../error/errorclass/errorclass");
 
 // retrieve purchase data
@@ -14,7 +14,7 @@ const dataForOrderHistory = async function (user) {
       $in: user.purchaseid,
     },
   };
-  let purchaseHistory = await purchaseHistoryCollection.find(query1);
+  let purchaseHistory = await purchases.find(query1);
   for await (const order of purchaseHistory) {
     const arrayData = {
       itemCount: order.products.length,
@@ -42,7 +42,7 @@ const dataForOrderStatusPage = async function (user, purchaseId) {
       _id: 0,
     },
   };
-  const purchaseHistory = await purchaseHistoryCollection.findOne(
+  const purchaseHistory = await purchases.findOne(
     query1,
     options1
   );
@@ -55,7 +55,7 @@ const dataForOrderStatusPage = async function (user, purchaseId) {
         purchaseid: ObjectId(purchaseId),
       },
     };
-    await userCollection.updateOne(query2, options2);
+    await users.updateOne(query2, options2);
     // we should send error message here. because api requested this data specifically. but couldn't find one that matching the request
     throw new Api404Error("Not Found", "Not found");
   }
