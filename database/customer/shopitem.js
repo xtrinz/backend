@@ -1,4 +1,4 @@
-const { products, shops } = require("../connect");
+const { shops, products } = require("../connect");
 const { Api404Error } = require("../../error/errorclass/errorclass");
 const { isArrayEmpty } = require("../../common/utils");
 
@@ -25,14 +25,14 @@ const dataForShopItemPage = async function (shopinfoid) {
       $in: shopinfo.products,
     },
   };
-  let products = await productsCollection.find(query2);
-  for await (const product of products) {
+  let product = await products.find(query2);
+  for await (const item of product) {
     const arrayData = {
-      productname: product.productname,
-      productvariations: product.productvariations,
-      producttype: product.producttype,
-      gstcategory: product.gstcategory,
-      extradiscount: product.extradiscount,
+      productname: item.productname,
+      productvariations: item.productvariations,
+      producttype: item.producttype,
+      gstcategory: item.gstcategory,
+      extradiscount: item.extradiscount,
     };
     data.push(arrayData);
   }
