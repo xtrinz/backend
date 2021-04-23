@@ -25,10 +25,8 @@ const dataForShopItemPage = async function (shopinfoid) {
       $in: shopinfo.products,
     },
   };
-  let products = await products.find(query2);
-  products = products.toArray();
-  const data = [];
-  for (const product of products) {
+  let products = await productsCollection.find(query2);
+  for await (const product of products) {
     const arrayData = {
       productname: product.productname,
       productvariations: product.productvariations,
