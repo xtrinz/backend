@@ -1,4 +1,4 @@
-const { shopInfoCollection } = require("../connect");
+const { shops } = require("../connect");
 const { Api404Error } = require("../../error/errorclass/errorclass");
 
 /**
@@ -20,7 +20,7 @@ const dataForHomePage = async function (pageno, longitude, lattitude) {
     },
   };
   const skipOption = pageno > 0 ? (pageno - 1) * nPerPage : 0;
-  const shopinfo = await shopInfoCollection
+  const shopinfo = await shops
     .find(query)
     .skip(skipOption)
     .limit(nPerPage);

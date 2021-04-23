@@ -1,4 +1,4 @@
-const { userCollection } = require("../connect");
+const { users } = require("../connect");
 const { Api403Error } = require("../../error/errorclass/errorclass");
 const {
   comparePassword,
@@ -26,7 +26,7 @@ const updateUserDetails = async function (user, firstname, lastname) {
       lastname,
     },
   };
-  await userCollection.updateOne(query, options);
+  await users.updateOne(query, options);
 };
 
 const verifyUser = async function (user, phonenumber, email, password) {
@@ -60,7 +60,7 @@ const verifyUser = async function (user, phonenumber, email, password) {
       credentialchangepermission: true,
     },
   };
-  await userCollection.updateOne(query, options);
+  await users.updateOne(query, options);
   return isValid;
 };
 
@@ -82,7 +82,7 @@ const updateUserPhoneEmail = async function (user, phonenumber, email) {
       },
     };
   }
-  await userCollection.updateOne(query, options);
+  await users.updateOne(query, options);
 };
 
 const updateUserPassword = async function (user, oldpassword, newpassword) {
@@ -99,7 +99,7 @@ const updateUserPassword = async function (user, oldpassword, newpassword) {
       password,
     },
   };
-  await userCollection.updateOne(query, options);
+  await users.updateOne(query, options);
 };
 
 module.exports = {

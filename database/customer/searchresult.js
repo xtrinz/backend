@@ -1,5 +1,5 @@
 const { ObjectId } = require("mongodb");
-const { shopInfoCollection, productsCollection } = require("../connect");
+const { shops, products } = require("../connect");
 
 const dataForSearchResultPage = async function (searchresult) {
   // if search type is shop then query in shop info
@@ -12,7 +12,7 @@ const dataForSearchResultPage = async function (searchresult) {
     shopimage: 1,
     location: 1,
   };
-  const shopinfo1 = await shopInfoCollection.find(query1).project(options1);
+  const shopinfo1 = await shops.find(query1).project(options1);
   let shopData = await shopinfo1.toArray();
 
   // or query in products collection
@@ -25,7 +25,7 @@ const dataForSearchResultPage = async function (searchresult) {
     productimage: 1,
   };
   let productData = [];
-  const products = await productsCollection.find(query2).project(options2);
+  const products = await products.find(query2).project(options2);
   // it is a special for loop to loop through cursor
   /**
    * query all the shops where this item currenlty selling
@@ -41,7 +41,7 @@ const dataForSearchResultPage = async function (searchresult) {
         _id: 1,
         shopname: 1,
       };
-      const shopinfo2 = await shopInfoCollection.findOne(query3, options3);
+      const shopinfo2 = await shops.findOne(query3, options3);
       if (!shopinfo2) {
         continue; // throwing error or removing shopinfo id from product is inapproppriate(because this api is requested by customer)
       }

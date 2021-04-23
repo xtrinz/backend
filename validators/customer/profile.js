@@ -1,5 +1,5 @@
 const { body, oneOf } = require("express-validator");
-const { userCollection } = require("../../database/connect");
+const { users } = require("../../database/connect");
 const { validationError } = require("../../error/errorhandlers");
 
 const v1 = body("firstname", "400:Please provide a valid name")
@@ -53,7 +53,7 @@ const v6 = body("phonenumber", "400:Invalid Phonenumber")
     const query = {
       phonenumber,
     };
-    const user = await userCollection.findOne(query);
+    const user = await users.findOne(query);
     if (user) {
       return Promise.reject("409:Phone number already in use");
     }
@@ -73,7 +73,7 @@ const v7 = body("email", "400:Invalid Email")
     const query = {
       email,
     };
-    const user = await userCollection.findOne(query);
+    const user = await users.findOne(query);
     if (user) {
       return Promise.reject("409:Email address already in use");
     }

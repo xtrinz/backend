@@ -1,4 +1,4 @@
-const { userCollection } = require("../connect");
+const { users } = require("../connect");
 const { ObjectID } = require("mongodb");
 
 const getAllAddresses = function (user) {
@@ -60,7 +60,7 @@ const addLocationToDatabase = async function (
       },
     },
   };
-  await userCollection.updateOne(query, options);
+  await users.updateOne(query, options);
   return addressId;
 };
 
@@ -74,7 +74,7 @@ const makeAddressFavourite = async function (user, addressid, isfavourite) {
       "address.$.isfavourite": isfavourite,
     },
   };
-  await userCollection.updateOne(query, options);
+  await users.updateOne(query, options);
 };
 
 const removeAddress = async function (user, addressid) {
@@ -88,7 +88,7 @@ const removeAddress = async function (user, addressid) {
       },
     },
   };
-  await userCollection.updateOne(query, options);
+  await users.updateOne(query, options);
 };
 
 const editAddress = async function (
@@ -123,7 +123,7 @@ const editAddress = async function (
       },
     },
   };
-  await userCollection.updateOne(query, options);
+  await users.updateOne(query, options);
 };
 
 module.exports = {

@@ -1,4 +1,4 @@
-const { productsCollection, shopInfoCollection } = require("../connect");
+const { products, shops } = require("../connect");
 const { Api404Error } = require("../../error/errorclass/errorclass");
 const { isArrayEmpty } = require("../../common/utils");
 
@@ -13,14 +13,13 @@ const dataForShopItemPage = async function (shopinfoid) {
       shopname: 1,
     },
   };
-  const shopinfo = await shopInfoCollection.findOne(query1, options1);
+  const shopinfo = await shops.findOne(query1, options1);
   if (!shopinfo) {
     throw new Api404Error("Not Found", "Not Found");
   }
   if (isArrayEmpty(shopinfo.products)) {
     throw new Api404Error("Not Found", "Not Found");
   }
-  const data = [];
   const query2 = {
     _id: {
       $in: shopinfo.products,
@@ -52,7 +51,7 @@ const dataForItemDescriptionPage = async function (shopinfoid, productid) {
   const query1 = {
     _id: productid,
   };
-  const products = await productsCollection.findOne(query1);
+  const products = await products.findOne(query1);
   const query2 = {
     _id: shopinfoid,
   };
@@ -61,7 +60,7 @@ const dataForItemDescriptionPage = async function (shopinfoid, productid) {
       shopname: 1,
     },
   };
-  const shopinfo = await shopInfoCollection.findOne(query2, options2);
+  const shopinfo = await shops.findOne(query2, options2);
   if (!shopinfo || !products) {
     throw new Api404Error("Not found", "Not found");
   }
