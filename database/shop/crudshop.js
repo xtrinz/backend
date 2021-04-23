@@ -1,8 +1,4 @@
-const {
-  products,
-  shops,
-  users,
-} = require("../connect");
+const { products, shops, users } = require("../connect");
 const {
   Api409Error,
   Api404Error,
@@ -168,9 +164,6 @@ const getSingleProductByUniqueId = async function (shopinfoid, uniqueid) {
     productdetails: products.productdetails,
     keywords: products.keywords,
   };
-  if (isArrayEmpty(variationtype)) {
-    return returnData;
-  }
   if (variationtype.indexOf("color")) {
     returnData = { ...returnData, productcolor, variationtype };
   }

@@ -1,12 +1,6 @@
 require("dotenv").config();
 const { ObjectID } = require("mongodb");
-const {
-  users,
-  shops,
-  products,
-  carts,
-  sessions,
-} = require("../connect");
+const { users, shops, products, carts, sessions } = require("../connect");
 const {
   Api403Error,
   Api404Error,
@@ -243,22 +237,9 @@ const calculateOrderAmount = async function (session) {
   const temporaryproducts = session.transaction.temporaryproducts;
   for (let product of temporaryproducts) {
     const query2 = {
-      $and: [
-        {
-          _id: product.productsid,
-          shopinfoid: product.shopinfoid,
-        },
-        {
-          $or: [
-            {
-              "productvariations.color.uniqueid": product.uniqueid,
-            },
-            {
-              "productvariations.default.uniqueid": product.uniqueid,
-            },
-          ],
-        },
-      ],
+      _id: product.productsid,
+      shopinfoid: product.shopinfoid,
+      "productvariations.uniqueid": product.uniqueid,
     };
     const products = await products.findOne(query2);
     if (!products) {
@@ -276,10 +257,8 @@ const calculateOrderAmount = async function (session) {
       continue;
     }
     let productprice;
-    if (products.productvariations.default) {
-      productprice = products.productvariations.default.productprice;
-    } else if (products.productvariations.color) {
-      for (const varient of products.productvariations.color) {
+    if (products.productvariations) {
+      for (const varient of products.productvariations) {
         if (varient.uniqueid == product.uniqueid) {
           productprice = varient.productprice;
           break;
@@ -345,22 +324,9 @@ const placeOrder = async function (
     };
     const shopinfo = await shops.findOne(query1, options1);
     const query2 = {
-      $and: [
-        {
-          _id: product.productsid,
-          shopinfoid: product.shopinfoid,
-        },
-        {
-          $or: [
-            {
-              "productvariations.color.uniqueid": product.uniqueid,
-            },
-            {
-              "productvariations.default.uniqueid": product.uniqueid,
-            },
-          ],
-        },
-      ],
+      _id: product.productsid,
+      shopinfoid: product.shopinfoid,
+      "productvariations.uniqueid": product.uniqueid,
     };
     const products = await products.findOne(query2);
     if (!shopinfo || !products) {
@@ -377,36 +343,37 @@ const placeOrder = async function (
       await sessions.updateOne(query3, options3);
       continue;
     } // Todo : stock status should be consider
-    let productcolor, productprice, productimage, variation;
-    if (products.productvariations.default) {
-      productimage = products.productvariations.default.productimage;
-      productcolor = products.productvariations.default.productcolor; // none
-      productprice = products.productvariations.default.productprice;
-      variation = "default";
-    } else if (products.productvariations.color) {
-      for (const varient of products.productvariations.color) {
-        if (varient.uniqueid == product.uniqueid) {
-          productimage = varient.productimage;
-          productcolor = varient.productcolor;
-          productprice = varient.productprice;
-          variation = "color";
+    let quantity, productcolor, productimage, variationtype, productprice;
+    const variation = products.productvariations;
+    for (const varient of variation) {
+      if (varient.uniqueid == uniqueid) {
+        quantity = varient.quantity;
+        productprice = varient.productprice;
+        productimage = varient.productimage;
+        variationtype = varient.type;
+        if (isArrayEmpty(variationtype)) {
           break;
         }
+        if (variationtype.indexOf("color")) {
+          productcolor = varient.productcolor;
+        }
+        break;
       }
     }
-    const arrayData = {
+    let arrayData = {
       _id: new ObjectID(),
       shopinfoid: shopinfo._id,
       shopname: shopinfo.shopname,
-      producstid: products._id,
-      productsname: products.productname,
-      productimage: productimage,
-      productcolor: productcolor,
-      productprice: productprice,
-      variation,
+      productid: products._id,
+      productname: products.productname,
+      productimage,
+      productprice,
       uniqueid: product.uniqueid,
       quantity: product.quantity,
     };
+    if (variationtype.indexOf("color")) {
+      arrayData = { ...arrayData, productcolor, variationtype };
+    }
     productData.push(arrayData);
   }
   if (isArrayEmpty(productData)) {

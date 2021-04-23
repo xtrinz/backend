@@ -1,9 +1,4 @@
-const {
-  users,
-  carts,
-  shops,
-  products,
-} = require("../connect");
+const { users, carts, shops, products } = require("../connect");
 const { ObjectID } = require("mongodb");
 
 /**
@@ -56,22 +51,9 @@ const dataForCartPage = async function (user) {
       };
       const shopinfo = await shops.findOne(query3, options3);
       const query4 = {
-        $and: [
-          {
-            _id: product.productsid,
-            shopinfoid: product.shopinfoid,
-          },
-          {
-            $or: [
-              {
-                "productvariations.color.uniqueid": product.uniqueid,
-              },
-              {
-                "productvariations.default.uniqueid": product.uniqueid,
-              },
-            ],
-          },
-        ],
+        _id: product.productsid,
+        shopinfoid: product.shopinfoid,
+        "productvariations.uniqueid": uniqueid,
       };
       const products = await products.findOne(query4);
       if (!shopinfo || !products) {
@@ -89,36 +71,38 @@ const dataForCartPage = async function (user) {
         await carts.updateOne(query5, options5);
         continue;
       } // Todo : if stock of the product is false . then we should do something
-      let productcolor, productprice, productimage, variation;
-      if (products.productvariations.default) {
-        productimage = products.productvariations.default.productimage;
-        productcolor = products.productvariations.default.productcolor; // none
-        productprice = products.productvariations.default.productprice;
-        variation = "default";
-      } else if (products.productvariations.color) {
-        for (const varient of products.productvariations.color) {
-          if (varient.uniqueid == product.uniqueid) {
-            productimage = varient.productimage;
-            productcolor = varient.productcolor;
-            productprice = varient.productprice;
-            variation = "color";
+      let quantity, productcolor, productimage, variationtype, productprice;
+      const variation = products.productvariations;
+      for (const varient of variation) {
+        if (varient.uniqueid == uniqueid) {
+          quantity = varient.quantity;
+          productprice = varient.productprice;
+          productimage = varient.productimage;
+          variationtype = varient.type;
+          if (isArrayEmpty(variationtype)) {
             break;
           }
+          if (variationtype.indexOf("color")) {
+            productcolor = varient.productcolor;
+          }
+          break;
         }
       }
-      const arrayData = {
-        shopId: shopinfo._id,
-        shopName: shopinfo.shopname,
-        productId: products._id,
-        productName: products.productname,
-        productImage: productimage,
-        productColor: productcolor,
-        productPrice: productprice,
+      let arrayData = {
+        shopid: shopinfo._id,
+        shopname: shopinfo.shopname,
+        productid: products._id,
+        productname: products.productname,
+        productimage,
+        productprice,
         variation,
         uniqueId: product.uniqueid,
         quantity: product.quantity,
         cartItemId: product._id,
       };
+      if (variationtype.indexOf("color")) {
+        arrayData = { ...arrayData, productcolor, variationtype };
+      }
       data.push(arrayData);
     }
   }

@@ -25,7 +25,7 @@
                 type : objectid
                 refer : cart collection
                 description : id to uniquely identify user cart from cart collection
-        1.8) purchaseid :
+        1.8) purchaseids :
                 type : array
                 description : array contain all previous purchase ids
                 parameters :
@@ -39,43 +39,51 @@
                     _id :
                         type : objectid
                         description : id to uniquely identify address from address array
-                    house : 
+                    feature : 
                         type : string
                         description : house name or house number
-                    street :
-                        type : string
-                        description : street name
                     landmark :
                         type : string
                         description : landmark of the address
-                    town :
+                    addressline : 
                         type : string
-                        description : town name
-                    state :
-                        type : string
-                        description : state name
-                    country :
-                        type : string
-                        description : country name
-                    pincode :
-                        type : number
-                        description : pincode
-                    latlng :
-                        type : object
+                        description : address line
+                    coordinates :
+                        type : array
                         description : lattitude and longitude of the address
                         parameters :
-                            lat :
-                                type : double
-                                description : lattitude of the address
                             lng :
                                 type : double
                                 description : longitude of the address
+                            lat :
+                                type : double
+                                description : lattitude of the address
                     isfavourite :
                         type : boolean
                         description : whether to add this address to favourite list or not
                     isdefault :
                         type : boolean
                         description : to make this address default
+        1.10) shopinfoids : 
+                type : array
+                description : array contain all saved shop ids
+                parameters :
+                    type : objectid
+                    description : id of shop that these user works
+        1.11) notification :
+                type : array
+                description : notifications
+                parameters :
+                    _id : 
+                        type : objectid
+                        description : an id to uniquely identify notification
+                    type :
+                        type : string
+                        description : type of the notification
+                    shopinfoid
+                        type : objectid
+                        description : shop id (this is for employeee verification)
+
         -----------------------------------------------------------------------------------------------------------------------------
         *****************************************************************************************************************************
         -----------------------------------------------------------------------------------------------------------------------------
@@ -100,6 +108,9 @@
                             _id :
                                 type : objectid
                                 description : id to uniquely identify product from temporaryproducts array
+                            uniqueid :
+                                type : string
+                                description : uniqueid of the product like barcode
                             shopinfoid :
                                 type : objectid
                                 refer : shopinfo collection
@@ -135,6 +146,9 @@
                     _id : 
                         type : objectid
                         description : id to uniquely identify products from products array
+                    uniqueid :
+                        type : string
+                        description : uniqueid of the product like barcode
                     shopinfoid :
                         type : objectid
                         refer : shopinfo collection
@@ -146,7 +160,6 @@
                     quantity :
                         type : number
                         description : quantity of the product
-
         -----------------------------------------------------------------------------------------------------------------------------
         *****************************************************************************************************************************
         -----------------------------------------------------------------------------------------------------------------------------
@@ -177,6 +190,9 @@
                         type : objectid
                         refer : shopinfo collection
                         description : id of the shop
+                    uniqueid :
+                        type : string
+                        description : uniqueid of the product like barcode
                     shopname :
                         type : string
                         description : name of the shop
@@ -190,9 +206,16 @@
                     productsimage :
                         type : string
                         description : url of the image of the product
-                    price :
+                    productprice :
                         type : number
                         description : price of the product
+                    variationtype :
+                        type : array
+                        description : variations
+                        enum : "color" , "size"
+                    productcolor : 
+                        type : string
+                        description : product color
                     quantity :
                         type : number
                         description : quantity of the product   
@@ -203,40 +226,28 @@
                 type : object
                 description : delivery address of this purchase
                 parameters :
-                    _id :
+                     _id :
                         type : objectid
-                        description : address id
-                    house : 
+                        description : id to uniquely identify address from address array
+                    feature : 
                         type : string
                         description : house name or house number
-                    street :
-                        type : string
-                        description : street name
                     landmark :
                         type : string
                         description : landmark of the address
-                    town :
+                    addressline : 
                         type : string
-                        description : town name
-                    state :
-                        type : string
-                        description : state name
-                    country :
-                        type : string
-                        description : country name
-                    pincode :
-                        type : number
-                        description : pincode
-                    latlng :
-                        type : object
+                        description : address line
+                    coordinates :
+                        type : array
                         description : lattitude and longitude of the address
                         parameters :
-                            lat :
-                                type : double
-                                description : lattitude of the address
                             lng :
                                 type : double
                                 description : longitude of the address
+                            lat :
+                                type : double
+                                description : lattitude of the address
         4.8) statusdelivery :
                 type : string
                 description : delivery status
@@ -247,8 +258,8 @@
                 type : string
                 description : status of the payment
         4.11) paymentintentid :
-                        type : string
-                        description : stripe paymentintent id to uniquely identify payment status
+                type : string
+                description : stripe paymentintent id to uniquely identify payment status
 
         -----------------------------------------------------------------------------------------------------------------------------
         *****************************************************************************************************************************
@@ -313,23 +324,60 @@
                             1 :
                                 type : number
                                 description : lattitude
-        6.6) products :
+                    feature : 
+                        type : string
+                        description : house name or house number
+                    landmark :
+                        type : string
+                        description : landmark of the address
+                    addressline : 
+                        type : string
+                        description : address line
+        6.6) productids :
                 type : array
                 description : array of the products
                 parameters :
-                    _id :
+                    type : objectid
+                    refer : products collection
+                    description : id of the product
+        6.7) brandname :
+                type : string
+                description : main branch name
+        6.8) shoptype : 
+                type : string
+                description : type or nature of the business
+        6.9) certificates : 
+                type : array
+                description : url of certificates 
+        6.10) employee :
+                type : array
+                description : employees that works in this shop
+                parameters :
+                    userid :
                         type : objectid
-                        description : id to uniquely identify product
-                    producstid :
+                        description : id of the user
+                        refer : user collection
+                    jobtitle : 
+                        type : string
+                        description : title of the job
+        6.11) tempemployee :
+                type : array
+                description : employee verification yet to confirm
+                parameters :
+                    userid :
                         type : objectid
-                        refer : products collection
-                        description : id of the product
-                    price :
+                        description : id of the user
+                        refer : user collection
+                    jobtitle : 
                         type : string
-                        description : price of the product
-                    stockstatus :
-                        type : string
-                        description : status of the stock in shop
+                        description : title of the job
+        6.12) shoporderhistoryids :
+                type : array
+                description : array of order ids
+                parameters :
+                    type : objectid
+                    description : shop order history id
+                    refer : shoporderhistory collection
 
         -----------------------------------------------------------------------------------------------------------------------------
         *****************************************************************************************************************************
@@ -343,20 +391,165 @@
         7.2) productsname :
                 type : string
                 description : name of the product
-        7.3) productsimage :
-                type : string
-                description : url of the image of the product
-        7.4) enum :
+        7.3) enum :
                 type : array
                 description : keywords for search field
                 parameters :
                     type : string
                     description : keyword
-        7.5) shopinfoid :
+        7.4) shopinfoid :
                 type : array
                 description : array of ids of the shop which sell this product
                 parameters :
                     type : objectid
                     refer : shopinfo collection
                     description : id of the shop
-                    
+        7.5) productvariations :
+                type : array
+                description : array of variations of the product
+                parameters :
+                    type :
+                        type : array
+                        description : variations
+                        enum : "color" , "size"
+                    uniqueid :
+                        type : string
+                        description : uniqueid of the product like barcode
+                    productprice :
+                        type : number
+                        description : price of the product
+                    productimage
+                        type : string
+                        description : url of the product
+                    productcolor :
+                        type : string
+                        description : color of the product
+                    quantity :
+                        type : number
+                        description : quantity of the product
+
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------
+
+8) tempshopinfo
+    ===========
+        8.1) _id :
+                type : objectid
+                description : id to uniquely identify shop 
+        8.2) shopname :
+                type : string
+                description : name of the shop
+        8.3) shopimage :
+                type : string
+                description : url of the image of the shop
+        8.4) location :
+                type : object
+                description : address of the shop
+                parameters :
+                    type :  
+                        type : string
+                        description : location type
+                    coordinates :
+                        type : array
+                        description : longitude and lattitude
+                        parameters:
+                            0 : 
+                                type : number
+                                description : longitude
+                            1 :
+                                type : number
+                                description : lattitude
+                    feature : 
+                        type : string
+                        description : house name or house number
+                    landmark :
+                        type : string
+                        description : landmark of the address
+                    addressline : 
+                        type : string
+                        description : address line
+        8.5) productids :
+                type : array
+                description : array of the products
+                parameters :
+                    type : objectid
+                    refer : products collection
+                    description : id of the product
+        8.6) brandname :
+                type : string
+                description : main branch name
+        8.7) shoptype : 
+                type : string
+                description : type or nature of the business
+        8.8) certificates : 
+                type : array
+                description : url of certificates 
+        8.9) verificationstatus :
+                type : string
+                description : status of the verification
+
+        -----------------------------------------------------------------------------------------------------------------------------
+        *****************************************************************************************************************************
+        -----------------------------------------------------------------------------------------------------------------------------
+
+  9) shoporderhistory
+        =============      
+        9.1) _id :
+                type : objectid
+                description : unique id to identify document
+        9.2) products :
+                type : array
+                description : array of the products
+                parameters :
+                    _id :
+                        type : objectid
+                        description : id to uniquely identify product from products array
+                    shopinfoid :
+                        type : objectid
+                        refer : shopinfo collection
+                        description : id of the shop
+                    uniqueid :
+                        type : string
+                        description : uniqueid of the product like barcode
+                    shopname :
+                        type : string
+                        description : name of the shop
+                    producstid :
+                        type : objectid
+                        refer : products collection
+                        description : id of the product  
+                    productsname :
+                        type : string
+                        description : name of the product
+                    productsimage :
+                        type : string
+                        description : url of the image of the product
+                    productprice :
+                        type : number
+                        description : price of the product
+                    variationtype :
+                        type : array
+                        description : variations
+                        enum : "color" , "size"
+                    productcolor : 
+                        type : string
+                        description : product color
+                    quantity :
+                        type : number
+                        description : quantity of the product 
+        9.3) orderstatus :
+                type : string
+                description : status of the order
+        9.4) createddate :
+                type : date
+                description : order placed date
+        9.5) totalprice :
+                type : number
+                description : total price of the products
+        9.6) paymentstatus :
+                type : string
+                description : status of the payment recieved by shop
+        9.7) paymentdate :
+                type : date
+                description : payment recieved date
