@@ -38,34 +38,13 @@ router.get("/:addressid", validator.addr_with_id, (req, res, next) => {
  */
 router.post("/", async (req, res, next) => {
   try {
-    let {
-      user,
-      lat,
-      lng,
-      house,
-      street,
-      landmark,
-      town,
-      state,
-      country,
-      pincode,
-      isdefault = false,
-      isfavourite = false,
-    } = req.body;
+    let { user, location, isdefault = false, isfavourite = false } = req.body;
     lat = parseFloat(lat);
     lng = parseFloat(lng);
     // add user location to database
     const addressId = await addLocationToDatabase(
       user,
-      lat,
-      lng,
-      house,
-      street,
-      landmark,
-      town,
-      state,
-      country,
-      pincode,
+      location,
       isdefault,
       isfavourite
     );
@@ -101,34 +80,10 @@ Todo : some doubts still exist
 */
 router.post("/edit", async (req, res, next) => {
   try {
-    let {
-      user,
-      addressid,
-      lat,
-      lng,
-      house,
-      street,
-      landmark,
-      town,
-      state,
-      country,
-      pincode,
-    } = req.body;
+    let { user, addressid, location } = req.body;
     lat = parseFloat(lat);
     lng = parseFloat(lng);
-    await editAddress(
-      user,
-      addressid,
-      lat,
-      lng,
-      house,
-      street,
-      landmark,
-      town,
-      state,
-      country,
-      pincode
-    );
+    await editAddress(user, addressid, location);
     return res
       .status(code.OK)
       .json({ message: "Address success fully updated" });

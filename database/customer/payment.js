@@ -6,6 +6,7 @@ const {
   products,
   carts,
   sessions,
+  purchases,
 } = require("../connect");
 const {
   Api403Error,
@@ -43,25 +44,12 @@ const dataForPaymentPage = async function (session) {
     };
     const shopinfo = await shops.findOne(query1, options1);
     const query2 = {
-      $and: [
-        {
-          _id: product.productsid,
-          shopinfoid: product.shopinfoid,
-        },
-        {
-          $or: [
-            {
-              "productvariations.color.uniqueid": product.uniqueid,
-            },
-            {
-              "productvariations.default.uniqueid": product.uniqueid,
-            },
-          ],
-        },
-      ],
+      _id: product.productsid,
+      shopinfoid: product.shopinfoid,
+      "productvariations.color.uniqueid": product.uniqueid,
     };
-    const products = await products.findOne(query2);
-    if (!shopinfo || !products) {
+    const product1 = await products.findOne(query2);
+    if (isObjectEmpty(shopinfo) || isObjectEmpty(products)) {
       const query3 = {
         _id: session._id,
       };
@@ -75,35 +63,33 @@ const dataForPaymentPage = async function (session) {
       await sessions.updateOne(query3, options3);
       continue;
     }
-    let productcolor, productprice, productimage, variation;
-    if (products.productvariations.default) {
-      productimage = products.productvariations.default.productimage;
-      productcolor = products.productvariations.default.productcolor; // none
-      productprice = products.productvariations.default.productprice;
-      variation = "default";
-    } else if (products.productvariations.color) {
-      for (const varient of products.productvariations.color) {
-        if (varient.uniqueid == product.uniqueid) {
-          productimage = varient.productimage;
+    let quantity, productcolor, productimage, variationtype, productprice;
+    const variation = product1.productvariations;
+    for (const varient of variation) {
+      if (varient.uniqueid == uniqueid) {
+        quantity = varient.quantity;
+        productprice = varient.productprice;
+        productimage = varient.productimage;
+        variationtype = varient.type;
+        if (variationtype.indexOf("color")) {
           productcolor = varient.productcolor;
-          productprice = varient.productprice;
-          variation = "color";
-          break;
         }
+        break;
       }
     }
-    const arrayData = {
-      shopId: shopinfo._id,
-      shopName: shopinfo.shopname,
-      productid: products._id,
-      productName: products.productname,
-      productImage: productimage,
-      productColor: productcolor,
-      productPrice: productprice,
-      variation,
-      uniqueId: product.uniqueid,
+    let arrayData = {
+      shopinfoid: shopinfo._id,
+      shopname: shopinfo.shopname,
+      productid: product1._id,
+      productname: product1.productname,
+      productimage,
+      productprice,
+      uniqueid: product.uniqueid,
       quantity: product.quantity,
     };
+    if (variationtype.indexOf("color")) {
+      arrayData = { ...arrayData, productcolor, variationtype };
+    }
     data.push(arrayData);
   }
   if (isArrayEmpty(data)) {
@@ -113,8 +99,8 @@ const dataForPaymentPage = async function (session) {
     );
   }
   // calculate total price
-  for (const { productPrice, quantity } of data) {
-    totalPrice = totalPrice + productPrice * quantity;
+  for (const { productprice, quantity } of data) {
+    totalPrice = totalPrice + productprice * quantity;
   }
   const returnData = {
     data,
@@ -142,7 +128,7 @@ const addTemporaryProductInUserForPaymentPage = async function (
       },
     };
     let cart = await carts.findOne(query1, options1);
-    if (!cart) {
+    if (isObjectEmpty(cart)) {
       const insertOptions = {
         products: [],
       };
@@ -210,27 +196,6 @@ const getDefaultAddress = function (user) {
   return returnData;
 };
 
-const tempStoreDelDetails = async function (
-  session,
-  customername,
-  phonenumber,
-  addressid
-) {
-  const query = {
-    _id: session._id,
-  };
-  const options = {
-    $set: {
-      "transaction.tempdeldetails": {
-        customername,
-        phonenumber,
-        addressid,
-      },
-    },
-  };
-  await sessions.updateOne(query, options);
-};
-
 const calculateOrderAmount = async function (session) {
   let cartValue = 0;
   if (
@@ -243,25 +208,12 @@ const calculateOrderAmount = async function (session) {
   const temporaryproducts = session.transaction.temporaryproducts;
   for (let product of temporaryproducts) {
     const query2 = {
-      $and: [
-        {
-          _id: product.productsid,
-          shopinfoid: product.shopinfoid,
-        },
-        {
-          $or: [
-            {
-              "productvariations.color.uniqueid": product.uniqueid,
-            },
-            {
-              "productvariations.default.uniqueid": product.uniqueid,
-            },
-          ],
-        },
-      ],
+      _id: product.productsid,
+      shopinfoid: product.shopinfoid,
+      "productvariations.uniqueid": product.uniqueid,
     };
-    const products = await products.findOne(query2);
-    if (!products) {
+    const product1 = await products.findOne(query2);
+    if (isObjectEmpty(product1)) {
       const query3 = {
         _id: session._id,
       };
@@ -276,10 +228,8 @@ const calculateOrderAmount = async function (session) {
       continue;
     }
     let productprice;
-    if (products.productvariations.default) {
-      productprice = products.productvariations.default.productprice;
-    } else if (products.productvariations.color) {
-      for (const varient of products.productvariations.color) {
+    if (product1.productvariations) {
+      for (const varient of product1.productvariations) {
         if (varient.uniqueid == product.uniqueid) {
           productprice = varient.productprice;
           break;
@@ -320,7 +270,7 @@ const placeOrder = async function (
       break;
     }
   }
-  if (!delAddress) {
+  if (isObjectEmpty(delAddress)) {
     throw new Api403Error(
       "Forbidden",
       "Please provide an address to deliver your item"
@@ -345,25 +295,12 @@ const placeOrder = async function (
     };
     const shopinfo = await shops.findOne(query1, options1);
     const query2 = {
-      $and: [
-        {
-          _id: product.productsid,
-          shopinfoid: product.shopinfoid,
-        },
-        {
-          $or: [
-            {
-              "productvariations.color.uniqueid": product.uniqueid,
-            },
-            {
-              "productvariations.default.uniqueid": product.uniqueid,
-            },
-          ],
-        },
-      ],
+      _id: product.productsid,
+      shopinfoid: product.shopinfoid,
+      "productvariations.uniqueid": product.uniqueid,
     };
-    const products = await products.findOne(query2);
-    if (!shopinfo || !products) {
+    const product1 = await products.findOne(query2);
+    if (isObjectEmpty(shopinfo) || isObjectEmpty(product1)) {
       const query3 = {
         _id: session._id,
       };
@@ -377,36 +314,37 @@ const placeOrder = async function (
       await sessions.updateOne(query3, options3);
       continue;
     } // Todo : stock status should be consider
-    let productcolor, productprice, productimage, variation;
-    if (products.productvariations.default) {
-      productimage = products.productvariations.default.productimage;
-      productcolor = products.productvariations.default.productcolor; // none
-      productprice = products.productvariations.default.productprice;
-      variation = "default";
-    } else if (products.productvariations.color) {
-      for (const varient of products.productvariations.color) {
-        if (varient.uniqueid == product.uniqueid) {
-          productimage = varient.productimage;
-          productcolor = varient.productcolor;
-          productprice = varient.productprice;
-          variation = "color";
+    let quantity, productcolor, productimage, variationtype, productprice;
+    const variation = product1.productvariations;
+    for (const varient of variation) {
+      if (varient.uniqueid == uniqueid) {
+        quantity = varient.quantity;
+        productprice = varient.productprice;
+        productimage = varient.productimage;
+        variationtype = varient.type;
+        if (isArrayEmpty(variationtype)) {
           break;
         }
+        if (variationtype.indexOf("color")) {
+          productcolor = varient.productcolor;
+        }
+        break;
       }
     }
-    const arrayData = {
+    let arrayData = {
       _id: new ObjectID(),
       shopinfoid: shopinfo._id,
       shopname: shopinfo.shopname,
-      producstid: products._id,
-      productsname: products.productname,
-      productimage: productimage,
-      productcolor: productcolor,
-      productprice: productprice,
-      variation,
+      productid: products._id,
+      productname: products.productname,
+      productimage,
+      productprice,
       uniqueid: product.uniqueid,
       quantity: product.quantity,
     };
+    if (variationtype.indexOf("color")) {
+      arrayData = { ...arrayData, productcolor, variationtype };
+    }
     productData.push(arrayData);
   }
   if (isArrayEmpty(productData)) {
@@ -417,8 +355,8 @@ const placeOrder = async function (
   }
   // calculate total price
   // Todo : we should consider all other charges too like delivery charge ,gst etc
-  for (const { productPrice, quantity } of productData) {
-    totalPrice = totalPrice + productPrice * quantity;
+  for (const { productprice, quantity } of productData) {
+    totalPrice = totalPrice + productprice * quantity;
   }
   const insertData = {
     userid: user._id,
@@ -487,7 +425,6 @@ module.exports = {
   dataForPaymentPage,
   addTemporaryProductInUserForPaymentPage,
   getDefaultAddress,
-  tempStoreDelDetails,
   calculateOrderAmount,
   placeOrder,
   createPaymentIntent,

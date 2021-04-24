@@ -1,6 +1,6 @@
 const { shops, products } = require("../connect");
 const { Api404Error } = require("../../error/errorclass/errorclass");
-const { isArrayEmpty } = require("../../common/utils");
+const { isArrayEmpty, isObjectEmpty } = require("../../common/utils");
 
 const dataForShopItemPage = async function (shopinfoid) {
   const query1 = {
@@ -14,7 +14,7 @@ const dataForShopItemPage = async function (shopinfoid) {
     },
   };
   const shopinfo = await shops.findOne(query1, options1);
-  if (!shopinfo) {
+  if (isObjectEmpty(shopinfo)) {
     throw new Api404Error("Not Found", "Not Found");
   }
   if (isArrayEmpty(shopinfo.products)) {
@@ -51,7 +51,7 @@ const dataForItemDescriptionPage = async function (shopinfoid, productid) {
   const query1 = {
     _id: productid,
   };
-  const products = await products.findOne(query1);
+  const product1 = await products.findOne(query1);
   const query2 = {
     _id: shopinfoid,
   };
@@ -61,21 +61,21 @@ const dataForItemDescriptionPage = async function (shopinfoid, productid) {
     },
   };
   const shopinfo = await shops.findOne(query2, options2);
-  if (!shopinfo || !products) {
+  if (isObjectEmpty(shopinfo) || isObjectEmpty(product1)) {
     throw new Api404Error("Not found", "Not found");
   }
   const returnData = {
     shopId: shopinfo._id,
     shopName: shopinfo.shopname,
-    productid: products._id,
-    productName: products.productname,
-    productvariations: products.productvariations,
-    producttype: products.producttype,
-    gstcategory: products.gstcategory,
-    warrentycard: products.warrentycard,
-    extradiscount: products.extradiscount,
-    productdescription: products.productdescription,
-    productdetails: products.productdetails,
+    productid: product1._id,
+    productName: product1.productname,
+    productvariations: product1.productvariations,
+    producttype: product1.producttype,
+    gstcategory: product1.gstcategory,
+    warrentycard: product1.warrentycard,
+    extradiscount: product1.extradiscount,
+    productdescription: product1.productdescription,
+    productdetails: product1.productdetails,
   };
   return returnData;
 };
