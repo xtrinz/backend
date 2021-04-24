@@ -1,9 +1,5 @@
 require("dotenv").config();
-const {
-  carts,
-  users,
-  tempUsers,
-} = require("../connect");
+const { carts, users, tempUsers } = require("../connect");
 // json web token for authentication
 const jwt = require("jsonwebtoken");
 const { hashPassword } = require("../../common/utils");
@@ -32,7 +28,6 @@ const registerUser = async function (
     email,
     cartid: cart.insertedId,
     address: [],
-    temporaryproducts: [],
     purchaseid: [],
   };
   const user = await users.insertOne(insertOptions2);

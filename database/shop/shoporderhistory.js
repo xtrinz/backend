@@ -1,9 +1,6 @@
 const { isObjectEmpty, isArrayEmpty } = require("../../common/utils");
 const { Api404Error } = require("../../error/errorclass/errorclass");
-const {
-  shops,
-  orders,
-} = require("../connect");
+const { shops, orders } = require("../connect");
 
 const dataForShopOrderHistory = async function (shopinfoid) {
   const query1 = {
@@ -53,10 +50,6 @@ const dataForOrderStatusPage = async function (shopinfoid, orderid) {
       quantity: products.quantity,
       uniqueId: products.uniqueid,
     };
-    if (isArrayEmpty(variationtype)) {
-      dataForId.push(arrayData);
-      continue;
-    }
     if (variationtype.indexOf("color")) {
       arrayData = {
         ...arrayData,

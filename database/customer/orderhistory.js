@@ -1,17 +1,14 @@
 const { ObjectId } = require("mongodb");
 const { users, purchases } = require("../connect");
 const { Api404Error } = require("../../error/errorclass/errorclass");
+const { isObjectEmpty } = require("../../common/utils");
 
 // retrieve purchase data
 const dataForOrderHistory = async function (user) {
   const data = [];
-  /**
-   * loop throgh array of purchase id
-   * query purchase history with that id to retrieve info regarding purchase
-   */
   const query1 = {
     _id: {
-      $in: user.purchaseid,
+      $in: user.purchaseids,
     },
   };
   let purchaseHistory = await purchases.find(query1);
@@ -29,7 +26,7 @@ const dataForOrderHistory = async function (user) {
 
 const dataForOrderStatusPage = async function (user, purchaseId) {
   //retrieve that purchase id from user collection (it is basically a double check to make sure that purchase id belongs to that user)
-  const idMatches = user.purchaseid.some(id => id == purchaseId);
+  const idMatches = user.purchaseids.some(id => id == purchaseId);
   if (!idMatches) {
     throw new Api404Error("Not Found", "Not found");
   }
@@ -42,17 +39,14 @@ const dataForOrderStatusPage = async function (user, purchaseId) {
       _id: 0,
     },
   };
-  const purchaseHistory = await purchases.findOne(
-    query1,
-    options1
-  );
-  if (!purchaseHistory) {
+  const purchaseHistory = await purchases.findOne(query1, options1);
+  if (isObjectEmpty(purchaseHistory)) {
     const query2 = {
-      _id: ObjectId(user._id),
+      _id: user._id,
     };
     const options2 = {
       $pull: {
-        purchaseid: ObjectId(purchaseId),
+        purchaseid: purchaseId,
       },
     };
     await users.updateOne(query2, options2);
@@ -68,12 +62,12 @@ const dataForOrderStatusPage = async function (user, purchaseId) {
       const {
         shopinfoid,
         shopname,
-        productsid,
+        productid,
         productname,
         productimage,
         productcolor,
         uniqueid,
-        variation,
+        variationtype,
         productprice,
         quantity,
       } = purchaseHistoryProduct;
@@ -81,16 +75,16 @@ const dataForOrderStatusPage = async function (user, purchaseId) {
       // Todo : error handling . we can't just delete data if shopinfo or products empty. because purchase is already happened so we must show
       // status to customer if they requested
       const arrayData = {
-        shopId: shopinfoid,
-        shopName: shopname,
-        productid: productsid,
-        productName: productname,
-        productImage: productimage,
-        productprice: productprice,
-        quantity: quantity,
-        productColor: productcolor,
-        uniqueId: uniqueid,
-        variation: variation,
+        shopinfoid,
+        shopname,
+        productid,
+        productname,
+        productimage,
+        productprice,
+        quantity,
+        productcolor,
+        uniqueid,
+        variationtype,
       };
       dataForId.push(arrayData);
       //make an array that contain location of shop
@@ -113,7 +107,7 @@ const dataForOrderStatusPage = async function (user, purchaseId) {
   let returnData = {
     dataForId,
     statusdelivery: purchaseHistory.statusdelivery,
-    totalPrice: purchaseHistory.totalPrice,
+    totalprice: purchaseHistory.totalprice,
     deliveryLocation: {
       ...purchaseHistory.address,
       content: "Delivery Location",

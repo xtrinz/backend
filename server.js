@@ -77,7 +77,7 @@ app.use(forbiddenApiCall);
 // error handling
 app.use(logErrorMiddleware);
 app.use(returnError);
-/*
+
 // This will prevent dirty exit on code-fault crashes:
 process.on("uncaughtException", handleUnCaughtException);
 process.on("unhandledRejection", handlePromiseRejection);
@@ -87,7 +87,7 @@ process.on("exit", gracefulShutdown);
 process.on("SIGINT", gracefulShutdown);
 process.on("SIGTERM", gracefulShutdown);
 process.on("SIGKILL", gracefulShutdown);
-*/
+
 // listening on port 3001
 app.listen(3001, () => {
   console.log("Server Running On Port 3001");

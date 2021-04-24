@@ -1,9 +1,6 @@
 const { isObjectEmpty, isArrayEmpty } = require("../../common/utils");
 const { Api404Error } = require("../../error/errorclass/errorclass");
-const {
-  shops,
-  orders,
-} = require("../connect");
+const { shops, orders } = require("../connect");
 
 const getPaymentStatement = async function (shopinfoid) {
   const query1 = {
@@ -18,7 +15,7 @@ const getPaymentStatement = async function (shopinfoid) {
   }
   const query2 = {
     _id: {
-      $in: shopinfo.shoporderhistoryid,
+      $in: shopinfo.shoporderhistoryids,
     },
   };
   const shoporderhistory = await orders.find(query2);
@@ -62,7 +59,7 @@ const getPendingPaymentStatement = async function (shopinfoid) {
   }
   const query2 = {
     _id: {
-      $in: shopinfo.shoporderhistoryid,
+      $in: shopinfo.shoporderhistoryids,
     },
     paymentstatus: false,
   };
@@ -92,7 +89,7 @@ const getSuccessPaymentStatement = async function (shopinfoid) {
   }
   const query2 = {
     _id: {
-      $in: shopinfo.shoporderhistoryid,
+      $in: shopinfo.shoporderhistoryids,
     },
     paymentstatus: true,
   };
