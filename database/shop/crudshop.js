@@ -78,13 +78,13 @@ const getAllProductInShop = async function (shopinfoid) {
       $in: shopinfo.productids,
     },
   };
-  const products = await products.find(query2);
+  const product = await products.find(query2);
   let data = [];
-  for await (const product of products) {
+  for await (const product1 of product) {
     const arrayData = {
       shopname: shopinfo.shopname,
-      productname: product.productname,
-      productvariations: product.productvariations, // we need a default setup. which variation should show by default
+      productname: product1.productname,
+      productvariations: product1.productvariations, // we need a default setup. which variation should show by default
     };
     data.push(arrayData);
   }
@@ -108,21 +108,21 @@ const getSingleProductFromShop = async function (shopinfoid, productid) {
     _id: productid,
     shopinfoid: shopinfoid,
   };
-  const products = await products.findOne(query2);
-  if (isObjectEmpty(products)) {
+  const product = await products.findOne(query2);
+  if (isObjectEmpty(product)) {
     throw Api404Error("Not found", "Not Found");
   }
   const returnData = {
     shopname: shopinfo.shopname,
-    productname: products.productname,
-    productvariations: products.productvariations,
-    producttype: products.producttype,
-    gstcategory: products.gstcategory,
-    warrentycard: products.warrentycard,
-    extradiscount: products.extradiscount,
-    keywords: products.keywords,
-    productdescription: products.productdescription,
-    productdetails: products.productdetails,
+    productname: product.productname,
+    productvariations: product.productvariations,
+    producttype: product.producttype,
+    gstcategory: product.gstcategory,
+    warrentycard: product.warrentycard,
+    extradiscount: product.extradiscount,
+    keywords: product.keywords,
+    productdescription: product.productdescription,
+    productdetails: product.productdetails,
   };
   return returnData;
 };
@@ -140,9 +140,6 @@ const getSingleProductByUniqueId = async function (shopinfoid, uniqueid) {
       productprice = varient.productprice;
       productimage = varient.productimage;
       variationtype = varient.type;
-      if (isArrayEmpty(variationtype)) {
-        break;
-      }
       if (variationtype.indexOf("color")) {
         productcolor = varient.productcolor;
       }
@@ -217,13 +214,13 @@ const addProduct = async function (
     keywords,
     shopinfoid,
   };
-  const products = await products.insertOne(insertOptions);
+  const product = await products.insertOne(insertOptions);
   const query = {
     _id: shopinfoid,
   };
   const options = {
     $push: {
-      productids: products.insertedId,
+      productids: product.insertedId,
     },
   };
   await shops.updateOne(query, options);
@@ -242,9 +239,6 @@ const getProductDataToRemove = async function (shopinfoid, uniqueid) {
       productprice = varient.productprice;
       productimage = varient.productimage;
       variationtype = varient.type;
-      if (isArrayEmpty(variationtype)) {
-        break;
-      }
       if (variationtype.indexOf("color")) {
         productcolor = varient.productcolor;
       }
@@ -258,9 +252,6 @@ const getProductDataToRemove = async function (shopinfoid, uniqueid) {
     productprice,
     productid: products._id,
   };
-  if (isArrayEmpty(variationtype)) {
-    return returnData;
-  }
   if (variationtype.indexOf("color")) {
     returnData = { ...returnData, productcolor, variationtype };
   }
@@ -293,9 +284,6 @@ const getProductDataToUpdate = async function (shopinfoid, uniqueid, ch) {
       productprice = varient.productprice;
       productimage = varient.productimage;
       variationtype = varient.type;
-      if (isArrayEmpty(variationtype)) {
-        break;
-      }
       if (variationtype.indexOf("color")) {
         productcolor = varient.productcolor;
       }
@@ -334,9 +322,6 @@ const getProductDataToUpdate = async function (shopinfoid, uniqueid, ch) {
       uniqueid,
       productid: products._id,
     };
-  }
-  if (isArrayEmpty(variationtype)) {
-    return returnData;
   }
   if (variationtype.indexOf("color")) {
     returnData = { ...returnData, productcolor, variationtype };

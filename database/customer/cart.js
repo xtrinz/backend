@@ -1,5 +1,6 @@
 const { users, carts, shops, products } = require("../connect");
 const { ObjectID } = require("mongodb");
+const { isObjectEmpty } = require("../../common/utils");
 
 /**
  *
@@ -17,7 +18,7 @@ const dataForCartPage = async function (user) {
     },
   };
   let cart = await carts.findOne(query1, options1);
-  if (!cart) {
+  if (isObjectEmpty(cart)) {
     // bychance if cart collection deleted or cart id become invalid
     const insertOptions = {
       products: [],
@@ -55,8 +56,8 @@ const dataForCartPage = async function (user) {
         shopinfoid: product.shopinfoid,
         "productvariations.uniqueid": uniqueid,
       };
-      const products = await products.findOne(query4);
-      if (!shopinfo || !products) {
+      const product1 = await products.findOne(query4);
+      if (isObjectEmpty(product1) || isObjectEmpty(shopinfo)) {
         // if any of the one doesn't exist then we should delete refence to that from cart
         const query5 = {
           _id: cart._id,
@@ -72,16 +73,13 @@ const dataForCartPage = async function (user) {
         continue;
       } // Todo : if stock of the product is false . then we should do something
       let quantity, productcolor, productimage, variationtype, productprice;
-      const variation = products.productvariations;
+      const variation = product1.productvariations;
       for (const varient of variation) {
         if (varient.uniqueid == uniqueid) {
           quantity = varient.quantity;
           productprice = varient.productprice;
           productimage = varient.productimage;
           variationtype = varient.type;
-          if (isArrayEmpty(variationtype)) {
-            break;
-          }
           if (variationtype.indexOf("color")) {
             productcolor = varient.productcolor;
           }
@@ -91,8 +89,8 @@ const dataForCartPage = async function (user) {
       let arrayData = {
         shopid: shopinfo._id,
         shopname: shopinfo.shopname,
-        productid: products._id,
-        productname: products.productname,
+        productid: product1._id,
+        productname: product1.productname,
         productimage,
         productprice,
         variation,
@@ -138,7 +136,7 @@ const addItemToCart = async function (
   //to delete cart collection or something like that
   if (cart.modifiedCount == 0) {
     cart = await carts.findOne(query1);
-    if (!cart) {
+    if (isObjectEmpty(cart)) {
       const insertOptions = {
         products: [],
       };

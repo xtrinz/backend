@@ -7,8 +7,6 @@ const getAllAddresses = function (user) {
 const getAddress = function (user, addressid) {
   for (const address of user.address) {
     if (address._id == addressid) {
-      // addressid coming from params are the type of objectid so no need to convert to string
-      console.log("true");
       return address;
     }
   }
@@ -23,41 +21,28 @@ const getAddress = function (user, addressid) {
  */
 const addLocationToDatabase = async function (
   user,
-  lat,
-  lng,
-  house,
-  street,
-  landmark,
-  town,
-  state,
-  country,
-  pincode,
+  location,
   isdefault,
   isfavourite
 ) {
   // updating location info into database
   const addressId = new ObjectID();
+  location = {
+    _id: addressId,
+    type: "Point",
+    coordinates: [location.lng, location.lat],
+    addressline: location.addressline,
+    feature: location.feature, // floor no. or complex name
+    landmark: location.landmark,
+    isfavourite,
+    isdefault,
+  };
   const query = {
     _id: user._id,
   };
   const options = {
     $push: {
-      address: {
-        _id: addressId,
-        house,
-        street,
-        landmark,
-        town,
-        state,
-        country,
-        pincode,
-        latlng: {
-          lat,
-          lng,
-        },
-        isfavourite,
-        isdefault,
-      },
+      address: location,
     },
   };
   await users.updateOne(query, options);
@@ -91,36 +76,17 @@ const removeAddress = async function (user, addressid) {
   await users.updateOne(query, options);
 };
 
-const editAddress = async function (
-  user,
-  addressid,
-  lat,
-  lng,
-  house,
-  street,
-  landmark,
-  town,
-  state,
-  country,
-  pincode
-) {
+const editAddress = async function (user, addressid, location) {
   const query = {
     _id: user._id,
     address: { $elemMatch: { _id: addressid } },
   };
   const options = {
     $set: {
-      "address.$.house": house,
-      "address.$.street": street,
-      "address.$.landmark": landmark,
-      "address.$.town": town,
-      "address.$.state": state,
-      "address.$.country": country,
-      "address.$.pincode": pincode,
-      "address.$.latlng": {
-        lat,
-        lng,
-      },
+      "address.$.feature": location.feature,
+      "address.$.landmark": location.landmark,
+      "address.$.addressline": location.addressline,
+      "address.$.coordinates": [location.lng, location.lat],
     },
   };
   await users.updateOne(query, options);
