@@ -1,6 +1,6 @@
 const { gracefulShutdown } = require("../common/utils");
 const BaseError = require("./errorclass/baserror");
-const { code } = require("../../common/error")
+const { code } = require("../common/error")
 const { validationResult } = require("express-validator");
 const {
   Api400Error,
