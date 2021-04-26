@@ -1,5 +1,5 @@
 const express = require("express");
-const code = require("../../error/code");
+const { code } = require("../../common/error");
 const {
   sendOtp,
   verifyOtp,

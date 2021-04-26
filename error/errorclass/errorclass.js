@@ -1,4 +1,4 @@
-const code = require("../code");
+const { code } = require("../../common/error");
 const BaseError = require("../errorclass/baserror");
 
 class Api400Error extends BaseError {

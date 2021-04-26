@@ -1,4 +1,4 @@
-const code = require("../../error/code");
+const { code } = require("../../common/error");
 const {
   createShop,
   verificationstatus,

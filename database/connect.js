@@ -20,6 +20,8 @@ const tempUsers = database.collection("temporaryuser")
 const sessions 	= database.collection("session")
 const tempShops = database.collection("tempshopinfo")
 const orders 	= database.collection("shoporderhistory")
+const sockets 	= database.collection("socket")
+const transits 	= database.collection("transit")
 
 module.exports = {
   client,
@@ -33,4 +35,6 @@ module.exports = {
   sessions,
   tempShops,
   orders,
+  sockets,
+  transits
 };

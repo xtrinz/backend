@@ -78,17 +78,32 @@ app.use(forbiddenApiCall);
 app.use(logErrorMiddleware);
 app.use(returnError);
 
+const Emitter = require('events')
+const emitter = new Emitter
+app.set('EventChannel', emitter)
+
 // This will prevent dirty exit on code-fault crashes:
 process.on("uncaughtException", handleUnCaughtException);
 process.on("unhandledRejection", handlePromiseRejection);
-// This will handle process.exit():
-process.on("exit", gracefulShutdown);
-// This will handle kill commands, such as CTRL+C:
-process.on("SIGINT", gracefulShutdown);
-process.on("SIGTERM", gracefulShutdown);
-process.on("SIGKILL", gracefulShutdown);
+[`exit`, `SIGINT`, `SIGKILL`, `SIGTERM`].forEach((type) =>
+{
+  process.on(type, gracefulShutdown);
+})
 
 // listening on port 3001
-app.listen(3001, () => {
+const server = app.listen(3001, () => {
   console.log("Server Running On Port 3001");
-});
+})
+
+const io    = require('socket.io')(server)
+const event = require('./machine/events')
+io.on('connection', async (socket) =>
+{
+    console.info('client-connected', socket.handshake.auth)
+    event.Connect(socket.id, socket.handshake.auth)
+    socket.on("disconnect", () =>
+    {
+        event.Disconnect(socket.id)
+        console.info(`client-disconnected ${socket}`)
+    })
+})

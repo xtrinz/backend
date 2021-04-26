@@ -3,7 +3,7 @@ const {
   getPendingPaymentStatement,
   getSuccessPaymentStatement,
 } = require("../../database/shop/paymentstatement");
-const code = require("../../error/code");
+const { code } = require("../../common/error");
 
 const router = require("express").Router();
 
