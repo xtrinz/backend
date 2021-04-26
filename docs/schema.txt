@@ -118,13 +118,13 @@ DB SCHEMAS
         productcolor 				: String 		- 					/
         quantity 					: Number 		- 					/
 	    totalPrice 					: Number 		- 					/
-	    address 					: ObjectAS
-            ObjectAS
-             _id 					: ObjectID 		- 					/ unique key for the array
-            feature 				: String 		- 					/ house name or house number
-            landmark 				: String
-            addressline 			: String
-            coordinates 			: []double 		- 					/  [0/1]Lng [0/1]Lat ?
+    address 					    : ObjectAS
+        ObjectAS
+            _id 					: ObjectID 		- 					/ unique key for the array
+        feature 				    : String 		- 					/ house name or house number
+        landmark 				    : String
+        addressline 			    : String
+        coordinates 			    : []double 		- 					/  [0/1]Lng [0/1]Lat ?
     statusdelivery 					: String 		- 					/
     isdelivered 					: boolean 		- 					/ delivery completed or not
     paymentstatus 					: String 		- 					/ status of the payment

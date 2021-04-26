@@ -3,14 +3,14 @@ const { users, purchases } = require("../connect");
 const { Api404Error } = require("../../error/errorclass/errorclass");
 const { isObjectEmpty } = require("../../common/utils");
 
-const GetPurchaseByID = async function(Id)
+const GetByID = async function(Id)
 {
   console.log(`Get-purchase-by-id. Id: ${Id}`)
   const query = { _id: Id }
   let purchase = await purchases.find(query)
   if (!purchase)
   {
-    console.log(`Purchase-not-found. _id: ${Id}, err: {$err}`)
+    console.log(`Purchase-not-found. _id: ${Id}`)
     return
   }
   console.log(`Purchase-found. purchase: ${purchase}`)
@@ -136,5 +136,5 @@ const dataForOrderStatusPage = async function (user, purchaseId) {
 module.exports = {
   dataForOrderHistory,
   dataForOrderStatusPage,
-  GetPurchaseByID
+  GetByID
 };

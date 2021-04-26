@@ -6,6 +6,20 @@ const {
   compareTwo,
 } = require("../../common/utils");
 
+const GetByID = async function(Id)
+{
+  console.log(`Get-user-by-id. Id: ${Id}`)
+  const query = { _id: Id }
+  let user = await users.find(query)
+  if (!user)
+  {
+    console.log(`User-not-found. _id: ${Id}`)
+    return
+  }
+  console.log(`User-found. user: ${user}`)
+  return user
+}
+
 const dataForProfilePage = function (user) {
   const returnData = {
     firstname: user.firstname,
@@ -108,4 +122,5 @@ module.exports = {
   verifyUser,
   updateUserPassword,
   updateUserPhoneEmail,
+  GetByID
 };

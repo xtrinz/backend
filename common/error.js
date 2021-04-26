@@ -1,14 +1,25 @@
+class Error_
+{
+  constructor(code, status, reaon) 
+  {
+    this.Code = code
+    this.Status = status
+    this.Reaon = reaon
+  }
+}
 module.exports =
 {
-	status:
+  Err: Error_,
+  status:
 	{
 		  Success 					  : 'Success'
 		, Failed 			        : 'Failed'
 	},
 	reason:
 	{
-		  PurchaseNotFound 		: 'PurchaseNotFound'
-		, Node 			          : 'Node'
+		  PurchaseNotFound 		: 'PurchaseNotFound'		
+    , UserNotFound 			  : 'UserNotFound'
+		, Internal 			      : 'Internal'    
 	},
   code:
   {
