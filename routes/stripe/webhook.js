@@ -37,19 +37,27 @@ async function InitTransit(user_id, purchase_id)
     if (!purchase)
     {
       console.log(`Purchase-not-found. _id: ${purchase_id}`)
-      throw new Err(code.BAD_REQUEST, status.Failed, reason.PurchaseNotFound)
+      throw new Err(code.BAD_REQUEST,
+                    status.Failed,
+                    reason.PurchaseNotFound)
     }
+
     let user = await db_user.GetByID(user_id)
     if (!user)
     {
       console.log(`User-not-found. _id: ${user_id}`)
-      throw new Err(code.BAD_REQUEST, status.Failed, reason.UserNotFound)
+      throw new Err(code.BAD_REQUEST,
+                    status.Failed,
+                    reason.UserNotFound)
     }
+
     let shop = await db_shop.GetByID(ObjectId(purchase.products.shopinfoid))
     if (!shop)
     {
       console.log(`Shop-not-found. _id: ${ObjectId(purchase.products.shopinfoid)}`)
-      throw new Err(code.BAD_REQUEST, status.Failed, reason.ShopNotFound)
+      throw new Err(code.BAD_REQUEST,
+                    status.Failed,
+                    reason.ShopNotFound)
     }
 
     let user_lng      = purchase.address.coordinates[0],
@@ -69,7 +77,9 @@ async function InitTransit(user_id, purchase_id)
       console.log('transit-init-failed', err)
       // TODO init Refund(user_id, purchase_id)
       if (err instanceof Err) { throw err }
-      throw new Err(code.INTERNAL_SERVER, status.Failed, reason.Internal)
+      throw new Err(code.INTERNAL_SERVER,
+                    status.Failed,
+                    reason.Internal)
   }
 }
 module.exports = router
