@@ -5,6 +5,20 @@ const {
 } = require("../../error/errorclass/errorclass");
 const { isArrayEmpty, isObjectEmpty } = require("../../common/utils");
 
+const GetByID = async function(Id)
+{
+  console.log(`Get-shop-by-id. Id: ${Id}`)
+  const query = { _id: Id }
+  let shop = await shops.find(query)
+  if (!shop)
+  {
+    console.log(`Shop-not-found. _id: ${Id}`)
+    return
+  }
+  console.log(`Shop-found. shop: ${shop}`)
+  return shop
+}
+
 const getShops = async function (user) {
   if (isArrayEmpty(user.shopinfoids)) {
     return;
@@ -409,4 +423,5 @@ module.exports = {
   getAllProductInShop,
   getSingleProductFromShop,
   getSingleProductByUniqueId,
+  GetByID
 };

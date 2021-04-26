@@ -1,10 +1,12 @@
-const express                   = require("express");
-const { paymentStatus }         = require("../../database/stripe/webhook");
-const router                    = express.Router();
-const purchase		              = require("../customer/orderhistory")
-const { ObjectId }  	          = require("mongodb")
-const {machine, NewTransit}     = require("../../machine/machine")
-const { code, status, reason }  = require("../../common/error");
+const express                         = require("express");
+const { paymentStatus }               = require("../../database/stripe/webhook");
+const router                          = express.Router();
+const db_purchase		                  = require("../../database/customer/orderhistory")
+const db_user		                      = require("../../database/customer/profile")
+const db_shop		                      = require("../../database/shop/crudshop")
+const { ObjectId }  	                = require("mongodb")
+const {machine, NewTransit}           = require("../../machine/machine")
+const { Err, code, status, reason }   = require("../../common/error");
 
 router.post("/", async (req, res, next) => {
   try
@@ -30,33 +32,54 @@ async function InitTransit(user_id, purchase_id)
   try
   {
     console.log('init-transit', user_id, purchase_id)
-    let data = await purchase.GetPurchaseByID(purchase_id)
-    if (!data)
+
+    let purchase = await db_purchase.GetByID(purchase_id)
+    if (!purchase)
     {
       console.log(`Purchase-not-found. _id: ${purchase_id}`)
-      let   code_   = code.BAD_REQUEST
-          , status_ = status.Failed
-          , reason_ = reason.PurchaseNotFound
-      
-      // throw new (code_, status_, reason_)
+      throw new Err(code.BAD_REQUEST,
+                    status.Failed,
+                    reason.PurchaseNotFound)
     }
-    let user_lng      = 'x',
-        user_lat      = 'y',
-        user_sock_ids = ["asdfa", "asdfa"],
-        shop_sock_ids = ["asdfa", "asdfa"],
-        shop_id       = ObjectId(data.products.shopinfoid),
-        shop_lng      = data.address.latlng.lng,
-        shop_lat      = data.address.latlng.lat;
+
+    let user = await db_user.GetByID(user_id)
+    if (!user)
+    {
+      console.log(`User-not-found. _id: ${user_id}`)
+      throw new Err(code.BAD_REQUEST,
+                    status.Failed,
+                    reason.UserNotFound)
+    }
+
+    let shop = await db_shop.GetByID(ObjectId(purchase.products.shopinfoid))
+    if (!shop)
+    {
+      console.log(`Shop-not-found. _id: ${ObjectId(purchase.products.shopinfoid)}`)
+      throw new Err(code.BAD_REQUEST,
+                    status.Failed,
+                    reason.ShopNotFound)
+    }
+
+    let user_lng      = purchase.address.coordinates[0],
+        user_lat      = purchase.address.coordinates[1],
+        user_sock_ids = user.sockids,
+        shop_sock_ids = shop.sockids,
+        shop_id       = shop._id,
+        shop_lng      = shop.location.coordinates[0],
+        shop_lat      = shop.location.coordinates[1];
+
     let context       = NewTransit(user_id, user_lng, user_lat, user_sock_ids,
                                    shop_id, shop_lng, shop_lat, shop_sock_ids)
     await machine.Transition(context)
     console.log('transit-init-passed', context)
   } catch (err)
   {
-      console.log('set-error-hadling-properly', err) // TODO
-      // TODO init Refund()
-      throw new Api500Error("Internal Error", "Trasit placement failed");
+      console.log('transit-init-failed', err)
+      // TODO init Refund(user_id, purchase_id)
+      if (err instanceof Err) { throw err }
+      throw new Err(code.INTERNAL_SERVER,
+                    status.Failed,
+                    reason.Internal)
   }
 }
-
 module.exports = router
