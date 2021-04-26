@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
-const code = require("../../error/code");
+const { code } = require("../../common/error");
 
 // json web token for authentication
 

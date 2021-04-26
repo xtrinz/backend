@@ -2,7 +2,7 @@ const {
   dataForShopOrderHistory,
   dataForOrderStatusPage,
 } = require("../../database/shop/shoporderhistory");
-const code = require("../../error/code");
+const { code } = require("../../common/error");
 
 const router = require("express").Router();
 
