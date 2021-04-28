@@ -28,7 +28,6 @@ const shoporderhistory = require("./routes/shop/shoporderhistory");
 const paymentstatement = require("./routes/shop/paymentstatement");
 
 const {
-  logErrorMiddleware,
   returnError,
   handleUnCaughtException,
   handlePromiseRejection,
@@ -75,7 +74,6 @@ app.use("/paymentstatement", paymentstatement);
 app.use(forbiddenApiCall);
 
 // error handling
-app.use(logErrorMiddleware);
 app.use(returnError);
 
 const Emitter = require('events')
@@ -84,7 +82,7 @@ app.set('EventChannel', emitter)
 
 // This will prevent dirty exit on code-fault crashes:
 process.on("uncaughtException", handleUnCaughtException);
-process.on("unhandledRejection", handlePromiseRejection);
+process.on("unhandledRejection", (err) => { console.log(err) }); // TODO Need proper handler
 [`exit`, `SIGINT`, `SIGKILL`, `SIGTERM`].forEach((type) =>
 {
   process.on(type, gracefulShutdown);

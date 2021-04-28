@@ -1,50 +1,56 @@
-const express = require("express");
-const { code } = require("../../common/error");
-const {
-  dataForCartPage,
-  addItemToCart,
-  deleteCartItem,
-} = require("../../database/customer/cart");
+const express 	= require("express");
+const router 	  = express.Router();
+const { code } 	= require("../../common/error");
+const cart 	    = require("../../database/customer/cart");
 const validator = require("../../validators/customer/cart");
 
-const router = express.Router();
-
-/**
- * this api return cart data
- */
-router.get("/", async (req, res, next) => {
-  try {
-    const { user } = req.body;
-    // getting data for cart page
-    const data = await dataForCartPage(user);
-    // send response
-    return res.status(code.OK).json(data);
-  } catch (error) {
-    next(error);
-  }
-});
-
+// Insert a product to cart
 router.post("/", validator.add_cart, async (req, res, next) => {
-  try {
-    const { user, shopinfoid, productsid, quantity } = req.body;
-    // call function to add item
-    await addItemToCart(user, shopinfoid, productsid, quantity);
-    // send success response
-    return res.status(code.OK).json({ message: "Item added to your cart" });
-  } catch (error) {
-    next(error);
-  }
-});
+  try
+  {
 
-router.delete("/", validator.delete_cart, async (req, res, next) => {
-  try {
-    const { user, cartitemid } = req.body;
-    await deleteCartItem(user, cartitemid);
-    return res.status(code.OK).json({ message: "item removed from your cart" });
-  } catch (error) {
-    next(error);
-  }
-});
-// missing quanity update route
+    await cart.Insert(req.body)
+    const msg = "Item added"
+    return res.status(code.OK).json({ message: msg })
 
-module.exports = router;
+  } catch (err) { next(err) }
+})
+
+// Read all products from a cart
+router.get("/", async (req, res, next) =>
+{
+  try
+  {
+
+    const data = await cart.GetAll(req.body.user)
+    return res.status(code.OK).json(data)
+
+  } catch (err) { next(err) }
+})
+
+// Update a product in cart
+router.post("/update", async (req, res, next) => {
+  try
+  {
+
+    // await cart.Modify(req.body)
+    const msg = "Item updated"
+    return res.status(code.OK).json({ message: msg })
+
+  } catch (err) { next(err) }
+})
+
+// Remove a product from cart
+router.delete("/", validator.delete_cart, async (req, res, next) =>
+{
+  try
+  {
+
+    await cart.Remove(req.body)
+    const msg = "Item removed"
+    return res.status(code.OK).json({ message: msg })
+
+  } catch (err) { next(err) }
+})
+
+module.exports = router

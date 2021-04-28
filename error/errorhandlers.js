@@ -8,39 +8,24 @@ const {
   Api401Error,
 } = require("./errorclass/errorclass");
 
-function logError(err) {
-  console.error(err);
-}
-
-function logErrorMiddleware(err, req, res, next) {
-  logError(err);
-  next(err);
-}
-
 function returnError(err, req, res, next) {
+  console.error(err);
   res
     .status(err.statusCode || code.INTERNAL_SERVER)
     .send(err.message);
 }
 
-function isOperationalError(error) {
-  if (error instanceof BaseError) {
-    return error.isOperational;
-  }
-  return false;
-}
-
 async function handleUnCaughtException(error) {
-  logError(error);
-  if (!isOperationalError(error)) {
+  console.error(error);
+  let isOpErr = false
+  if (error instanceof BaseError) {
+    isOpErr = error.isOperational
+  }
+  if (!isOpErr) {
     process.exit(1); // Todo : we need pm2 to restart automatically in production environment
   } else {
     await gracefulShutdown();
   }
-}
-
-function handlePromiseRejection(error) {
-  logError(error);
 }
 
 function validationError(req, res, next) {
@@ -78,11 +63,7 @@ function validationError(req, res, next) {
 }
 
 module.exports = {
-  logError,
-  logErrorMiddleware,
   returnError,
-  isOperationalError,
   handleUnCaughtException,
-  handlePromiseRejection,
   validationError,
 };
