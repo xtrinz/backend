@@ -1,3 +1,20 @@
+const Emitter = require('events')
+const emitter = new Emitter
+
+/*
+    Sender API for events
+ */
+const Emit = function(msg)
+{
+    if (!msg.To.length)
+    {
+        console.log('no-live-end-points-found-emission-dropped', msg)
+        return
+    }
+    console.log('emit-message', msg)
+    emitter.emit('SendEvent', msg)
+}
+
 /*
     1. Authenticate user
     2. Create sock_id-vs-user lookup
@@ -25,6 +42,8 @@ const Disconnect = function()
 
 module.exports =
 {
-    Connect     :   Connect,
-    Disconnect  :   Disconnect
+      Emit        :   Emit
+    , Channel     :   emitter
+    , Connect     :   Connect
+    , Disconnect  :   Disconnect
 }

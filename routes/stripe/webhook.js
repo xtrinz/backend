@@ -2,10 +2,11 @@ const express                         = require("express");
 const { paymentStatus }               = require("../../database/stripe/webhook");
 const router                          = express.Router();
 const db_purchase		                  = require("../../database/customer/orderhistory")
-const db_user		                      = require("../../database/customer/profile")
-const db_shop		                      = require("../../database/shop/crudshop")
+const { User }                        = require("../../database/user")
+const { Store }                       = require("../../database/store")
 const { ObjectId }  	                = require("mongodb")
-const {machine, NewTransit}           = require("../../machine/machine")
+const { machine }                     = require("../../machine/machine")
+const { NewTransit }                  = require("../../machine/transit")
 const { Err, code, status, reason }   = require("../../common/error");
 
 router.post("/", async (req, res, next) => {
@@ -42,7 +43,8 @@ async function InitTransit(user_id, purchase_id)
                     reason.PurchaseNotFound)
     }
 
-    let user = await db_user.GetByID(user_id)
+    const user_ = new User()
+    let user    = await user_.GetByID(user_id)
     if (!user)
     {
       console.log(`User-not-found. _id: ${user_id}`)
@@ -51,7 +53,8 @@ async function InitTransit(user_id, purchase_id)
                     reason.UserNotFound)
     }
 
-    let shop = await db_shop.GetByID(ObjectId(purchase.products.shopinfoid))
+    const shop_ = new Store()
+    let shop    = await shop_.GetByID(ObjectId(purchase.products.shopinfoid))
     if (!shop)
     {
       console.log(`Shop-not-found. _id: ${ObjectId(purchase.products.shopinfoid)}`)
@@ -60,7 +63,8 @@ async function InitTransit(user_id, purchase_id)
                     reason.ShopNotFound)
     }
 
-    let user_lng      = purchase.address.coordinates[0],
+    let order_id      = 'adsfa' // purchase or order
+        user_lng      = purchase.address.coordinates[0],
         user_lat      = purchase.address.coordinates[1],
         user_sock_ids = user.sockids,
         shop_sock_ids = shop.sockids,
@@ -68,7 +72,8 @@ async function InitTransit(user_id, purchase_id)
         shop_lng      = shop.location.coordinates[0],
         shop_lat      = shop.location.coordinates[1];
 
-    let context       = NewTransit(user_id, user_lng, user_lat, user_sock_ids,
+    let context       = NewTransit(order_id,
+                                   user_id, user_lng, user_lat, user_sock_ids,
                                    shop_id, shop_lng, shop_lat, shop_sock_ids)
     await machine.Transition(context)
     console.log('transit-init-passed', context)

@@ -1,6 +1,6 @@
 // environmental variables stored in .env file
-require("dotenv").config();
-// express instance
+require("dotenv").config()
+require("./settings")
 const express = require("express");
 const {
   verifyAuthorizationToken,
@@ -76,10 +76,7 @@ app.use(forbiddenApiCall);
 // error handling
 app.use(returnError);
 
-const Emitter = require('events')
-const emitter = new Emitter
-app.set('EventChannel', emitter)
-
+/*
 // This will prevent dirty exit on code-fault crashes:
 process.on("uncaughtException", handleUnCaughtException);
 process.on("unhandledRejection", (err) => { console.log(err) }); // TODO Need proper handler
@@ -87,8 +84,8 @@ process.on("unhandledRejection", (err) => { console.log(err) }); // TODO Need pr
 {
   process.on(type, gracefulShutdown);
 })
+*/
 
-// listening on port 3001
 const server = app.listen(3001, () => {
   console.log("Server Running On Port 3001");
 })
@@ -99,9 +96,14 @@ io.on('connection', async (socket) =>
 {
     console.info('client-connected', socket.handshake.auth)
     event.Connect(socket.id, socket.handshake.auth)
-    socket.on("disconnect", () =>
+    socket.on('disconnect', () =>
     {
         event.Disconnect(socket.id)
         console.info(`client-disconnected ${socket}`)
     })
+})
+event.Channel.on('SendEvent', (data)=>
+{
+  console.info('Sending-event', data)
+	io.to(data.To).emit(data.Msg)
 })

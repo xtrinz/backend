@@ -29,8 +29,8 @@ module.exports =
 		, TransitRejected 			: 'TransitRejected'
 		// TransitEnroute 			: The package is on the way.[state in hold, not decided]
 		, TransitEnroute 			: 'TransitEnroute'
-		// TranistComplete 			: The package delivered.
-		, TranistComplete 			: 'TranistComplete'
+		// TranistCompleted 		: The package delivered.
+		, TranistCompleted 			: 'TranistCompleted'
 	},
 		// Transit Delays and Timeouts (in minutes)
 	delay:
@@ -68,5 +68,33 @@ module.exports =
 		, EventRejectionByAgent		: 'EventRejectionByAgent'
 		// EventCompletionByAgent 	: event tranist completion by agent
 		, EventCompletionByAgent	: 'EventCompletionByAgent'
+	},
+	alerts:
+	{
+		// NewOrder					: to shop 		on init
+		  NewOrder 					: 'New Order'
+		// Rejected					: to user 		on rejection by shop
+		, Rejected 					: 'Rejected'
+		// Cancelled				: to shop 		on cancel by user
+		, Cancelled 				: 'Cancelled'
+		// Accepted					: to user 		on acceptance from shop
+		, Accepted 					: 'Accepted'
+		// AutoCancelled			: to user/shop 	on outstanding delay
+		, AutoCancelled 			: 'AutoCancelled'
+		// NewTransit				: to agents 	on acceptance from shop
+		, NewTransit 				: 'New Transit'
+		// AgentReady				: to shop/user 	on acceptance from agent 
+		, AgentReady 				: 'Agent Ready'
+		// EnRoute					: to agent/user on despachement from shop
+		, EnRoute 					: 'En Route'
+		// Delivered				: to user/shop  on delivery
+		, Delivered 				: 'Delivered'
+	},
+	entity:
+	{
+		  User 						: 'User'
+		, Shop 						: 'Shop'
+		, Agent 					: 'Agent'
+		, Admin 					: 'Admin'
 	}
 }

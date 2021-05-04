@@ -12,6 +12,7 @@ client.connect()
 const database = client.db(process.env.DB_NAME)
 
 const shops 	= database.collection("shopinfo")
+const stores 	= database.collection("store")
 const users 	= database.collection("user")
 const carts 	= database.collection("cart")
 const products 	= database.collection("products")
@@ -27,6 +28,7 @@ module.exports = {
   client,
   database,
   shops,
+  stores,
   users,
   carts,
   products,

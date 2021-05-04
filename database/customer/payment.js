@@ -183,7 +183,7 @@ const getDefaultAddress = function (user) {
       delAddress = address;
       break;
     } else {
-      if (compareTwo(user.lastdeladdressid, address._id)) {
+      if (user.lastdeladdressid == address._id) {
         delAddress = address;
       }
     }
@@ -265,7 +265,7 @@ const placeOrder = async function (
   }
   let delAddress;
   for (const address of user.address) {
-    if (compareTwo(address._id, addressid)) {
+    if (address._id == addressid) {
       delAddress = address;
       break;
     }

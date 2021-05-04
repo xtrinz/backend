@@ -1,55 +1,72 @@
-const express 	= require("express");
-const router 	  = express.Router();
-const { code } 	= require("../../common/error");
-const cart 	    = require("../../database/customer/cart");
-const validator = require("../../validators/customer/cart");
+const express 	        = require("express");
+const router 	          = express.Router();
+const { code, text } 	  = require("../../common/error");
+const {Cart, CartEntry} = require("../../database/cart");
+const { ObjectId }      = require("mongodb")
+const validator         = require("../../validators/customer/cart");
 
-// Insert a product to cart
-router.post("/", validator.add_cart, async (req, res, next) => {
+// Insert product
+router.post("/insert", validator.add_cart, async (req, res, next) => {
   try
   {
-
-    await cart.Insert(req.body)
-    const msg = "Item added"
-    return res.status(code.OK).json({ message: msg })
-
+    const entry = new CartEntry(req.body)
+    await entry.Insert(req.body.CartID)
+    
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : text.ProductAdded,
+      Data    : ''
+    })
   } catch (err) { next(err) }
 })
 
-// Read all products from a cart
-router.get("/", async (req, res, next) =>
+// List products
+router.get("/list", async (req, res, next) =>
 {
   try
   {
-
-    const data = await cart.GetAll(req.body.user)
-    return res.status(code.OK).json(data)
-
+    const cart = new Cart() 
+    const data = await cart.Read(req.query.CardID) // TODO
+    
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : '',
+      Data    : data
+    })
   } catch (err) { next(err) }
 })
 
-// Update a product in cart
-router.post("/update", async (req, res, next) => {
+// Update product
+router.post("/modify", async (req, res, next) => {
   try
   {
-
-    // await cart.Modify(req.body)
-    const msg = "Item updated"
-    return res.status(code.OK).json({ message: msg })
-
+    const entry = new CartEntry()
+    await entry.Update( ObjectId(req.body.CartID),
+                        ObjectId(req.body.EntryID),
+                        req.body.Quantity)
+    
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : text.ProductUpdated,
+      Data    : ''
+    })
   } catch (err) { next(err) }
 })
 
-// Remove a product from cart
-router.delete("/", validator.delete_cart, async (req, res, next) =>
+// Remove product
+router.delete("/remove", validator.delete_cart, async (req, res, next) =>
 {
   try
   {
-
-    await cart.Remove(req.body)
-    const msg = "Item removed"
-    return res.status(code.OK).json({ message: msg })
-
+    const entry = new CartEntry()
+    await entry.Remove( ObjectId(req.body.CartID),
+                        ObjectId(req.body.EntryID))
+    
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : text.ProductRemoved,
+      Data    : ''
+    })
   } catch (err) { next(err) }
 })
 

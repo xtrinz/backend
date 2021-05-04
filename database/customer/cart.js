@@ -1,12 +1,6 @@
 const { users, carts, shops, products } = require("../connect");
-const { ObjectID } = require("mongodb");
 const { isObjectEmpty } = require("../../common/utils");
 
-/**
- *
- * @param {id of the user} userid
- * this function return the cart data
- */
 const dataForCartPage = async function (user) {
   // collect info regarding that cartid from cart collection
   const query1 = {
@@ -105,76 +99,6 @@ const dataForCartPage = async function (user) {
     }
   }
   return data;
-};
+}
 
-const addItemToCart = async function (
-  user,
-  shopinfoid,
-  productsid,
-  uniqueid,
-  quantity
-) {
-  // updating cart collection with incoming data
-  // refer mongo db doc for more info
-  const query1 = {
-    _id: user.cartid,
-  };
-  const options1 = {
-    $push: {
-      products: {
-        _id: new ObjectID(),
-        shopinfoid,
-        productsid,
-        uniqueid,
-        quantity,
-      },
-    },
-  };
-  let cart = await carts.updateOne(query1, options1);
-
-  // bychance if cart collection deleted or cart id become invalid : worst case scenarios like if admin want
-  //to delete cart collection or something like that
-  if (cart.modifiedCount == 0) {
-    cart = await carts.findOne(query1);
-    if (isObjectEmpty(cart)) {
-      const insertOptions = {
-        products: [],
-      };
-      cart = await carts.insertOne(insertOptions);
-      const query2 = {
-        _id: user._id,
-      };
-      const options2 = {
-        $set: {
-          cartid: cart.insertedId,
-        },
-      };
-      await users.updateOne(query2, options2);
-      const query3 = {
-        _id: cart.insertedId,
-      };
-      await carts.updateOne(query3, options1);
-    }
-  }
-};
-
-const deleteCartItem = async function (user, cartitemid) {
-  // deleting that item from cart
-  const query1 = {
-    _id: user.cartid,
-  };
-  const options1 = {
-    $pull: {
-      products: {
-        _id: cartitemid,
-      },
-    },
-  };
-  await carts.updateOne(query1, options1);
-};
-
-module.exports = {
-  dataForCartPage,
-  addItemToCart,
-  deleteCartItem,
-};
+module.exports = { dataForCartPage }
