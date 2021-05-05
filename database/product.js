@@ -1,4 +1,4 @@
-const { carts }                     = require("../connect")
+const { products, users }           = require("../connect")
 const { ObjectId, ObjectID }        = require('mongodb')
 const { Err, code, status, reason } = require("../common/error")
 
@@ -62,7 +62,7 @@ function Product(data)
    this.DelByID = function(Id)
    {
         const query = {_id : ObjectId(Id)}
-        const resp  = await carts.deleteOne(query);
+        const resp  = await products.deleteOne(query);
         if (resp.deletedCount !== 1)
         {
             console.log('product-deletion-failed', query)

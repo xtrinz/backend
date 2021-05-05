@@ -3,7 +3,7 @@ const router 	          = express.Router()
 const { code, text } 	  = require("../common/error")
 const { Store }         = require("../database/store")
 const { ObjectId }      = require("mongodb")
-const { task }          = require("../database/models")
+const { task }          = require("../common/models")
 
 // Create shop
 router.post("/shop/register", async (req, res, next) =>

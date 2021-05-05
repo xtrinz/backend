@@ -1,6 +1,6 @@
 const { users }                     = require("./connect")
 const { ObjectID, ObjectId }        = require("mongodb")
-const { states, mode }              = require("./models")
+const { states, mode }              = require("../common/models")
 const { Err, code, status, reason}  = require('../common/error')
 const { Cart }                      = require("./cart")
 const otp                           = require('../common/otp')
