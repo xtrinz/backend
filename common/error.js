@@ -40,6 +40,10 @@ module.exports =
     , BadState                  : 'Bad machine state'
     , ProductNotFound           : 'Product not found'
     , StoreNotFound             : 'Store not found'
+    , AdminNotFound             : 'Admin not found'
+    , StaffNotFound             : 'Staff not found'
+    , UnapprovedSotre           : 'Unapproved Store'
+    , StaffExists               : 'Staff already exists'
 	},
   text:
   {
@@ -51,12 +55,17 @@ module.exports =
     , Approved                  : 'Approved'
     , LoggedIn                  : 'Logged In'
     , PasswdUpdated             : 'Password updated'
-
     , ProductAdded              : 'Product added'
     , ProductUpdated            : 'Product updated'
     , ProductRemoved            : 'Product removed'
     , NoDataFound               : 'No data found'
-
+    , AddressAdded              : 'Address added'
+    , AddressUpdated            : 'Address updated'
+    , AddressRemoved            : 'Address removed'
+    , WaitingForStaffReply      : 'Waiting for staff reply'
+    , ResponseUpdated           : 'Response updated'
+    , NoContextFound            : 'No context found'
+    , Relieved                  : 'Relieved'
   },
   code:
   {

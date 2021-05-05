@@ -1,8 +1,8 @@
 const express                 = require("express")
 const router                  = express.Router()
-const { code, status, text }  = require("../../common/error")
-const { User }                = require("../../database/user")
-const { task }                = require("../../database/models")
+const { code, status, text }  = require("../common/error")
+const { User }                = require("../database/user")
+const { task }                = require("../database/models")
 
 /*Register
   Login

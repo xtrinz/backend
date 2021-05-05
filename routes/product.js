@@ -1,7 +1,7 @@
 const express 	        = require("express");
-const router 	        = express.Router();
-const { code, text } 	= require("../../common/error");
-const { Product }       = require("../../database/product");
+const router 	          = express.Router();
+const { code, text } 	  = require("../common/error");
+const { Product }       = require("../database/product");
 const { ObjectId }      = require("mongodb")
 
 // Add product

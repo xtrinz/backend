@@ -1,6 +1,7 @@
 const { states, alerts, entity }= require("./models")
-const { Emit } 			= require("./events")
-const otp 				= require("../common/otp")
+const { Emit } 					= require("./events")
+const otp 						= require("../common/otp")
+const { User } 					= require("../database/user")
 
 /**
  * #Method/ActivatedBy 	:  01/Server(User)
@@ -109,7 +110,8 @@ const OrderAcceptedByShop			=  function()
 	console.log('process-order-acceptance', ctxt)
 	// Shop -> User transit will be compensated with delivery charge,
 	// hence profitable pooling occures with agents near to shop
-	const agents = db_agents.GetLivePoolByLoc(ctxt.Shop.Location)
+	const agent = new User()
+	const agents = agent.ListNearbyLiveAgents(ctxt.Shop.Location)
 	if(!agents)
 	{
 		// TODO
@@ -295,7 +297,8 @@ const TransitRejectedByAgent		=  function(ctxt)
 
 			// Shop -> User transit will be compensated with delivery charge,
 			// hence profitable pooling occures with agents near to shop
-			const agents = db_agents.GetLivePoolByLoc(ctxt.Shop.Location)
+			const agent  = new User()
+			const agents = agent.ListNearbyLiveAgents(ctxt.Shop.Location)
 			if(!agents)
 			{
 				// TODO

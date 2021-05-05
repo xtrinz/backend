@@ -1,0 +1,75 @@
+const express 	             = require("express")
+const router 	             = express.Router()
+const { code, status, text } = require("../common/error")
+const { ObjectId }           = require("mongodb")
+const { Address }            = require("../database/address");
+
+// View Addr Missing
+// Set Default Addr Missing
+
+// Add address
+router.post("/add", async (req, res, next) => {
+  try
+  {
+    const entry = new Address(req.body)
+    await entry.Insert(ObjectId(req.body.UserID))
+    
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : text.AddressAdded,
+      Data    : ''
+    })
+  } catch (err) { next(err) }
+})
+
+// List addresss
+router.get("/list", async (req, res, next) =>
+{
+  try
+  {
+    const address   = new Address() 
+    const data      = await address.Read(ObjectId(req.query.UserID)) // TODO
+
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : '',
+      Data    : data
+    })
+  } catch (err) { next(err) }
+})
+
+// Update address
+router.post("/modify", async (req, res, next) => {
+  try
+  {
+    const entry = new Address()
+    await entry.Update( ObjectId(req.body.AddressID),
+                        ObjectId(req.body.UserID),
+                        req.body.Quantity)
+    
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : text.AddressUpdated,
+      Data    : ''
+    })
+  } catch (err) { next(err) }
+})
+
+// Remove address
+router.delete("/remove", async (req, res, next) =>
+{
+  try
+  {
+    const entry = new Address()
+    await entry.Remove( ObjectId(req.body.UserID),
+                        ObjectId(req.body.AddressID))
+    
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : text.AddressRemoved,
+      Data    : ''
+    })
+  } catch (err) { next(err) }
+})
+
+module.exports = router

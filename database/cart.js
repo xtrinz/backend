@@ -1,5 +1,5 @@
 const { carts }                     = require("../connect")
-const { Err, code, status, reason } = require("../../common/error")
+const { Err, code, status, reason } = require("../common/error")
 
 function Cart(user_id)
 {

@@ -23,5 +23,9 @@ module.exports =
 		, EditPasswd 				: 'Edit_Password'
 		, EditProfile 				: 'Edit_Profile'
 		, Approve 					: 'Approve'
+		, Request					: 'Request'
+		, Accept 					: 'Accept'
+		, Deny 						: 'Deny'
+		, Relieve 					: 'Relieve'
 	}
 }

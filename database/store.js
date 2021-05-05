@@ -8,21 +8,28 @@ const { mode }                      = require("./models")
 
 function Store(data)
 {
-    this._id        = ''
-    this.AdminID    = ObjectId(data.AdminID)
-    this.Name       = data.Name
-    this.Img        = data.Image
-    this.Type       = data.Type
-    this.Certs      = data.Certs
-    this.MobileNo   = data.MobileNo
-    this.Email      = data.Email
-    this.Location   =
+    this._id                 = ''
+    this.AdminID             = ObjectId(data.AdminID)
+    this.Name                = data.Name
+    this.Img                 = data.Image
+    this.Type                = data.Type
+    this.Certs               = data.Certs
+    this.MobileNo            = data.MobileNo
+    this.Email               = data.Email
+    this.Location            =
     {
           Type          : 'Point'
         , Coordinates   : [data.Longitude, data.Latitude]
     }
-    this.State      = states.New
-    this.Address    =
+    this.State               = states.New
+    
+    this.StaffList           =
+    {
+          Approved : []
+        , Pending  : []
+    }
+
+    this.Address             =
     {
           Line1         : data.Address.Line1
         , Line2         : data.Address.Line2
@@ -45,6 +52,7 @@ function Store(data)
         this.Location   = data.Location
         this.State      = data.State
         this.Address    = data.Address
+        this.StaffList  = data.StaffList
     }
 
     this.Save       = async function()
@@ -65,7 +73,22 @@ function Store(data)
     this.GetByID = function(_id)
     {
         console.log(`find-store-by-id. ID: ${_id}`)
-        const query = { _id: _id }
+        const query = { _id: ObjectId(_id) }
+        let store = await stores.findOne(query)
+        if (!store)
+        {
+          console.log(`store-not-found. ID: ${_id}`)
+          return
+        }
+        this.Set(store)
+        console.log(`store-found. store: ${store}`)
+        return store
+    }
+
+    this.GetByAdminIDAndStoreID = function(admin_id, shop_id)
+    {
+        console.log(`store-by-admin-and-shop-id. admin_id: ${admin_id} shop_id: ${shop_id}`)
+        const query = { _id: ObjectId(shop_id), AdminID: ObjectId(admin_id) }
         let store = await stores.findOne(query)
         if (!store)
         {
@@ -102,7 +125,7 @@ function Store(data)
         return
     }
 
-    this.GetNearbyList = async function(PageNo, Lon, Lat)
+    this.ListNearby = async function(PageNo, Lon, Lat)
     {
         const   nPerPage = 30
               , skip     = PageNo > 0 ? (PageNo - 1)*nPerPage : 0;
@@ -140,6 +163,19 @@ function Store(data)
         this.Otp        = hash
         this.State      = states.New
         this.Save()
+
+        const user  = new User()
+        const resp = user.GetByID(data.UserID)
+        if (!resp)
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+                  , reason_     = reason.StaffNotFound
+            throw new Err(code_, status_, reason_)
+        }
+        user.StoreList.Owned.push(this._id)
+        user.Save()
+
         console.log(`new-store-created. store: ${this}`)
     }
 
@@ -224,6 +260,288 @@ function Store(data)
         return store
     }
 
+    this.AddStaff   = async function (data)
+    {
+        console.log(`add-staff. in: ${data}`)
+        const store = await this.GetByAdminIDAndStoreID(ObjectId(data.UserID), 
+                                                       ObjectId(data.ShopID))
+        if (!store || store.State !== states.Registered)
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+            let     reason_     = reason.StoreNotFound
+            if(!store) { reason_ = reason.UnapprovedSotre}
+            throw new Err(code_, status_, reason_)
+        }
+        const staff_  = new User()
+        const staff = staff_.GetByMobNo(ObjectId(data.MobileNo))
+        if (!staff)
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+                  , reason_     = reason.StaffNotFound
+            throw new Err(code_, status_, reason_)
+        }
+
+        if( staff.StoreList.Accepted.includes(store._id) ||
+            this.StaffList.Approved.includes(staff._id) )
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+                  , reason_     = reason.StaffExists
+            throw new Err(code_, status_, reason_)
+        }
+
+        staff.StoreList.Pending.push(store._id)
+        staff.Save()
+
+        this.StaffList.Pending.push(staff._id)
+        this.Save()
+        
+        console.log(`staff-invitation-send. store: ${this}`)
+    }
+
+    this.SetStaffReplay   = async function (data)
+    {
+        console.log(`set-staff-replay. in: ${data}`)
+        const store = await this.GetByID(ObjectId(data.ShopID))
+        if (!store || store.State !== states.Registered)
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+            let     reason_     = reason.StoreNotFound
+            if(!store) { reason_ = reason.UnapprovedSotre}
+            throw new Err(code_, status_, reason_)
+        }
+        const staff_  = new User()
+        const staff = staff_.GetByID(data.UserID)
+        if (!staff)
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+                  , reason_     = reason.StaffNotFound
+            throw new Err(code_, status_, reason_)
+        }
+
+        if( !staff.StoreList.Pending.includes(store._id) ||
+            !this.StaffList.Pending.includes(staff._id) )
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+                  , reason_     = reason.NoContextFound
+            throw new Err(code_, status_, reason_)
+        }
+
+        staff.StoreList.Pending.pop(store._id)
+        this.StaffList.Pending.pop(staff._id)
+
+        if (data.Task == task.Accept)
+        {
+          staff.StoreList.Accepted.push(store._id)
+          this.StaffList.Approved.push(staff._id)
+        }
+
+        staff.Save()
+        this.Save()
+        console.log(`staff-response-set. store: ${this} staff: ${staff}`)
+    }
+
+    this.RelieveStaff   = async function (data)
+    {
+        console.log(`relieve-staff. in: ${data}`)
+
+        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.ShopID)
+        if (!store || store.State !== states.Registered)
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+            let     reason_     = reason.StoreNotFound
+            if(!store) { reason_ = reason.UnapprovedSotre}
+            throw new Err(code_, status_, reason_)
+        }
+
+        const staff_  = new User()
+        const staff   = staff_.GetByID(data.StaffID)
+        if (!staff)
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+                  , reason_     = reason.StaffNotFound
+            throw new Err(code_, status_, reason_)
+        }
+
+        if( !staff.StoreList.Accepted.includes(store._id) ||
+            !this.StaffList.Approved.includes(staff._id) )
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+                  , reason_     = reason.NoContextFound
+            throw new Err(code_, status_, reason_)
+        }
+
+        staff.StoreList.Accepted.pop(store._id)
+        this.StaffList.Approved.pop(staff._id)
+
+        staff.Save()
+        this.Save()
+        console.log(`staff-relieved. store: ${this} staff: ${staff}`)
+    }
+
+    this.RevokeStaffReq   = async function (data)
+    {
+        console.log(`revoke-staff. in: ${data}`)
+
+        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.ShopID)
+        if (!store || store.State !== states.Registered)
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+            let     reason_     = reason.StoreNotFound
+            if(!store) { reason_ = reason.UnapprovedSotre}
+            throw new Err(code_, status_, reason_)
+        }
+
+        const staff_  = new User()
+        const staff   = staff_.GetByID(data.StaffID)
+        if (!staff)
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+                  , reason_     = reason.StaffNotFound
+            throw new Err(code_, status_, reason_)
+        }
+
+        if( !staff.StoreList.Pending.includes(store._id) ||
+            !this.StaffList.Pending.includes(staff._id) )
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+                  , reason_     = reason.NoContextFound
+            throw new Err(code_, status_, reason_)
+        }
+        
+        staff.StoreList.Pending.pop(store._id)
+        this.StaffList.Pending.pop(staff._id)
+
+        staff.Save()
+        this.Save()
+        console.log(`staff-revoked. store: ${this} staff: ${staff}`)
+    }
+
+    this.ListStaff  = async function (data)
+    {
+        console.log(`list-staff. in: ${data}`)
+
+        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.ShopID)
+        if (!store || store.State !== states.Registered)
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+            let     reason_     = reason.StoreNotFound
+            if(!store) { reason_ = reason.UnapprovedSotre}
+            throw new Err(code_, status_, reason_)
+        }
+
+        const staff_  = new User()
+        let data =
+        {
+          Approved   : [],
+          Pending    : []
+        }
+        const ReadUser = (id) =>
+        {
+          const staff   = staff_.GetByID(id)
+          if (!staff)
+          {
+              const   code_       = code.BAD_REQUEST
+                    , status_     = status.Failed
+                    , reason_     = reason.StaffNotFound
+              throw new Err(code_, status_, reason_)
+          }
+          const res =
+          {
+              StaffID: staff._id
+            , Name   : staff.Name
+          }
+          return res
+        }
+        this.StaffList.Approved.forEach((id)=>
+        {
+          const out = ReadUser(id)
+          data.Approved.push(out)
+        })
+
+        this.StaffList.Pending.forEach((id)=>
+        {
+          const out = ReadUser(id)
+          data.Pending.push(out)
+        })
+
+        console.log(`staff-list. store: ${data}`)
+        return data
+    }
+
+    this.ListStores  = async function (data)
+    {
+        console.log(`list-store. in: ${data}`)
+
+        const user  = new User()
+        const resp = user.GetByID(data.UserID)
+        if (!resp)
+        {
+            const   code_       = code.BAD_REQUEST
+                  , status_     = status.Failed
+                  , reason_     = reason.StaffNotFound
+            throw new Err(code_, status_, reason_)
+        }
+        
+        let data =
+        {
+          Owned      : [],
+          Approved   : [],
+          Pending    : []
+        }
+
+        const store_ = new Store()
+        const ReadStore = (id) =>
+        {
+          const store   = store_.GetByID(id)
+          if (!store)
+          {
+              const   code_       = code.BAD_REQUEST
+                    , status_     = status.Failed
+                    , reason_     = reason.StoreNotFound
+              throw new Err(code_, status_, reason_)
+          }
+          const res =
+          {
+              StoreID: store._id
+            , Name   : store.Name
+          }
+          return res
+        }
+
+        user.StoreList.Owned.forEach((id)=>
+        {
+          const out = ReadStore(id)
+          data.Owned.push(out)
+        })
+
+        user.StoreList.Accepted.forEach((id)=>
+        {
+          const out = ReadStore(id)
+          data.Approved.push(out)
+        })
+
+        user.StoreList.Pending.forEach((id)=>
+        {
+          const out = ReadStore(id)
+          data.Pending.push(out)
+        })
+
+        console.log(`store-list. store: ${data}`)
+        return data
+    }
 }
 
 module.exports =

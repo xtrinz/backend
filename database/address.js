@@ -40,11 +40,11 @@ function Address(data)
         }
         console.log('address-inserted', query, opts)
     }
-
-    this.Update     = function (user_id, entry_id, qnty)
+/*
+    this.Update     = function (user_id, entry_id)
     {
         const   query = { _id: user_id, 'AddressList._id': entry_id }
-                , opts  = { $set: { 'AddressList.$.Qnty': qnty }      }
+              , opts  = { $set: { 'AddressList.$.Qnty': qnty }      }
 
         const resp  = await users.updateOne(query, opts)
         if (resp.modifiedCount !== 1) 
@@ -56,7 +56,7 @@ function Address(data)
         }
         console.log('address-updated', query, opts)
     }
-
+*/
     this.Remove     = function (user_id, entry_id)
     {
         const   query = { _id: user_id }

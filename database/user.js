@@ -1,5 +1,5 @@
 const { users }                     = require("./connect")
-const { ObjectID }                  = require("mongodb")
+const { ObjectID, ObjectId }        = require("mongodb")
 const { states, mode }              = require("./models")
 const { Err, code, status, reason}  = require('../common/error')
 const { Cart }                      = require("./cart")
@@ -23,7 +23,15 @@ function User(mob_no, user_mode)
     this.CartID     = ''
     this.AddressList= []
 
+    this.StoreList  = 
+    {
+          Owned     : []    // Created By User
+        , Accepted  : []    // Managed By User
+        , Pending   : []    // Invitation Received for management
+    }
+
     this.ResetPasswd= false
+    this.IsLive     = false
 
     this.Set        = function(user)
     {
@@ -40,8 +48,10 @@ function User(mob_no, user_mode)
 
         this.CartID     = user.CartID
         this.AddressList= user.AddressList
+        this.StoreList  = user.StoreList
 
         this.ResetPasswd= user.ResetPasswd
+        this.IsLive     = user.IsLive
     }
 
     this.Save       = async function()
@@ -59,10 +69,10 @@ function User(mob_no, user_mode)
         }
     }
     
-    this.GetByID = function(_id)
+    this.GetByID = async function(_id)
     {
         console.log(`find-user-by-id. ID: ${_id}`)
-        const query = { _id: _id }
+        const query = { _id: ObjectId(_id) }
         let user = await users.findOne(query)
         if (!user)
         {
@@ -74,7 +84,7 @@ function User(mob_no, user_mode)
         return user
     }
 
-    this.GetByMobNo = function(mob_no)
+    this.GetByMobNo = async function(mob_no)
     {
         console.log(`find-user-by-mob-no. MobNo: ${mob_no}`)
         const query = { MobNo: mob_no }
@@ -84,11 +94,12 @@ function User(mob_no, user_mode)
           console.log(`user-not-found. MobNo: ${mob_no}`)
           return
         }
+        this.Set(user)
         console.log(`user-found. user: ${user}`)
         return user
     }
 
-    this.GetByEmail = function(email)
+    this.GetByEmail = async function(email)
     {
         console.log(`find-user-by-email. Email: ${email}`)
         const query = { Email: email }
@@ -100,6 +111,34 @@ function User(mob_no, user_mode)
         }
         console.log(`user-found. user: ${user}`)
         return user
+    }
+
+    this.ListNearbyLiveAgents = async function(Loc)
+    {
+        console.log(`list-nearby-live-agents. Co-ordintes: ${Loc}`)
+        const lon     = parseFloat(Loc[0])
+        const lat     = parseFloat(Loc[1])
+        /* 1) Filter UserID, UserName & SocketID 
+            2) No of Agents : <= 10 [Limit]
+            3) Nearest free / near-to-free agents
+            4) Live
+            5) Within 5km radius
+            6) User Type: Agent                */
+        const agentLimit      = 10
+                , maxDist       = 5000
+                , geometry      = { $geometry: { type: "Point", coordinates: [lon, lat] }, $maxDistance: maxDist }
+                , projections   = { _id: 1, Name: 1, SockID: 1 }
+                , query         = { location: { $near: geometry }, IsLive : true, Mode: mode.Agent }
+        const agents = await users.find(query, projections)
+                                    .limit(agentLimit)
+                                    .toArray()
+        if (!agents.length)
+        {
+            console.log(`no-agents-found. _id: ${Loc}`)
+            return
+        }
+        console.log(`agents-found. agents: ${agents}`)
+        return agents
     }
 
     this.ComparePasswd = async function (hash, passwd)
@@ -127,7 +166,7 @@ function User(mob_no, user_mode)
         }
         const res = jwt.verify(token, jwt_secret)
 
-        const user = await this.GetByID(ObjectId(res._id))
+        const user = await this.GetByID(res._id)
         if (!user)
         {
             console.log('token-missing', res._id)

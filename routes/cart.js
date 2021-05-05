@@ -1,9 +1,9 @@
 const express 	        = require("express");
 const router 	          = express.Router();
-const { code, text } 	  = require("../../common/error");
-const {Cart, CartEntry} = require("../../database/cart");
+const { code, text } 	  = require("../common/error");
+const {Cart, CartEntry} = require("../database/cart");
 const { ObjectId }      = require("mongodb")
-const validator         = require("../../validators/customer/cart");
+const validator         = require("../validators/customer/cart");
 
 // Insert product
 router.post("/insert", validator.add_cart, async (req, res, next) => {

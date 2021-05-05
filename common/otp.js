@@ -53,7 +53,11 @@ function OneTimePasswd(data)
   
   this.SMS = async function(retries = 3)
   {
-    if (retries <= 0) return;
+    if (retries <= 0 || !this.MobNo) 
+    {
+      if (!this.MobNo) {console.log('mobile-no-not-found', this)}
+      return
+    }
     
     const msg =
     {
@@ -72,7 +76,11 @@ function OneTimePasswd(data)
   
   this.Email = async function(retries = 3)
   {
-    if (retries <= 0) return;
+    if (retries <= 0 || !this.Email)
+    {
+      if (!this.Email) {console.log('mail-id-not-found', this)}
+      return
+    }
 
     let email =
     {
