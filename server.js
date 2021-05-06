@@ -3,7 +3,7 @@ require("./settings")
 
 const express                           = require("express")
 const app                               = express()
-const { Auth, Forbidden, GracefulExit } = require("./common/mw");
+const { Auth, Forbidden, GracefulExit } = require("./common/adapter");
 
 // routes customer
 const home = require("./routes/customer/home");
