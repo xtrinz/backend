@@ -37,8 +37,7 @@ router.post("/user/register", async (req, res, next) =>
 
       case task.Register:
         const user  = new User()
-        const token = req.headers["Authorization"]
-        await user.Auth(token)
+        await user.Auth(req.headers["Authorization"])
         await user.Register(req.body)
         text_ = text.Registered
         break
@@ -95,8 +94,7 @@ router.post( "/user/password/forgot", async (req, res, next) =>
 
       case task.SetPasswd:
           const user  = new User()
-          const token = req.headers["Authorization"]
-          await user.Auth(token)
+          await user.Auth(req.headers["Authorization"])
           await user.UpdatePasswd(req.body.Password)
           text_       = text.PasswdUpdated
           break
@@ -114,8 +112,7 @@ router.post( "/user/password/forgot", async (req, res, next) =>
 router.get("/user/profile", async (req, res, next) => {
   try {
     const user  = new User()
-    const token = req.headers["Authorization"]
-    await user.Auth(token)
+    await user.Auth(req.headers["Authorization"])
 
     const data = 
     {
@@ -139,8 +136,7 @@ router.put("/user/profile", async (req, res, next) =>
   {
     let text_
     const user  = new User()
-    const token = req.headers["Authorization"]
-    await user.Auth(token)
+    await user.Auth(req.headers["Authorization"])
 
     switch (req.body.Task)
     {

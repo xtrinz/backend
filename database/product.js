@@ -11,10 +11,8 @@ function Product(data)
    this.Name        = data.Name
    this.Image       = data.Image
    this.Price       = data.Price
-   this.SerialNo    = data.SerialNo
    this.Quantity    = data.Quantity
    this.Description = data.Description
-   //this.Options = [{Name: ,Image: ,Text: }]
 
    this.Set        = function()
    {
@@ -24,7 +22,6 @@ function Product(data)
         this.Name        = data.Name
         this.Image       = data.Image
         this.Price       = data.Price
-        this.SerialNo    = data.SerialNo
         this.Quantity    = data.Quantity
         this.Description = data.Description
    }
@@ -81,7 +78,7 @@ function Product(data)
          Name : 1,  Image   : 1,
          Price: 1,  Quantity: 1 
        }
-       const query = { StoreID: _id }
+       const query = { StoreID: ObjectId(_id) }
        let products_ = await products.find(query, project)
                                           .toArray()
        if (!products_.length)

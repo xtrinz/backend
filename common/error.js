@@ -44,6 +44,9 @@ module.exports =
     , StaffNotFound             : 'Staff not found'
     , UnapprovedSotre           : 'Unapproved Store'
     , StaffExists               : 'Staff already exists'
+    , CartNotFound              : 'Cart not found'
+    , NoProductsFound           : 'No products found'
+    , PageNotFound              : 'Page not found'
 	},
   text:
   {

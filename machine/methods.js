@@ -1,7 +1,8 @@
-const { states, alerts, entity }= require("./models")
-const { Emit } 					= require("./events")
-const otp 						= require("../common/otp")
-const { User } 					= require("../database/user")
+const   { states, alerts, entity }	= require("./models")
+	  , { Emit } 					= require("./events")
+	  , otp 						= require("../common/otp")
+	  , { User } 					= require("../database/user")
+      , pay 						= require('./payment')
 
 /**
  * #Method/ActivatedBy 	:  01/Server(User)
@@ -51,7 +52,7 @@ const CargoCancelledByUser		=  function(ctxt)
 	ctxt.State 		= states.CargoCancelled
 	ctxt.Event 		= ""
 	ctxt.Save()
-	ProcessMonetaryReturns(ctxt)
+	pay.ProcessMonetaryReturns(ctxt)
 	console.log('cargo-cancelled', ctxt)
 }
 
@@ -77,7 +78,7 @@ const OrderRejectedByShop		=  function()
 	ctxt.State 		= states.OrderRejected
 	ctxt.Event 		= ""
 	ctxt.Save()
-	ProcessMonetaryReturns(ctxt)
+	pay.ProcessMonetaryReturns(ctxt)
 	console.log('order-rejected', ctxt)
 }
 
@@ -368,7 +369,7 @@ const TransitCompletedByAgent		=  function(ctxt)
 	ctxt.Event 		= ""
 	ctxt.Save()
 
-	ProcessMonetaryReturns(ctxt)
+	pay.ProcessMonetaryReturns(ctxt)
 
 	console.log('transit-completed', ctxt)
 }

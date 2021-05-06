@@ -1,5 +1,6 @@
 const { users }                     = require("../connect")
 const { Err, code, status, reason } = require("../../common/error")
+const { ObjectId }                  = require("mongodb")
 
 function Address(data)
 {
@@ -40,11 +41,20 @@ function Address(data)
         }
         console.log('address-inserted', query, opts)
     }
-/*
-    this.Update     = function (user_id, entry_id)
+
+    this.List     = function (user_id)
     {
-        const   query = { _id: user_id, 'AddressList._id': entry_id }
-              , opts  = { $set: { 'AddressList.$.Qnty': qnty }      }
+        const   query   = { _id: ObjectId(user_id) }
+              , project = { AddressList: 1 }
+        const resp  = await users.find(query, project)
+        console.log('address-list', resp)
+        return resp
+    }
+
+    this.Update     = function (data)
+    {
+        const   query = { _id: data.UserID, 'AddressList._id': data.AddressID }
+              , opts  = { $set: { 'AddressList.$': data }      }
 
         const resp  = await users.updateOne(query, opts)
         if (resp.modifiedCount !== 1) 
@@ -56,7 +66,7 @@ function Address(data)
         }
         console.log('address-updated', query, opts)
     }
-*/
+
     this.Remove     = function (user_id, entry_id)
     {
         const   query = { _id: user_id }

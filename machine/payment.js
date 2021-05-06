@@ -1,7 +1,4 @@
-const { states } = require("../machine/models")
-// ProcessMonetaryReturns represents update utility 
-// to set-compenstaion-counters or initiate refund
-// on every transit for Agent/ User/ Admin
+const { states } = require("./models")
 const ProcessMonetaryReturns = function(ctxt)
 {
     switch (ctxt.State)

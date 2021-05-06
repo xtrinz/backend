@@ -1,11 +1,9 @@
 // environmental variables stored in .env file
 require("dotenv").config()
 require("./settings")
-const express = require("express");
-const {
-  verifyAuthorizationToken,
-  forbiddenApiCall,
-} = require("./common/middleware");
+const express             = require("express")
+const app                 = express()
+const { Auth, Forbidden } = require("./common/middleware");
 
 // routes customer
 const home = require("./routes/customer/home");
@@ -32,10 +30,7 @@ const {
   handleUnCaughtException,
   handlePromiseRejection,
 } = require("./error/errorhandlers");
-const { gracefulShutdown } = require("./common/utils");
-
-// creating application
-const app = express();
+const { gracefulShutdown } = require("./common/utils")
 
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -54,8 +49,9 @@ app.use(
 app.use("/register", register);
 app.use("/login", login);
 app.use("/webhook", webhook);
-// middleware for verifieying jwt token
-app.use(verifyAuthorizationToken);
+
+// Authenitcate
+app.use(Auth);
 
 app.use("/", home);
 app.use("/cart", cart);
@@ -71,7 +67,7 @@ app.use("/crudshop", crudshop);
 app.use("/crudemployee", crudemployee);
 app.use("/order", shoporderhistory);
 app.use("/paymentstatement", paymentstatement);
-app.use(forbiddenApiCall);
+app.use(Forbidden);
 
 // error handling
 app.use(returnError);

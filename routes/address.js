@@ -28,7 +28,7 @@ router.get("/list", async (req, res, next) =>
   try
   {
     const address   = new Address() 
-    const data      = await address.Read(ObjectId(req.query.UserID)) // TODO
+    const data      = await address.List(req.query.UserID) // TODO
 
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -38,14 +38,12 @@ router.get("/list", async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-// Update address
+// Modify address
 router.post("/modify", async (req, res, next) => {
   try
   {
     const entry = new Address()
-    await entry.Update( ObjectId(req.body.AddressID),
-                        ObjectId(req.body.UserID),
-                        req.body.Quantity)
+    await entry.Update(req.body)
     
     return res.status(code.OK).json({
       Status  : status.Success,

@@ -164,12 +164,13 @@ function User(mob_no, user_mode)
                   , reason_     = reason.TokenMissing
             throw new Err(code_, status_, reason_)
         }
-        const res = jwt.verify(token, jwt_secret)
+        token       = token.slice(7) // cut 'Bearer '
+        const res   = jwt.verify(token, jwt_secret)
 
         const user = await this.GetByID(res._id)
         if (!user)
         {
-            console.log('token-missing', res._id)
+            console.log('user-not-found', res._id)
             const   code_       = code.BAD_REQUEST
                   , status_     = status.Failed
                   , reason_     = reason.UserNotFound
