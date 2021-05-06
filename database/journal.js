@@ -48,14 +48,14 @@ function Journal(data)
     this.New       = function(data)
     {
       // data.AddressID
-      const address = this.GetByID(ObjectId(Id))
+      /* const address = this.GetByID(ObjectId(Id))
       if (!cart)
       {
         const   code_       = code.BAD_REQUEST
               , status_     = status.Failed
               , reason_     = reason.CartNotFound
         throw new Err(code_, status_, reason_)
-      }
+      }*/
     }
 
 }

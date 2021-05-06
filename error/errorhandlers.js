@@ -1,4 +1,4 @@
-const { gracefulShutdown } = require("../common/utils");
+const { client } = require("../database/connect")
 const BaseError = require("./errorclass/baserror");
 const { code } = require("../common/error")
 const { validationResult } = require("express-validator");
@@ -7,6 +7,17 @@ const {
   Api409Error,
   Api401Error,
 } = require("./errorclass/errorclass");
+
+
+const GracefulExit = async function () 
+{
+  try 
+  {
+    console.log('graceful-exit')
+    await client.close()
+  } catch (err) { console.log(err) }
+}
+
 
 function returnError(err, req, res, next) {
   console.error(err);
@@ -24,7 +35,7 @@ async function handleUnCaughtException(error) {
   if (!isOpErr) {
     process.exit(1); // Todo : we need pm2 to restart automatically in production environment
   } else {
-    await gracefulShutdown();
+    await GracefulExit();
   }
 }
 

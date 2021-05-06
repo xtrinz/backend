@@ -1,5 +1,5 @@
-require("dotenv").config()
 const { Err, code, status, reason } = require("./error")
+const { client }                    = require("../database/connect")
 
 const Auth = async function (req, res, next)
 {
@@ -24,16 +24,18 @@ const Forbidden = (req, res, next) =>
   } catch (err) { next(err) }
 }
 
-const GracefulExit = async function () {
-  try {
+const GracefulExit = async function () 
+{
+  try 
+  {
+    console.log('graceful-exit')
     await client.close()
-  } catch (error) {
-    console.log(error)
-  }
+  } catch (err) { console.log(err) }
 }
 
 module.exports =
 {
-    Auth      : Auth
-  , Forbidden : Forbidden
+    Auth          : Auth
+  , Forbidden     : Forbidden
+  , GracefulExit  : GracefulExit
 }

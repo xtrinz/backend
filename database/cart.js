@@ -132,14 +132,14 @@ function Cart(user_id)
 
    this.Flush       = function(Id)
    {
-    const cart = this.GetByID(ObjectId(Id))
-    if (!cart)
-    {
-      const   code_       = code.BAD_REQUEST
-            , status_     = status.Failed
-            , reason_     = reason.CartNotFound
-      throw new Err(code_, status_, reason_)
-    }
+      const cart = this.GetByID(ObjectId(Id))
+      if (!cart)
+      {
+        const   code_       = code.BAD_REQUEST
+              , status_     = status.Failed
+              , reason_     = reason.CartNotFound
+        throw new Err(code_, status_, reason_)
+      }
    }
 }
 

@@ -1,5 +1,4 @@
 const express = require("express");
-const { code } = require("../../common/error");
 const {
   dataForPaymentPage,
   addTemporaryProductInUserForPaymentPage,

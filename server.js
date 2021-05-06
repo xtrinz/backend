@@ -1,9 +1,9 @@
-// environmental variables stored in .env file
-require("dotenv").config()
+require("dotenv").config() // Read .env
 require("./settings")
-const express             = require("express")
-const app                 = express()
-const { Auth, Forbidden } = require("./common/middleware");
+
+const express                           = require("express")
+const app                               = express()
+const { Auth, Forbidden, GracefulExit } = require("./common/mw");
 
 // routes customer
 const home = require("./routes/customer/home");
@@ -25,12 +25,12 @@ const crudemployee = require("./routes/shop/crudemployee");
 const shoporderhistory = require("./routes/shop/shoporderhistory");
 const paymentstatement = require("./routes/shop/paymentstatement");
 
-const {
+const
+{
   returnError,
   handleUnCaughtException,
   handlePromiseRejection,
-} = require("./error/errorhandlers");
-const { gracefulShutdown } = require("./common/utils")
+} = require("./error/errorhandlers")
 
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -78,11 +78,12 @@ process.on("uncaughtException", handleUnCaughtException);
 process.on("unhandledRejection", (err) => { console.log(err) }); // TODO Need proper handler
 [`exit`, `SIGINT`, `SIGKILL`, `SIGTERM`].forEach((type) =>
 {
-  process.on(type, gracefulShutdown);
+  process.on(type, GracefulExit);
 })
 */
 
-const server = app.listen(3001, () => {
+const server = app.listen(3001, () =>
+{
   console.log("Server Running On Port 3001");
 })
 
