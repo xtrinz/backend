@@ -15,19 +15,19 @@ router.post("/shop/register", async (req, res, next) =>
     switch(req.body.Task)
     {
         case task.New:
-            const store = new Store(req.body)
+            let store = new Store(req.body)
             await store.New(req.body)
             text_ = text.OTPSendToMobNo.format(store.MobileNo.slice(-4))
             break
 
         case task.ReadOTP:
-            const store  = new Store()
+            let store  = new Store()
             await store.ConfirmContactNo(req.body)
             text_ = text.OTPConfirmed
             break
         
         case task.Approve:
-            const store  = new Store()
+            let store  = new Store()
             await store.Approve(req.body)
             text_ = text.Approved
             break
@@ -61,8 +61,8 @@ router.get("/store/list", async (req, res, next) => {
 router.get("/store/view", async (req, res, next) => {
     try 
     {
-      const   store = new Store()
-            , id    = ObjectId(req.query.StoreID)
+      let     store = new Store()
+      const     id  = ObjectId(req.query.StoreID)
             , user  = ObjectId(req.query.user._id)
             , data  = await store.Read(id, user)
 
@@ -82,7 +82,7 @@ router.post("/store/staff", async (req, res, next) =>
     try 
     {
       let text_
-      const store = new Store()
+      let store = new Store()
       switch(req.body.Task)
       {
         case task.Request:
@@ -116,7 +116,7 @@ router.get("/store/staff", async (req, res, next) =>
 {
     try 
     {
-      const store = new Store()
+      let store = new Store()
       const data  = store.ListStaff(req.query)
       return res.status(code.OK).json({
         Status  : status.Success,
@@ -131,7 +131,7 @@ router.get("/store/list", async (req, res, next) =>
 {
     try 
     {
-      const store = new Store()
+      let store = new Store()
       const data  = store.ListStores(req.query)
       return res.status(code.OK).json({
         Status  : status.Success,

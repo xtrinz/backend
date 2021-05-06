@@ -9,13 +9,37 @@ function Cart(user_id)
 {
    this._id         = ''
    this.UserID      = user_id
-   this.Products    = []
+   this.Products    = []    
+   this.Bill        = 
+   {
+         Total           : 0
+       , ShipmentCost    : 0
+       , Tax             : 0
+       , NetPrice        : 0
+   }
 
    this.Set(data)
    {
       this._id       = data._id
       this.UserID    = data.UserID
       this.Products  = data.Products
+   }
+
+   this.Save       = async function()
+   {
+       console.log('save-cart', this)
+       const   query = { _id : this._id }
+              , act   = { $set : this }
+              , opt   = { upsert : true }
+       const resp  = await users.updateOne(query, act, opt)
+       if (resp.modifiedCount !== 1) 
+       {
+           console.log('save-cart-failed', this)
+           const   code_   = code.INTERNAL_SERVER
+                 , status_ = status.Failed
+                 , reason_ = reason.DBAdditionFailed
+          throw new Err(code_, status_, reason_)
+       }
    }
 
    this.GetByIDAndUserID = function(_id, user_id)
@@ -35,7 +59,7 @@ function Cart(user_id)
 
    this.Create      = function ()
    {
-        this._id   = new ObjectID()
+        this._id        = new ObjectID()
         const resp = await carts.insertOne(this);
         if (resp.insertedCount !== 1)
         {
@@ -49,58 +73,20 @@ function Cart(user_id)
         return this._id
    }
 
-   this.Read        = function ()
+   this.Read        = function (data)
    {
-        // TODO
-        // Should Do Better
-        // Model Product First
-   }
-
-   this.Delete      = function (Id, user_id)
-   {
-        const query = {_id : ObjectId(Id), UserID: ObjectId(user_id)}
-        const resp  = await carts.deleteOne(query);
-        if (resp.deletedCount !== 1)
-        {
-            console.log('cart-deletion-failed', query)
-            const   code_  = code.INTERNAL_SERVER
-                  , status_= status.Failed
-                  , reason_= reason.DBDeletionFailed
-            throw new Err(code_, status_, reason_)
-        }
-        console.log('cart-deleted', query)
-   }
-
-   this.Checkout    = function(data)
-   {
-      const cart = this.GetByIDAndUserID(ObjectId(data.CartID), ObjectId(data.UserID))
-      if (!cart || !cart.Products.length)
+      let data =
+      {
+          Products: []
+        , Bill    : this.Bill 
+      }
+      let cart = this.GetByIDAndUserID(ObjectId(data.CartID), ObjectId(data.UserID))
+      if (!cart)
       {
         const   code_       = code.BAD_REQUEST
               , status_     = status.Failed
-        let     reason_     = reason.CartNotFound
-        if (cart) { reson_ = reason.NoProductsFound }
+              , reason_     = reason.CartNotFound
         throw new Err(code_, status_, reason_)
-      }
-
-      const   storeId = this.Products[0].StoreID
-            , store_  = new Store()
-            , store   = store_.GetByID(storeId)
-      if (!store)
-      {
-        const   code_       = code.BAD_REQUEST
-              , status_     = status.Failed
-              , reason_     = reason.StoreNotFound
-        throw new Err(code_, status_, reason_)
-      }
-
-      const journal = new Journal()
-      journal.Seller = 
-      {
-            ID        : store._id
-          , Name      : store.Name
-          , Location  : store.Location
-          , Address   : store.Address
       }
 
       this.Products.forEach(item => 
@@ -123,16 +109,36 @@ function Cart(user_id)
           , Image     : product.Image
           , Quantity  : item.Quantity
         }
-        journal.Products.push(node)
-        journal.Bill.Total += node.Price
-      })
+        data.Products.push(node)
+        data.Bill.Total += node.Price 
+        
+        // --TODO--
+        // Calculate rest of the Bill attrs
+        // and shipmeent cost
 
-      journal.New(data)
+      })
+      console.log('cart-read', data)
+      return data
+   }
+
+   this.Delete      = function (Id, user_id)
+   {
+        const query = {_id : ObjectId(Id), UserID: ObjectId(user_id)}
+        const resp  = await carts.deleteOne(query);
+        if (resp.deletedCount !== 1)
+        {
+            console.log('cart-deletion-failed', query)
+            const   code_  = code.INTERNAL_SERVER
+                  , status_= status.Failed
+                  , reason_= reason.DBDeletionFailed
+            throw new Err(code_, status_, reason_)
+        }
+        console.log('cart-deleted', query)
    }
 
    this.Flush       = function(Id)
    {
-      const cart = this.GetByID(ObjectId(Id))
+      let cart = this.GetByID(ObjectId(Id))
       if (!cart)
       {
         const   code_       = code.BAD_REQUEST
@@ -140,6 +146,15 @@ function Cart(user_id)
               , reason_     = reason.CartNotFound
         throw new Err(code_, status_, reason_)
       }
+      this.Products    = []    
+      this.Bill        = 
+      {
+            Total           : 0
+          , ShipmentCost    : 0
+          , Tax             : 0
+          , NetPrice        : 0
+      }
+      this.Save()
    }
 }
 
@@ -170,7 +185,7 @@ function CartEntry(data)
   this.Update     = function (cart_id, entry_id, qnty)
   {
     const   query = { _id: cart_id, 'Products._id': entry_id }
-          , opts  = { $set: { 'Products.$.Quantity': qnty }      }
+          , opts  = { $set: { 'Products.$.Quantity': qnty }  }
 
     const resp  = await carts.updateOne(query, opts)
     if (resp.modifiedCount !== 1) 

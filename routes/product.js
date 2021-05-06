@@ -8,7 +8,7 @@ const { ObjectId }      = require("mongodb")
 router.post("/add", async (req, res, next) => {
   try
   {
-    const product = new Product(req.body)
+    let product = new Product(req.body)
     await product.Add()
     
     return res.status(code.OK).json({
@@ -40,8 +40,8 @@ router.get("/view", async (req, res, next) =>
 {
   try
   {
-    const product = new Product()
-    const data = await product.Read(req.query.ProductID) // TODO
+    let product = new Product()
+    const data  = await product.Read(req.query.ProductID) // TODO
     
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -55,7 +55,7 @@ router.get("/view", async (req, res, next) =>
 router.post("/modify", async (req, res, next) => {
   try
   {
-    const product = new Product(req.body)
+    let product = new Product(req.body)
     await product.Modify(req.body.ProductID)
     
     return res.status(code.OK).json({

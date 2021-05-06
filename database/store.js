@@ -57,15 +57,17 @@ function Store(data)
     this.Save       = async function()
     {
         console.log('save-store', this)
-        const resp  = await users.updateOne({ _id 	 : this._id },
-                                            { $set   : this	    },
-                                            { upsert : true     })
+        const   query = { _id : this._id }
+              , act   = { $set : this }
+              , opt   = { upsert : true }
+        const resp  = await users.updateOne(query, act, opt)
         if (resp.modifiedCount !== 1) 
         {
             console.log('save-store-failed', this)
-            throw new Err(code.INTERNAL_SERVER,
-                          status.Failed,
-                          reason.DBAdditionFailed)
+            const   code_   = code.INTERNAL_SERVER
+                  , status_ = status.Failed
+                  , reason_ = reason.DBAdditionFailed
+            throw new Err(code_, status_, reason_)
         }
     }
 
