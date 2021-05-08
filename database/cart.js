@@ -2,8 +2,6 @@ const { carts }                     = require("../connect")
 const { Err, code, status, reason } = require("../common/error")
 const { ObjectID, ObjectId }        = require("mongodb")
 const { Product }                   = require("./product")
-const { Store   }                   = require("./store")
-const { Journal }                   = require("./journal")
 
 function Cart(user_id)
 {
@@ -13,7 +11,7 @@ function Cart(user_id)
    this.Bill        = 
    {
          Total           : 0
-       , ShipmentCost    : 0
+       , TransitCost     : 0
        , Tax             : 0
        , NetPrice        : 0
    }
@@ -78,7 +76,13 @@ function Cart(user_id)
       let data =
       {
           Products: []
-        , Bill    : this.Bill 
+        , Bill    : 
+        {
+            Total           : 0
+          , TransitCost     : 0
+          , Tax             : 0
+          , NetPrice        : 0
+        }
       }
       let cart = this.GetByIDAndUserID(ObjectId(data.CartID), ObjectId(data.UserID))
       if (!cart)
@@ -110,13 +114,13 @@ function Cart(user_id)
           , Quantity  : item.Quantity
         }
         data.Products.push(node)
-        data.Bill.Total += node.Price 
-        
+        data.Bill.Total   += node.Price * node.Quantity
         // --TODO--
         // Calculate rest of the Bill attrs
         // and shipmeent cost
 
       })
+      data.Bill.NetPrice = data.Bill.Total // till algo get harderns
       console.log('cart-read', data)
       return data
    }
@@ -150,7 +154,7 @@ function Cart(user_id)
       this.Bill        = 
       {
             Total           : 0
-          , ShipmentCost    : 0
+          , TransitCost    : 0
           , Tax             : 0
           , NetPrice        : 0
       }

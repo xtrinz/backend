@@ -2,17 +2,19 @@ module.exports =
 {
 	states:
     {
-		// User
 		  None 							: 'None'
         , New 							: 'New'
         , MobConfirmed              	: 'MobileNumberConfirmed'
         , Registered                	: 'Registered'
 
-		// Journal
 		, PaymentSuccessTransitSuccess 	: 'Payment-Success-Transit-Success'
 		, PaymentSuccessTransitFailed 	: 'Payment-Success-Transit-Failed'
 		, PaymentFailedTransitSuccess 	: 'Payment-Failed-Transit-Success'
 		, PaymentFailedTransitFailed 	: 'Payment-Failed-Transit-Failed'
+
+		, Success 					    : 'Success'
+		, Failed 			            : 'Failed'
+        , Initiated                 	: 'Initiated'
     },
 	mode:
 	{
@@ -40,5 +42,10 @@ module.exports =
 		, Accept 						: 'Accept'
 		, Deny 							: 'Deny'
 		, Relieve 						: 'Relieve'
+	},
+
+	channel:
+	{
+		Stripe 							: 'Stripe'
 	}
 }

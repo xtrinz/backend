@@ -14,7 +14,7 @@ const CargoInitiatedByUser		=  function(ctxt)
 	console.log('process-cargo-init', ctxt)
 	const msg = 
 	{		 
-		To	: ctxt.Shop.SockID,
+		To	: [...ctxt.User.SockID, ...ctxt.Shop.SockID], // user? since event initd by payment gw
 		Msg	:
 		{
 			Type: alerts.NewOrder,
