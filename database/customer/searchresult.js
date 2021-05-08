@@ -1,5 +1,12 @@
-const { ObjectId } = require("mongodb");
-const { shops, products } = require("../connect");
+const { ObjectId }  = require("mongodb")
+const { shops }     = require("../connect")
+
+/**
+ * 
+ * Return record, if any one of the array
+ * element matches with enums in the document
+ * 
+ */
 
 const dataForSearchResultPage = async function (searchresult) {
   // if search type is shop then query in shop info

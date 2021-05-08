@@ -93,7 +93,7 @@ module.exports =
 	entity:
 	{
 		  User 						: 'User'
-		, Shop 						: 'Shop'
+		, Store 					: 'Store'
 		, Agent 					: 'Agent'
 		, Admin 					: 'Admin'
 	}

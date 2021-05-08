@@ -7,8 +7,8 @@ function Address(data)
     this._id        = ''
     this.Location   =
     {
-          Type          : 'Point'
-        , Coordinates   : [data.Longitude, data.Latitude]
+          type          : 'Point'
+        , coordinates   : [data.Longitude, data.Latitude]
     }
     this.State      = states.New
     this.Tag        = data.Tag

@@ -1,8 +1,7 @@
-const express           = require("express");
-const { code, status }  = require("../../common/error");
-const { text } = require("../common/error");
-const { Store }         = require("../database/store");
-const { User }          = require("../database/user")
+const express           = require("express")
+const { code, status }  = require("../../common/error")
+const { text }          = require("../common/error")
+const { Store }         = require("../database/store")
 const router            = express.Router()
 
 router.get("/feed", async (req, res, next) => {
@@ -23,6 +22,22 @@ router.get("/feed", async (req, res, next) => {
         Status  : status.Success,
         Text    : text_,
         Data    : data
+      })
+  } catch (err) { next(err) }
+})
+
+router.get("/search", async (req, res, next) => {
+  try
+  {
+    let text_
+    // const data = req.query // Lattitude & Longitude should be taken from user record
+    const data_ = []
+    if(!data_.length) { text_ = text.NoDataFound}
+
+    return res.status(code.OK).json({
+        Status  : status.Success,
+        Text    : text_,
+        Data    : data_
       })
   } catch (err) { next(err) }
 })

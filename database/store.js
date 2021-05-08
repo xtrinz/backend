@@ -17,8 +17,8 @@ function Store(data)
     this.Email               = data.Email
     this.Location            =
     {
-          Type          : 'Point'
-        , Coordinates   : [data.Longitude, data.Latitude]
+          type          : 'Point'
+        , coordinates   : [data.Longitude, data.Latitude]
     }
     this.State               = states.New
     
@@ -131,7 +131,7 @@ function Store(data)
         const   nPerPage = 30
               , skip     = PageNo > 0 ? (PageNo - 1)*nPerPage : 0;
         const query      = 
-        { location: { $near: { $geometry: 
+        { Location: { $near: { $geometry: 
             { type: "Point",
               coordinates: [Lon, Lat] } } } }
 

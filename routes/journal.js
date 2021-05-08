@@ -1,5 +1,5 @@
 const express 	  = require("express")
-const router 	  = express.Router()
+const router 	    = express.Router()
 const { code } 	  = require("../common/error")
 const { Journal } = require("../database/journal")
 
@@ -8,7 +8,7 @@ router.post("/journal/confirm", async (req, res, next) =>
 {
   try
   {
-    
+
     const journal = new Journal()
     await journal.UpdateStatusAndInitTransit(req)
     return res.send(code.OK)
@@ -18,6 +18,38 @@ router.post("/journal/confirm", async (req, res, next) =>
     console.log('payment-confirmation-failed', err)
     return res.send(code.BAD_REQUEST)
   }
+})
+
+// List Journals (user/shop)
+router.get("/journal/list", async (req, res, next) =>
+{
+  try
+  {
+    const journal = new Journal() 
+    const data = await journal.List(req.query) // TODO
+    
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : '',
+      Data    : data
+    })
+  } catch (err) { next(err) }
+})
+
+// Journals (user/shop)
+router.get("/journal/read", async (req, res, next) =>
+{
+  try
+  {
+    const journal = new Journal() 
+    const data = await journal.Read(req.query) // TODO
+    
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : '',
+      Data    : data
+    })
+  } catch (err) { next(err) }
 })
 
 module.exports = router

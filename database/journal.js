@@ -1,11 +1,13 @@
 const { Cart }                     = require("./cart")
 const { Store }                    = require("./store")
 const { Transit }                  = require("./transit")
+const { User }                     = require("./user")
 const { Stripe }                   = require("../common/stripe")
 const { Err, code, status, reason }= require("../common/error")
 const { states, type, channel }    = require("../common/models")
-const { journals }                 = require("./connect")
+const { journals, stores }         = require("./connect")
 const { ObjectID }                 = require("mongodb")
+const { entity } = require("../machine/models")
 
 function Journal()
 {
@@ -33,14 +35,14 @@ function Journal()
     }
     this.Bill     = 
     {
-      Total           : 0
+        Total           : 0
       , TransitCost     : 0
       , Tax             : 0
       , NetPrice        : 0
     }
     this.Payment  =
     {
-      Channel         : channel.Stripe
+        Channel         : channel.Stripe
       , TransactionID   : ''
       , Amount          : ''
       , Status          : states.Initiated
@@ -155,6 +157,8 @@ function Journal()
       this.Payment.Amount           = data_.Bill.NetPrice
       this.Save()
 
+      // TODO Add Journal ID to the cart & remove it only after payment success
+
       data_ = {...data_, ...intent}
       console.log('checkout-initiated', data_)
       return data_
@@ -191,6 +195,65 @@ function Journal()
             this.Payment.Status = states.Failed
             this.Save()
       }     
+    }
+
+    this.List = function(data)
+    {
+      switch(data.Entity)
+      {
+            case entity.User:
+            let user    = new User()
+            const user_ = user.GetByID(data.UserID)
+            if (!user_)
+            {
+                  const     code_ = code.NOT_FOUND
+                        , status_ = status.Failed
+                        , reason_ = reason.UserNotFound
+                  throw new Err(code_, status_, reason_)
+            }
+            const data_ = {}
+            /* const   query = 
+                        { 
+                                Buyer :  { UserID : user._id }
+                              , Payment: { Status : states.Success } 
+                        }
+                  , proj  = 
+                        {
+                                _id      : 1
+                              , Seller   : { ID : 1 , Name : 1 }
+                              , Bill     : 1
+                              , Products : 1
+                              , Transit  : { ID : 1 , FinalStatus : 1 }
+                        }
+            const data_   = this.Get(query, proj) */
+            return data_
+
+            case entity.Store:
+            let store    = new Store()
+            const store_ = store.GetByIDAndMgmtID(data.UserID, data.StoreID)
+            if (!store_)
+            {
+                  const     code_ = code.NOT_FOUND
+                        , status_ = status.Failed
+                        , reason_ = reason.StoreNotFound
+                  throw new Err(code_, status_, reason_)
+            }
+            break
+      }
+    }
+
+    this.Read = function(data)
+    {
+      switch(data.Entity)
+      {
+            case entity.User:
+            let data_
+            return data_
+
+            case entity.Store:
+            let data_
+            return data_      
+      }
     }
 }
 
