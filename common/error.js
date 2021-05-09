@@ -72,6 +72,7 @@ module.exports =
     , ResponseUpdated           : 'Response updated'
     , NoContextFound            : 'No context found'
     , Relieved                  : 'Relieved'
+    , Server                    : 'Server running on port {0}'
   },
   code:
   {

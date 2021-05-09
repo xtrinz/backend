@@ -17,10 +17,6 @@ const journals 	= database.collection("journal")
 const transits 	= database.collection("transit")
 
 const shops 	  = database.collection("shopinfo")
-const purchases = database.collection("purchasehistory")
-const tempUsers = database.collection("temporaryuser")
-const sessions 	= database.collection("session")
-const tempShops = database.collection("tempshopinfo")
 const orders 	  = database.collection("shoporderhistory")
 
 module.exports  =
@@ -35,9 +31,5 @@ module.exports  =
   transits,
 
   shops,
-  purchases,
-  tempUsers,
-  sessions,
-  tempShops,
   orders
 }

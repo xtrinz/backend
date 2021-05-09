@@ -1,10 +1,10 @@
-require("dotenv").config()
 require("./settings")
 
 const   express = require("express")
       , app     = express()
       , port    = process.env.PORT
       , adptr   = require("./common/adapter")
+      , { text }= require('./common/error')
 
       , user    = require('./routes/user'   )
       , store   = require('./routes/store'  )
