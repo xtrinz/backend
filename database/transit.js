@@ -10,20 +10,22 @@ function Transit (journal)
     this.JournalID  = journal._id
     this.Store 		=
     {
-        _id         : journal.Buyer.ID,
-        SockID      : [],
-        Name        : journal.Buyer.Name,
-        ContactNo   : journal.Buyer.ContactNo,
-        Location    : journal.Buyer.Location
+          _id         : journal.Seller.ID
+        , SockID      : []
+        , Name        : journal.Seller.Name
+        , ContactNo   : journal.Seller.ContactNo
+        , Location    : journal.Seller.Location
+        , Address     : journal.Seller.Address
     }
 
     this.User 		= 
     {
-        _id         : journal.Buyer.ID,
-        SockID      : [],
-        Name        : journal.Buyer.Name,
-        ContactNo   : journal.Buyer.ContactNo,
-        Location    : journal.Buyer.Location
+          _id         : journal.Buyer.ID
+        , SockID      : []
+        , Name        : journal.Buyer.Name
+        , ContactNo   : journal.Buyer.ContactNo
+        , Location    : journal.Buyer.Location
+        , Address     : journal.Buyer.Address
     }
 
     this.Return 	= ""                                    // Machine's prev-state for fallbacks
@@ -50,7 +52,7 @@ function Transit (journal)
           , JournalID	: this.JournalID
           , UserName 	: this.User.Name
           , StoreName 	: this.Store.Name
-          , 
+          , StoreCity   : this.Store.Address.City
         }
         if (this.Agent && !args.includes(entity.Agent))
         {

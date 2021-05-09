@@ -21,14 +21,14 @@ function Journal()
 
     this.Buyer    =
     {
-      ID              : ''
+        ID              : ''
       , Name            : ''
       , Location        : {}
       , Address         : {}
     }
     this.Seller   =
     {
-      ID              : ''
+        ID              : ''
       , Name            : ''
       , Location        : {}
       , Address         : {}
