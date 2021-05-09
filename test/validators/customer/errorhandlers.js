@@ -1,5 +1,5 @@
-const { client } = require("../database/connect")
-const { code } = require("../common/error")
+const { client } = require("../../../database/connect")
+const { code } = require("../../../common/error")
 const { validationResult } = require("express-validator");
 
 class BaseError extends Error {
