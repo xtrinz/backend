@@ -28,6 +28,9 @@ function Transit (journal)
         , Address     : journal.Buyer.Address
     }
 
+    this.Agent      = {}
+
+    this.Agents     = []                                    // Pool of live agents filtered for transit
     this.Return 	= ""                                    // Machine's prev-state for fallbacks
     this.State 		= states.None                           // Machine init state
     this.Event 		= events.EventInitiationByUser          // Machine init event
@@ -48,11 +51,12 @@ function Transit (journal)
     {
         let obj =
         {
-            TransitID   : this._id
-          , JournalID	: this.JournalID
-          , UserName 	: this.User.Name
-          , StoreName 	: this.Store.Name
-          , StoreCity   : this.Store.Address.City
+            TransitID     : this._id
+          , JournalID	  : this.JournalID
+          , UserName 	  : this.User.Name
+          , StoreName 	  : this.Store.Name
+          , StoreCity     : this.Store.Address.City
+          , StoreLocation : this.Store.Location
         }
         if (this.Agent && !args.includes(entity.Agent))
         {

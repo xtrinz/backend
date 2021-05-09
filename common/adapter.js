@@ -40,7 +40,8 @@ const ErrorHandler = function(err, req, res, next)
   {
     res.status(err.Code).json({
       Status  : err.Status,
-      Reason  : err.Reaon
+      Text    : err.Reaon,
+      Data    : {}
     })
     return
   }

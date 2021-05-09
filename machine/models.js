@@ -16,6 +16,8 @@ module.exports =
 		, OrderTimeExceeded 		: 'OrderTimeExceeded'
 		// OrderAccepted 			: Order accpeted by shop.
 		, OrderAccepted 			: 'OrderAccepted'
+		// OrderOnHold 				: Order on hold due to no nearby live agents
+		, OrderOnHold 				: 'OrderOnHold'
 		// OrderDespatched 			: Order gave to agent by shop.
 		, OrderDespatched 			: 'OrderDespatched'
 
@@ -91,6 +93,8 @@ module.exports =
 		, Delivered 				: 'Delivered'
 		// Ignored					: to none
 		, Ignored 					: 'Ignored'
+		// NoAgents 				: to admin 		on absents of live agents
+		, NoAgents 					: 'NoAgents'
 	},
 	entity:
 	{

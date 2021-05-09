@@ -34,8 +34,13 @@ const Machine 						=
 		{ 
 			  [events.EventIgnoranceByAgent] 		: method.TransitIgnoredByAgent
 			, [events.EventRespTimeoutByAgent] 		: method.TransitAcceptanceTimeout
-			, [events.EventRejectionByStore] 		: method.OrderRejectedByStore// handler separately #02
+			, [events.EventRejectionByStore] 		: method.OrderRejectedByStore 		// handler separately #02
 			, [events.EventAcceptanceByAgent] 		: method.TransitAcceptedByAgent
+		}
+
+		, [states.OrderOnHold] 						:
+		{ 
+			  [events.EventRefeedAgentsByAdmin] 	: method.OrderAcceptedByStore
 		}
 
 		, [states.TransitIgnored] 					:
@@ -64,7 +69,6 @@ const Machine 						=
 		, [states.TransitRejected] 					:
 		{
 			  [events.EventAcceptanceByAgent] 		: method.TransitAcceptedByAgent
-			,
 		}
 
 		, [states.TranistComplete] 					:

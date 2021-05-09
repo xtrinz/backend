@@ -164,7 +164,7 @@ function User(mob_no, user_mode)
                   , reason_     = reason.TokenMissing
             throw new Err(code_, status_, reason_)
         }
-        token       = token.slice(7) // cut 'Bearer '
+        token       = token.slice(7) // cut 'Bearer <token>'
         const res   = jwt.verify(token, jwt_secret)
 
         const user = await this.GetByID(res._id)

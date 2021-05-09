@@ -32,10 +32,10 @@ const CargoInitiatedByUser		=  function(ctxt)
 /**
  * #Method/ActivatedBy 	:  02/User
  * Start/End(States) 	:  CargoInitiated/CargoCancelled
- * Policy				:  Cancel permitted before despatchment
+ * Policy				:  Permit cancel before despatchment
  * User 				:  Refund with added penalty
  * Agent				:  Event/s - Cancelled
- * Store					:  Event   - Cancelled
+ * Store				:  Event   - Cancelled
  **/
 const CargoCancelledByUser		=  function(ctxt)
 {
@@ -50,6 +50,8 @@ const CargoCancelledByUser		=  function(ctxt)
 		
 		break
 	}
+
+	ctxt.Return 	= ctxt.State
 	ctxt.State 		= states.CargoCancelled
 	ctxt.Event 		= ""
 	ctxt.Save()
@@ -105,29 +107,37 @@ const OrderAcceptanceTimeout		=  function()
 	Agent				:  Filter nearby active agents & send acceptance event
 	Store				:  
 	Admin				:  If no agents live, report to admin
-					   [TODO set a retry tirggering API from admin]
 */
 const OrderAcceptedByStore			=  function()
 {
 	console.log('process-order-acceptance', ctxt)
-	// Store -> User transit will be compensated with delivery charge,
-	// hence profitable pooling occures with agents near to shop
+
 	const agent = new User()
 	const agents = agent.ListNearbyLiveAgents(ctxt.Store.Location)
 	if(!agents)
 	{
-		// TODO
-		/**
-		 * Introduce a new state for 'accepted but on hold'
-		 * Notify the state to admin with option to Cancel the order or refeed to pipeline
-		 * Admin has to send some user to corresponding location on notification pops up
-		 * If a agent comes online in a location where orders with these state are available 
-		 * The agent should get it notified
-		 **/
+		// Notify admin about the absents of live agents
+		const msg_to_admin = 
+		{		 
+			To	: ctxt.User.SockID,
+			Msg	:
+			{
+				Type: alerts.NoAgents,
+				Data: ctxt.Abstract()
+			}
+		}
+		Emit(msg_to_admin)
+
+		ctxt.State  = states.OrderOnHold
+		ctxt.Event  = ""
+		ctxt.Save()
+		return
 	}
+
+	// Notify newby agents
 	let to = []
 	agents.forEach((agent)=>{ to.push(...agent.SockID)})
-	const msg = 
+	const msg_to_agents = 
 	{		 
 		To	: to,
 		Msg	:
@@ -135,20 +145,36 @@ const OrderAcceptedByStore			=  function()
 			Type: alerts.NewTransit,
 			Data: 
 			{
-				TransitID  		: ctxt._id,
-				JournalID		: ctxt.JournalID,
-				Origin 			: ctxt.User.Location,
-				Destination 	: ctxt.Store.Location,
-				ETD 			: ctxt.ETD
+				  TransitID  	: ctxt._id
+				, JournalID		: ctxt.JournalID
+				, OriginName 	: ctxt.Store.Name
+				, OriginCity 	: ctxt.Store.City
+				, OriginLocation: ctxt.Store.Location
+				, Destination 	: ctxt.User.Location
+				, ETD 			: ctxt.ETD
 			}
 		}
 	}
 	// Frond End has to calculate reach to origin and ETD to origin if needed
-	Emit(msg)
+	Emit(msg_to_agents)
+
 	// Save Agent pool to ctxt
-	ctxt.State = states.OrderAccepted
-	ctxt.Event = ""
+	ctxt.Agents = agents
+	ctxt.State  = states.OrderAccepted
+	ctxt.Event  = ""
 	ctxt.Save()
+	
+	// Notify user about the acceptance of order
+	const msg_to_user = 
+	{		 
+		To	: ctxt.User.SockID,
+		Msg	:
+		{
+			Type: alerts.Accepted,
+			Data: ctxt.Abstract()
+		}
+	}
+	Emit(msg_to_user)
 	console.log('order-accepted-by-shop', ctxt)
 }
 
@@ -161,9 +187,19 @@ const OrderAcceptedByStore			=  function()
 	Store				:  Read & validate OTP in the request
 	Admin				:  Fraud Alert if for incorrect OTP
 */
-const OrderDespatchedByStore		=  function()
+const OrderDespatchedByStore		=  function(ctxt)
 {
+	// TODO set ctxt.Shop.Otp from route
 	console.log('process-order-despatchment', ctxt)
+	
+	const otp_ = new otp.OneTimePasswd({MobNo: "", Body: ""})
+	if (!otp_.Confirm(ctxt.Agent.Otp, ctxt.Shop.Otp))
+	{
+		throw new Err(	code.BAD_REQUEST,
+						status.Failed,
+						reason.OtpRejected)
+	}
+
 	const msg = 
 	{		 
 		To	: [...ctxt.Agent.SockID, ...ctxt.User.SockID],
@@ -235,11 +271,18 @@ const TransitAcceptanceTimeout		=  function()
 */
 const TransitAcceptedByAgent		=  function(ctxt)
 {
-	// TODO Clear agent pool of the context
+	// set ctxt.Agent from route itself
+	let AgentsSockID = []
+	ctxt.Agents.forEach((agent)=>
+	{ 
+		if (agent._id !== ctxt.Agent._id)
+		{ AgentsSockID.push(...agent.SockID) }
+	})
+
 	console.log('process-transit-acceptace', ctxt)
 	const msg = 
 	{		 
-		To	: [...ctxt.Store.SockID, ...ctxt.User.SockID],
+		To	: [...ctxt.Store.SockID, ...ctxt.User.SockID, ...AgentsSockID], // To Agents as alert to delete past event
 		Msg	:
 		{
 			Type: alerts.AgentReady,
@@ -257,6 +300,7 @@ const TransitAcceptedByAgent		=  function(ctxt)
 		, hash 		= otp_sms.Send(otp.Opts.SMS)
 
 	ctxt.Agent.Otp 	= hash
+	ctxt.Agents		= []
 	ctxt.State 		= states.TransitAccepted
 	ctxt.Event 		= ""
 	ctxt.Save()
@@ -355,6 +399,15 @@ const TransitRejectedByAgent		=  function(ctxt)
 const TransitCompletedByAgent		=  function(ctxt)
 {
 	console.log('process-transit-completion', ctxt)
+	// TODO set otp on agent context
+	const otp_ = new otp.OneTimePasswd({MobNo: "", Body: ""})
+	if (!otp_.Confirm(ctxt.User.Otp, ctxt.Agent.Otp))
+	{
+		throw new Err(	code.BAD_REQUEST,
+						status.Failed,
+						reason.OtpRejected)
+	}
+
 	const msg = 
 	{		 
 		To	: [...ctxt.Store.SockID, ...ctxt.User.SockID],

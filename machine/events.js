@@ -12,7 +12,9 @@ const Emit = function(msg)
         return
     }
     console.log('emit-message', msg)
-    emitter.emit('SendEvent', msg)
+
+    try         { emitter.emit('SendEvent', msg)           } 
+    catch(err)  { console.log('emission-failed', err, msg) }
 }
 
 /*
