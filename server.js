@@ -14,8 +14,7 @@ const   express = require("express")
       , journal = require('./routes/journal')
       , transit = require('./routes/transit')
       , common  = require('./routes/common' )           
-
-
+  
 const stripe_ = function (req, res, buf)
 { // We need the raw body to verify webhook signatures. Let's compute it only when hitting the Stripe webhook endpoint.
   if (req.originalUrl.startsWith("/journal/confirm")) { req.rawBody = buf.toString() }
