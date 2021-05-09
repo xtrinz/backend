@@ -1,13 +1,51 @@
 const { client } = require("../database/connect")
-const BaseError = require("./errorclass/baserror");
 const { code } = require("../common/error")
 const { validationResult } = require("express-validator");
-const {
-  Api400Error,
-  Api409Error,
-  Api401Error,
-} = require("./errorclass/errorclass");
 
+class BaseError extends Error {
+  constructor(name, statusCode, isOperational, description) {
+    super(description);
+
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = name;
+    this.statusCode = statusCode;
+    this.isOperational = isOperational;
+    Error.captureStackTrace(this);
+  }
+}
+
+class Api400Error extends BaseError {
+  constructor(
+    name = "Bad Request",
+    description = "Bad Request",
+    statusCode = code.BAD_REQUEST,
+    isOperational = true
+  ) {
+    super(name, statusCode, isOperational, description);
+  }
+}
+
+class Api401Error extends BaseError {
+  constructor(
+    name = "Unauthorized",
+    description = "Unauthorized",
+    statusCode = code.UNAUTHORIZED,
+    isOperational = true
+  ) {
+    super(name, statusCode, isOperational, description);
+  }
+}
+
+class Api409Error extends BaseError {
+  constructor(
+    name = "Conflict",
+    description = "Conflict",
+    statusCode = code.CONFLICT,
+    isOperational = true
+  ) {
+    super(name, statusCode, isOperational, description);
+  }
+}
 
 const GracefulExit = async function () 
 {
@@ -24,19 +62,6 @@ function returnError(err, req, res, next) {
   res
     .status(err.statusCode || code.INTERNAL_SERVER)
     .send(err.message);
-}
-
-async function handleUnCaughtException(error) {
-  console.error(error);
-  let isOpErr = false
-  if (error instanceof BaseError) {
-    isOpErr = error.isOperational
-  }
-  if (!isOpErr) {
-    process.exit(1); // Todo : we need pm2 to restart automatically in production environment
-  } else {
-    await GracefulExit();
-  }
 }
 
 function validationError(req, res, next) {
@@ -75,6 +100,5 @@ function validationError(req, res, next) {
 
 module.exports = {
   returnError,
-  handleUnCaughtException,
   validationError,
 };

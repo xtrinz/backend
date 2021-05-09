@@ -1,6 +1,6 @@
 const { body, oneOf } = require("express-validator");
 const { users } = require("../../database/connect");
-const { validationError } = require("../../error/errorhandlers");
+const { validationError } = require("./errorhandlers");
 
 const v1 = body("firstname", "400:Please provide a valid name")
   .isLength({ min: 3, max: 25 })

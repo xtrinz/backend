@@ -1,6 +1,6 @@
 const { check, body } = require("express-validator");
 const { ObjectId } = require("mongodb");
-const { validationError } = require("../../error/errorhandlers");
+const { validationError } = require("./errorhandlers");
 
 const v1 = check("addressid", "400:Invalid Address Id")
   .exists()

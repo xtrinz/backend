@@ -1,5 +1,5 @@
 const { param } = require("express-validator");
-const { validationError } = require("../../error/errorhandlers");
+const { validationError } = require("./errorhandlers");
 const { ObjectId } = require("mongodb");
 
 const v1 = param("shopid", "400:Not found")

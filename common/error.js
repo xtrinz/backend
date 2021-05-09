@@ -10,7 +10,7 @@ class Error_
 
 module.exports =
 {
-  Err: Error_,
+  Err                           : Error_,
   status:
 	{
 		  Success 					        : 'Success'
@@ -49,6 +49,7 @@ module.exports =
     , PageNotFound              : 'Page not found'
     , BadSignature              : 'Bad signature'
     , JournalNotFound           : 'Journal not found'
+    , TransitNotFound           : 'Transit not found'
 	},
   text:
   {

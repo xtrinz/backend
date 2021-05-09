@@ -223,7 +223,7 @@ function Store(data)
             throw new Err(code_, status_, reason_)
         }
 
-        const store = await this.GetByID(ObjectId(data.ShopID))
+        const store = await this.GetByID(ObjectId(data.StoreID))
         if (!store || store.State !== states.MobConfirmed)
         {
             const   code_       = code.BAD_REQUEST
@@ -265,7 +265,7 @@ function Store(data)
     {
         console.log(`add-staff. in: ${data}`)
         const store = await this.GetByAdminIDAndStoreID(ObjectId(data.UserID), 
-                                                       ObjectId(data.ShopID))
+                                                       ObjectId(data.StoreID))
         if (!store || store.State !== states.Registered)
         {
             const   code_       = code.BAD_REQUEST
@@ -305,7 +305,7 @@ function Store(data)
     this.SetStaffReplay   = async function (data)
     {
         console.log(`set-staff-replay. in: ${data}`)
-        const store = await this.GetByID(ObjectId(data.ShopID))
+        const store = await this.GetByID(ObjectId(data.StoreID))
         if (!store || store.State !== states.Registered)
         {
             const   code_       = code.BAD_REQUEST
@@ -351,7 +351,7 @@ function Store(data)
     {
         console.log(`relieve-staff. in: ${data}`)
 
-        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.ShopID)
+        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.StoreID)
         if (!store || store.State !== states.Registered)
         {
             const   code_       = code.BAD_REQUEST
@@ -392,7 +392,7 @@ function Store(data)
     {
         console.log(`revoke-staff. in: ${data}`)
 
-        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.ShopID)
+        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.StoreID)
         if (!store || store.State !== states.Registered)
         {
             const   code_       = code.BAD_REQUEST
@@ -433,7 +433,7 @@ function Store(data)
     {
         console.log(`list-staff. in: ${data}`)
 
-        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.ShopID)
+        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.StoreID)
         if (!store || store.State !== states.Registered)
         {
             const   code_       = code.BAD_REQUEST

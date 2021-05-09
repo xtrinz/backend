@@ -35,8 +35,8 @@ module.exports =
 		// Transit Delays and Timeouts (in minutes)
 	delay:
 	{
-		// ShopRespLimit    		: Order acceptace delay for shops.
-	 	  ShopRespLimit				: 4
+		// StoreRespLimit    		: Order acceptace delay for shops.
+	 	  StoreRespLimit			: 4
 		// AgentRespLimit 			: Transit acceptace delay for agents.
 		, AgentRespLimit 			: 3
 		// AgentFilterLimit 		: Time upper limit to find an agent for delivery.
@@ -50,14 +50,14 @@ module.exports =
 		  EventInitiationByUser		: 'EventInitiationByUser'
 		// EventCancellationByUser 	: event cargo cancellation by user
 		, EventCancellationByUser	: 'EventCancellationByUser'
-		// EventRejectionByShop 	: event order rejection by shop
-		, EventRejectionByShop		: 'EventRejectionByShop'
-		// EventRespTimeoutByShop 	: event order acceptance timeout
-		, EventRespTimeoutByShop	: 'EventRespTimeoutByShop'
-		// EventAcceptanceByShop 	: event order acception by shop
-		, EventAcceptanceByShop		: 'EventAcceptanceByShop'
-		// EventDespatchmentByShop 	: event order despatchment by shop
-		, EventDespatchmentByShop	: 'EventDespatchmentByShop'
+		// EventRejectionByStore 	: event order rejection by shop
+		, EventRejectionByStore		: 'EventRejectionByStore'
+		// EventRespTimeoutByStore 	: event order acceptance timeout
+		, EventRespTimeoutByStore	: 'EventRespTimeoutByStore'
+		// EventAcceptanceByStore 	: event order acception by shop
+		, EventAcceptanceByStore	: 'EventAcceptanceByStore'
+		// EventDespatchmentByStore : event order despatchment by shop
+		, EventDespatchmentByStore	: 'EventDespatchmentByStore'
 		// EventIgnoranceByAgent 	: event transit ignorance by agent
 		, EventIgnoranceByAgent		: 'EventIgnoranceByAgent'
 		// EventRespTimeoutByAgent 	: event transit acceptance timeout
@@ -89,6 +89,8 @@ module.exports =
 		, EnRoute 					: 'En Route'
 		// Delivered				: to user/shop  on delivery
 		, Delivered 				: 'Delivered'
+		// Ignored					: to none
+		, Ignored 					: 'Ignored'
 	},
 	entity:
 	{

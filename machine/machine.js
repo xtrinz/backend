@@ -12,9 +12,9 @@ const Machine 						=
 		, [states.CargoInitiated] 					:
 		{ 
 			  [events.EventCancellationByUser] 		: method.CargoCancelledByUser
-			, [events.EventRejectionByShop] 		: method.OrderRejectedByShop // #02
+			, [events.EventRejectionByStore] 		: method.OrderRejectedByStore // #02
 			, [events.EventAcceptanceTimeout]		: method.OrderAcceptanceTimeout
-			, [events.EventAcceptanceByShop]		: method.OrderAcceptedByShop
+			, [events.EventAcceptanceByStore]		: method.OrderAcceptedByStore
 		}
 		, [states.CargoCancelled] 					:
 		{
@@ -34,7 +34,7 @@ const Machine 						=
 		{ 
 			  [events.EventIgnoranceByAgent] 		: method.TransitIgnoredByAgent
 			, [events.EventRespTimeoutByAgent] 		: method.TransitAcceptanceTimeout
-			, [events.EventRejectionByShop] 		: method.OrderRejectedByShop// handler separately #02
+			, [events.EventRejectionByStore] 		: method.OrderRejectedByStore// handler separately #02
 			, [events.EventAcceptanceByAgent] 		: method.TransitAcceptedByAgent
 		}
 
@@ -51,8 +51,8 @@ const Machine 						=
 		, [states.TransitAccepted] 					:
 		{
 			  [events.EventRejectionByAgent] 		: method.TransitRejectedByAgent 
-			, [events.EventRejectionByShop]  		: method.CargoCancelledByUser
-			, [events.EventDespatchmentByShop] 		: method.OrderDespatchedByShop
+			, [events.EventRejectionByStore]  		: method.CargoCancelledByUser
+			, [events.EventDespatchmentByStore] 	: method.OrderDespatchedByStore
 		}
 
 		, [states.OrderDespatched] 					:

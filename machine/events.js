@@ -21,8 +21,9 @@ const Emit = function(msg)
     3. Push sock_id to user record
     4. Push sock_id to transaction record if any
 */
-const Connect = function(sock_id, auth)
+const Connect = function(socket)
 {
+    console.info('client-connected', socket.id, socket.handshake.auth)
     /*
         sock_id
         auth.user_id
@@ -35,9 +36,9 @@ const Connect = function(sock_id, auth)
     2. Pull sock_id from user record
     3. Delete sock_id-vs-user lookup
 */
-const Disconnect = function()
+const Disconnect = function(socket)
 {
-
+    console.info(`client-disconnected ${socket}`)
 }
 
 module.exports =

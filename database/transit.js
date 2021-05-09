@@ -7,8 +7,8 @@ const { machine }                   = require("../machine/machine")
 function Transit (journal)
 {
     this._id 		= ''
-    this.OrderID    = journal._id
-    this.Shop 		=
+    this.JournalID  = journal._id
+    this.Store 		=
     {
         _id         : journal.Buyer.ID,
         SockID      : [],
@@ -30,7 +30,7 @@ function Transit (journal)
     this.State 		= states.None                           // Machine init state
     this.Event 		= events.EventInitiationByUser          // Machine init event
     this.MaxWT      = 35                                    // Maximum Waiting Time (35min)
-    this.OrderedAt 	= Date.now()                            // Millis/https://currentmillis.com/
+    this.OrderedAt 	= Date.now()                            // Millis / https://currentmillis.com/
     this.ETD   		= 0                                     // Estimated Time of Delivery
 
     this.Delay      = function()                            // Time spend(in min) since order placement
@@ -47,21 +47,18 @@ function Transit (journal)
         let obj =
         {
             TransitID   : this._id
-          , OrderID	    : this.OrderID
-          , UserID 	    : this.User._id
+          , JournalID	: this.JournalID
           , UserName 	: this.User.Name
-          , ShopID 	    : this.Shop._id
-          , ShopName 	: this.Shop.Name
+          , StoreName 	: this.Store.Name
+          , 
         }
         if (this.Agent && !args.includes(entity.Agent))
         {
-            obj.AgentID        = this.Agent._id
             obj.AgentName      = this.Agent.Name
             obj.AgentContactNo = this.Agent.ContactNo
         }
         if (this.Admin && !args.includes(entity.Admin))
         {
-            obj.AdminID        = this.Admin._id
             obj.AdminName      = this.Admin.Name
         }
         return obj

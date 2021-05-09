@@ -1,5 +1,5 @@
 const { query } = require("express-validator");
-const { validationError } = require("../../error/errorhandlers");
+const { validationError } = require("./errorhandlers");
 
 const v1 = query("searchresult", "400:Not found").isString().trim().escape();
 

@@ -1,6 +1,6 @@
 const { body } = require("express-validator");
 const { users } = require("../../database/connect");
-const { validationError } = require("../../error/errorhandlers");
+const { validationError } = require("./errorhandlers");
 
 const v1 = body("phonenumber", "400:Invalid Phonenumber")
   .isLength({ min: 13, max: 13 })

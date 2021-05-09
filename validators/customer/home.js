@@ -1,5 +1,5 @@
 const { query, param } = require("express-validator");
-const { validationError } = require("../../error/errorhandlers");
+const { validationError } = require("./errorhandlers");
 
 const v1 = param("pageno", "400:Page Not Found")
   .isInt()

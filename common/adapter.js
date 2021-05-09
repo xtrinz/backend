@@ -33,9 +33,24 @@ const GracefulExit = async function ()
   } catch (err) { console.log(err) }
 }
 
+const ErrorHandler = function(err, req, res, next) 
+{
+  console.error('return-err', err)
+  if (err instanceof Err)
+  {
+    res.status(err.Code).json({
+      Status  : err.Status,
+      Reason  : err.Reaon
+    })
+    return
+  }
+  res.status(code.INTERNAL_SERVER).send(err);
+}
+
 module.exports =
 {
     Auth          : Auth
   , Forbidden     : Forbidden
   , GracefulExit  : GracefulExit
+  , ErrorHandler  : ErrorHandler
 }

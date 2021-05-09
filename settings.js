@@ -1,4 +1,3 @@
-// Setting String formater function
 // "{0}".format("1") : {0} get replaced with "1"
 String.prototype.format = function() 
 {

@@ -1,6 +1,37 @@
-const { isObjectEmpty, isArrayEmpty } = require("../../common/utils");
-const { Api404Error } = require("../../error/errorclass/errorclass");
 const { shops, orders } = require("../connect");
+
+class BaseError extends Error {
+  constructor(name, statusCode, isOperational, description) {
+    super(description);
+
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = name;
+    this.statusCode = statusCode;
+    this.isOperational = isOperational;
+    Error.captureStackTrace(this);
+  }
+}
+
+class Api404Error extends BaseError {
+  constructor(
+    name = "Not found",
+    description = "Not found",
+    statusCode = code.NOT_FOUND,
+    isOperational = true
+  ) {
+    super(name, statusCode, isOperational, description);
+  }
+}
+
+const isObjectEmpty = function (obj)
+{
+  return typeof obj != "object" || Object.keys(obj).length === 0
+}
+
+const isArrayEmpty = function (arr)
+{
+  return !Array.isArray(arr) || arr.length == 0
+}
 
 const getPaymentStatement = async function (shopinfoid) {
   const query1 = {

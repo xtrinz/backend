@@ -7,14 +7,15 @@ const   { states, alerts, entity }	= require("./models")
 /**
  * #Method/ActivatedBy 	:  01/Server(User)
  * Start/End(States) 	:  None/CargoInitiated
- * Shop					:  Event - NewOrder
+ * Store					:  Event - NewOrder
  **/
 const CargoInitiatedByUser		=  function(ctxt)
 {
 	console.log('process-cargo-init', ctxt)
 	const msg = 
-	{		 
-		To	: [...ctxt.User.SockID, ...ctxt.Shop.SockID], // user? since event initd by payment gw
+	{
+		// user? since event initiated by payment gw
+		To	: [...ctxt.User.SockID, ...ctxt.Store.SockID],
 		Msg	:
 		{
 			Type: alerts.NewOrder,
@@ -34,7 +35,7 @@ const CargoInitiatedByUser		=  function(ctxt)
  * Policy				:  Cancel permitted before despatchment
  * User 				:  Refund with added penalty
  * Agent				:  Event/s - Cancelled
- * Shop					:  Event   - Cancelled
+ * Store					:  Event   - Cancelled
  **/
 const CargoCancelledByUser		=  function(ctxt)
 {
@@ -57,12 +58,12 @@ const CargoCancelledByUser		=  function(ctxt)
 }
 
 /**
- * #Method/ActivatedBy 	:  03/Shop
+ * #Method/ActivatedBy 	:  03/Store
  * Start/End(States) 	:  {CargoInitiated,OrderAccepted}/OrderRejected
  * User 				:  Refund. Event - Rejected
- * Shop					:  Set Penalty
+ * Store					:  Set Penalty
  **/ 
-const OrderRejectedByShop		=  function()
+const OrderRejectedByStore		=  function()
 {
 	console.log('process-order-rejection', ctxt)
 	const msg = 
@@ -87,7 +88,7 @@ const OrderRejectedByShop		=  function()
  * Start/End(States) 	:  CargoInitiated/OrderRejected
  * User 				:  [2] If admin does not initiate explicitly action, auto reject the order & refund [May be a different event]
  * Agent				:
- * Shop					:  [1] Generate automated voice alert(repeat thrice if no user action)
+ * Store					:  [1] Generate automated voice alert(repeat thrice if no user action)
  **/
 const OrderAcceptanceTimeout		=  function()
 {
@@ -97,22 +98,22 @@ const OrderAcceptanceTimeout		=  function()
 }
 
 /*
-	#Method/ActivatedBy :  05/Shop
+	#Method/ActivatedBy :  05/Store
 	Start/End(States) 	:  CargoInitiated/OrderAccepted
 	Policy				:  TODO Set a policy to for filtering agent based on [Profit/AgentCount/SpacialRadius]
 	User 				:  Event for status update(Order Accepted)
 	Agent				:  Filter nearby active agents & send acceptance event
-	Shop				:  
+	Store				:  
 	Admin				:  If no agents live, report to admin
 					   [TODO set a retry tirggering API from admin]
 */
-const OrderAcceptedByShop			=  function()
+const OrderAcceptedByStore			=  function()
 {
 	console.log('process-order-acceptance', ctxt)
-	// Shop -> User transit will be compensated with delivery charge,
+	// Store -> User transit will be compensated with delivery charge,
 	// hence profitable pooling occures with agents near to shop
 	const agent = new User()
-	const agents = agent.ListNearbyLiveAgents(ctxt.Shop.Location)
+	const agents = agent.ListNearbyLiveAgents(ctxt.Store.Location)
 	if(!agents)
 	{
 		// TODO
@@ -135,9 +136,9 @@ const OrderAcceptedByShop			=  function()
 			Data: 
 			{
 				TransitID  		: ctxt._id,
-				OrderID			: ctxt.OrderID,
+				JournalID		: ctxt.JournalID,
 				Origin 			: ctxt.User.Location,
-				Destination 	: ctxt.Shop.Location,
+				Destination 	: ctxt.Store.Location,
 				ETD 			: ctxt.ETD
 			}
 		}
@@ -152,15 +153,15 @@ const OrderAcceptedByShop			=  function()
 }
 
 /*
-	#Method/ActivatedBy :  06/Shop
+	#Method/ActivatedBy :  06/Store
 	Start/End(States) 	:  TransitAccepted/OrderDespatched
 	User 				:  Event to update status
 	Agent				:  Event to update status once OTP verfied
 	[TODO: Set a API to resent OTP, if agent some how misses the first]
-	Shop				:  Read & validate OTP in the request
+	Store				:  Read & validate OTP in the request
 	Admin				:  Fraud Alert if for incorrect OTP
 */
-const OrderDespatchedByShop		=  function()
+const OrderDespatchedByStore		=  function()
 {
 	console.log('process-order-despatchment', ctxt)
 	const msg = 
@@ -197,7 +198,7 @@ const OrderDespatchedByShop		=  function()
 	[ This event can come from mutiple agent. If waiting time goes beyond 7min auto cancel the order ] 
 	User 				:  Event to increase expected waiting time 
 	Agent				:  Generate events to add more agents
-	Shop				:  Event to increase waiting time
+	Store				:  Event to increase waiting time
 	Admin				:  If agent count drops to zero raise an alarm
 */
 const TransitIgnoredByAgent		=  function()
@@ -212,7 +213,7 @@ const TransitIgnoredByAgent		=  function()
 	Start/End(States) 	:  OrderAccepted/TransitTimeout 
 	User 				:   
 	Agent				: 
-	Shop				: 
+	Store				: 
 	Admin				: 
 */
 const TransitAcceptanceTimeout		=  function()
@@ -228,7 +229,7 @@ const TransitAcceptanceTimeout		=  function()
 	User 				:  Event for status update
 	Agent				:  1. Send OTP for package collection and shop location
 					   	   2. Send disable order acceptance event to remaining agents
-	Shop				:  Event to associate order with agent data.
+	Store				:  Event to associate order with agent data.
 					   	   [Validate this OTP at despatch API]
 	Admin				:  
 */
@@ -238,7 +239,7 @@ const TransitAcceptedByAgent		=  function(ctxt)
 	console.log('process-transit-acceptace', ctxt)
 	const msg = 
 	{		 
-		To	: [...ctxt.Shop.SockID, ...ctxt.User.SockID],
+		To	: [...ctxt.Store.SockID, ...ctxt.User.SockID],
 		Msg	:
 		{
 			Type: alerts.AgentReady,
@@ -267,7 +268,7 @@ const TransitAcceptedByAgent		=  function(ctxt)
 	Start/End(States) 	:  TransitAccepted/OrderDespatched || TransitRejected
 	User 				:  
 	Agent				:  
-	Shop				: 
+	Store				: 
 	Admin				: 
 */
 const TransitRejectedByAgent		=  function(ctxt)
@@ -282,7 +283,7 @@ const TransitRejectedByAgent		=  function(ctxt)
 				console.log('order-delay-exceeded', ctxt)
 				const msg = 
 				{		 
-					To	: [...ctxt.Shop.SockID, ...ctxt.User.SockID],
+					To	: [...ctxt.Store.SockID, ...ctxt.User.SockID],
 					Msg	:
 					{
 						Type: alerts.AutoCancelled,
@@ -296,10 +297,10 @@ const TransitRejectedByAgent		=  function(ctxt)
 				return
 			}
 
-			// Shop -> User transit will be compensated with delivery charge,
+			// Store -> User transit will be compensated with delivery charge,
 			// hence profitable pooling occures with agents near to shop
 			const agent  = new User()
-			const agents = agent.ListNearbyLiveAgents(ctxt.Shop.Location)
+			const agents = agent.ListNearbyLiveAgents(ctxt.Store.Location)
 			if(!agents)
 			{
 				// TODO
@@ -322,9 +323,9 @@ const TransitRejectedByAgent		=  function(ctxt)
 					Data: 
 					{
 						TransitID  		: ctxt._id,
-						OrderID			: ctxt.OrderID,
+						JournalID			: ctxt.JournalID,
 						Origin 			: ctxt.User.Location,
-						Destination 	: ctxt.Shop.Location,
+						Destination 	: ctxt.Store.Location,
 						ETD 			: ctxt.ETD,
 					}
 				}
@@ -348,7 +349,7 @@ const TransitRejectedByAgent		=  function(ctxt)
 	Start/End(States) 	:  OrderDespatched/TransitCompleted 
 	User 				:  Event for status update
 	Agent				:  Respond with success 	& Credit the compensation
-	Shop				:  Event for status update 	& Credit the compensation
+	Store				:  Event for status update 	& Credit the compensation
 	Admin				:  
 */
 const TransitCompletedByAgent		=  function(ctxt)
@@ -356,7 +357,7 @@ const TransitCompletedByAgent		=  function(ctxt)
 	console.log('process-transit-completion', ctxt)
 	const msg = 
 	{		 
-		To	: [...ctxt.Shop.SockID, ...ctxt.User.SockID],
+		To	: [...ctxt.Store.SockID, ...ctxt.User.SockID],
 		Msg	:
 		{
 			Type: alerts.EnRoute,
@@ -378,10 +379,10 @@ module.exports =
 {
 	CargoInitiatedByUser		: CargoInitiatedByUser,
 	CargoCancelledByUser		: CargoCancelledByUser,
-	OrderRejectedByShop			: OrderRejectedByShop,
+	OrderRejectedByStore			: OrderRejectedByStore,
 	OrderAcceptanceTimeout		: OrderAcceptanceTimeout,
-	OrderAcceptedByShop			: OrderAcceptedByShop,
-	OrderDespatchedByShop		: OrderDespatchedByShop,
+	OrderAcceptedByStore			: OrderAcceptedByStore,
+	OrderDespatchedByStore		: OrderDespatchedByStore,
 	TransitIgnoredByAgent		: TransitIgnoredByAgent,
 	TransitAcceptanceTimeout	: TransitAcceptanceTimeout,
 	TransitAcceptedByAgent		: TransitAcceptedByAgent,
