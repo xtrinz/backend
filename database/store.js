@@ -1,9 +1,9 @@
-const { ObjectID, ObjectId }        = require("mongodb")
-const { stores }                    = require("../connect");
-const { Err, code, status, reason}  = require('../common/error')
-const otp                           = require('../common/otp')
 const { User }                      = require("./user")
-const { states, mode }              = require("../common/models")
+    , { ObjectID, ObjectId }        = require("mongodb")
+    , { stores }                    = require("./connect")
+    , otp                           = require('../common/otp')
+    , { Err, code, status, reason}  = require('../common/error')
+    , { states, mode }              = require("../common/models")
 
 function Store(data)
 {

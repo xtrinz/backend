@@ -1,8 +1,7 @@
-const express 	             = require("express")
-const router 	             = express.Router()
-const { code, status, text } = require("../common/error")
-const { ObjectId }           = require("mongodb")
-const { Address }            = require("../database/address");
+const { Address }            = require("../database/address")
+    , router 	               = require("express").Router()
+    , { code, status, text } = require("../common/error")
+    , { ObjectId }           = require("mongodb")
 
 // View Addr Missing
 // Set Default Addr Missing

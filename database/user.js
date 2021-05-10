@@ -1,11 +1,11 @@
-const { users }                     = require("./connect")
-const { ObjectID, ObjectId }        = require("mongodb")
 const { states, mode }              = require("../common/models")
-const { Err, code, status, reason}  = require('../common/error')
-const { Cart }                      = require("./cart")
-const otp                           = require('../common/otp')
-const jwt                           = require("jsonwebtoken")
-const jwt_secret                    = process.env.JWT_AUTHORIZATION_TOKEN_SECRET
+    , { Err, code, status, reason}  = require('../common/error')
+    , otp                           = require('../common/otp')
+    , jwt                           = require("jsonwebtoken")
+    , { users }                     = require("./connect")
+    , { ObjectID, ObjectId }        = require("mongodb")
+    , { Cart }                      = require("./cart")
+    , jwt_secret                    = process.env.JWT_AUTHORIZATION_TOKEN_SECRET
 
 function User(mob_no, user_mode)
 {

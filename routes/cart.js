@@ -1,12 +1,10 @@
-const express 	        = require("express");
-const router 	          = express.Router();
-const { code, text } 	  = require("../common/error");
-const {Cart, CartEntry} = require("../database/cart");
 const { ObjectId }      = require("mongodb")
-const validator         = require("../validators/customer/cart");
+    , { code, text } 	  = require("../common/error")
+    , {Cart, CartEntry} = require("../database/cart")
+    , router 	          = require("express").Router()
 
 // Insert product
-router.post("/insert", validator.add_cart, async (req, res, next) => {
+router.post("/insert", async (req, res, next) => {
   try
   {
     const entry = new CartEntry(req.body)
@@ -54,7 +52,7 @@ router.post("/modify", async (req, res, next) => {
 })
 
 // Remove product
-router.delete("/remove", validator.delete_cart, async (req, res, next) =>
+router.delete("/remove", async (req, res, next) =>
 {
   try
   {

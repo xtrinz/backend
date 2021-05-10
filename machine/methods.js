@@ -1,7 +1,5 @@
-const journal = require("../database/journal")
-const   { states, alerts, entity }	  = require("./models")
+const   { states, alerts }	  		  = require("./models")
 	  , { Emit } 					  = require("./events")
-      , pay 						  = require('./payment')
 	  , otp 						  = require("../common/otp")
 	  , { Err, code, status, reason } = require("../common/error")
 	  , { User } 					  = require("../database/user")

@@ -1,8 +1,6 @@
-const express           = require("express")
-const { code, status }  = require("../../common/error")
-const { text }          = require("../common/error")
-const { Store }         = require("../database/store")
-const router            = express.Router()
+const { Store }              = require("../database/store")
+    , router                 = require("express").Router()
+    , { text, code, status } = require("../common/error") 
 
 router.get("/feed", async (req, res, next) => {
   try
@@ -30,7 +28,6 @@ router.get("/search", async (req, res, next) => {
   try
   {
     let text_
-    // const data = req.query // Lattitude & Longitude should be taken from user record
     const data_ = []
     if(!data_.length) { text_ = text.NoDataFound}
 

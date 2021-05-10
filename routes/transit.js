@@ -1,10 +1,8 @@
-const   express                         = require("express")
-      , router                          = express.Router()
-      , { Transit }                     = require("../database/transit")
-      , { code }                        = require("../common/error")
-      , { alerts, events }              = require("../machine/models")
-      , { Err, code, status, reason }   = require("../common/error")
-      , { machine }                     = require("../machine/machine")
+const router                          = require("express").Router()
+    , { Transit }                     = require("../database/transit")
+    , { machine }                     = require("../machine/machine")
+    , { alerts, events }              = require("../machine/models")
+    , { Err, code, status, reason }   = require("../common/error")
 
 /* Cargo cancellation by user */
 router.post("/user/cancel", async (req, res, next) =>

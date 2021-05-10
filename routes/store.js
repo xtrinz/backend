@@ -1,9 +1,8 @@
-const express 	        = require("express")
-const router 	          = express.Router()
-const { code, text } 	  = require("../common/error")
-const { Store }         = require("../database/store")
 const { ObjectId }      = require("mongodb")
-const { task }          = require("../common/models")
+    , router 	          = require("express").Router()
+    , { code, text } 	  = require("../common/error")
+    , { task }          = require("../common/models")
+    , { Store }         = require("../database/store")
 
 // Create shop
 router.post("/shop/register", async (req, res, next) =>

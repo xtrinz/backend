@@ -1,6 +1,6 @@
-const { products, users }           = require("../connect")
 const { ObjectId, ObjectID }        = require('mongodb')
-const { Err, code, status, reason } = require("../common/error")
+    , { products, users }           = require("./connect")
+    , { Err, code, status, reason } = require("../common/error")
 
 function Product(data)
 {

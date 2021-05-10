@@ -1,6 +1,6 @@
-const { users }                     = require("../connect")
-const { Err, code, status, reason } = require("../../common/error")
 const { ObjectId }                  = require("mongodb")
+    , { users }                     = require("./connect")
+    , { Err, code, status, reason } = require("../common/error")
 
 function Address(data)
 {

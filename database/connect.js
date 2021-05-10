@@ -17,7 +17,6 @@ const journals 	= database.collection("journal")
 const transits 	= database.collection("transit")
 
 const shops 	  = database.collection("shopinfo")
-const orders 	  = database.collection("shoporderhistory")
 
 module.exports  =
 {
@@ -30,6 +29,5 @@ module.exports  =
   journals,
   transits,
 
-  shops,
-  orders
+  shops
 }
