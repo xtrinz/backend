@@ -1,35 +1,31 @@
-require("dotenv").config()
-const { compareSync } 	= require("bcryptjs");
-const express       	= require("express")
-const app           	= express()
-const { ObjectId } 	= require("mongodb")
-const jwt 		= require("jsonwebtoken")
-const jwt_secret        = process.env.JWT_AUTHORIZATION_TOKEN_SECRET
-const { sockets }   	= require("../common/database");
+// Suite
+// Caeses
 
-//app.post('/', async (req, res) =>
-app.get('/', async (req, res) =>
+function Test(path, req, resp)
 {
-    console.log('hit')
-    let opts = function() 
+
+}
+
+let test = 
+{
+      Type    : 'REST/EVENT'
+    , Describe: 'Step 1'
+    , Path    : '/the/path'
+    , Request : 
     {
-        this._id = ObjectId('608924a0051de619b651caab'),
-        this.Kol = 'u'
-        this.Loc = { type: "Point", coordinates: [10, 10] }
-        this.hi = function() { this.Kol = 'k' }
-        this.save = async function()
+          Params        : { 'key': 'value' }
+        , Body          : { 'key': 'value' }
+        , Authorisation : 'Bearer xlfjsdlfj'
+    }
+    , Response:
+    {
+          Code : 200
+        , Body : 
         {
-      //      let x = await sockets.updateOne({ _id: this._id }, { $set: this}, { upsert : true })
-            console.log(x.matchedCount)
+              Status: 'Success'
+            , Text  : 'User Found'
+            , Data  : {}
         }
     }
-    const o = new opts()
-    o.hi()
-    //console.log(o)
-    //o.save()  
-    const tu = await sockets.find({Kol: 'k'}, {})  
-    console.log(tu.save())
 
-})
-
-app.listen(3001, () => { console.log("Server Running On Port 3001") })
+}
