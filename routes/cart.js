@@ -1,6 +1,6 @@
 const { ObjectId }      = require("mongodb")
     , { code, text } 	  = require("../common/error")
-    , {Cart, CartEntry} = require("../database/cart")
+    , {Cart, CartEntry} = require("../objects/cart")
     , router 	          = require("express").Router()
 
 // Insert product

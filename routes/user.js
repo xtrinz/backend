@@ -1,6 +1,6 @@
 const { code, status, text }  = require("../common/error")
     , router                  = require("express").Router()
-    , { User }                = require("../database/user")
+    , { User }                = require("../objects/user")
     , { task }                = require("../common/models")
 
 /*Register

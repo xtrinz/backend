@@ -2,7 +2,7 @@ const { ObjectId }      = require("mongodb")
     , router 	          = require("express").Router()
     , { code, text } 	  = require("../common/error")
     , { task }          = require("../common/models")
-    , { Store }         = require("../database/store")
+    , { Store }         = require("../objects/store")
 
 // Create shop
 router.post("/shop/register", async (req, res, next) =>

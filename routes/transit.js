@@ -1,5 +1,5 @@
 const router                          = require("express").Router()
-    , { Transit }                     = require("../database/transit")
+    , { Transit }                     = require("../objects/transit")
     , { machine }                     = require("../machine/machine")
     , { alerts, events }              = require("../machine/models")
     , { Err, code, status, reason }   = require("../common/error")

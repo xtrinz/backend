@@ -1,4 +1,4 @@
-const { Store }              = require("../database/store")
+const { Store }              = require("../objects/store")
     , router                 = require("express").Router()
     , { text, code, status } = require("../common/error") 
 

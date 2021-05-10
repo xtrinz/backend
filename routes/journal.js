@@ -1,6 +1,6 @@
 const { code } 	  = require("../common/error")
     , router 	    = require("express").Router()
-    , { Journal } = require("../database/journal")
+    , { Journal } = require("../objects/journal")
 
 // Stripe confirmation webhook
 router.post("/journal/confirm", async (req, res, next) =>

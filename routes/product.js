@@ -1,7 +1,7 @@
 const { ObjectId }      = require("mongodb")
     , { code, text } 	  = require("../common/error")
     , router 	          = require("express").Router()
-    , { Product }       = require("../database/product")
+    , { Product }       = require("../objects/product")
 
 // Add product
 router.post("/add", async (req, res, next) => {

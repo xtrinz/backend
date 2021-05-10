@@ -2,8 +2,8 @@ const   { states, alerts }	  		  = require("./models")
 	  , { Emit } 					  = require("./events")
 	  , otp 						  = require("../common/otp")
 	  , { Err, code, status, reason } = require("../common/error")
-	  , { User } 					  = require("../database/user")
-	  , { Journal } 				  = require("../database/journal")
+	  , { User } 					  = require("../objects/user")
+	  , { Journal } 				  = require("../objects/journal")
 
 /**
  * #Method/ActivatedBy 	:  01/Server(User)

@@ -1,4 +1,4 @@
-const { Address }            = require("../database/address")
+const { Address }            = require("../objects/address")
     , router 	               = require("express").Router()
     , { code, status, text } = require("../common/error")
     , { ObjectId }           = require("mongodb")
