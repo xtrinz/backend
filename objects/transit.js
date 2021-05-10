@@ -1,5 +1,5 @@
 const { ObjectID } 					= require("mongodb")
-    , { transits } 					= require("./connect")
+    , { transits } 					= require("../common/connect")
     , { Err, code, status, reason } = require("../common/error")
     , {states, events, entity}		= require("../engine/models")
     , { engine }                    = require("../engine/engine")

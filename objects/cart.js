@@ -1,6 +1,6 @@
 const { ObjectID, ObjectId }        = require("mongodb")
     , { Product }                   = require("./product")
-    , { carts }                     = require("./connect")
+    , { carts }                     = require("../common/connect")
     , { Err, code, status, reason } = require("../common/error")
 
 function Cart(user_id)
