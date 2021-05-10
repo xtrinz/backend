@@ -1,5 +1,5 @@
 const { body, oneOf } = require("express-validator");
-const { users } = require("../../../objects/connect");
+const { users } = require("../../../common/connect");
 const { validationError } = require("./errorhandlers");
 
 const v1 = body("phonenumber", "401:Your username or password is incorrect")

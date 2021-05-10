@@ -5,7 +5,7 @@ const app           	= express()
 const { ObjectId } 	= require("mongodb")
 const jwt 		= require("jsonwebtoken")
 const jwt_secret        = process.env.JWT_AUTHORIZATION_TOKEN_SECRET
-const { sockets }   	= require("../objects/connect");
+const { sockets }   	= require("../common/connect");
 
 //app.post('/', async (req, res) =>
 app.get('/', async (req, res) =>
