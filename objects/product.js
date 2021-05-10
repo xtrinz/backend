@@ -1,5 +1,5 @@
 const { ObjectId, ObjectID }        = require('mongodb')
-    , { products, users }           = require("../common/connect")
+    , { products, users }           = require("../common/database")
     , { Err, code, status, reason } = require("../common/error")
 
 function Product(data)

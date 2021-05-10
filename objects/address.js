@@ -1,5 +1,5 @@
 const { ObjectId }                  = require("mongodb")
-    , { users }                     = require("../common/connect")
+    , { users }                     = require("../common/database")
     , { Err, code, status, reason } = require("../common/error")
 
 function Address(data)

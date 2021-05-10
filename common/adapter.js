@@ -1,5 +1,5 @@
 const { Err, code, status, reason } = require("./error")
-    , { client }                    = require("./connect")
+    , { client }                    = require("./database")
 
 const Auth = async function (req, res, next)
 {

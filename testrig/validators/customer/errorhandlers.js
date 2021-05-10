@@ -1,4 +1,4 @@
-const { client } = require("../../../common/connect")
+const { client } = require("../../../common/database")
 const { code } = require("../../../common/error")
 const { validationResult } = require("express-validator");
 

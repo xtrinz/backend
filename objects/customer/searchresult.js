@@ -1,5 +1,5 @@
 const { ObjectId }  = require("mongodb")
-const { shops }     = require("../../common/connect")
+const { shops }     = require("../../common/database")
 
 /**
  * 
