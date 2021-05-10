@@ -51,6 +51,7 @@ module.exports =
     , JournalNotFound           : 'Journal not found'
     , TransitNotFound           : 'Transit not found'
     , CancellationDenied        : 'On transit, cancellation denied'
+    , Unknown                   : 'Unknown'
 	},
   text:
   {

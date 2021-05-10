@@ -40,12 +40,16 @@ const ErrorHandler = function(err, req, res, next)
   {
     res.status(err.Code).json({
       Status  : err.Status,
-      Text    : err.Reaon,
+      Text    : err.Reason,
       Data    : {}
     })
     return
   }
-  res.status(code.INTERNAL_SERVER).send(err);
+  res.status(code.INTERNAL_SERVER).json({
+    Status  : status.Failed,
+    Text    : reason.Unknown,
+    Data    : {}
+  })
 }
 
 module.exports =
