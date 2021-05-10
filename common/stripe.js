@@ -1,8 +1,8 @@
 const sec_key                       = process.env.STRIPE_SECRET_KEY
-const wh_sec                        = process.env.STRIPE_WEBHOOK_SECRET
-const pub_key                       = process.env.STRIPE_PUBLISHABLE_KEY
-const stripe                        = require("stripe")(sec_key)
-const { Err, code, status, reason } = require("../common/error")
+    , wh_sec                        = process.env.STRIPE_WEBHOOK_SECRET
+    , pub_key                       = process.env.STRIPE_PUBLISHABLE_KEY
+    , stripe                        = require("stripe")(sec_key)
+    , { Err, code, status, reason } = require("../common/error")
 
 function Stripe(data)
 {
