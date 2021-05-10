@@ -52,7 +52,7 @@ const server_ = () => { console.log(text.Server.format(port)) }
      , server = app.listen(port, server_)
 
      , io     = require('socket.io')(server)
-     , event  = require('./machine/events')
+     , event  = require('./engine/events')
 
 io.on('connection', async (socket) =>
 {

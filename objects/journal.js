@@ -7,7 +7,7 @@ const { User }                     = require("./user")
     , { Err, code, status, reason }= require("../common/error")
     , { states, type, channel }    = require("../common/models")
     , { Stripe }                   = require("../common/stripe")
-    , { states, entity }           = require("../machine/models")
+    , { states, entity }           = require("../engine/models")
 
 function Journal()
 {
