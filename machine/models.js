@@ -98,9 +98,13 @@ module.exports =
 	},
 	entity:
 	{
+		// User 					: the user
 		  User 						: 'User'
+		// Store 					: the store
 		, Store 					: 'Store'
+		// Agent 					: the agent
 		, Agent 					: 'Agent'
+		// Admin 					: the admin
 		, Admin 					: 'Admin'
 	}
 }

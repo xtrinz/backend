@@ -90,7 +90,7 @@ const OrderRejectedByStore		=  function()
  * Start/End(States) 	:  CargoInitiated/OrderRejected
  * User 				:  [2] If admin does not initiate explicitly action, auto reject the order & refund [May be a different event]
  * Agent				:
- * Store					:  [1] Generate automated voice alert(repeat thrice if no user action)
+ * Store				:  [1] Generate automated voice alert(repeat thrice if no user action)
  **/
 const OrderAcceptanceTimeout		=  function()
 {
