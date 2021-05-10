@@ -1,6 +1,6 @@
 const router                          = require("express").Router()
     , { Transit }                     = require("../objects/transit")
-    , { machine }                     = require("../engine/engine")
+    , { engine }                     = require("../engine/engine")
     , { alerts, events }              = require("../engine/models")
     , { Err, code, status, reason }   = require("../common/error")
 
@@ -20,7 +20,7 @@ router.post("/user/cancel", async (req, res, next) =>
         }
 
         trans.Event = events.EventCancellationByUser
-        await machine.Transition(trans)
+        await engine.Transition(trans)
 
         return res.status(code.OK).json({
             Status  : status.Success,
@@ -46,7 +46,7 @@ router.post("/store/reject", async (req, res, next) =>
         }
 
         trans.Event = events.EventRejectionByStore
-        await machine.Transition(trans)
+        await engine.Transition(trans)
 
         return res.status(code.OK).json({
             Status  : status.Success,
@@ -72,7 +72,7 @@ router.post("/store/accept", async (req, res, next) =>
         }
 
         trans.Event = events.EventAcceptanceByStore
-        await machine.Transition(trans)
+        await engine.Transition(trans)
 
         return res.status(code.OK).json({
             Status  : status.Success,
@@ -98,7 +98,7 @@ router.post("/store/despatch", async (req, res, next) =>
         }
 
         trans.Event = events.EventDespatchmentByStore
-        await machine.Transition(trans)
+        await engine.Transition(trans)
 
         return res.status(code.OK).json({
             Status  : status.Success,
@@ -124,7 +124,7 @@ router.post("/agent/ignore", async (req, res, next) =>
         }
 
         trans.Event = events.EventIgnoranceByAgent
-        await machine.Transition(trans)
+        await engine.Transition(trans)
 
         return res.status(code.OK).json({
             Status  : status.Success,
@@ -150,7 +150,7 @@ router.post("/agent/accept", async (req, res, next) =>
         }
 
         trans.Event = events.EventAcceptanceByStore
-        await machine.Transition(trans)
+        await engine.Transition(trans)
 
         return res.status(code.OK).json({
             Status  : status.Success,
@@ -176,7 +176,7 @@ router.post("/agent/reject", async (req, res, next) =>
         }
 
         trans.Event = events.EventRejectionByStore
-        await machine.Transition(trans)
+        await engine.Transition(trans)
 
         return res.status(code.OK).json({
             Status  : status.Success,
@@ -202,7 +202,7 @@ router.post("/agent/complete", async (req, res, next) =>
         }
 
         trans.Event = events.EventCompletionByAgent
-        await machine.Transition(trans)
+        await engine.Transition(trans)
 
         return res.status(code.OK).json({
             Status  : status.Success,

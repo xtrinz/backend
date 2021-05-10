@@ -2,7 +2,7 @@ const { ObjectID } 					= require("mongodb")
     , { transits } 					= require("./connect")
     , { Err, code, status, reason } = require("../common/error")
     , {states, events, entity}		= require("../engine/models")
-    , { machine }                   = require("../engine/engine")
+    , { engine }                    = require("../engine/engine")
 
 function Transit (journal)
 {
@@ -92,7 +92,7 @@ function Transit (journal)
         // Get Src & Dest Contexts & Update SockIDs
         this._id 		= new ObjectID()
         this.Save()
-        await machine.Transition(this)
+        await engine.Transition(this)
         console.log('transit-initialised', context)
     }
 }

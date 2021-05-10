@@ -1,7 +1,7 @@
 const {states, events}				= require("./models")
 const method						= require("./methods")
 const { Err, code, status, reason } = require("../common/error")
-const Machine 						=
+const Engine 						=
 {
 	Handler :
 	{
@@ -95,5 +95,5 @@ const Machine 						=
 
 module.exports =
 {
-	machine		: Machine
+	engine		: Engine
 }
