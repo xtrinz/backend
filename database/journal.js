@@ -1,13 +1,13 @@
-const { Cart }                     = require("./cart")
-const { Store }                    = require("./store")
-const { Transit }                  = require("./transit")
-const { User }                     = require("./user")
-const { Stripe }                   = require("../common/stripe")
-const { Err, code, status, reason }= require("../common/error")
-const { states, type, channel }    = require("../common/models")
-const { journals, stores }         = require("./connect")
-const { ObjectID }                 = require("mongodb")
-const { entity } = require("../machine/models")
+const   { User }                     = require("./user")
+      , { Cart }                     = require("./cart")
+      , { Store }                    = require("./store")
+      , { Transit }                  = require("./transit")
+      , { Stripe }                   = require("../common/stripe")
+      , { states, type, channel }    = require("../common/models")
+      , { Err, code, status, reason }= require("../common/error")
+      , { ObjectID }                 = require("mongodb")
+      , { journals }                 = require("./connect")
+      , { states, entity }           = require("../machine/models")
 
 function Journal()
 {
@@ -253,6 +253,21 @@ function Journal()
             case entity.Store:
             let data_
             return data_      
+      }
+    }
+
+    this.PayOut(ctxt)
+    {
+      switch (ctxt.State)
+      {
+      case states.TranistCompleted:
+      break
+      case states.CargoCancelled  :
+      break
+      case states.OrderRejected   :
+      break
+      case states.TransitRejected :
+      break
       }
     }
 }

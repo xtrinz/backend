@@ -45,7 +45,7 @@ const Machine 						=
 
 		, [states.TransitIgnored] 					:
 		{
-
+			[events.EventRefeedAgentsByAdmin] 		: method.OrderAcceptedByStore
 		}
 
 		, [states.TransitTimeout] 					:

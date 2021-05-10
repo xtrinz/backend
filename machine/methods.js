@@ -1,13 +1,16 @@
-const   { states, alerts, entity }	= require("./models")
-	  , { Emit } 					= require("./events")
-	  , otp 						= require("../common/otp")
-	  , { User } 					= require("../database/user")
-      , pay 						= require('./payment')
+const journal = require("../database/journal")
+const   { states, alerts, entity }	  = require("./models")
+	  , { Emit } 					  = require("./events")
+      , pay 						  = require('./payment')
+	  , otp 						  = require("../common/otp")
+	  , { Err, code, status, reason } = require("../common/error")
+	  , { User } 					  = require("../database/user")
+	  , { Journal } 				  = require("../database/journal")
 
 /**
  * #Method/ActivatedBy 	:  01/Server(User)
  * Start/End(States) 	:  None/CargoInitiated
- * Store					:  Event - NewOrder
+ * Store				:  Event - NewOrder
  **/
 const CargoInitiatedByUser		=  function(ctxt)
 {
@@ -43,19 +46,33 @@ const CargoCancelledByUser		=  function(ctxt)
 	let to = []
 	switch(ctxt.State)
 	{
-		case states.TransitAccepted:
-		
-		break
-		case states.OrderAccepted:
-		
-		break
+		case states.TransitAccepted :
+			to.push(...ctxt.Agent.SockID)
+			to.push(...ctxt.Shop.SockID)
+			break
+		case states.OrderAccepted 	:
+			ctxt.Agents.forEach((agent)=>
+			{ to.push(...agent.SockID) })
+			to.push(...ctxt.Shop.SockID)
+			break
+		case states.CargoInitiated:
+			to.push(...ctxt.Shop.SockID)
+			break
+		default :
+			console.log('cannot-be-cancelled', ctxt)
+			throw new Err(code.BAD_REQUEST,
+						  status.Failed,
+						  reason.CancellationDenied)
 	}
 
 	ctxt.Return 	= ctxt.State
 	ctxt.State 		= states.CargoCancelled
 	ctxt.Event 		= ""
 	ctxt.Save()
-	pay.ProcessMonetaryReturns(ctxt)
+	
+	let journal = new Journal()
+	journal.PayOut(ctxt)
+
 	console.log('cargo-cancelled', ctxt)
 }
 
@@ -63,7 +80,7 @@ const CargoCancelledByUser		=  function(ctxt)
  * #Method/ActivatedBy 	:  03/Store
  * Start/End(States) 	:  {CargoInitiated,OrderAccepted}/OrderRejected
  * User 				:  Refund. Event - Rejected
- * Store					:  Set Penalty
+ * Store				:  Set Penalty
  **/ 
 const OrderRejectedByStore		=  function()
 {
@@ -81,7 +98,10 @@ const OrderRejectedByStore		=  function()
 	ctxt.State 		= states.OrderRejected
 	ctxt.Event 		= ""
 	ctxt.Save()
-	pay.ProcessMonetaryReturns(ctxt)
+
+	let journal = new Journal()
+	journal.PayOut(ctxt)
+	
 	console.log('order-rejected', ctxt)
 }
 
@@ -92,9 +112,12 @@ const OrderRejectedByStore		=  function()
  * Agent				:
  * Store				:  [1] Generate automated voice alert(repeat thrice if no user action)
  **/
-const OrderAcceptanceTimeout		=  function()
+const OrderAcceptanceTimeout		=  function(ctxt)
 {
-	ctxt.State 		= "" //states.TransitComplete
+	// Create a machine call to this function from init API
+	// after saving the context setting event as timeout
+
+	ctxt.State 		= states.TransitAcceptanceTimeout
 	ctxt.Event 		= ""
 	ctxt.Save()
 }
@@ -108,7 +131,7 @@ const OrderAcceptanceTimeout		=  function()
 	Store				:  
 	Admin				:  If no agents live, report to admin
 */
-const OrderAcceptedByStore			=  function()
+const OrderAcceptedByStore			=  function(ctxt)
 {
 	console.log('process-order-acceptance', ctxt)
 
@@ -116,10 +139,11 @@ const OrderAcceptedByStore			=  function()
 	const agents = agent.ListNearbyLiveAgents(ctxt.Store.Location)
 	if(!agents)
 	{
+		console.log('no-pickup-agents-order-on-hold', ctxt)
 		// Notify admin about the absents of live agents
 		const msg_to_admin = 
 		{		 
-			To	: ctxt.User.SockID,
+			To	: ctxt.User.SockID, // SET ADMIN
 			Msg	:
 			{
 				Type: alerts.NoAgents,
@@ -237,10 +261,40 @@ const OrderDespatchedByStore		=  function(ctxt)
 	Store				:  Event to increase waiting time
 	Admin				:  If agent count drops to zero raise an alarm
 */
-const TransitIgnoredByAgent		=  function()
+const TransitIgnoredByAgent		=  function(ctxt)
 {
-	ctxt.State 		= "" //states.TransitComplete
-	ctxt.Event 		= ""
+	// TODO set Agent ID to Agent Context from route
+	ctxt.Agents.forEach((agent)=>
+	{
+		if (agent._id === ctxt.Agent._id)
+		{
+			ctxt.Agents.pop(agent)
+			break
+		}
+	})
+
+	if(!ctxt.Agents.length)
+	{
+		console.log('all-agents-ignored-the-tranist-transit-on-hold', ctxt)
+		const msg_to_admin = 
+		{		 
+			To	: ctxt.User.SockID, // SET ADMIN
+			Msg	:
+			{
+				Type: alerts.NoAgents,
+				Data: ctxt.Abstract()
+			}
+		}
+		Emit(msg_to_admin)
+
+		ctxt.State  = states.TransitIgnored
+		ctxt.Event  = ""
+		ctxt.Save()
+		return	
+	}
+
+	delete ctxt.Agent
+	ctxt.Event  = ""
 	ctxt.Save()
 }
 
@@ -320,45 +374,38 @@ const TransitRejectedByAgent		=  function(ctxt)
 	switch(ctxt.State)
 	{
 		case states.TransitAccepted:
-			/*// validate reason for rejection + take necessary actions
-			// increment fault count of current agent agent*/ // not now
-			if (ctxt.Delay() > ctxt.MaxWT)
-			{
-				console.log('order-delay-exceeded', ctxt)
-				const msg = 
-				{		 
-					To	: [...ctxt.Store.SockID, ...ctxt.User.SockID],
-					Msg	:
-					{
-						Type: alerts.AutoCancelled,
-						Data: ctxt.Abstract(entity.Agent)
-					}
-				}
-				Emit(msg)
-				ctxt.State 		= states.TransitRejected
-				ctxt.Event 		= ""
-				ctxt.Save()
-				return
-			}
+ 			/* Logic to be streamlined :
+				0) Not for now: Handle reason for rejection/ agent fault rating index/ admin actions if any 
+				1) How to cutoff if a agent intentionally delays an order with repeatetion accept/reapeat
+				2) How to handle if accept /reject loop grows beyond a expected time */
 
-			// Store -> User transit will be compensated with delivery charge,
-			// hence profitable pooling occures with agents near to shop
-			const agent  = new User()
+			const agent = new User()
 			const agents = agent.ListNearbyLiveAgents(ctxt.Store.Location)
 			if(!agents)
 			{
-				// TODO
-				/**
-				 * Introduce a new state for 'accepted but on hold'
-				 * Notify the state to admin with option to Cancel the order or refeed to pipeline
-				 * Admin has to send some user to corresponding location on notification pops up
-				 * If a agent comes online in a location where orders with these state are available 
-				 * The agent should get it notified
-				 **/
+				// Notify admin about the absents of live agents
+				console.log('no-nearby-agents-order-on-hold', ctxt)
+				const msg_to_admin = 
+				{		 
+					To	: ctxt.User.SockID, // SET ADMIN
+					Msg	:
+					{
+						Type: alerts.NoAgents,
+						Data: ctxt.Abstract()
+					}
+				}
+				Emit(msg_to_admin)
+		
+				ctxt.State  = states.OrderOnHold
+				ctxt.Event  = ""
+				ctxt.Save()
+				return
 			}
+		
+			// Notify nearby agents
 			let to = []
 			agents.forEach((agent)=>{ to.push(...agent.SockID)})
-			const msg = 
+			const msg_to_agents = 
 			{		 
 				To	: to,
 				Msg	:
@@ -366,26 +413,34 @@ const TransitRejectedByAgent		=  function(ctxt)
 					Type: alerts.NewTransit,
 					Data: 
 					{
-						TransitID  		: ctxt._id,
-						JournalID			: ctxt.JournalID,
-						Origin 			: ctxt.User.Location,
-						Destination 	: ctxt.Store.Location,
-						ETD 			: ctxt.ETD,
+						  TransitID  	: ctxt._id
+						, JournalID		: ctxt.JournalID
+						, OriginName 	: ctxt.Store.Name
+						, OriginCity 	: ctxt.Store.City
+						, OriginLocation: ctxt.Store.Location
+						, Destination 	: ctxt.User.Location
+						, ETD 			: ctxt.ETD
 					}
 				}
 			}
 			// Frond End has to calculate reach to origin and ETD to origin if needed
-			Emit(msg)
-
-			delete ctxt.Agent
-			ctxt.State 		= states.TransitRejected
-			ctxt.Event 		= ""
-			ctxt.Save()
-			return
+			Emit(msg_to_agents)
+			ctxt.Agents = agents
 
 		case states.OrderDespatched:
+			/**
+			 * Generate new notification to agent with
+			 * location as of current agent location
+			 * notify admin to track furthur progress
+			 */
 
 	}
+
+	delete ctxt.Agent
+	ctxt.State 		= states.TransitRejected
+	ctxt.Event 		= ""
+	ctxt.Save()
+	return
 }
 
 /*
@@ -423,7 +478,8 @@ const TransitCompletedByAgent		=  function(ctxt)
 	ctxt.Event 		= ""
 	ctxt.Save()
 
-	pay.ProcessMonetaryReturns(ctxt)
+	let journal = new Journal()
+	journal.PayOut(ctxt)
 
 	console.log('transit-completed', ctxt)
 }
@@ -432,9 +488,9 @@ module.exports =
 {
 	CargoInitiatedByUser		: CargoInitiatedByUser,
 	CargoCancelledByUser		: CargoCancelledByUser,
-	OrderRejectedByStore			: OrderRejectedByStore,
+	OrderRejectedByStore		: OrderRejectedByStore,
 	OrderAcceptanceTimeout		: OrderAcceptanceTimeout,
-	OrderAcceptedByStore			: OrderAcceptedByStore,
+	OrderAcceptedByStore		: OrderAcceptedByStore,
 	OrderDespatchedByStore		: OrderDespatchedByStore,
 	TransitIgnoredByAgent		: TransitIgnoredByAgent,
 	TransitAcceptanceTimeout	: TransitAcceptanceTimeout,

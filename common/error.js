@@ -50,6 +50,7 @@ module.exports =
     , BadSignature              : 'Bad signature'
     , JournalNotFound           : 'Journal not found'
     , TransitNotFound           : 'Transit not found'
+    , CancellationDenied        : 'On transit, cancellation denied'
 	},
   text:
   {
