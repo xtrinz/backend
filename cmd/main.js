@@ -44,7 +44,7 @@ process.on(`unhandledRejection`, excp_)
 const sce_  = [ `uncaughtException`,
                 `exit`, `SIGINT`,
                 `SIGKILL`, `SIGTERM`]
-sce_.forEach((type) => process.on(type, adptr.GracefulExit))
+//sce_.forEach((type) => process.on(type, adptr.GracefulExit))
 
 const server_ = () => { console.log(text.Server.format(port)) }
      , server = app.listen(port, server_)
