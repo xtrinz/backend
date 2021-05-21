@@ -57,7 +57,7 @@ function TestRig(path, req, resp)
     }
 }
 
-let test = 
+let test_1 = 
 {
       Type    : 'REST/EVENT'
     , Describe: 'Step 1'
@@ -78,9 +78,15 @@ let test =
             , Data  : {}
         }
     }
-    , Event  :
-    {
-        Subject: 'NewTransit'
-    }
+}
 
+let test_2 = 
+{
+      Type    : 'EVENT'
+    , Describe: 'Step 2'
+    , Event   :
+    {
+          Subject : 'NewTransit'
+        , Data    : {}
+    }
 }
