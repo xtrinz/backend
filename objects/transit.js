@@ -1,7 +1,7 @@
 const { ObjectID } 					= require("mongodb")
     , { transits } 					= require("../common/database")
     , { Err, code, status, reason } = require("../common/error")
-    , {states, events, entity}		= require("../engine/models")
+    , {states, events, entity}		= require("../common/models")
     , { engine }                    = require("../engine/engine")
 
 function Transit (journal)

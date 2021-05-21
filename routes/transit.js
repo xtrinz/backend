@@ -1,7 +1,7 @@
 const router                          = require("express").Router()
     , { Transit }                     = require("../objects/transit")
     , { engine }                     = require("../engine/engine")
-    , { alerts, events }              = require("../engine/models")
+    , { alerts, events }              = require("../common/models")
     , { Err, code, status, reason }   = require("../common/error")
 
 /* Cargo cancellation by user */

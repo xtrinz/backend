@@ -41,7 +41,7 @@ function Product(data)
         }
    }
    
-   this.GetByID = function(_id)
+   this.GetByID = async function(_id)
    {
        console.log(`find-product-by-id. ID: ${_id}`)
        const query = { _id: _id }
@@ -56,7 +56,7 @@ function Product(data)
        return product
    }
 
-   this.DelByID = function(Id)
+   this.DelByID = async function(Id)
    {
         const query = {_id : ObjectId(Id)}
         const resp  = await products.deleteOne(query);
@@ -69,7 +69,7 @@ function Product(data)
         return true
    }
    
-   this.GetByStoreID = function(_id)
+   this.GetByStoreID = async function(_id)
    {
        console.log(`find-product-by-store-id. StoreID: ${_id}`)
        const project = 
@@ -90,7 +90,7 @@ function Product(data)
        return products_
    }
 
-   this.FindByStoreIDAndName = function(store_id, name)
+   this.FindByStoreIDAndName = async function(store_id, name)
    {
        console.log(`find-product-by-store-id-and-name. ID: ${store_id, name}`)
        const query = { StoreID: store_id, Name: name }
@@ -105,7 +105,7 @@ function Product(data)
        return product
    }
 
-   this.Add      = function ()
+   this.Add      = async function ()
    {
         // Permission Check
         const product = await this.FindByStoreIDAndName(this.StoreID, this.Name)
@@ -140,7 +140,7 @@ function Product(data)
        return product
    }
 
-   this.Modify      = function (Id)
+   this.Modify      = async function (Id)
    {
         // Permission Check
         console.log('modify-product', this, Id)

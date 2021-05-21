@@ -6,10 +6,10 @@ router.get("/feed", async (req, res, next) => {
   try
   {
     let text_
-    const data = req.query // Lattitude & Longitude should be taken from user record
-    const   PageNo  = parseInt(data.PageNo)
-          , Lon     = parseFloat(data.Longitude)
-          , Lat     = parseFloat(data.Lattitude)
+    const in_ = req.query // Lattitude & Longitude should be taken from user record
+    const   PageNo  = parseInt(in_.PageNo)
+          , Lon     = parseFloat(in_.Longitude)
+          , Lat     = parseFloat(in_.Lattitude)
           , stores_ = new Store()
           , data    = await stores_.ListNearby(PageNo, Lon, Lat)
 

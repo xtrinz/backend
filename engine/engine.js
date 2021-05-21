@@ -1,4 +1,4 @@
-const {states, events}				= require("./models")
+const {states, events}				= require("../common/models")
 const method						= require("./methods")
 const { Err, code, status, reason } = require("../common/error")
 const Engine 						=

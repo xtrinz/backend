@@ -10,23 +10,23 @@ router.post("/shop/register", async (req, res, next) =>
   try
   {
     console.log('register-shop',req.body)
-    let text_, data_
+    let text_, data_, store
     switch(req.body.Task)
     {
         case task.New:
-            let store = new Store(req.body)
+            store = new Store(req.body)
             await store.New(req.body)
             text_ = text.OTPSendToMobNo.format(store.MobileNo.slice(-4))
             break
 
         case task.ReadOTP:
-            let store  = new Store()
+            store  = new Store()
             await store.ConfirmContactNo(req.body)
             text_ = text.OTPConfirmed
             break
         
         case task.Approve:
-            let store  = new Store()
+            store  = new Store()
             await store.Approve(req.body)
             text_ = text.Approved
             break

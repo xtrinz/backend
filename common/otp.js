@@ -22,14 +22,11 @@ const Opts =
 
 function OneTimePasswd(data)
 {
-  this =
-  {
-          MobNo     : data.MobNo
-        , Email     : data.MailID
-        , Body      : data.Body
-        , OtpLen    : 6
-        , Otp       : ''
-  }
+  this.MobNo     = data.MobNo
+  this.Email     = data.MailID
+  this.Body      = data.Body
+  this.OtpLen    = 6
+  this.Otp       = ''
   
   this.GenOtp = function (len)
   {

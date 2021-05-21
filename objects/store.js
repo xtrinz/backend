@@ -71,7 +71,7 @@ function Store(data)
         }
     }
 
-    this.GetByID = function(_id)
+    this.GetByID = async function(_id)
     {
         console.log(`find-store-by-id. ID: ${_id}`)
         const query = { _id: ObjectId(_id) }
@@ -86,7 +86,7 @@ function Store(data)
         return store
     }
 
-    this.GetByAdminIDAndStoreID = function(admin_id, shop_id)
+    this.GetByAdminIDAndStoreID = async function(admin_id, shop_id)
     {
         console.log(`store-by-admin-and-shop-id. admin_id: ${admin_id} shop_id: ${shop_id}`)
         const query = { _id: ObjectId(shop_id), AdminID: ObjectId(admin_id) }
@@ -101,7 +101,7 @@ function Store(data)
         return store
     }
 
-    this.DoesExist = function()
+    this.DoesExist = async function()
     {
         console.log(`find-store-by-primary-keys. Data: ${data}`)
         const query = { $or: [
@@ -238,7 +238,7 @@ function Store(data)
         console.log(`store-approved. store: ${this}`)
     }
     
-    this.MultiGetByUserID = function(_id)
+    this.MultiGetByUserID = async function(_id)
     {
         console.log(`stores-under-user. ID: ${_id}`)
 
@@ -429,11 +429,11 @@ function Store(data)
         console.log(`staff-revoked. store: ${this} staff: ${staff}`)
     }
 
-    this.ListStaff  = async function (data)
+    this.ListStaff  = async function (in_)
     {
-        console.log(`list-staff. in: ${data}`)
+        console.log(`list-staff. in: ${in_}`)
 
-        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.StoreID)
+        const store = await this.GetByAdminIDAndStoreID(in_.UserID, in_.StoreID)
         if (!store || store.State !== states.Registered)
         {
             const   code_       = code.BAD_REQUEST
@@ -482,12 +482,12 @@ function Store(data)
         return data
     }
 
-    this.ListStores  = async function (data)
+    this.ListStores  = async function (in_)
     {
-        console.log(`list-store. in: ${data}`)
+        console.log(`list-store. in: ${in_}`)
 
         const user  = new User()
-        const resp = user.GetByID(data.UserID)
+        const resp = user.GetByID(in_.UserID)
         if (!resp)
         {
             const   code_       = code.BAD_REQUEST

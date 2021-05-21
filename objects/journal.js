@@ -1,13 +1,12 @@
 const { User }                     = require("./user")
-    , { Cart }                     = require("./cart")
-    , { Store }                    = require("./store")
-    , { ObjectID }                 = require("mongodb")
-    , { Transit }                  = require("./transit")
-    , { journals }                 = require("../common/database")
-    , { Err, code, status, reason }= require("../common/error")
-    , { states, type, channel }    = require("../common/models")
-    , { Stripe }                   = require("../common/stripe")
-    , { states, entity }           = require("../engine/models")
+    , { Cart }                          = require("./cart")
+    , { Store }                         = require("./store")
+    , { ObjectID }                      = require("mongodb")
+    , { Transit }                       = require("./transit")
+    , { journals }                      = require("../common/database")
+    , { Err, code, status, reason }     = require("../common/error")
+    , { states, type, channel, entity } = require("../common/models")
+    , { Stripe }                        = require("../common/stripe")
 
 function Journal()
 {
@@ -70,7 +69,7 @@ function Journal()
       this.Transit  = data.Transit
     }
 
-    this.GetByID = function(_id)
+    this.GetByID = async function(_id)
     {
        console.log(`find-journal-by-id. ID: ${_id}`)
        const query = { _id: ObjectId(_id) }
@@ -244,14 +243,13 @@ function Journal()
 
     this.Read = function(data)
     {
+      let data_
       switch(data.Entity)
       {
             case entity.User:
-            let data_
             return data_
 
             case entity.Store:
-            let data_
             return data_      
       }
     }

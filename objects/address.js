@@ -25,7 +25,7 @@ function Address(data)
         , Country       : data.Country
     }
 
-    this.Insert     = function (user_id)
+    this.Insert     = async function (user_id)
     {
         this._id    = new ObjectID()
         const query = { _id: user_id }
@@ -42,7 +42,7 @@ function Address(data)
         console.log('address-inserted', query, opts)
     }
 
-    this.List     = function (user_id)
+    this.List     = async function (user_id)
     {
         const   query   = { _id: ObjectId(user_id) }
               , project = { AddressList: 1 }
@@ -51,7 +51,7 @@ function Address(data)
         return resp
     }
 
-    this.Update     = function (data)
+    this.Update     = async function (data)
     {
         const   query = { _id: data.UserID, 'AddressList._id': data.AddressID }
               , opts  = { $set: { 'AddressList.$': data }      }
@@ -67,7 +67,7 @@ function Address(data)
         console.log('address-updated', query, opts)
     }
 
-    this.Remove     = function (user_id, entry_id)
+    this.Remove     = async function (user_id, entry_id)
     {
         const   query = { _id: user_id }
                 , opts  = { $pull: { AddressList: {_id: entry_id} } }

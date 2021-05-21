@@ -18,24 +18,24 @@ router.post("/user/register", async (req, res, next) =>
   try
   {
     console.log('register-user',req.body)
-    let text_, data_
+    let text_, data_, user
     switch (req.body.Task) // Block unknown task at I/O validation itself
     {
       case task.New:
-        const user = new User(req.body.MobNo, req.body.Mode)
+        user = new User(req.body.MobNo, req.body.Mode)
         await user.New()
         text_ = text.OTPSendToMobNo.format(req.body.MobNo.slice(-4))
         break
 
       case task.ReadOTP:
-        const user  = new User()
+        user  = new User()
         const token = await user.ConfirmMobNo(req.body)
         text_ = text.OTPConfirmed
         data_ = {Token: token}
         break
 
       case task.Register:
-        const user  = new User()
+        user  = new User()
         await user.Auth(req.headers["Authorization"])
         await user.Register(req.body)
         text_ = text.Registered
@@ -75,24 +75,24 @@ router.post( "/user/password/forgot", async (req, res, next) =>
   {
     console.log('forgot-password',req.body)
 
-    let text_, data_
+    let text_, data_, user
     switch (req.body.Task)
     {
       case task.GenOTP:
-          const   user  = new User()
-                , dest  = await user.SetPwdResetFlag(req.body)
+                user  = new User()
+          const dest  = await user.SetPwdResetFlag(req.body)
           text_ = text.OTPSendVia.format(dest)      
           break
 
       case task.ConfirmOTP:
-          const user  = new User()
+                user  = new User()
           const token = await user.ConfirmOTPOnPasswdReset(req.body)
           text_       = text.OTPConfirmed
           data_       = {Token: token}
           break
 
       case task.SetPasswd:
-          const user  = new User()
+                user  = new User()
           await user.Auth(req.headers["Authorization"])
           await user.UpdatePasswd(req.body.Password)
           text_       = text.PasswdUpdated

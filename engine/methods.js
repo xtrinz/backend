@@ -1,7 +1,7 @@
-const   { states, alerts }	  		  = require("./models")
-	  , { Emit } 					  = require("./events")
+const   { Emit } 					  = require("./events")
 	  , otp 						  = require("../common/otp")
 	  , { Err, code, status, reason } = require("../common/error")
+	  , { states, alerts }	  		  = require("../common/models")
 	  , { User } 					  = require("../objects/user")
 	  , { Journal } 				  = require("../objects/journal")
 
@@ -262,14 +262,15 @@ const OrderDespatchedByStore		=  function(ctxt)
 const TransitIgnoredByAgent		=  function(ctxt)
 {
 	// TODO set Agent ID to Agent Context from route
-	ctxt.Agents.forEach((agent)=>
+	for (idx = 0; idx < ctxt.Agents.length; idx++) 
 	{
-		if (agent._id === ctxt.Agent._id)
+		let agent = ctxt.Agents[idx]
+		if (agent._id === ctxt.Agent._id) 
 		{
 			ctxt.Agents.pop(agent)
-			break
+			break; 
 		}
-	})
+	}
 
 	if(!ctxt.Agents.length)
 	{
