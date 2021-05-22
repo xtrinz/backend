@@ -13,6 +13,12 @@ function Product(data)
    this.Price       = data.Price
    this.Quantity    = data.Quantity
    this.Description = data.Description
+   this.CategoryID  = data.CategoryID
+   this.Variants    = 
+   {
+          Id  : ''
+        , Type: '' // COLOR / SIZE
+   }
 
    this.Set        = function()
    {
@@ -24,6 +30,8 @@ function Product(data)
         this.Price       = data.Price
         this.Quantity    = data.Quantity
         this.Description = data.Description
+        this.Variants    = data.Variants
+        this.CategoryID  = data.CategoryID
    }
 
    this.Save       = async function()
