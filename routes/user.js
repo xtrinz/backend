@@ -3,28 +3,18 @@ const { code, status, text }  = require("../common/error")
     , { User }                = require("../objects/user")
     , { task }                = require("../common/models")
 
-/*Register
-  Login
-  Forgot Password
-  Profile: GET
-  Profile: PUT
-  TODO: Confirm Email */
-
-// Set Mobile Number
-// const validator = require("../../validators/customer/register")
-// validator.register,
-router.post("/user/register", async (req, res, next) => 
+router.post("/register", async (req, res, next) => 
 {
   try
   {
     console.log('register-user',req.body)
-    let text_, data_, user
-    switch (req.body.Task) // Block unknown task at I/O validation itself
+    let text_ = '', data_ = {}, user
+    switch (req.body.Task)
     {
       case task.New:
-        user = new User(req.body.MobNo, req.body.Mode)
+        user = new User(req.body.MobileNo, req.body.Mode)
         await user.New()
-        text_ = text.OTPSendToMobNo.format(req.body.MobNo.slice(-4))
+        text_ = text.OTPSendToMobNo.format(req.body.MobileNo.slice(-4))
         break
 
       case task.ReadOTP:
@@ -52,7 +42,7 @@ router.post("/user/register", async (req, res, next) =>
 
 // Login
 // validator.verify_login,
-router.post( "/user/login", async (req, res, next) =>
+router.post( "/login", async (req, res, next) =>
 {
   try
   {
@@ -69,7 +59,7 @@ router.post( "/user/login", async (req, res, next) =>
 
 // Set password reset flag
 // validator.validate_uid,
-router.post( "/user/password/forgot", async (req, res, next) =>
+router.post( "/password/forgot", async (req, res, next) =>
 {
   try
   {
@@ -108,7 +98,7 @@ router.post( "/user/password/forgot", async (req, res, next) =>
 })
 
 // Read Profile
-router.get("/user/profile", async (req, res, next) => {
+router.get("/profile", async (req, res, next) => {
   try {
     const user  = new User()
     await user.Auth(req.headers["Authorization"])
@@ -129,7 +119,7 @@ router.get("/user/profile", async (req, res, next) => {
 })
 
 // Edit Password
-router.put("/user/profile", async (req, res, next) =>
+router.put("/profile", async (req, res, next) =>
 {
   try 
   {

@@ -17,6 +17,7 @@ module.exports =
 	{
 		  New							: 'New'
 		, ReadOTP 						: 'Read_OTP'
+		, Register 						: 'Register'
 		, GenOTP 						: 'Generate_OTP'
 		, ConfirmOTP 					: 'Confirm_OTP'
 		, EditPasswd 					: 'Edit_Password'

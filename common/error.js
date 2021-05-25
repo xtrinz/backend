@@ -4,7 +4,7 @@ class Error_
   {
     this.Code   = code
     this.Status = status
-    this.Reaon  = reaon
+    this.Reason  = reaon
   }
 }
 
@@ -51,6 +51,7 @@ module.exports =
     , JournalNotFound           : 'Journal not found'
     , TransitNotFound           : 'Transit not found'
     , CancellationDenied        : 'On transit, cancellation denied'
+    , UnknownTask 						  : 'Unknown task'
     , Unknown                   : 'Unknown'
 	},
   text:
