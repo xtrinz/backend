@@ -4,7 +4,7 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test" : "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Project X\n---------\n\" && node testrig/main.js",
     "start": "node cmd/main.js",
     "clean": "rm -rf node_modules && rm package-lock.json"
   },
@@ -16,6 +16,8 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-validator": "^6.10.0",
+    "http": "^0.0.1-security",
+    "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.6.3",
     "nodemailer": "^6.4.17",
