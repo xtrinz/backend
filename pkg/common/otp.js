@@ -22,11 +22,14 @@ const Opts =
 
 function OneTimePasswd(data)
 {
-  this.MobNo     = data.MobNo
-  this.Email     = data.MailID
-  this.Body      = data.Body
-  this.OtpLen    = 6
-  this.Otp       = ''
+  this.Data =
+  {
+      MobNo     : data.MobNo
+    , EmailID   : data.MailID
+    , Body      : data.Body
+    , OtpLen    : 6
+  }
+  this.Otp      = ''
   
   this.GenOtp = function (len)
   {
@@ -50,41 +53,52 @@ function OneTimePasswd(data)
   
   this.SMS = async function(retries = 3)
   {
-    if (retries <= 0 || !this.MobNo) 
+    if (retries <= 0 || !this.Data.MobNo) 
     {
-      if (!this.MobNo) {console.log('mobile-no-not-found', this)}
-      return
+      if (!this.Data.MobNo) {console.log('no-mobile-no', this.Data)}
+      return false
     }
     
     const msg =
     {
-        body  : this.Body.format(this.Otp)
+        body  : this.Data.Body.format(this.Otp)
       , from  : process.env.MOB_NO
-      , to    : this.MobNo
+      , to    : this.Data.MobNo
     }
 
     try { await twilio.messages.create(msg) }
     catch(err) 
     {
       // TODO add a sleep here
-      await this.Email(--retries)
+      console.log('sms-transmission-failed', 
+          { 
+            Data      : this.Data,
+            Error     : 
+            { 
+              Status  : err.status, 
+              Code    : err.status, 
+              Info    : err.moreInfo, 
+              Details : err.details
+            }
+          })
+      await this.SMS(--retries)
     }
   }
   
   this.Email = async function(retries = 3)
   {
-    if (retries <= 0 || !this.Email)
+    if (retries <= 0 || !this.Data.EmailID)
     {
-      if (!this.Email) {console.log('mail-id-not-found', this)}
-      return
+      if (!this.Data.EmailID) {console.log('no-mail-id', this.Data)}
+      return false
     }
 
     let email =
     {
         from    : process.env.EMAIL
-      , to      : this.Email
-      , subject : this.Body
-      , html    : this.Body.format(this.Otp)
+      , to      : this.Data.EmailID
+      , subject : this.Data.Body
+      , html    : this.Data.Body.format(this.Otp)
     }
     
     const svc = nodemailer.createTransport(
@@ -96,25 +110,36 @@ function OneTimePasswd(data)
     catch(err) 
     {
       // TODO add a sleep here
+      console.log('email-transmission-failed',
+      { 
+        Data      : this.Data,
+        Error     : 
+        { 
+          Status  : err.status, 
+          Code    : err.status, 
+          Info    : err.moreInfo, 
+          Details : err.details
+        }
+      })
       await this.Email(--retries) 
     }
   }
 
   this.Send = async function (opts) 
   { 
-    console.log('send-otp', this.MobNo, this.Email, opts)
-    this.GenOtp(this.OtpLen)
+    console.log('send-otp', { MobileNo : this.Data.MobNo, Email : this.Data.EmailID, Options: opts})
+    this.GenOtp(this.Data.OtpLen)
 
     switch (opts)
     {
-      case Opts.SMS   : this.SMS();   break;
-      case Opts.Email : this.Email(); break;
-      default         : this.SMS(); this.Email();
+      case Opts.SMS   : await this.SMS();   break;
+      case Opts.MAIL  : await this.Email(); break;
+      default         : await this.SMS(); await this.Email();
     }
-    
-    let   salt = this.OtpLen
+
+    let   salt = this.Data.OtpLen
         , hash = await bcrypt.hash(this.Otp, salt)
-    console.log('otp-send', this.MobNo, this.Email, hash)
+    console.log('otp-send', { MobileNo : this.Data.MobNo, Email : this.Data.EmailID})
     return hash
   }
 }

@@ -4,30 +4,33 @@ const client    = new MongoClient(process.env.DB_URL,
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-client.connect()
-      .then(result => console.log(`DB-connected. res: ${result} URL: ${process.env.DB_URL}`))
-      .catch(e => console.log(e))
-const database  = client.db(process.env.DB_NAME)
-const users 	  = database.collection("user")
-const sockets 	= database.collection("socket")
-const stores 	  = database.collection("store")
-const products 	= database.collection("products")
-const carts 	  = database.collection("cart")
-const journals 	= database.collection("journal")
-const transits 	= database.collection("transit")
 
-const shops 	  = database.collection("shopinfo")
+client.connect()
+      .then(result => console.log('db-connected', { URL  : result.s.url }))
+      .catch(err => 
+      {
+        console.log('db-connection-failed', {Error: err})
+        process.exit(1)
+      })
+
+const database  = client.db(process.env.DB_NAME)
+
+    , users 	  = database.collection("user")
+    , sockets 	= database.collection("socket")
+    , stores 	  = database.collection("store")
+    , products 	= database.collection("products")
+    , carts 	  = database.collection("cart")
+    , journals 	= database.collection("journal")
+    , transits 	= database.collection("transit")
 
 module.exports  =
 {
-  client,
-  users,
-  sockets,
-  stores,
-  products,
-  carts,
-  journals,
-  transits,
-
-  shops
+    client
+  , users
+  , sockets
+  , stores
+  , products
+  , carts
+  , journals
+  , transits
 }

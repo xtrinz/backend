@@ -46,7 +46,7 @@ const sce_  = [ `uncaughtException`,
                 `SIGKILL`, `SIGTERM`]
 //sce_.forEach((type) => process.on(type, adptr.GracefulExit))
 
-const server_ = () => { console.log(text.Server.format(port)) }
+const server_ = () => console.log('server-started', {Port : port})
      , server = app.listen(port, server_)
 
      , io     = require('socket.io')(server)

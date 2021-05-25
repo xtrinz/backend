@@ -31,6 +31,7 @@ const GracefulExit = async function ()
   {
     console.log('graceful-exit')
     await client.close()
+    process.exit(1)
   } catch (err) { console.log(err) }
 }
 

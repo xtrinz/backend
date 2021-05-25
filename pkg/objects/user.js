@@ -1,72 +1,52 @@
-const { states, mode }              = require("../common/models")
-    , { Err, code, status, reason}  = require('../common/error')
-    , otp                           = require('../common/otp')
-    , jwt                           = require("jsonwebtoken")
-    , { users }                     = require("../common/database")
-    , { ObjectID, ObjectId }        = require("mongodb")
-    , { Cart }                      = require("./cart")
-    , jwt_secret                    = process.env.JWT_AUTHORIZATION_TOKEN_SECRET
+const { users }              = require("../common/database")
+    , { states, mode }       = require("../common/models")
+    , { Err_, code, reason}  = require('../common/error')
+    , otp                    = require('../common/otp')
+    , jwt                    = require("../common/jwt")
+    , { ObjectID, ObjectId } = require("mongodb")
+    , { Cart }               = require("./cart")
 
 function User(mob_no, user_mode)
 {
-    this.MobNo      = mob_no
-    this.Mode       = user_mode              // User/ Agent / Admin / Owner
-
-    this._id        = ''
-    this.Otp        = ''
-    this.State      = states.None
-
-    this.Name       = ''
-    this.Passwd     = ''
-    this.Email      = ''
-
-    this.CartID     = ''
-    this.AddressList= []
-
-    this.StoreList  = 
+    this.Data =
     {
-          Owned     : []    // Created By User
-        , Accepted  : []    // Managed By User
-        , Pending   : []    // Invitation Received for management
+        MobNo      : mob_no
+      , Mode       : user_mode              // User/ Agent / Admin / Owner
+  
+      , _id        : ''
+      , Otp        : ''
+      , State      : states.None
+  
+      , Name       : ''
+      , Passwd     : ''
+      , Email      : ''
+  
+      , CartID     : ''
+      , AddressList: []
+  
+      , StoreList  : 
+      {
+            Owned     : []    // Created By User
+          , Accepted  : []    // Managed By User
+          , Pending   : []    // Invitation Received for management
+      }  
+      , ResetPasswd: false
+      , IsLive     : false
     }
-
-    this.ResetPasswd= false
-    this.IsLive     = false
-
-    this.Set        = function(user)
-    {
-        this.MobNo      = user.MobNo
-        this.Mode       = user.Mode
-
-        this._id        = user._id
-        this.Otp        = user.Otp
-        this.State      = user.State
-
-        this.Name       = user.Name
-        this.Passwd     = user.Passwd
-        this.Email      = user.Email
-
-        this.CartID     = user.CartID
-        this.AddressList= user.AddressList
-        this.StoreList  = user.StoreList
-
-        this.ResetPasswd= user.ResetPasswd
-        this.IsLive     = user.IsLive
-    }
+    this.Set        = (user) => this.Data = user
 
     this.Save       = async function()
     {
-        console.log('save-user', this)
-        const resp  = await users.updateOne({ _id 	 : this._id },
-                                            { $set   : this	    },
-                                            { upsert : true     })
-        if (resp.modifiedCount !== 1) 
+        console.log('save-user', this.Data)
+        const resp  = await users.updateOne({ _id : this.Data._id },
+                        { $set : this.Data }, { upsert : true })
+
+        if (resp.upsertedCount !== 1)
         {
-            console.log('save-user-failed', this)
-            throw new Err(code.INTERNAL_SERVER,
-                          status.Failed,
-                          reason.DBAdditionFailed)
+            console.log('user-save-failed', this.Data)
+            Err_(code.INTERNAL_SERVER, 0, reason.DBAdditionFailed)
         }
+        console.log('user-saved', this.Data)
     }
     
     this.GetByID = async function(_id)
@@ -76,26 +56,26 @@ function User(mob_no, user_mode)
         let user = await users.findOne(query)
         if (!user)
         {
-          console.log(`user-not-found. MobNo: ${email}`)
+          console.log('user-not-found-by-id', { _id: _id})
           return
         }
         this.Set(user)
-        console.log(`user-found. user: ${user}`)
+        console.log('user-found-by-id', { User: user })
         return user
     }
 
     this.GetByMobNo = async function(mob_no)
     {
-        console.log(`find-user-by-mob-no. MobNo: ${mob_no}`)
+        console.log('find-user-by-mob-no',{ MobileNo: mob_no})
         const query = { MobNo: mob_no }
         let user = await users.findOne(query)
         if (!user)
         {
-          console.log(`user-not-found. MobNo: ${mob_no}`)
+          console.log('user-not-found-by-mob-no', { MobileNo: mob_no})
           return
         }
         this.Set(user)
-        console.log(`user-found. user: ${user}`)
+        console.log('user-found-by-mob-no', { User: user })
         return user
     }
 
@@ -106,19 +86,20 @@ function User(mob_no, user_mode)
         let user = await users.findOne(query)
         if (!user)
         {
-          console.log(`user-not-found. MobNo: ${email}`)
+          console.log('user-not-found-by-email', { Email: email})
           return
         }
-        console.log(`user-found. user: ${user}`)
+        this.Set(user)
+        console.log('user-found-by-email', { User: user })
         return user
     }
 
     this.ListNearbyLiveAgents = async function(Loc)
     {
-        console.log(`list-nearby-live-agents. Co-ordintes: ${Loc}`)
+        console.log('list-nearby-live-agents', {Location: Loc})
         const lon     = parseFloat(Loc[0])
         const lat     = parseFloat(Loc[1])
-        /* 1) Filter UserID, UserName & SocketID 
+        /*  1) Filter UserID, UserName & SocketID 
             2) No of Agents : <= 10 [Limit]
             3) Nearest free / near-to-free agents
             4) Live
@@ -129,9 +110,7 @@ function User(mob_no, user_mode)
                 , geometry      = { $geometry: { type: "Point", coordinates: [lon, lat] }, $maxDistance: maxDist }
                 , projections   = { _id: 1, Name: 1, SockID: 1 }
                 , query         = { location: { $near: geometry }, IsLive : true, Mode: mode.Agent }
-        const agents = await users.find(query, projections)
-                                    .limit(agentLimit)
-                                    .toArray()
+        const agents = await users.find(query, projections).limit(agentLimit).toArray()
         if (!agents.length)
         {
             console.log(`no-agents-found. _id: ${Loc}`)
@@ -144,115 +123,77 @@ function User(mob_no, user_mode)
     this.ComparePasswd = async function (hash, passwd)
     {
       const result = await bcrypt.compare(passwd, hash)
-      if(!result)
-      {
-        console.log('wrong-passwd')
-      } else
-      {
-        console.log('passwd-confirmed')
-      }
       return result
     }
 
     this.Auth   = async function (token)
     {
-        if (!token)
-        {
-            console.log('token-missing')
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.TokenMissing
-            throw new Err(code_, status_, reason_)
-        }
+        if (!token) Err_(code.BAD_REQUEST, 0, reason.TokenMissing)
+
         token       = token.slice(7) // cut 'Bearer <token>'
-        const res   = jwt.verify(token, jwt_secret)
+        const res   = await jwt.Verify(token)
 
         const user = await this.GetByID(res._id)
         if (!user)
         {
-            console.log('user-not-found', res._id)
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.UserNotFound
-            throw new Err(code_, status_, reason_)
+            console.log('user-not-found', {UserID: res._id})
+            Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
         }
-        console.log(`user-authenticated. user: ${this}`)
+        console.log('user-authenticated', {User: this.Data})
     }
 
     this.New      = async function ()
     {
-        let user = await this.GetByMobNo(this.MobNo)
-        if (!user || user.State === states.Registred)
-        {
-            throw new Err(code.BAD_REQUEST,
-                          status.Failed,
-                          reason.UserFound)
-        }
+        let user = await this.GetByMobNo(this.Data.MobNo)
+        if (user && user.State === states.Registred)
+        Err_(code.BAD_REQUEST, 0, reason.UserFound)
 
         const otp_sms = new otp.OneTimePasswd({
-                        MobNo: 	this.MobNo, 
+                        MobNo: 	this.Data.MobNo, 
                         Body: 	otp.Msgs.OnAuth })
-            , hash = otp_sms.Send(otp.Opts.SMS)
+            , hash    = await otp_sms.Send(otp.Opts.SMS)
 
-        this._id        = new ObjectID()
-        this.Otp        = hash
-        this.State      = states.New
-        this.Save()
-        console.log(`new-user-created. user: ${this}`)
+        this.Data._id        = new ObjectID()
+        this.Data.Otp        = hash
+        this.Data.State      = states.New
+        await this.Save()
+        console.log('user-created', { User: this.Data})
     }
 
     this.ConfirmMobNo   = async function (data)
     {
-        let user = await this.GetByMobNo(data.MobNo)
-        if (!user)
-        {
-            throw new Err(code.BAD_REQUEST,
-                          status.Failed,
-                          reason.UserNotFound)
-        }
-        this.Set(user)
-        const otp_ = new otp.OneTimePasswd({MobNo: "", Body: ""})
-        if (!otp_.Confirm(this.Otp, data.OTP))
-        {
-            throw new Err(code.BAD_REQUEST,
-                        status.Failed,
-                        reason.OtpRejected)
-        }
-        this.State      = states.MobConfirmed
-        this.Save()
-        console.log(`user-mobile-number-confirmed. user: ${this}`)
+        let user     = await this.GetByMobNo(data.MobNo)
+        if (!user)   Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
 
-        const token = jwt.sign({ _id: this._id }, jwt_secret)
+        const otp_   = new otp.OneTimePasswd({MobNo: "", Body: ""})
+            , status = await otp_.Confirm(this.Otp, data.OTP)
+
+        if (!status) Err_(code.BAD_REQUEST, 0, reason.OtpRejected)
+
+        this.Data.State = states.MobConfirmed
+        await this.Save()
+        console.log(`user-mobile-number-confirmed. user: ${this}`)
+        const token = await jwt.Sign({ _id: this.Data._id })
         return token
     }
 
     this.Register   = async function (data)
     {
         if (user.State !== states.MobConfirmed)
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-            let     reason_     = reason.MobNoNotConfirmed
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST, 0, reason.MobNoNotConfirmed)
 
         const salt      = 5
         const hash_pwd  = await bcrypt.hash(data.Password, salt)
 
-        this.Name       = data.Name
-        this.Passwd     = hash_pwd
-        this.Email      = data.Email
+        this.Data.Name       = data.Name
+        this.Data.Passwd     = hash_pwd
+        this.Data.Email      = data.Email
         
-        if (this.Mode == mode.Agent)
-        {
-            // Create Cart for user
-            const cart  = new Cart(this._id)
-            this.CartID = cart.Create()
-        }
-
-        this.State      = states.Registered
-        this.Save()
-        console.log(`user-registered. user: ${this}`)
+        const cart       = new Cart(this.Data._id)
+        this.Data.CartID = cart.Create()
+        this.Data.State  = states.Registered
+        await this.Save()
+        console.log('user-registered', {User: this.Data})
     }
 
     this.Login   = async function (data)
@@ -262,26 +203,16 @@ function User(mob_no, user_mode)
         else            { user = await this.GetByEmail(data.Email) }
 
         if (!user || user.State !== states.Registered)
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.UserNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
 
-        if (!this.ComparePasswd(user.Passwd, data.Password))
-        {
-            throw new Err(code.BAD_REQUEST,
-                          status.Failed,
-                          reason.IncorrectCredentials)
-        }
+        let status = await this.ComparePasswd(user.Passwd, data.Password)
+        if (!status) Err_(code.BAD_REQUEST, 0, reason.IncorrectCredentials)
         
-        this.Set(user)
-        this.ResetPasswd = false
-        this.Save()
+        this.Data.ResetPasswd = false
+        await this.Save()
 
-        console.log(`user-loggedin. _id: ${user.Name} user: ${user._id}`)        
-        const token = jwt.sign({ _id: user._id }, jwt_secret)
+        console.log('user-loggedin', {Name: user.Name, UserID: user._id})        
+        const token = await jwt.Sign({ _id: user._id })
         return token
     }
 
@@ -298,23 +229,19 @@ function User(mob_no, user_mode)
             user    = await this.GetByEmail(data.Email)
             via     = otp.Opts.MAIL
         }
+
         if (!user || user.State !== states.Registered)
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.UserNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
+
         const otp_  = new otp.OneTimePasswd({
                         MobNo:  user.MobNo,
                         Email:  user.Email,
                         Body:   otp.Msgs.ResetPass })
-        const hash = otp_.Send(via) 
+        const hash = await otp_.Send(via) 
         
-        this.Set(user)
-        this.Otp         = hash
-        this.ResetPasswd = true
-        this.Save()
+        this.Data.Otp         = hash
+        this.Data.ResetPasswd = true
+        await this.Save()
 
         console.log(`set-user-password-flag. user: ${data}`)
         return via
@@ -327,45 +254,36 @@ function User(mob_no, user_mode)
         else            { user = await this.GetByEmail(data.Email) }
 
         if (!user || user.State !== states.Registered)
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.UserNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
 
-        this.Set(user)
-        const otp_ = new otp.OneTimePasswd({MobNo: this.MobNo, Body: ""})
-        if (!this.ResetPasswd || !otp_.Confirm(this.Otp, Otp))
-        {
-            throw new Err(code.BAD_REQUEST,
-                        status.Failed,
-                        reason.OtpRejected)
-        }
-        this.Save()
-        
-        console.log(`otp-confirmed-on-password-reset. user: ${this}`)
-        const token = jwt.sign({ _id: this._id }, jwt_secret)
+        const otp_   = new otp.OneTimePasswd({MobNo: this.Data.MobNo, Body: ""})
+            , status = await otp_.Confirm(this.Data.Otp, Otp)
+
+        if (!this.ResetPasswd || !status)
+        Err_(code.BAD_REQUEST, 0, reason.OtpRejected)
+
+        await this.Save()
+
+        console.log('otp-confirmed-on-password-reset', {User: this.Data})
+        const token = await jwt.Sign({ _id: this._id })
         return token
     }
 
     this.UpdatePasswd   = async function (passwd)
     {
-        if (this.State !== states.Registered || !this.ResetPasswd)
+        if (this.Data.State !== states.Registered || !this.Data.ResetPasswd)
         {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-            let     reason_     = reason.IncompleteRegistration
-            if(!this.ResetPasswd) { reason_ = reason.PasswdResetNotPermited}
-            throw new Err(code_, status_, reason_)
+            let reason_ = reason.IncompleteRegistration
+            if(!this.Data.ResetPasswd) { reason_ = reason.PasswdResetNotPermited }
+            Err_(code.BAD_REQUEST, 0, reason_)
         }
 
-        const salt      = 5
-        const hash_pwd  = await bcrypt.hash(passwd, salt)
-        this.Passwd     = hash_pwd
+        const salt       = 5
+        const hash_pwd   = await bcrypt.hash(passwd, salt)
+        this.Data.Passwd = hash_pwd
+        await this.Save()
 
-        this.Save()
-        console.log(`password-updated. user: ${this}`)
+        console.log('password-updated', {User: this.Data})
     }
 
 }

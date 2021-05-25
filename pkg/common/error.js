@@ -8,8 +8,15 @@ class Error_
   }
 }
 
+const Err_     = function(code, status, reason)
+{
+  const status_     = (status) ? 'Success' : 'Failed'
+  throw new Error_(code, status_, reason)
+}
+
 module.exports =
 {
+  Err_                          : Err_,
   Err                           : Error_,
   status:
 	{
@@ -75,7 +82,6 @@ module.exports =
     , ResponseUpdated           : 'Response updated'
     , NoContextFound            : 'No context found'
     , Relieved                  : 'Relieved'
-    , Server                    : 'Server running on port {0}'
   },
   code:
   {
