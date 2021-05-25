@@ -1,7 +1,7 @@
 const { Method, Type }        = require("../lib/medium")
-    , { task }                = require("../pkg/common/models")
-    , { code, status, text }  = require("../pkg/common/error")
-    , { entity }              = require("../pkg/common/models")
+    , { task }                = require("../../pkg/common/models")
+    , { code, status, text }  = require("../../pkg/common/error")
+    , { entity }              = require("../../pkg/common/models")
 
 const reg_new = 
 {

@@ -17,17 +17,24 @@ const Type   =
 
     , Rest  = function(opts_)
 {
-    opts_         = {...opt_g, ...opts_}
-    opts_.headers = {...opts_.headers, Accept: 'application/json' }
+    let opts                      = { ...opt_g }
+    opts['path']                  = opts_.path
+    opts['method']                = opts_.method
+    let data                      = JSON.stringify(opts_.body)
+    opts.headers                  = { ...opts_.headers }
+    opts.headers['Content-Type']  = 'application/json'
+    opts.headers['Content-Length']= data.length
+
     return new Promise((resolve, reject) =>
     {
-        const req = http.request(opts_, (res) =>
+        const req = http.request(opts, (res) =>
         {
             let data = ''
             res.on('data', (chunk) => data += chunk)
                .on('close', () => resolve({Code: res.statusCode, ...JSON.parse(data)}))
                .on('error', (err) => reject(err.stack))
         })
+        req.write(data)
         req.end()
         req.on('error', (err) => console.error(`Request Failed : ${err}`))
     })
