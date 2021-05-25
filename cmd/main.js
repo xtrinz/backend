@@ -3,17 +3,17 @@ require("./settings")
 const   express = require("express")
       , app     = express()
       , port    = process.env.PORT
-      , adptr   = require("../common/adapter")
-      , { text }= require('../common/error')
+      , adptr   = require("../pkg/common/adapter")
+      , { text }= require('../pkg/common/error')
 
-      , user    = require('../routes/user'   )
-      , store   = require('../routes/store'  )
-      , product = require('../routes/product')
-      , cart    = require('../routes/cart'   )
-      , address = require('../routes/address')
-      , journal = require('../routes/journal')
-      , transit = require('../routes/transit')
-      , common  = require('../routes/common' )           
+      , user    = require('../pkg/routes/user'   )
+      , store   = require('../pkg/routes/store'  )
+      , product = require('../pkg/routes/product')
+      , cart    = require('../pkg/routes/cart'   )
+      , address = require('../pkg/routes/address')
+      , journal = require('../pkg/routes/journal')
+      , transit = require('../pkg/routes/transit')
+      , common  = require('../pkg/routes/common' )           
   
 const stripe_ = function (req, res, buf)
 { // We need the raw body to verify webhook signatures. Let's compute it only when hitting the Stripe webhook endpoint.
@@ -50,7 +50,7 @@ const server_ = () => { console.log(text.Server.format(port)) }
      , server = app.listen(port, server_)
 
      , io     = require('socket.io')(server)
-     , event  = require('../engine/events')
+     , event  = require('../pkg/engine/events')
 
 io.on('connection', async (socket) =>
 {
