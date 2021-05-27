@@ -6,6 +6,7 @@ const { users }               = require("../common/database")
     , jwt                     = require("../common/jwt")
     , { ObjectID, ObjectId }  = require("mongodb")
     , { Cart }                = require("./cart")
+    , bcrypt                  = require("bcryptjs")
 
 function User(mob_no, user_mode)
 {
@@ -90,12 +91,6 @@ function User(mob_no, user_mode)
         return agents
     }
 
-    this.ComparePasswd = async function (hash, passwd)
-    {
-      const result = await bcrypt.compare(passwd, hash)
-      return result
-    }
-
     this.Auth   = async function (token)
     {
         if (!token) Err_(code.BAD_REQUEST, 0, reason.TokenMissing)
@@ -134,34 +129,41 @@ function User(mob_no, user_mode)
     this.ConfirmMobNo   = async function (data)
     {
         let user     = await this.Get(data.MobileNo, query.ByMobNo)
-        if (!user)   Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
+        if (!user || user.State === states.Registred)
+           Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
 
         const otp_   = new otp.OneTimePasswd({MobNo: "", Body: ""})
-            , status = await otp_.Confirm(this.Otp, data.OTP)
+            , status = await otp_.Confirm(this.Data.Otp, data.OTP)
 
         if (!status) Err_(code.BAD_REQUEST, 0, reason.OtpRejected)
 
         this.Data.State = states.MobConfirmed
+        this.Data.Otp   = ''
         await this.Save()
-        console.log(`user-mobile-number-confirmed. user: ${this}`)
+        console.log('user-mobile-number-confirmed', { User: this.Data})
         const token = await jwt.Sign({ _id: this.Data._id })
         return token
     }
 
     this.Register   = async function (data)
     {
-        if (user.State !== states.MobConfirmed)
+        if (this.Data.State !== states.MobConfirmed)
         Err_(code.BAD_REQUEST, 0, reason.MobNoNotConfirmed)
 
         const cart       = new Cart(this.Data._id)
-        this.Data.CartID = cart.Create()
+        this.Data.CartID = await cart.Create()
         this.Data.Name   = data.Name
         this.Data.Passwd = await bcrypt.hash(data.Password, 5) // salt = 5hash_pwd
         this.Data.Email  = data.Email        
         this.Data.State  = states.Registered
 
         await this.Save()
-        console.log('user-registered', {User: this.Data})
+        console.log('user-registered', 
+            {
+                  UserID  : this.Data._id
+                , Name    : data.Name
+                , Email   : data.Email
+            })
     }
 
     this.Login   = async function (data)
@@ -175,7 +177,7 @@ function User(mob_no, user_mode)
         if (!user || user.State !== states.Registered)
         Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
 
-        let status = await this.ComparePasswd(user.Passwd, data.Password)
+        let status = await bcrypt.compare(user.Passwd, data.Password)
         if (!status) Err_(code.BAD_REQUEST, 0, reason.IncorrectCredentials)
         
         this.Data.ResetPasswd = false

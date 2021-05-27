@@ -7,7 +7,18 @@ router.post("/register", async (req, res, next) =>
 {
   try
   {
-    console.log('register-user',req.body)
+
+    let log = { ...req.body }
+    if (req.body['OTP'])      delete log.OTP
+    if (req.body['Password']) delete log.Password
+
+    /*  To avoid OTP read from logs
+        Expected attack sequence: 
+        1) Read OTP from following log
+        2) Crash running server bin
+        3) Try again with the creds */
+
+    console.log('register-user',log)
     let text_ = '', data_ = {}, user
     switch (req.body.Task)
     {
@@ -26,7 +37,8 @@ router.post("/register", async (req, res, next) =>
 
       case task.Register:
         user  = new User()
-        await user.Auth(req.headers["Authorization"])
+        console.log(req.headers)
+        await user.Auth(req.headers["authorization"])
         await user.Register(req.body)
         text_ = text.Registered
         break
@@ -83,7 +95,7 @@ router.post( "/password/forgot", async (req, res, next) =>
 
       case task.SetPasswd:
                 user  = new User()
-          await user.Auth(req.headers["Authorization"])
+          await user.Auth(req.headers["authorization"])
           await user.UpdatePasswd(req.body.Password)
           text_       = text.PasswdUpdated
           break
@@ -101,7 +113,7 @@ router.post( "/password/forgot", async (req, res, next) =>
 router.get("/profile", async (req, res, next) => {
   try {
     const user  = new User()
-    await user.Auth(req.headers["Authorization"])
+    await user.Auth(req.headers["authorization"])
 
     const data = 
     {
@@ -125,7 +137,7 @@ router.put("/profile", async (req, res, next) =>
   {
     let text_
     const user  = new User()
-    await user.Auth(req.headers["Authorization"])
+    await user.Auth(req.headers["authorization"])
 
     switch (req.body.Task)
     {

@@ -20,7 +20,7 @@ const Type   =
     let opts                      = { ...opt_g }
     opts['path']                  = in_.Path
     opts['method']                = in_.Method
-    opts.headers                  = { ...in_.headers }
+    opts.headers                  = { ...in_.Header }
     opts.headers['Content-Type']  = 'application/json'
 
     let body                      = JSON.stringify(in_.Body)

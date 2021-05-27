@@ -7,7 +7,7 @@ const Auth = async function (req, res, next)
   try 
   {
     const user    = new User()
-    const token   = req.headers["Authorization"]
+    const token   = req.headers["authorization"]
     await user.Auth(token)
     req.body.User = user
     next()                    // ?

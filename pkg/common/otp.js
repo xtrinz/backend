@@ -43,13 +43,8 @@ function OneTimePasswd(data)
   this.Confirm = async function (hash, otp)
   {
     const result = await bcrypt.compare(otp, hash)
-    if(!result)
-    {
-      console.log('wrong-otp')
-    } else
-    {
-      console.log('otp-confirmed')
-    }
+    if(!result) console.log('wrong-otp')
+    else console.log('otp-confirmed')
     return result
   }
   

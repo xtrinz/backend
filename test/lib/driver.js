@@ -28,11 +28,9 @@ function TestRig()
         for(let index =0; index < this.Tests.length; index++)
         {
             let test          = this.Tests[index]
+            console.log(index + 1, ':', test.Describe)            
                 test          = await test.PreSet(test)
                 test['Index'] = index + 1
-
-            console.log(test.Index, ':', test.Describe)
-
             let res           = await this.Exec(test)
             if (!res) this.Failed.push({No: test.Index, Title: test.Describe})
         }

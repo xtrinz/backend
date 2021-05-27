@@ -5,8 +5,10 @@ const { Method, Type, Rest }  = require("../lib/medium")
 
 const user =
 {
-  MobileNo : '+915660844848'
-
+  MobileNo  : '+915660844848'
+  , Name    : 'User-1'
+  , Email   : 'user@domain.com'
+  , Password: 'protected'
 }
 
 const reg_new = 
@@ -80,6 +82,46 @@ const reg_readotp =
   }
 }
 
-// How to enable few lines of code if test env var is set
+const reg_register = 
+{
+    Type      : Type.Rest
+  , Describe  : 'User Register Register'
+  , Request   :
+  {
+      Method : Method.POST
+    , Path   : '/user/register'
+    , Body   : 
+    {
+        Task     : task.Register
+      , MobileNo : user.MobileNo
+      , Name     : user.Name
+      , Email    : user.Email
+      , Password : user.Password
+    }
+    , Header: {}
+  }
+  , Response  :
+  {
+      Code  : code.OK
+    , Status: status.Success
+    , Text  : text.Registered
+    , Data  : {}
+  }
+  , PreSet         : async function(data)
+  {
+    console.log('  : Read Test Params')
+    let req = 
+    {
+        Method     : Method.GET
+      , Path       : '/test'
+      , Body       : {}
+      , Header     : {}
+    }
+    let resp  = await Rest(req)
+      , token = await jwt.Sign({ _id: resp.Data.UserID })
+    data.Request.Header["Authorization"] = 'Bearer ' + token
+    return data
+  }
+}
 
-module.exports = [reg_new, reg_readotp]
+module.exports = [reg_new, reg_readotp, reg_register]

@@ -16,7 +16,7 @@ function Cart(user_id)
        , NetPrice        : 0
    }
 
-   this.Set(data)
+   this.Set = function (data)
    {
       this._id       = data._id
       this.UserID    = data.UserID
