@@ -15,15 +15,16 @@ const Type   =
     , DELETE: 'DELETE'
 }
 
-    , Rest  = function(opts_)
+    , Rest  = function(in_)
 {
     let opts                      = { ...opt_g }
-    opts['path']                  = opts_.path
-    opts['method']                = opts_.method
-    let data                      = JSON.stringify(opts_.body)
-    opts.headers                  = { ...opts_.headers }
+    opts['path']                  = in_.Path
+    opts['method']                = in_.Method
+    opts.headers                  = { ...in_.headers }
     opts.headers['Content-Type']  = 'application/json'
-    opts.headers['Content-Length']= data.length
+
+    let body                      = JSON.stringify(in_.Body)
+    opts.headers['Content-Length']= body.length
 
     return new Promise((resolve, reject) =>
     {
@@ -34,7 +35,7 @@ const Type   =
                .on('close', () => resolve({Code: res.statusCode, ...JSON.parse(data)}))
                .on('error', (err) => reject(err.stack))
         })
-        req.write(data)
+        req.write(body)
         req.end()
         req.on('error', (err) => console.error(`Request Failed : ${err}`))
     })

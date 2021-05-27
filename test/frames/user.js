@@ -1,31 +1,85 @@
-const { Method, Type }        = require("../lib/medium")
-    , { task }                = require("../../pkg/common/models")
+const { Method, Type, Rest }  = require("../lib/medium")
+    , { task, mode }          = require("../../pkg/common/models")
     , { code, status, text }  = require("../../pkg/common/error")
-    , { entity }              = require("../../pkg/common/models")
+    , jwt                     = require("../../pkg/common/jwt")
+
+const user =
+{
+  MobileNo : '+915660844848'
+
+}
 
 const reg_new = 
 {
-      Type      : Type.Rest
-    , Describe  : 'User Register New'
-    , Path      : '/user/register'
-    , Request   :
+      Type           : Type.Rest
+    , Describe       : 'User Register New'
+    , Request        :
     {
-          Method: Method.POST
-        , Body  : 
+          Method     : Method.POST
+        , Path       : '/user/register'
+        , Body       : 
         {
             Task     : task.New
-          , MobileNo : '+918606135758'
-          , Mode     : entity.User
+          , MobileNo : user.MobileNo
+          , Mode     : mode.User
         }
-        , Header: {}
+        , Header     : {}
     }
-    , Response  :
+    , Response       :
     {
-          Code  : code.OK
-        , Status: status.Success
-        , Text  : text.OTPSendToMobNo.format('5758')
-        , Data  : {}
+          Code       : code.OK
+        , Status     : status.Success
+        , Text       : text.OTPSendToMobNo.format(
+                        user.MobileNo.substr(
+                        user.MobileNo.length - 4))
+        , Data       : {}
+    }
+    , PreSet         : async function(data)
+    {
+      return data
     }
 }
 
-module.exports = [reg_new]
+const reg_readotp = 
+{
+    Type      : Type.Rest
+  , Describe  : 'User Register Read_OTP'
+  , Request   :
+  {
+      Method : Method.POST
+    , Path   : '/user/register'
+    , Body   : 
+    {
+        Task     : task.ReadOTP
+      , MobileNo : user.MobileNo
+      , OTP      : ''
+    }
+    , Header: {}
+  }
+  , Response  :
+  {
+      Code  : code.OK
+    , Status: status.Success
+    , Text  : text.OTPConfirmed
+    , Data  : ''
+  }
+  , PreSet         : async function(data)
+  {
+    console.log('  : Read Test Params')
+    let req = {
+        Method     : Method.GET
+      , Path       : '/test'
+      , Body       : {}
+      , Header     : {}
+    }
+    let resp = await Rest(req)
+    data.Request.Body.OTP = resp.Data.OTP
+    let token = await jwt.Sign({ _id: resp.Data.UserID })
+    data.Response.Data = {Token : token}
+    return data
+  }
+}
+
+// How to enable few lines of code if test env var is set
+
+module.exports = [reg_new, reg_readotp]
