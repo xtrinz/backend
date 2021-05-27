@@ -3,7 +3,8 @@ const twilio_sid   = process.env.TWILIO_ACCOUNT_SID
     , twilio       = require("twilio")(twilio_sid, twilio_token)
     , Org          = process.env.ORGANISATION
     ,  nodemailer  = require("nodemailer")
-    , bcrypt       = require("bcryptjs");
+    , bcrypt       = require("bcryptjs")
+    , test         = require("./test")
 
 const Msgs =
 {
@@ -36,6 +37,7 @@ function OneTimePasswd(data)
     this.Otp = Math.random()
                    .toFixed(len)
                    .substr(`-${len}`)
+    test.Set('OTP', this.Otp) // #101
   }
 
   this.Confirm = async function (hash, otp)

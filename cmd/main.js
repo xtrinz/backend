@@ -4,7 +4,7 @@ const   express = require("express")
       , app     = express()
       , port    = process.env.PORT
       , adptr   = require("../pkg/common/adapter")
-      , { text }= require('../pkg/common/error')
+      , { test }= require('../pkg/common/test'   )
 
       , user    = require('../pkg/routes/user'   )
       , store   = require('../pkg/routes/store'  )
@@ -23,6 +23,7 @@ const stripe_ = function (req, res, buf)
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json({ verify: stripe_ }))
 
+app.use("/test"           , test   )
 app.use("/user"           , user   )
 app.use("/journal/confirm", journal) // need to check, how journal/cofirm and journal differs
 

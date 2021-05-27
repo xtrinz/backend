@@ -82,6 +82,7 @@ module.exports =
     , ResponseUpdated           : 'Response updated'
     , NoContextFound            : 'No context found'
     , Relieved                  : 'Relieved'
+    , TestNotEnabled            : 'Test disabled'
   },
   code:
   {
