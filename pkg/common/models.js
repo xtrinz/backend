@@ -24,6 +24,7 @@ module.exports =
 		, Register 					: 'Register'
 		, GenOTP 					: 'Generate_OTP'
 		, ConfirmOTP 				: 'Confirm_OTP'
+		, SetPassword				: 'Set_Password'
 		, EditPasswd 				: 'Edit_Password'
 		, EditProfile 				: 'Edit_Profile'
 		, Approve 					: 'Approve'

@@ -37,7 +37,6 @@ router.post("/register", async (req, res, next) =>
 
       case task.Register:
         user  = new User()
-        console.log(req.headers)
         await user.Auth(req.headers["authorization"])
         await user.Register(req.body)
         text_ = text.Registered
@@ -69,36 +68,34 @@ router.post( "/login", async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-// Set password reset flag
-// validator.validate_uid,
-router.post( "/password/forgot", async (req, res, next) =>
+router.post( "/passwd/reset", async (req, res, next) =>
 {
   try
   {
-    console.log('forgot-password',req.body)
+    console.log('edit-password',req.body)
 
-    let text_, data_, user
+    let text_, data_ = {}, user
     switch (req.body.Task)
     {
       case task.GenOTP:
                 user  = new User()
-          const dest  = await user.SetPwdResetFlag(req.body)
-          text_ = text.OTPSendVia.format(dest)      
-          break
+          const dest  = await user.EnableEditPassword(req.body)
+                text_ = text.OTPSendVia.format(dest)      
+                break
 
       case task.ConfirmOTP:
                 user  = new User()
-          const token = await user.ConfirmOTPOnPasswdReset(req.body)
-          text_       = text.OTPConfirmed
-          data_       = {Token: token}
-          break
+          const token = await user.AuthzEditPassword(req.body)
+                text_ = text.OTPConfirmed
+                data_ = {Token: token}
+                break
 
-      case task.SetPasswd:
+      case task.SetPassword:
                 user  = new User()
           await user.Auth(req.headers["authorization"])
           await user.UpdatePasswd(req.body.Password)
-          text_       = text.PasswdUpdated
-          break
+                text_ = text.PasswdUpdated
+                break
     }
 
     return res.status(code.OK).json({
@@ -117,10 +114,10 @@ router.get("/profile", async (req, res, next) => {
 
     const data = 
     {
-        Name      : user.Name
-      , MobileNo  : user.MobNo
-      , Email     : user.Email
-      , Mode      : user.Mode
+        Name      : user.Data.Name
+      , MobileNo  : user.Data.MobNo
+      , Email     : user.Data.Email
+      , Mode      : user.Data.Mode
     }
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -130,42 +127,17 @@ router.get("/profile", async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-// Edit Password
 router.put("/profile", async (req, res, next) =>
 {
   try 
   {
-    let text_
     const user  = new User()
     await user.Auth(req.headers["authorization"])
-
-    switch (req.body.Task)
-    {
-      case task.EditPasswd:
-        if (!user.ComparePasswd(user.Passwd, req.body.Password))
-        { 
-          return res.status(code.BAD_REQUEST).json({
-            Status  : status.Failed,
-            Text    : reason.IncorrectCredentials,
-            Data    : {}
-          })
-        }
-        user.ResetPasswd = true
-        user.UpdatePasswd(req.body.Password)
-        text_ = text.PasswdUpdated
-        break
-
-      case task.EditProfile:
-        user.Name   = req.body.Name
-        user.Email  = req.body.Email
-        user.Save(req.body)
-        text_ = text.ProfileUpdated
-        break
-    }
+    await user.EditProfile(req.body)
 
     return res.status(code.OK).json({
       Status  : status.Success,
-      Text    : text_,
+      Text    : text.ProfileUpdated,
       Data    : {}
     })
   } catch (err) { next(err) }

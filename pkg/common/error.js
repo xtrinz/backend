@@ -4,25 +4,26 @@ class Error_
   {
     this.Code   = code
     this.Status = status
-    this.Reason  = reaon
+    this.Reason = reaon
   }
 }
 
-const Err_     = function(code, status, reason)
+const status   =
 {
-  const status_     = (status) ? 'Success' : 'Failed'
-  throw new Error_(code, status_, reason)
+    Success 					        : 'Success'
+  , Failed 			              : 'Failed'
+}
+
+const Err_     = function(code, reason)
+{
+  throw new Error_(code, status.Failed, reason)
 }
 
 module.exports =
 {
   Err_                          : Err_,
   Err                           : Error_,
-  status:
-	{
-		  Success 					        : 'Success'
-		, Failed 			              : 'Failed'
-	},
+  status                        : status,
 	reason:
 	{
 		  PurchaseNotFound 		      : 'Purchase not found'
@@ -71,6 +72,7 @@ module.exports =
     , Approved                  : 'Approved'
     , LoggedIn                  : 'Logged in'
     , PasswdUpdated             : 'Password updated'
+    , ProfileUpdated            : 'Profile updated'
     , ProductAdded              : 'Product added'
     , ProductUpdated            : 'Product updated'
     , ProductRemoved            : 'Product removed'

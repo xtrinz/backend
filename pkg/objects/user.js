@@ -39,7 +39,7 @@ function User(mob_no, user_mode)
         if (!resp.result.ok)
         {
             console.log('user-save-failed', { Data: this.Data, Result: resp.result})
-            Err_(code.INTERNAL_SERVER, 0, reason.DBAdditionFailed)
+            Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
         }
         console.log('user-saved', this.Data)
     }
@@ -93,16 +93,18 @@ function User(mob_no, user_mode)
 
     this.Auth   = async function (token)
     {
-        if (!token) Err_(code.BAD_REQUEST, 0, reason.TokenMissing)
+        if (!token) Err_(code.BAD_REQUEST, reason.TokenMissing)
 
         token       = token.slice(7) // cut 'Bearer <token>'
         const res   = await jwt.Verify(token)
+        if (!res || !res._id)
+            Err_(code.BAD_REQUEST, reason.UserNotFound)
 
         const user = await this.Get(res._id, query.ByID)
         if (!user)
         {
             console.log('user-not-found', {UserID: res._id})
-            Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
+            Err_(code.BAD_REQUEST, reason.UserNotFound)
         }
         console.log('user-authenticated', {User: this.Data})
     }
@@ -110,8 +112,8 @@ function User(mob_no, user_mode)
     this.New      = async function ()
     {
         let user = await this.Get(this.Data.MobNo, query.ByMobNo)
-        if (user && user.State === states.Registred)
-        Err_(code.BAD_REQUEST, 0, reason.UserFound)
+        if (user && user.State === states.Registered)
+        Err_(code.BAD_REQUEST, reason.UserFound)
 
         const otp_sms = new otp.OneTimePasswd({
                         MobNo: 	this.Data.MobNo, 
@@ -129,13 +131,13 @@ function User(mob_no, user_mode)
     this.ConfirmMobNo   = async function (data)
     {
         let user     = await this.Get(data.MobileNo, query.ByMobNo)
-        if (!user || user.State === states.Registred)
-           Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
+        if (!user || user.State === states.Registered)
+           Err_(code.BAD_REQUEST, reason.UserNotFound)
 
         const otp_   = new otp.OneTimePasswd({MobNo: "", Body: ""})
             , status = await otp_.Confirm(this.Data.Otp, data.OTP)
 
-        if (!status) Err_(code.BAD_REQUEST, 0, reason.OtpRejected)
+        if (!status) Err_(code.BAD_REQUEST, reason.OtpRejected)
 
         this.Data.State = states.MobConfirmed
         this.Data.Otp   = ''
@@ -148,7 +150,7 @@ function User(mob_no, user_mode)
     this.Register   = async function (data)
     {
         if (this.Data.State !== states.MobConfirmed)
-        Err_(code.BAD_REQUEST, 0, reason.MobNoNotConfirmed)
+        Err_(code.BAD_REQUEST, reason.MobNoNotConfirmed)
 
         const cart       = new Cart(this.Data._id)
         this.Data.CartID = await cart.Create()
@@ -168,27 +170,23 @@ function User(mob_no, user_mode)
 
     this.Login   = async function (data)
     {
-
         let param, qType
         if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobNo }
         else               { param = data.Email;    qType = query.ByMail  }
 
-        let user = user = await this.Get(param, qType)
+        let user = await this.Get(param, qType)
         if (!user || user.State !== states.Registered)
-        Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
+        Err_(code.BAD_REQUEST, reason.UserNotFound)
 
-        let status = await bcrypt.compare(user.Passwd, data.Password)
-        if (!status) Err_(code.BAD_REQUEST, 0, reason.IncorrectCredentials)
-        
-        this.Data.ResetPasswd = false
-        await this.Save()
+        let status = await bcrypt.compare(data.Password, user.Passwd) // (data, hash) keep sign in order
+        if (!status) Err_(code.BAD_REQUEST, reason.IncorrectCredentials)
 
         console.log('user-loggedin', {Name: user.Name, UserID: user._id})        
         const token = await jwt.Sign({ _id: user._id })
         return token
     }
 
-    this.SetPwdResetFlag   = async function (data)
+    this.EnableEditPassword   = async function (data)
     {
 
         let param, qType, via
@@ -197,7 +195,7 @@ function User(mob_no, user_mode)
 
         let user = await this.Get(param, qType)
         if (!user || user.State !== states.Registered)
-        Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
+        Err_(code.BAD_REQUEST, reason.UserNotFound)
 
         const otp_  = new otp.OneTimePasswd({
                         MobNo:  user.MobNo,
@@ -209,11 +207,16 @@ function User(mob_no, user_mode)
         this.Data.ResetPasswd = true
         await this.Save()
 
-        console.log('user-password-flag-set', { User: data})
+        console.log('user-password-flag-set', 
+            { 
+                UserID  : user._id,
+                MobileNo: data.MobileNo,
+                Email   : data.Email
+            })
         return via
     }
 
-    this.ConfirmOTPOnPasswdReset   = async function (data)
+    this.AuthzEditPassword   = async function (data)
     {
         let param, qType
         if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobNo }
@@ -221,18 +224,18 @@ function User(mob_no, user_mode)
 
         let user = await this.Get(param, qType)
         if (!user || user.State !== states.Registered)
-        Err_(code.BAD_REQUEST, 0, reason.UserNotFound)
+        Err_(code.BAD_REQUEST, reason.UserNotFound)
 
         const otp_   = new otp.OneTimePasswd({MobNo: this.Data.MobNo, Body: ""})
-            , status = await otp_.Confirm(this.Data.Otp, Otp)
+            , status = await otp_.Confirm(this.Data.Otp, data.OTP)
+        if (!this.Data.ResetPasswd || !status)
+        Err_(code.BAD_REQUEST, reason.OtpRejected)
 
-        if (!this.ResetPasswd || !status)
-        Err_(code.BAD_REQUEST, 0, reason.OtpRejected)
-
+        this.Data.Otp = ''
         await this.Save()
 
-        console.log('otp-confirmed-on-password-reset', {User: this.Data})
-        const token = await jwt.Sign({ _id: this._id })
+        console.log('authorized-edit-password', {User: this.Data})
+        const token = await jwt.Sign({ _id: this.Data._id })
         return token
     }
 
@@ -243,11 +246,29 @@ function User(mob_no, user_mode)
         {
             let reason_ = reason.IncompleteRegistration
             if(!this.Data.ResetPasswd) { reason_ = reason.PasswdResetNotPermited }
-            Err_(code.BAD_REQUEST, 0, reason_)
+            Err_(code.BAD_REQUEST, reason_)
         }
-        this.Data.Passwd = await bcrypt.hash(passwd, 5) // salt =5
+        this.Data.Passwd      = await bcrypt.hash(passwd, 5) // salt =5
+        this.Data.ResetPasswd = false
         await this.Save()
         console.log('password-updated', {User: this.Data})
+    }
+
+    this.EditProfile   = async function (data)
+    {
+        if ( this.Data.State !== states.Registered)
+            Err_(code.BAD_REQUEST, reason.IncompleteRegistration)
+
+        if(data.Password)
+        {                                        // (data, hash) keep sign in order
+            let status        = await bcrypt.compare(data.Password, this.Data.Passwd)
+            if (!status) Err_(code.BAD_REQUEST, reason.IncorrectCredentials)
+            this.Data.Passwd  = await bcrypt.hash(data.NewPassword, 5) // salt =5
+        }
+        if(data.Name ) { this.Data.Name  = data.Name  }
+        if(data.Email) { this.Data.Email = data.Email }
+        await this.Save()
+        console.log('profile-updated', {User: this.Data})
     }
 
 }

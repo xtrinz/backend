@@ -1,5 +1,5 @@
-const compare           = require("./compare")
-    , { Rest, Type }    = require("./medium")
+const compare        = require("./compare")
+    , { Rest, Type } = require("./medium")
 
 function TestRig()
 {
@@ -27,11 +27,11 @@ function TestRig()
     {
         for(let index =0; index < this.Tests.length; index++)
         {
-            let test          = this.Tests[index]
-            console.log(index + 1, ':', test.Describe)            
-                test          = await test.PreSet(test)
-                test['Index'] = index + 1
-            let res           = await this.Exec(test)
+            let test               = this.Tests[index]
+            console.log(index + 1, ':', test.Describe)
+            if(test.PreSet) { test = await test.PreSet(test) }
+                test['Index']      = index + 1
+            let res                = await this.Exec(test)
             if (!res) this.Failed.push({No: test.Index, Title: test.Describe})
         }
 
