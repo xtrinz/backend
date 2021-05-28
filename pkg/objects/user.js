@@ -34,8 +34,10 @@ function User(mob_no, user_mode)
     this.Save       = async function()
     {
         console.log('save-user', this.Data)
-        const resp  = await users.updateOne({ _id : this.Data._id },
-                            { $set : this.Data }, { upsert : true })
+        const query = { _id : this.Data._id }
+            , act   = { $set : this.Data }
+            , opt   = { upsert : true }
+        const resp  = await users.updateOne(query, act, opt)
         if (!resp.result.ok)
         {
             console.log('user-save-failed', { Data: this.Data, Result: resp.result})
@@ -97,8 +99,7 @@ function User(mob_no, user_mode)
 
         token       = token.slice(7) // cut 'Bearer <token>'
         const res   = await jwt.Verify(token)
-        if (!res || !res._id)
-            Err_(code.BAD_REQUEST, reason.UserNotFound)
+        if (!res || !res._id) Err_(code.BAD_REQUEST, reason.UserNotFound)
 
         const user = await this.Get(res._id, query.ByID)
         if (!user)

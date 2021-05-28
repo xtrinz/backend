@@ -6,10 +6,10 @@ const { Method, Type, Rest }  = require("../../lib/medium")
 let user =
 {
     MobileNo  : '+915660844848'
-  , Name      : 'User-1'
-  , Email     : 'user@domain.com'
-  , Password  : 'protected'
-  , Mode      : 'User'
+  , Name      : 'UserName'
+  , Email     : 'user@user.com'
+  , Password  : 'Password'
+  , Mode      : mode.Admin
 }
 
 let reg_new = 
@@ -24,7 +24,7 @@ let reg_new =
         {
             Task     : task.New
           , MobileNo : user.MobileNo
-          , Mode     : mode.User
+          , Mode     : user.Mode
         }
         , Header     : {}
     }
@@ -64,7 +64,7 @@ let reg_readotp =
   }
   , PreSet         : async function(data)
   {
-    console.log('  : Read Test Params')
+    console.log('    : Read Test Params')
     let req = {
         Method     : Method.GET
       , Path       : '/test'
@@ -95,7 +95,10 @@ let reg_register =
       , Email    : user.Email
       , Password : user.Password
     }
-    , Header: {}
+    , Header:
+    {
+      Authorization: ''
+    }
   }
   , Response  :
   {
@@ -106,7 +109,7 @@ let reg_register =
   }
   , PreSet         : async function(data)
   {
-    console.log('  : Read Test Params')
+    console.log('    : Read Test Params')
     let req = 
     {
         Method     : Method.GET
@@ -116,7 +119,7 @@ let reg_register =
     }
     let resp  = await Rest(req)
       , token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header["Authorization"] = 'Bearer ' + token
+    data.Request.Header.Authorization = 'Bearer ' + token
     return data
   }
 }
@@ -145,7 +148,7 @@ let login =
   }
   , PreSet         : async function(data)
   {
-    console.log('  : Read Test Params')
+    console.log('    : Read Test Params')
     let req = 
     {
         Method     : Method.GET
@@ -210,7 +213,7 @@ let passwd_confirmotp =
   }
   , PreSet         : async function(data)
   {
-    console.log('  : Read Test Params')
+    console.log('    : Read Test Params')
     let req = {
         Method     : Method.GET
       , Path       : '/test'
@@ -238,7 +241,10 @@ let passwd_setpassword =
         Task     : task.SetPassword
       , Password : user.Password + '1'
     }
-    , Header: {}
+    , Header:
+    {
+      Authorization: ''
+    }
   }
   , Response  :
   {
@@ -249,7 +255,7 @@ let passwd_setpassword =
   }
   , PreSet         : async function(data)
   {
-    console.log('  : Read Test Params')
+    console.log('    : Read Test Params')
     let req = {
         Method     : Method.GET
       , Path       : '/test'
@@ -258,7 +264,7 @@ let passwd_setpassword =
     }
     let resp = await Rest(req)
     let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header["Authorization"] = 'Bearer ' + token
+    data.Request.Header.Authorization = 'Bearer ' + token
     return data
   }
 }
@@ -275,7 +281,10 @@ let profile =
       Method : Method.GET
     , Path   : '/user/profile'
     , Body   : {}
-    , Header : {}
+    , Header :
+    {
+      Authorization: ''
+    }
   }
   , Response  :
   {
@@ -292,7 +301,7 @@ let profile =
   }
   , PreSet         : async function(data)
   {
-    console.log('  : Read Test Params')
+    console.log('    : Read Test Params')
     let req = {
         Method     : Method.GET
       , Path       : '/test'
@@ -301,7 +310,7 @@ let profile =
     }
     let resp = await Rest(req)
     let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header["Authorization"] = 'Bearer ' + token
+    data.Request.Header.Authorization = 'Bearer ' + token
     return data
   }
 }
@@ -321,7 +330,10 @@ let profile_edit =
       , Name        : user.Name
       , Email       : user.Email
     }
-    , Header : {}
+    , Header :
+    {
+      Authorization: ''
+    }
   }
   , Response  :
   {
@@ -332,7 +344,7 @@ let profile_edit =
   }
   , PreSet         : async function(data)
   {
-    console.log('  : Read Test Params')
+    console.log('    : Read Test Params')
     let req = {
         Method     : Method.GET
       , Path       : '/test'
@@ -341,26 +353,26 @@ let profile_edit =
     }
     let resp = await Rest(req)
     let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header["Authorization"] = 'Bearer ' + token
+    data.Request.Header.Authorization = 'Bearer ' + token
     return data
   }
 }
 
 module.exports = 
 [
-  reg_new,
-  reg_readotp,
-  reg_register,
+    reg_new
+  , reg_readotp
+  , reg_register
 
-  login,
+  , login
   
-  passwd_genotp,
-  passwd_confirmotp,      // Edit password
-  passwd_setpassword,
-  passwd_genotp,
-  passwd_confirmotp,      // Revert it, for the sake of rest of TC
-  passwd_setpassword_revert,
+  , passwd_genotp
+  , passwd_confirmotp      // Edit password
+  , passwd_setpassword
+  , passwd_genotp
+  , passwd_confirmotp      // Revert it, for the sake of rest of TC
+  , passwd_setpassword_revert
 
-  profile,
-  profile_edit
+  , profile
+  , profile_edit
 ]

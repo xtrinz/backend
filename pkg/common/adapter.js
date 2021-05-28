@@ -9,7 +9,7 @@ const Auth = async function (req, res, next)
     const user    = new User()
     const token   = req.headers["authorization"]
     await user.Auth(token)
-    req.body.User = user
+    req.body.User = user.Data
     next()                    // ?
   } catch (err) { next(err) }
 }

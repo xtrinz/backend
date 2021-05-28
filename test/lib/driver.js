@@ -14,11 +14,11 @@ function TestRig()
                , sts = await compare.DeepEqual(resp, data.Response)
             if(!sts)
             {
-                console.log('  : Failed') // console.log('\nRequest :', data.Request)
+                console.log('    : Failed') // console.log('\nRequest :', data.Request)
                 console.log('\nExpected : ', data.Response, '\nReceived : ', resp)
                 return false
             }
-            console.log('  : Passed')
+            console.log('    : Passed')
             return true
         }
         else { return false }
@@ -28,7 +28,7 @@ function TestRig()
         for(let index =0; index < this.Tests.length; index++)
         {
             let test               = this.Tests[index]
-            console.log(index + 1, ':', test.Describe)
+            console.log(('000' + (index + 1)).substr(-3), ':', test.Describe)
             if(test.PreSet) { test = await test.PreSet(test) }
                 test['Index']      = index + 1
             let res                = await this.Exec(test)
@@ -47,7 +47,7 @@ function TestRig()
     }
 }
 
-var TestSuite = new TestRig()
+var TestSuite  = new TestRig()
 
 module.exports =
 {

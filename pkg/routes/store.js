@@ -1,27 +1,28 @@
-const { ObjectId }      = require("mongodb")
-    , router 	          = require("express").Router()
-    , { code, text } 	  = require("../common/error")
-    , { task }          = require("../common/models")
-    , { Store }         = require("../objects/store")
+const { ObjectId }           = require("mongodb")
+    , router 	               = require("express").Router()
+    , { code, text, status } = require("../common/error")
+    , { task }               = require("../common/models")
+    , { Store }              = require("../objects/store")
 
 // Create shop
-router.post("/shop/register", async (req, res, next) =>
+router.post("/register", async (req, res, next) =>
 {
   try
   {
     console.log('register-shop',req.body)
-    let text_, data_, store
+    let text_, data_ = {}, store
     switch(req.body.Task)
     {
         case task.New:
             store = new Store(req.body)
             await store.New(req.body)
-            text_ = text.OTPSendToMobNo.format(store.MobileNo.slice(-4))
-            break
+            const mob_no = store.Data.MobileNo
+            text_ = text.OTPSendToMobNo.format(mob_no.slice(-4))
+            break;
 
         case task.ReadOTP:
             store  = new Store()
-            await store.ConfirmContactNo(req.body)
+            await store.ConfirmMobNo(req.body)
             text_ = text.OTPConfirmed
             break
         
@@ -40,30 +41,14 @@ router.post("/shop/register", async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-// List store
-router.get("/store/list", async (req, res, next) => {
-    try 
-    {
-      const   store = new Store()
-            , id    = ObjectId(req.query.user._id)
-            , data  = await store.MultiGetByUserID(id)
-
-      return res.status(code.OK).json({
-        Status  : status.Success,
-        Text    : '',
-        Data    : data
-      })
-    } catch (err) { next(err) }
-})
-
 // View store
-router.get("/store/view", async (req, res, next) => {
+router.get("/view", async (req, res, next) => {
     try 
     {
-      let     store = new Store()
-      const     id  = ObjectId(req.query.StoreID)
-            , user  = ObjectId(req.query.user._id)
-            , data  = await store.Read(id, user)
+      let  store = new Store()
+      const id   = ObjectId(req.query.StoreID)
+          , user = ObjectId(req.query.User._id) // does GET have Body?
+          , data = await store.Read(id, user)
 
       return res.status(code.OK).json({
         Status  : status.Success,
@@ -73,10 +58,23 @@ router.get("/store/view", async (req, res, next) => {
     } catch (err) { next(err) }
 })
 
-// TODO Delete & Edit APIs
-// List orders...
+// List stores
+router.get("/list", async (req, res, next) =>
+{
+    try 
+    {
+      let store = new Store()
+      const data  = store.ListStores(req.query)
+      return res.status(code.OK).json({
+        Status  : status.Success,
+        Text    : '',
+        Data    : data
+      })
+    } catch (err) { next(err) }
+})
 
-router.post("/store/staff", async (req, res, next) =>
+// Add Staff
+router.post("/staff", async (req, res, next) =>
 {
     try 
     {
@@ -111,27 +109,12 @@ router.post("/store/staff", async (req, res, next) =>
 })
 
 // List staff
-router.get("/store/staff", async (req, res, next) =>
+router.get("/staff", async (req, res, next) =>
 {
     try 
     {
       let store = new Store()
       const data  = store.ListStaff(req.query)
-      return res.status(code.OK).json({
-        Status  : status.Success,
-        Text    : '',
-        Data    : data
-      })
-    } catch (err) { next(err) }
-})
-
-// List stores
-router.get("/store/list", async (req, res, next) =>
-{
-    try 
-    {
-      let store = new Store()
-      const data  = store.ListStores(req.query)
       return res.status(code.OK).json({
         Status  : status.Success,
         Text    : '',

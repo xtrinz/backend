@@ -5,6 +5,7 @@ module.exports =
 		  ByID						: 'ByID'
 		, ByMail 					: 'ByMail'
 		, ByMobNo 					: 'ByMobNo'
+		, Custom 					: 'Custom'
 	},
 	mode:
 	{

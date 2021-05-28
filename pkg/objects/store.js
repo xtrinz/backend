@@ -1,120 +1,94 @@
-const { User }                      = require("./user")
-    , { ObjectID, ObjectId }        = require("mongodb")
-    , { stores }                    = require("../common/database")
-    , otp                           = require('../common/otp')
-    , { Err, code, status, reason}  = require('../common/error')
-    , { states, mode }              = require("../common/models")
+const { User }                = require("./user")
+    , { ObjectID, ObjectId }  = require("mongodb")
+    , { stores }              = require("../common/database")
+    , otp                     = require('../common/otp')
+    , test                    = require('../common/test')
+    , { Err_, code, reason}   = require('../common/error')
+    , { states, mode, query } = require("../common/models")
 
 function Store(data)
 {
-    this._id                 = ''
-    this.AdminID             = ObjectId(data.AdminID)
-    this.Name                = data.Name
-    this.Img                 = data.Image
-    this.Type                = data.Type
-    this.Certs               = data.Certs
-    this.MobileNo            = data.MobileNo
-    this.Email               = data.Email
-    this.Location            =
+    if (data)
+    this.Data          =
     {
-          type          : 'Point'
-        , coordinates   : [data.Longitude, data.Latitude]
-    }
-    this.State               = states.New
+        _id          : ''
+        , AdminID      : (data && data.User)? ObjectId(data.User._id):''
+        , Name         : data.Name
+        , Image        : data.Image
+        , Type         : data.Type
+        , Certs        : data.Certs
+        , MobileNo     : data.MobileNo
+        , Email        : data.Email
+        , Location     :
+        {
+            type        : 'Point'
+            , coordinates : [data.Longitude, data.Latitude]
+        }
+        , State        : states.New
     
-    this.StaffList           =
-    {
-          Approved : []
-        , Pending  : []
-    }
-
-    this.Address             =
-    {
-          Line1         : data.Address.Line1
-        , Line2         : data.Address.Line2
-        , City          : data.Address.City
-        , PostalCode    : data.Address.PostalCode
-        , State         : data.Address.State
-        , Country       : data.Address.Country
-    }
-
-    this.Set(data)
-    {
-        this._id        = data._id
-        this.AdminID    = data.AdminID
-        this.Name       = data.Name
-        this.Img        = data.Img
-        this.Type       = data.Type
-        this.Certs      = data.Certs
-        this.MobileNo   = data.MobileNo
-        this.Email      = data.Email
-        this.Location   = data.Location
-        this.State      = data.State
-        this.Address    = data.Address
-        this.StaffList  = data.StaffList
+        , StaffList    :
+        {
+            Approved    : []
+            , Pending     : []
+        }
+    
+        , Address      :
+        {
+            Line1       : data.Address.Line1
+            , Line2       : data.Address.Line2
+            , City        : data.Address.City
+            , PostalCode  : data.Address.PostalCode
+            , State       : data.Address.State
+            , Country     : data.Address.Country
+        }
     }
 
     this.Save       = async function()
     {
-        console.log('save-store', this)
-        const   query = { _id : this._id }
-              , act   = { $set : this }
-              , opt   = { upsert : true }
-        const resp  = await users.updateOne(query, act, opt)
-        if (resp.modifiedCount !== 1) 
+        console.log('save-store', this.Data)
+        const query = { _id : this.Data._id }
+            , act   = { $set : this.Data }
+            , opt   = { upsert : true }
+        const resp  = await stores.updateOne(query, act, opt)
+        if (!resp.result.ok)
         {
-            console.log('save-store-failed', this)
-            const   code_   = code.INTERNAL_SERVER
-                  , status_ = status.Failed
-                  , reason_ = reason.DBAdditionFailed
-            throw new Err(code_, status_, reason_)
+            console.log('store-save-failed',
+            { Data: this.Data, Result: resp.result })
+            Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
         }
+        console.log('store-saved', this.Data)
     }
 
-    this.GetByID = async function(_id)
+    this.Get = async function(param, qType)
     {
-        console.log(`find-store-by-id. ID: ${_id}`)
-        const query = { _id: ObjectId(_id) }
-        let store = await stores.findOne(query)
+        console.log('find-store', { Param: param, QType: qType})
+        let query_
+        switch (qType)
+        {
+            case query.ByID   : query_ = { _id: ObjectId(param) } ; break;
+            case query.Custom : query_ = param                    ; break;
+        }
+        let store = await stores.findOne(query_)
         if (!store)
         {
-          console.log(`store-not-found. ID: ${_id}`)
+          console.log('store-not-found', query_)
           return
         }
-        this.Set(store)
-        console.log(`store-found. store: ${store}`)
+        this.Data = store
+        console.log('store-found', { Sotre: store })
         return store
     }
 
-    this.GetByAdminIDAndStoreID = async function(admin_id, shop_id)
+    this.CustomQuery = async function(key)
     {
-        console.log(`store-by-admin-and-shop-id. admin_id: ${admin_id} shop_id: ${shop_id}`)
-        const query = { _id: ObjectId(shop_id), AdminID: ObjectId(admin_id) }
-        let store = await stores.findOne(query)
+        console.log('find-store', key)
+        let store = await stores.find(key)
         if (!store)
         {
-          console.log(`store-not-found. ID: ${_id}`)
-          return
-        }
-        this.Set(store)
-        console.log(`store-found. store: ${store}`)
-        return store
-    }
-
-    this.DoesExist = async function()
-    {
-        console.log(`find-store-by-primary-keys. Data: ${data}`)
-        const query = { $or: [
-              { AdminID  : this.AdminID, Name : this.Name }
-            , { MobileNo : this.MobileNo }
-        ] }
-        let store = await stores.find(query)
-        if (!store)
-        {
-          console.log(`store-does-not-exist. Data: ${data} `)
+          console.log('store-does-not-exist', {Query: key})
           return false
         }
-        console.log(`store-exist. Data: ${data} `)
+        console.log('store-exist',  {Store: store})
         return true
     }
 
@@ -147,151 +121,99 @@ function Store(data)
 
     this.New      = async function ()
     {
-        const res = await this.DoesExist()
-        if (res)
-        {
-            throw new Err(code.BAD_REQUEST,
-                          status.Failed,
-                          reason.StoreExists)
-        }
+        // Check admin have shop with same name
+        const key1 = { AdminID  : this.Data.AdminID, Name : this.Data.Name }
+            , res1 = await this.Get(key1, query.Custom)
+        if (res1 && res1.State === states.Registered)
+        Err_(code.BAD_REQUEST, reason.StoreExists)
+
+        // Check the mobile number already used
+        const key2 = { MobileNo : this.Data.MobileNo }
+            , res2 = await this.Get(key2, query.Custom)
+        if (res2 && res1.State === states.Registered)
+        Err_(code.BAD_REQUEST, reason.Unauthorized)
 
         const otp_sms = new otp.OneTimePasswd({
-                        MobNo: 	this.MobileNo, 
+                        MobNo: 	this.Data.MobileNo, 
                         Body: 	otp.Msgs.OnAuth })
-            , hash    = otp_sms.Send(otp.Opts.SMS)
+            , hash    = await otp_sms.Send(otp.Opts.SMS)
 
-        this._id        = new ObjectID()
-        this.Otp        = hash
-        this.State      = states.New
-        this.Save()
+        if(!this.Data._id) { this.Data._id = new ObjectID() }
+        this.Data.Otp        = hash
+        this.Data.State      = states.New
+        await this.Save()
 
-        const user  = new User()
-        const resp = user.GetByID(data.UserID)
-        if (!resp)
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.StaffNotFound
-            throw new Err(code_, status_, reason_)
-        }
-        user.StoreList.Owned.push(this._id)
-        user.Save()
+        test.Set('StoreID', this.Data._id) // #101
 
-        console.log(`new-store-created. store: ${this}`)
+        const user = new User()
+        const resp = await user.Get(this.Data.AdminID, query.ByID)
+        if (!resp) Err_(code.BAD_REQUEST, reason.AdminNotFound)
+        user.Data.StoreList.Owned.push(this.Data._id)
+        await user.Save()
+        console.log('new-store-created', {Store: this.Data})
     }
 
-    this.ConfirmContactNo   = async function (data)
+    this.ConfirmMobNo   = async function(data)
     {
-        let store = await this.GetByMobNo(ObjectId(data.AdminID), data.MobNo)
+        const key = { AdminID: ObjectId(data.User._id), MobileNo : data.MobileNo }
+        let store = await this.Get(key, query.Custom)
         if (!store || store.State === states.Registered)
         {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-            let     reason_     = reason.StoreNotFound
-            if(!store) { reason_ = reason.BadState}
-            throw new Err(code_, status_, reason_)
+            let reason_ = reason.StoreNotFound
+            if(store) { reason_ = reason.BadState}
+            Err_(code.BAD_REQUEST, reason_)
         }
 
-        this.Set(store)
+        const otp_       = new otp.OneTimePasswd({MobNo: "", Body: ""})
+            , otp_status = await otp_.Confirm(this.Data.Otp, data.OTP)
+        if (!otp_status) Err_(code.BAD_REQUEST, reason.OtpRejected)
 
-        const otp_ = new otp.OneTimePasswd({MobNo: "", Body: ""})
-        if (!otp_.Confirm(this.Otp, data.OTP))
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.OtpRejected
-            throw new Err(code_, status_, reason_)
-        }
-
-        this.State      = states.MobConfirmed
-        this.Save()
-        console.log(`store-mobile-number-confirmed. store: ${this}`)
-        
+        this.Data.State  = states.MobConfirmed
+        this.Data.Otp  = ''
+        await this.Save()
+        console.log('store-mobile-number-confirmed', {Store: this.Data})
         // TODO Send an event to Admin
     }
 
     this.Approve   = async function (data)
     {
-        console.log(`store-approval. store: ${data}`)
+        console.log('store-approval', {Store: data})
         const user  = new User()
-        const admin = user.GetByID(ObjectId(data.user._id))
+        const admin = await user.Get(data.User._id, query.ByID)
         if (!admin || admin.Mode !== mode.Admin)
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.PermissionDenied
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST, reason.PermissionDenied)
 
-        const store = await this.GetByID(ObjectId(data.StoreID))
+        const store = await this.Get(data.StoreID, query.ByID)
         if (!store || store.State !== states.MobConfirmed)
         {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-            let     reason_     = reason.StoreNotFound
-            if(!store) { reason_ = reason.BadState}
-            throw new Err(code_, status_, reason_)
+                  let reason_ = reason.StoreNotFound
+            if(store) reason_ = reason.BadState
+            Err_(code.BAD_REQUEST, reason_)
         }
 
-        this.State      = states.Registered
-        this.Save()
-        console.log(`store-approved. store: ${this}`)
-    }
-    
-    this.MultiGetByUserID = async function(_id)
-    {
-        console.log(`stores-under-user. ID: ${_id}`)
-
-        const project = 
-        {
-          _id   : 1,  Name  : 1,
-          Type  : 1,  State : 1,
-          Img   : 1 
-        }
-
-        const query = { AdminID: _id }
-        const store = await stores.find(query, project)
-                                  .toArray()
-        if (!store.length)
-        {
-          console.log(`no-stores-found. ID: ${_id}`)
-          return
-        }
-        console.log(`store-list. store: ${store}`)
-        return store
+        this.Data.State      = states.Registered
+        await this.Save()
+        console.log('store-approved', {Store: this.Data})
     }
 
     this.AddStaff   = async function (data)
     {
         console.log(`add-staff. in: ${data}`)
-        const store = await this.GetByAdminIDAndStoreID(ObjectId(data.UserID), 
-                                                       ObjectId(data.StoreID))
+        const key   = { _id: ObjectId(data.StoreID), AdminID: ObjectId(data.UserID) }
+        const store = await this.Get(key, query.Custom)
         if (!store || store.State !== states.Registered)
         {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-            let     reason_     = reason.StoreNotFound
-            if(!store) { reason_ = reason.UnapprovedSotre}
-            throw new Err(code_, status_, reason_)
+            let     reason_      = reason.StoreNotFound
+            if(store) { reason_ = reason.UnapprovedSotre}
+            Err_(code.BAD_REQUEST, reason_)
         }
-        const staff_  = new User()
-        const staff = staff_.GetByMobNo(ObjectId(data.MobileNo))
-        if (!staff)
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.StaffNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        const staff_ = new User()
+        const staff  = staff_.Get(data.MobileNo, query.ByMobNo)
+        if (!staff) Err_(code.BAD_REQUEST, reason.StaffNotFound)
 
         if( staff.StoreList.Accepted.includes(store._id) ||
             this.StaffList.Approved.includes(staff._id) )
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.StaffExists
-            throw new Err(code_, status_, reason_)
-        }
+            Err_( code.BAD_REQUEST, reason.StaffExists)
 
         staff.StoreList.Pending.push(store._id)
         staff.Save()
@@ -305,33 +227,20 @@ function Store(data)
     this.SetStaffReplay   = async function (data)
     {
         console.log(`set-staff-replay. in: ${data}`)
-        const store = await this.GetByID(ObjectId(data.StoreID))
+        const store = await this.Get(ObjectId(data.StoreID), query.ByID)
         if (!store || store.State !== states.Registered)
         {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
             let     reason_     = reason.StoreNotFound
-            if(!store) { reason_ = reason.UnapprovedSotre}
-            throw new Err(code_, status_, reason_)
+            if(store) { reason_ = reason.UnapprovedSotre}
+            Err_(code.BAD_REQUEST, reason_)
         }
         const staff_  = new User()
-        const staff = staff_.GetByID(data.UserID)
-        if (!staff)
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.StaffNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        const staff = staff_.Get(data.UserID, query.ByID)
+        if (!staff) Err_(code.BAD_REQUEST, reason.StaffNotFound)
 
         if( !staff.StoreList.Pending.includes(store._id) ||
             !this.StaffList.Pending.includes(staff._id) )
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.NoContextFound
-            throw new Err(code_, status_, reason_)
-        }
+            Err_(code.BAD_REQUEST, reason.NoContextFound)
 
         staff.StoreList.Pending.pop(store._id)
         this.StaffList.Pending.pop(staff._id)
@@ -350,35 +259,22 @@ function Store(data)
     this.RelieveStaff   = async function (data)
     {
         console.log(`relieve-staff. in: ${data}`)
-
-        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.StoreID)
+        const key   = { _id: ObjectId(data.StoreID), AdminID: ObjectId(data.UserID) }
+        const store = await this.Get(key, query.Custom)
         if (!store || store.State !== states.Registered)
         {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
             let     reason_     = reason.StoreNotFound
-            if(!store) { reason_ = reason.UnapprovedSotre}
-            throw new Err(code_, status_, reason_)
+            if(store) { reason_ = reason.UnapprovedSotre}
+            Err_(code.BAD_REQUEST, status_, reason_)
         }
 
         const staff_  = new User()
-        const staff   = staff_.GetByID(data.StaffID)
-        if (!staff)
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.StaffNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        const staff   = staff_.Get(data.StaffID, query.ByID)
+        if (!staff) Err_( code.BAD_REQUEST, reason.StaffNotFound)
 
         if( !staff.StoreList.Accepted.includes(store._id) ||
             !this.StaffList.Approved.includes(staff._id) )
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.NoContextFound
-            throw new Err(code_, status_, reason_)
-        }
+            Err_(code.BAD_REQUEST, reason.NoContextFound)
 
         staff.StoreList.Accepted.pop(store._id)
         this.StaffList.Approved.pop(staff._id)
@@ -391,35 +287,22 @@ function Store(data)
     this.RevokeStaffReq   = async function (data)
     {
         console.log(`revoke-staff. in: ${data}`)
-
-        const store = await this.GetByAdminIDAndStoreID(data.UserID, data.StoreID)
+        const key   = { _id: ObjectId(data.StoreID), AdminID: ObjectId(data.UserID) }
+        const store = await this.Get(key, query.Custom)
         if (!store || store.State !== states.Registered)
         {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
             let     reason_     = reason.StoreNotFound
-            if(!store) { reason_ = reason.UnapprovedSotre}
-            throw new Err(code_, status_, reason_)
+            if(store) { reason_ = reason.UnapprovedSotre}
+            Err_(code.BAD_REQUEST, reason_)
         }
 
         const staff_  = new User()
-        const staff   = staff_.GetByID(data.StaffID)
-        if (!staff)
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.StaffNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        const staff   = staff_.Get(data.StaffID, query.ByID)
+        if (!staff) Err_(code.BAD_REQUEST, reason.StaffNotFound )
 
         if( !staff.StoreList.Pending.includes(store._id) ||
             !this.StaffList.Pending.includes(staff._id) )
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.NoContextFound
-            throw new Err(code_, status_, reason_)
-        }
+            Err_(code.BAD_REQUEST, reason.NoContextFound)
         
         staff.StoreList.Pending.pop(store._id)
         this.StaffList.Pending.pop(staff._id)
@@ -432,15 +315,13 @@ function Store(data)
     this.ListStaff  = async function (in_)
     {
         console.log(`list-staff. in: ${in_}`)
-
-        const store = await this.GetByAdminIDAndStoreID(in_.UserID, in_.StoreID)
+        const key   = { _id: ObjectId(in_.StoreID), AdminID: ObjectId(in_.UserID) }
+        const store = await this.Get(key, query.Custom)
         if (!store || store.State !== states.Registered)
         {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-            let     reason_     = reason.StoreNotFound
-            if(!store) { reason_ = reason.UnapprovedSotre}
-            throw new Err(code_, status_, reason_)
+            let     reason_      = reason.StoreNotFound
+            if(store) { reason_ = reason.UnapprovedSotre}
+            Err_(code.BAD_REQUEST, status_, reason_)
         }
 
         const staff_  = new User()
@@ -451,14 +332,8 @@ function Store(data)
         }
         const ReadUser = (id) =>
         {
-          const staff   = staff_.GetByID(id)
-          if (!staff)
-          {
-              const   code_       = code.BAD_REQUEST
-                    , status_     = status.Failed
-                    , reason_     = reason.StaffNotFound
-              throw new Err(code_, status_, reason_)
-          }
+          const staff   = staff_.Get(id, query.ByID)
+          if (!staff) Err_(code.BAD_REQUEST , reason.StaffNotFound)
           const res =
           {
               StaffID: staff._id
@@ -487,14 +362,8 @@ function Store(data)
         console.log(`list-store. in: ${in_}`)
 
         const user  = new User()
-        const resp = user.GetByID(in_.UserID)
-        if (!resp)
-        {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.StaffNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        const resp = user.Get(in_.UserID, query.ByID)
+        if (!resp) Err_(code.BAD_REQUEST, reason.StaffNotFound)
         
         let data =
         {
@@ -506,18 +375,15 @@ function Store(data)
         const store_ = new Store()
         const ReadStore = (id) =>
         {
-          const store   = store_.GetByID(id)
-          if (!store)
-          {
-              const   code_       = code.BAD_REQUEST
-                    , status_     = status.Failed
-                    , reason_     = reason.StoreNotFound
-              throw new Err(code_, status_, reason_)
-          }
+          const store   = store_.Get(id, query.ByID)
+          if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+
           const res =
           {
               StoreID: store._id
             , Name   : store.Name
+            , Type   : store.Type
+            , Image  : store.Image
           }
           return res
         }

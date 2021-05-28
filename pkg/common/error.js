@@ -61,6 +61,7 @@ module.exports =
     , CancellationDenied        : 'On transit, cancellation denied'
     , UnknownTask 						  : 'Unknown task'
     , Unknown                   : 'Unknown'
+    , Unauthorized              : 'Unauthorized'
 	},
   text:
   {
