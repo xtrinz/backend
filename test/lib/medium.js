@@ -1,3 +1,5 @@
+const qs = require('querystring')
+
 const Type   =
 {
       Rest  : 'REST'
@@ -17,14 +19,15 @@ const Type   =
 
     , Rest  = function(in_)
 {
+    if(in_.Query) in_.Path = in_.Path + '?' + qs.stringify(in_.Query)
+    let msg = JSON.stringify(in_.Body)
+
     let opts                      = { ...opt_g }
     opts['path']                  = in_.Path
     opts['method']                = in_.Method
     opts.headers                  = { ...in_.Header }
-    opts.headers['Content-Type']  = 'application/json'
-
-    let body                      = JSON.stringify(in_.Body)
-    opts.headers['Content-Length']= body.length
+    opts.headers['Content-Type']  = 'application/json'                              
+    opts.headers['Content-Length']= msg.length
 
     return new Promise((resolve, reject) =>
     {
@@ -35,7 +38,7 @@ const Type   =
                .on('close', () => resolve({Code: res.statusCode, ...JSON.parse(data)}))
                .on('error', (err) => reject(err.stack))
         })
-        req.write(body)
+        req.write(msg)
         req.end()
         req.on('error', (err) => console.error(`Request Failed : ${err}`))
     })

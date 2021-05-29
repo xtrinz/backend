@@ -1,5 +1,4 @@
-const { ObjectId }           = require("mongodb")
-    , router 	               = require("express").Router()
+const router 	               = require("express").Router()
     , { code, text, status } = require("../common/error")
     , { task }               = require("../common/models")
     , { Store }              = require("../objects/store")
@@ -46,8 +45,8 @@ router.get("/view", async (req, res, next) => {
     try 
     {
       let  store = new Store()
-      const id   = ObjectId(req.query.StoreID)
-          , user = ObjectId(req.query.User._id) // does GET have Body?
+      const id   = req.query.StoreID
+          , user = req.body.User._id
           , data = await store.Read(id, user)
 
       return res.status(code.OK).json({

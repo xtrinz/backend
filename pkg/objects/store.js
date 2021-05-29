@@ -9,32 +9,30 @@ const { User }                = require("./user")
 function Store(data)
 {
     if (data)
-    this.Data          =
+    this.Data             =
     {
-        _id          : ''
-        , AdminID      : (data && data.User)? ObjectId(data.User._id):''
-        , Name         : data.Name
-        , Image        : data.Image
-        , Type         : data.Type
-        , Certs        : data.Certs
-        , MobileNo     : data.MobileNo
-        , Email        : data.Email
-        , Location     :
+          _id             : ''
+        , AdminID         : ObjectId(data.User._id)
+        , Name            : data.Name
+        , Image           : data.Image
+        , Type            : data.Type
+        , Certs           : data.Certs
+        , MobileNo        : data.MobileNo
+        , Email           : data.Email
+        , Location        :
         {
-            type        : 'Point'
+              type        : 'Point'
             , coordinates : [data.Longitude, data.Latitude]
         }
-        , State        : states.New
-    
-        , StaffList    :
+        , State           : states.New
+        , StaffList       :
         {
-            Approved    : []
+              Approved    : []
             , Pending     : []
         }
-    
-        , Address      :
+        , Address         :
         {
-            Line1       : data.Address.Line1
+              Line1       : data.Address.Line1
             , Line2       : data.Address.Line2
             , City        : data.Address.City
             , PostalCode  : data.Address.PostalCode
@@ -46,8 +44,8 @@ function Store(data)
     this.Save       = async function()
     {
         console.log('save-store', this.Data)
-        const query = { _id : this.Data._id }
-            , act   = { $set : this.Data }
+        const query = { _id    : this.Data._id }
+            , act   = { $set   : this.Data }
             , opt   = { upsert : true }
         const resp  = await stores.updateOne(query, act, opt)
         if (!resp.result.ok)
@@ -92,12 +90,29 @@ function Store(data)
         return true
     }
 
-    this.Read = function(store_id, user_id)
+    this.Read = async function(store_id, user_id)
     {
-        console.log(`view-store-of-user. store: ${store_id} user: ${user_id}`)
-        // const query = { _id: store_id, AdminID: user_id }
-        console.log(`store-list. store: `)
-        return
+        console.log('read-store', {Store: store_id, UserID: user_id})
+        const store = await this.Get(store_id, query.ByID)
+        if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+        let data = { ...this.Data }
+        if (store.AdminID !== user_id)
+        {
+            if (data.State !== states.Registered)
+            Err_(code.FORBIDDEN, reason.PermissionDenied)
+            delete data.State
+        }
+        delete data.StaffList
+        delete data.Otp
+        delete data.AdminID
+        delete data._id
+        data.StoreID = store_id
+        let loc = data.Location
+        delete data.Location
+        data.Latitude  = loc.coordinates[1]
+        data.Longitude = loc.coordinates[0]
+        console.log('store-read', data)
+        return data
     }
 
     this.ListNearby = async function(PageNo, Lon, Lat)

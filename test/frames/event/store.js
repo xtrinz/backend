@@ -156,8 +156,75 @@ let RegisterApprove = function(store)
   }
 }
 
+let Read = function(store)
+{
+  this.Data =
+  {
+      Type            : Type.Rest
+    , Describe        : 'Store View'
+    , Request         :
+    {
+        Method        : Method.GET
+      , Path          : '/store/view'
+      , Body          : {}
+      , Query         : 
+      {
+        StoreID       : ''
+      }
+      , Header        :
+      {
+        Authorization : ''
+      }
+    }
+    , Response        :
+    {
+        Code          : code.OK
+      , Status        : status.Success
+      , Text          : ''
+      , Data          :
+      {
+            StoreID         : ''
+          , Name            : store.Name
+          , Image           : store.Image
+          , Type            : store.Type
+          , Certs           : store.Certs
+          , MobileNo        : store.MobileNo
+          , Email           : store.Email
+          , Longitude       : store.Longitude
+          , Latitude        : store.Latitude
+          , Address         :
+          {
+                Line1       : store.Address.Line1
+              , Line2       : store.Address.Line2
+              , City        : store.Address.City
+              , PostalCode  : store.Address.PostalCode
+              , State       : store.Address.State
+              , Country     : store.Address.Country
+          }
+      }
+    }
+  }
+
+  this.PreSet        = async function(data)
+  {
+    console.log(prints.ReadParam)
+    let req = {
+        Method     : Method.GET
+      , Path       : '/test'
+      , Body       : {}
+      , Header     : {}
+    }
+    let resp = await Rest(req)
+    data.Request.Query.StoreID = resp.Data.StoreID
+    data.Response.Data.StoreID = resp.Data.StoreID    
+    let token = await jwt.Sign({ _id: resp.Data.UserID })
+    data.Request.Header.Authorization = 'Bearer ' + token
+    return data
+  }
+}
+
 module.exports =
 {
       RegisterNew   , RegisterReadOTP,  RegisterApprove  // Store registration sequence
-    , 
+    , Read
 }
