@@ -128,13 +128,13 @@ function OneTimePasswd(data)
 
     console.log('send-otp', { MobileNo : this.Data.MobNo, Email : this.Data.EmailID, Options: opts})
     this.GenOtp(this.Data.OtpLen)
-    /*
+    /*//
     switch (opts)
     {
       case Opts.SMS   : await this.SMS();   break;
       case Opts.MAIL  : await this.Email(); break;
       default         : await this.SMS(); await this.Email();
-    }*/
+    }//*/
 
     let   salt = this.Data.OtpLen
         , hash = await bcrypt.hash(this.Otp, salt)

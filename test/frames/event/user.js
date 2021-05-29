@@ -70,10 +70,10 @@ let RegisterReadOTP = function(user)
       , Body       : {}
       , Header     : {}
     }
-    let resp = await Rest(req)
+    let resp              = await Rest(req)
     data.Request.Body.OTP = resp.Data.OTP
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Response.Data = {Token : token}
+    let token             = await jwt.Sign({ _id: resp.Data.UserID })
+    data.Response.Data    = {Token : token}
     return data
   }
 }

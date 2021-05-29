@@ -6,9 +6,9 @@ const prints =
       Failed    : '      : Failed'
     , Passed    : '      : Passed'
     , ReadParam : '      : Read Test Params'
-    , Head      : '{0} - {1}\n'
+    , Head      : '\n{0} - {1}\n'
     , Step      : '   {0} : {1}'
-    , FailedTC  : ' {0} - {1}\n\n    {2} : {3}'
+    , FailedTC  : `\n TestNo   : {0}\n Name     : {1}\n StepNo   : {2}\n StepName : {3}`
 }
 
 function TestRig()
@@ -67,8 +67,8 @@ function TestRig()
         }
 
         console.log('\nPassed: ', this.Tests.length - this.Failed.length)
-        console.log(  'Failed: ', this.Failed.length)
-        console.log(  'Total : ', this.Tests.length)
+        console.log('Failed: ', this.Failed.length)
+        console.log('Total : ', this.Tests.length)
     }
 }
 

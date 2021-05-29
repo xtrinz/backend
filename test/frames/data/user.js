@@ -36,10 +36,20 @@ let Agent =
   , Mode      : mode.Agent
 }
 
+let Admin =
+{
+    MobileNo  : '+910044008800'
+  , Name      : 'Admin'
+  , Email     : 'admin@admin.com'
+  , Password  : 'PasswordAdmin'
+  , Mode      : mode.Admin
+}
+
 module.exports =
 {
       Customer  : Customer
     , Seller    : Seller
     , Staff     : Staff
     , Agent     : Agent
+    , Admin     : Admin
 }

@@ -4,7 +4,7 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Project X\n---------\n\" && node test/main.js",
+    "test": "echo \"Project X\n---------\" && node test/main.js",
     "start": "node cmd/main.js",
     "clean": "rm -rf node_modules && rm package-lock.json"
   },
