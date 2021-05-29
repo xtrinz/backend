@@ -1,7 +1,7 @@
-const { Method, Type, Rest }  = require("../../lib/medium")
-    , { task, mode }          = require("../../../pkg/common/models")
-    , { code, status, text }  = require("../../../pkg/common/error")
-    , jwt                     = require("../../../pkg/common/jwt")
+const { Method, Type, Rest }  = require("../lib/medium")
+    , { task, mode }          = require("../../pkg/common/models")
+    , { code, status, text }  = require("../../pkg/common/error")
+    , jwt                     = require("../../pkg/common/jwt")
 
 let store =
 {

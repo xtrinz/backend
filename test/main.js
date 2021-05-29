@@ -1,9 +1,26 @@
                   require("./lib/settings")
 const { Suite } = require("./lib/driver")
-    , user      = require("./frames/event/user")
-    , store     = require("./frames/event/store")
+/*  , store     = require("./frames/store")
+    store.forEach((test)=>Suite.AddTest(test))*/
+    user      =
+    {
+        data  : require('./frames/data/user')
+      , story : require('./frames/story/user')
+    }
+    store      =
+    {
+        data  : require('./frames/data/user')
+      , story : require('./frames/story/user')
+    }
 
- user.forEach((test)=>Suite.AddTest(test))
-store.forEach((test)=>Suite.AddTest(test))
+    // User Management
+    let user_ = user.data.Customer
+      , tc    = user.story.Std(user_)
+    Suite.AddTest(tc)
 
-Suite.Run()
+    // Store Management
+    let user_ = data.Customer
+      , tc    = story.Std(user_)
+    //Suite.AddTest(tc)
+
+    Suite.Run()
