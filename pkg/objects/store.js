@@ -329,46 +329,47 @@ function Store(data)
 
     this.ListStaff  = async function (in_)
     {
-        console.log(`list-staff. in: ${in_}`)
+        console.log('list-staff', {In: in_})
         const key   = { _id: ObjectId(in_.StoreID), AdminID: ObjectId(in_.UserID) }
         const store = await this.Get(key, query.Custom)
         if (!store || store.State !== states.Registered)
         {
-            let     reason_      = reason.StoreNotFound
-            if(store) { reason_ = reason.UnapprovedSotre}
-            Err_(code.BAD_REQUEST, status_, reason_)
+            let     reason_   = reason.StoreNotFound
+            if(store) reason_ = reason.UnapprovedSotre
+            Err_(code.BAD_REQUEST, reason_)
         }
 
-        const staff_  = new User()
         let data =
         {
           Approved   : [],
           Pending    : []
         }
-        const ReadUser = (id) =>
+        const ReadUser = async (id) =>
         {
-          const staff   = staff_.Get(id, query.ByID)
-          if (!staff) Err_(code.BAD_REQUEST , reason.StaffNotFound)
+          const staff_  = new User()
+          const staff   = await staff_.Get(id, query.ByID)
+          if (!staff) Err_(code.BAD_REQUEST, reason.StaffNotFound)
           const res =
           {
-              StaffID: staff._id
-            , Name   : staff.Name
+              StaffID : staff._id
+            , Name    : staff.Name
+            , MobileNo: staff.MobNo
           }
           return res
         }
-        this.StaffList.Approved.forEach((id)=>
+
+        for(let i = 0; i < this.Data.StaffList.Approved.length; i++)
         {
-          const out = ReadUser(id)
+          const out = await ReadUser(this.Data.StaffList.Approved[i])
           data.Approved.push(out)
-        })
-
-        this.StaffList.Pending.forEach((id)=>
+        }
+        for(let i = 0; i < this.Data.StaffList.Pending.length; i++)
         {
-          const out = ReadUser(id)
+          const out = await ReadUser(this.Data.StaffList.Pending[i])
           data.Pending.push(out)
-        })
+        }
 
-        console.log(`staff-list. store: ${data}`)
+        console.log('staff-list', {Store: data})
         return data
     }
 

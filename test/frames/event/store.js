@@ -1,3 +1,4 @@
+const { database } = require("../../../pkg/common/database")
 const { Method, Type, Rest }  = require("../../lib/medium")
     , { prints }              = require("../../lib/driver")
     , jwt                     = require("../../../pkg/common/jwt")
@@ -451,9 +452,62 @@ let AddStaffRelieve = function(user)
   }
 }
 
+let ListStaff = function(user)
+{
+  this.Data =
+  {
+      Type            : Type.Rest
+    , Describe        : 'Store Staff List'
+    , Request         :
+    {
+        Method        : Method.GET
+      , Path          : '/store/staff'
+      , Body          : {}
+      , Query         : 
+      {
+        StoreID       : ''
+      }
+      , Header        : { Authorization : '' }
+    }
+    , Response        :
+    {
+        Code          : code.OK
+      , Status        : status.Success
+      , Text          : ''
+      , Data          :
+      {
+          Approved :
+          [{
+              StaffID : ''
+            , Name    : user.Name
+            , MobileNo: user.MobileNo
+          }]
+        , Pending  : []
+      }
+    }
+  }
+
+  this.PreSet        = async function(data)
+  {
+    console.log(prints.ReadParam)
+    let req = {
+        Method     : Method.GET
+      , Path       : '/test'
+      , Body       : {}
+      , Header     : {}
+    }
+    let resp = await Rest(req)
+    data.Request.Query.StoreID = resp.Data.StoreID
+    data.Response.Data.Approved[0].StaffID = resp.Data.UserID    
+    let token = await jwt.Sign({ _id: resp.Data.AdminID })
+    data.Request.Header.Authorization = 'Bearer ' + token
+    return data
+  }
+}
+
 module.exports =
 {
-      RegisterNew     , RegisterReadOTP , RegisterApprove                   // Store registration sequence
-    , Read            , List                                                // Read store
-    , AddStaffRequest , AddStaffAccept  , AddStaffRevoke  , AddStaffRelieve // Staff Management
+      RegisterNew     , RegisterReadOTP , RegisterApprove                              // Store registration sequence
+    , Read            , List                                                           // Read store
+    , AddStaffRequest , AddStaffAccept  , AddStaffRevoke  , AddStaffRelieve, ListStaff // Staff Management
 }

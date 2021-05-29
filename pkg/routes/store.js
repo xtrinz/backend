@@ -114,8 +114,10 @@ router.get("/staff", async (req, res, next) =>
 {
     try 
     {
-      let store = new Store()
-      const data  = store.ListStaff(req.query)
+      let store  = new Store()
+      req.query.UserID = req.body.User._id
+      console.log(req.query)
+      const data = await store.ListStaff(req.query)
       return res.status(code.OK).json({
         Status  : status.Success,
         Text    : '',
