@@ -17,8 +17,8 @@ const { Suite } = require("./lib/driver")
     Suite.AddTest(tc1)
 
     // Store Management
-//    let user_  = user.data.Customer
-//      , tc     = user.story.AddUser(user_)
+  /*let user_  = user.data.Customer
+      , tc     = user.story.AddUser(user_)*/
     let store_ = store.data.Store
       , tc2    = store.story.Std(store_)
     Suite.AddTest(tc2)
