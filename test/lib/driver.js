@@ -1,5 +1,6 @@
 const compare        = require("./compare")
     , { Rest, Type } = require("./medium")
+    , db             = require("../../pkg/common/database")
 
 const prints = 
 {
@@ -15,6 +16,7 @@ function TestRig()
 {
     this.Tests       = []
     this.Failed      = []
+    this.FailedCnt   = 0
     this.AddTest     = (test) => this.Tests.push(test)
     this.Exec        = async function(data)
     {
@@ -35,9 +37,11 @@ function TestRig()
     }
     this.Run         = async function()
     {
+        await db.database.dropDatabase()
+
         for(let suite =0; suite < this.Tests.length; suite++)
         {
-            let test = this.Tests[suite]
+            let test = this.Tests[suite], failed = false
             console.log(prints.Head.format(('000' + (suite + 1)).substr(-2), test.Describe))
             for(let case_=0; case_ < test.Steps.length; case_++)
             {                        
@@ -46,14 +50,19 @@ function TestRig()
                 if(step.PreSet) { step.Data = await step.PreSet(step.Data) }
                 step.Data.Index = suite + 1
                 let res         = await this.Exec(step.Data)
-                if (!res) this.Failed.push(
+                if (!res)
+                {
+                     this.Failed.push(
                     {
                         No      : suite + 1,
                         Title   : test.Describe,
                         StepNo  : step.Data.Index,
                         Step    : step.Data.Describe
                     })
+                    failed = true
+                }
             }
+            if(failed) this.FailedCnt++
         }
 
         if (this.Failed.length)
@@ -66,9 +75,11 @@ function TestRig()
             ))
         }
 
-        console.log('\nPassed: ', this.Tests.length - this.Failed.length)
-        console.log('Failed: ', this.Failed.length)
-        console.log('Total : ', this.Tests.length)
+        console.log('\nPassed: ', this.Tests.length - this.FailedCnt)
+        console.log('Failed: '  , this.FailedCnt)
+        console.log('Total : '  , this.Tests.length)
+
+        await db.client.close()
     }
 }
 

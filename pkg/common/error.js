@@ -62,6 +62,7 @@ module.exports =
     , UnknownTask 						  : 'Unknown task'
     , Unknown                   : 'Unknown'
     , Unauthorized              : 'Unauthorized'
+    , NoContextFound            : 'No context found'
 	},
   text:
   {
@@ -83,6 +84,7 @@ module.exports =
     , AddressRemoved            : 'Address removed'
     , WaitingForStaffReply      : 'Waiting for staff reply'
     , ResponseUpdated           : 'Response updated'
+    , Revoked                   : 'Revoked'
     , NoContextFound            : 'No context found'
     , Relieved                  : 'Relieved'
     , TestNotEnabled            : 'Test disabled'

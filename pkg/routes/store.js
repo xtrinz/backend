@@ -63,7 +63,8 @@ router.get("/list", async (req, res, next) =>
     try 
     {
       let store = new Store()
-      const data  = store.ListStores(req.query)
+      req.query.UserID = req.body.User._id
+      const data  = await store.ListStores(req.query)
       return res.status(code.OK).json({
         Status  : status.Success,
         Text    : '',
@@ -82,23 +83,24 @@ router.post("/staff", async (req, res, next) =>
       switch(req.body.Task)
       {
         case task.Request:
-          store.AddStaff(req.body)
+          await store.AddStaff(req.body)
           text_ = text.WaitingForStaffReply
           break
-        case task.Accept, task.Deny:
-          store.SetStaffReplay(req.body)
+        case task.Accept:
+        case task.Deny:
+          console.log(req.body.Task)
+          await store.SetStaffReplay(req.body)
           text_ = text.ResponseUpdated
           break
         case task.Revoke:
-          store.RevokeStaffReq(req.body)
+          await store.RevokeStaffReq(req.body)
           text_ = text.Revoked
           break
         case task.Relieve:
-          store.RelieveStaff(req.body)
+          await store.RelieveStaff(req.body)
           text_ = text.Relieved
           break
       }
-
       return res.status(code.OK).json({
         Status  : status.Success,
         Text    : text_,

@@ -1,3 +1,5 @@
+const { states } = require("../../../pkg/common/models")
+
 let Store =
 {
       Name         : 'StoreName'
@@ -8,6 +10,7 @@ let Store =
     , Email        : 'store@store.com'
     , Longitude    : 17.21
     , Latitude 	   : 17.21
+    , State        : states.Registered
     , Address      :
     {
           Line1       : 'Address.Line1'

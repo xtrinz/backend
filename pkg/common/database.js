@@ -26,6 +26,8 @@ const database  = client.db(process.env.DB_NAME)
 module.exports  =
 {
     client
+  , database
+
   , users
   , sockets
   , stores
