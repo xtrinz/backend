@@ -1,4 +1,3 @@
-const { database } = require("../../../pkg/common/database")
 const { Method, Type, Rest }  = require("../../lib/medium")
     , { prints }              = require("../../lib/driver")
     , jwt                     = require("../../../pkg/common/jwt")

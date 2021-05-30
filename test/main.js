@@ -10,17 +10,25 @@ const { Suite } = require("./lib/driver")
         data  : require('./frames/data/store')
       , story : require('./frames/story/store')
     }
+    , product   =
+    {
+        data  : require('./frames/data/product')
+      , story : require('./frames/story/product')        
+    }
 
     // User Management
-    let user_ = user.data.Admin
-      , tc1   = user.story.Std(user_)
+    let user_   = user.data.Admin
+      , tc1     = user.story.Std(user_)
     Suite.AddTest(tc1)
 
     // Store Management
-  /*let user_  = user.data.Customer
-      , tc     = user.story.AddUser(user_)*/
-    let store_ = store.data.Store
-      , tc2    = store.story.Std(store_)
+    let store_  = store.data.Store
+      , tc2     = store.story.Std(store_)
     Suite.AddTest(tc2)
+
+    // Product Management
+    let product_ = product.data.Product
+      , tc3      = product.story.Std(product_)
+    Suite.AddTest(tc3)
 
     Suite.Run()

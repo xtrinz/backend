@@ -7,18 +7,6 @@ router.post("/register", async (req, res, next) =>
 {
   try
   {
-
-    let log = { ...req.body }
-    if (req.body['OTP'])      delete log.OTP
-    if (req.body['Password']) delete log.Password
-
-    /*  To avoid OTP read from logs
-        Expected attack sequence: 
-        1) Read OTP from following log
-        2) Crash running server bin
-        3) Try again with the creds */
-
-    console.log('register-user',log)
     let text_ = '', data_ = {}, user
     switch (req.body.Task)
     {
@@ -119,6 +107,7 @@ router.get("/profile", async (req, res, next) => {
       , Email     : user.Data.Email
       , Mode      : user.Data.Mode
     }
+
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : '',

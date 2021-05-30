@@ -1,180 +1,142 @@
-const { ObjectId, ObjectID }        = require('mongodb')
-    , { products, users }           = require("../common/database")
-    , { Err, code, status, reason } = require("../common/error")
+const { ObjectId, ObjectID } = require('mongodb')
+    , { Err_, code, reason } = require("../common/error")
+    , test                    = require('../common/test')
+    , { query }              = require("../common/models")
+    , { products }           = require("../common/database")
 
 function Product(data)
 {
-   this._id         = ''
-   this.StoreID     = ObjectId(data.StoreID)
-   this.CreatedBy   = ObjectId(data.user._id)
-
-   this.Name        = data.Name
-   this.Image       = data.Image
-   this.Price       = data.Price
-   this.Quantity    = data.Quantity
-   this.Description = data.Description
-   this.CategoryID  = data.CategoryID
-   this.Variants    = 
+   if(data)
+   this.Data =
    {
-          Id  : ''
-        , Type: '' // COLOR / SIZE
-   }
-
-   this.Set        = function()
-   {
-        this._id         = data._id
-        this.StoreID     = data.StoreID
-        this.CreatedBy   = data.CreatedBy
-        this.Name        = data.Name
-        this.Image       = data.Image
-        this.Price       = data.Price
-        this.Quantity    = data.Quantity
-        this.Description = data.Description
-        this.Variants    = data.Variants
-        this.CategoryID  = data.CategoryID
-   }
+            _id       : ''
+        , StoreID     : ObjectId(data.StoreID)
+        , CreatedBy   : ObjectId(data.User._id)
+        , Name        : data.Name
+        , Image       : data.Image
+        , Price       : data.Price
+        , Quantity    : data.Quantity
+        , Description : data.Description
+        , CategoryID  : data.CategoryID
+        , Variants    : 
+        {
+                Id    : ''
+            , Type    : '' // COLOR / SIZE
+        }
+    }
 
    this.Save       = async function()
    {
-        console.log('save-product', this)
-        const resp  = await users.updateOne({ _id 	 : this._id },
-                                            { $set   : this	    },
-                                            { upsert : true     })
-        if (resp.modifiedCount !== 1) 
-        {
-            console.log('save-product-failed', this)
-            throw new Err(code.INTERNAL_SERVER,
-                            status.Failed,
-                            reason.DBAdditionFailed)
-        }
-   }
-   
-   this.GetByID = async function(_id)
-   {
-       console.log(`find-product-by-id. ID: ${_id}`)
-       const query = { _id: _id }
-       let product = await products.findOne(query)
-       if (!product)
+       console.log('save-product', this.Data)
+       const key   = { _id    : this.Data._id }
+           , act   = { $set   : this.Data }
+           , opt   = { upsert : true }
+       const resp  = await products.updateOne(key, act, opt)
+       if (!resp.result.ok)
        {
-         console.log(`product-not-found. ID: ${_id}`)
-         return
+           console.log('product-save-failed',
+           { Data: this.Data, Result: resp.result })
+           Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
        }
-       this.Set(product)
-       console.log(`product-found. product: ${product}`)
-       return product
+       console.log('product-saved', this.Data)
    }
 
-   this.DelByID = async function(Id)
+   this.Get = async function(param, qType)
    {
-        const query = {_id : ObjectId(Id)}
-        const resp  = await products.deleteOne(query);
-        if (resp.deletedCount !== 1)
-        {
-            console.log('product-deletion-failed', query)
-            return false
-        }
-        console.log('product-deleted', query)
-        return true
-   }
-   
-   this.GetByStoreID = async function(_id)
-   {
-       console.log(`find-product-by-store-id. StoreID: ${_id}`)
-       const project = 
+       console.log('find-product', { Param: param, QType: qType})
+       let query_
+       switch (qType)
        {
-         _id  : 1,  StoreID : 1,
-         Name : 1,  Image   : 1,
-         Price: 1,  Quantity: 1 
+           case query.ByID   : query_ = { _id: ObjectId(param) } ; break;
+           case query.Custom : query_ = param                    ; break;
        }
-       const query = { StoreID: ObjectId(_id) }
-       let products_ = await products.find(query, project)
-                                          .toArray()
-       if (!products_.length)
-       {
-         console.log(`no-product-found. StoreID: ${_id}`)
-         return
-       }
-       console.log(`products-found. product_len: ${products_.length}`)
-       return products_
-   }
-
-   this.FindByStoreIDAndName = async function(store_id, name)
-   {
-       console.log(`find-product-by-store-id-and-name. ID: ${store_id, name}`)
-       const query = { StoreID: store_id, Name: name }
-       let product = await products.findOne(query)
+       let product = await products.findOne(query_)
        if (!product)
        {
-         console.log(`product-not-found. ID: ${store_id, name}`)
+         console.log('product-not-found', query_)
          return
        }
-       this.Set(product)
-       console.log(`product-found. product: ${product}`)
+       this.Data = product
+       console.log('product-found', { Product: product })
        return product
    }
 
    this.Add      = async function ()
    {
-        // Permission Check
-        const product = await this.FindByStoreIDAndName(this.StoreID, this.Name)
-        if (product)
-        {
-            throw new Err(code.BAD_REQUEST,
-                          status.Failed,
-                          reason.ProductExists)
+        const key   = 
+        { 
+            StoreID : ObjectId(this.Data.StoreID),
+            Name    : this.Data.Name
         }
-        this._id = new ObjectID()
-        this.Save()
-        console.log(`new-product-added. product: ${this}`)
+        const product = await this.Get(key, query.Custom)
+        if (product) Err_(code.BAD_REQUEST, reason.ProductExists)
+        this.Data._id = new ObjectID()
+        test.Set('ProductID', this.Data._id) // #101
+        await this.Save()
+        console.log('new-product-added', { Product: this.Data})
    }
 
-   this.ReadAll        = function (store_id)
+   this.ReadAll         = async function (store_id)
    {
-        console.log('read-all-product-by-store-id', store_id)
-        return this.GetByStoreID(ObjectId(store_id))
+        console.log('find-all-product-by-store-id', { StoreID: store_id})
+        const project   =
+        {
+          _id         : 1, StoreID    : 1,
+          Name        : 1, Image      : 1,
+          Price       : 1, Quantity   : 1,
+          Description : 1, CategoryID : 1 
+        }
+        const query     = { StoreID: ObjectId(store_id) }
+            , products_ = await products.find(query).project(project).toArray()
+        if (!products_.length)
+        {
+          console.log('no-product-found', { StoreID: store_id})
+          return
+        }
+        console.log('products-found', {ProductLen: products_.length}, products_)
+        return products_
    }
 
-   this.Read           = function (product_id)
+   this.Read           = async function (product_id)
    {
        console.log('read-product', product_id)
-       const product = this.GetByID(ObjectId(product_id))
-       if (!product)
-       {
-           const   code_   = code.BAD_REQUEST
-                 , status_ = status.Failed
-                 , reason_ = reason.ProductNotFound
-           throw new Err(code_, status_, reason_)
-       }
+       const product = await this.Get(product_id, query.ByID)
+       if (!product) Err_(code.BAD_REQUEST, reason.ProductNotFound)
+       delete product.CreatedBy
        return product
    }
 
-   this.Modify      = async function (Id)
+   this.Modify      = async function (data)
    {
-        // Permission Check
-        console.log('modify-product', this, Id)
-        const product = await this.GetByID(ObjectId(Id))
-        if (!product)
-        {
-            throw new Err(code.BAD_REQUEST,
-                            status.Failed,
-                            reason.ProductNotFound)
-        }
-        this._id = product._id
-        this.Save()
-        console.log(`product-modified. product: ${this}`)
+        console.log('modify-product', { ProductID: data.ProductID })
+        const product = await this.Get(data.ProductID, query.ByID)
+        if (!product) Err_(code.BAD_REQUEST, reason.ProductNotFound)
+        this.Data.Name          = (data.Name)?        data.Name        : this.Data.Name
+        this.Data.Image         = (data.Image)?       data.Image       : this.Data.Image
+        this.Data.Price         = (data.Price)?       data.Price       : this.Data.Price
+        this.Data.Quantity      = (data.Quantity)?    data.Quantity    : this.Data.Quantity
+        this.Data.Description   = (data.Description)? data.Description : this.Data.Description
+        this.Data.CategoryID    = (data.CategoryID)?  data.CategoryID  : this.Data.CategoryID
+        this.Data.Variants.Id   = (data.VariantID)?   data.VariantID   : this.Data.Variants.Id
+        this.Data.Variants.Type = (data.Type)?        data.Type        : this.Data.Variants.Type
+        await this.Save()
+        console.log('product-modified', { Product: this.Data })
    }
 
-   this.Remove      = function (Id)
+   this.Remove      = async function (data)
    {
-        // Permission Check
-        if (!this.DelByID(ObjectId(Id)))
+        const query = 
         {
-            console.log('product-removal-failed', query)
-            const   code_  = code.INTERNAL_SERVER
-                , status_= status.Failed
-                , reason_= reason.DBDeletionFailed
-            throw new Err(code_, status_, reason_)
+            StoreID : ObjectId(data.StoreID), 
+            _id     : ObjectId(data.ProductID)
         }
+        const resp  = await products.deleteOne(query);
+        if (resp.deletedCount !== 1)
+        {
+            console.log('product-deletion-failed', query)
+            Err_(code.INTERNAL_SERVER, reason.DBDeletionFailed)
+        }
+        console.log('product-deleted', query)
    }
 }
 

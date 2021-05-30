@@ -27,6 +27,15 @@ let Staff =
   , Mode      : mode.User
 }
 
+let Staff2 =
+{
+    MobileNo  : '+911133557711'
+  , Name      : 'Staff2'
+  , Email     : 'staff2@staff2.com'
+  , Password  : 'PasswordStaff2'
+  , Mode      : mode.User
+}
+
 let Agent =
 {
     MobileNo  : '+912244668800'
@@ -50,6 +59,7 @@ module.exports =
       Customer  : Customer
     , Seller    : Seller
     , Staff     : Staff
+    , Staff2    : Staff2
     , Agent     : Agent
     , Admin     : Admin
 }

@@ -115,6 +115,17 @@ function Store(data)
         return data
     }
 
+    // Authz usr for product mgmt
+    this.Authz      = async function(StoreID, UserID) 
+    {
+        const store = await this.Get(StoreID, query.ByID)
+        if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+
+        if(!this.Data.StaffList.Approved.includes(String(UserID)) && 
+            (String(this.Data.AdminID) !== String(UserID)))
+            Err_(code.BAD_REQUEST, reason.Unauthorized)
+    }
+
     this.ListNearby = async function(PageNo, Lon, Lat)
     {
         const   nPerPage = 30
@@ -162,7 +173,7 @@ function Store(data)
         test.Set('AdminID', this.Data.AdminID) // #101
 
         const user = new User()
-        const resp = await user.Get(this.Data.AdminID, query.ByID)
+        const resp  = await user.Get(this.Data.AdminID, query.ByID)
         if (!resp) Err_(code.BAD_REQUEST, reason.AdminNotFound)
         user.Data.StoreList.Owned.push(String(this.Data._id))
         await user.Save()
@@ -220,7 +231,7 @@ function Store(data)
         if (!store || store.State !== states.Registered)
         {
             let     reason_   = reason.StoreNotFound
-            if(store) reason_ = reason.UnapprovedSotre
+            if(store) reason_ = reason.UnapprovedStore
             Err_(code.BAD_REQUEST, reason_)
         }
 
@@ -246,7 +257,7 @@ function Store(data)
         if (!store || store.State !== states.Registered)
         {
             let     reason_   = reason.StoreNotFound
-            if(store) reason_ = reason.UnapprovedSotre
+            if(store) reason_ = reason.UnapprovedStore
             Err_(code.BAD_REQUEST, reason_)
         }
         const staff_ = new User()
@@ -279,7 +290,7 @@ function Store(data)
         if (!store || store.State !== states.Registered)
         {
             let     reason_   = reason.StoreNotFound
-            if(store) reason_ = reason.UnapprovedSotre
+            if(store) reason_ = reason.UnapprovedStore
             Err_(code.BAD_REQUEST, reason_)
         }
 
@@ -307,7 +318,7 @@ function Store(data)
         if (!store || store.State !== states.Registered)
         {
             let     reason_     = reason.StoreNotFound
-            if(store) { reason_ = reason.UnapprovedSotre}
+            if(store) { reason_ = reason.UnapprovedStore}
             Err_(code.BAD_REQUEST, reason_)
         }
 
@@ -335,7 +346,7 @@ function Store(data)
         if (!store || store.State !== states.Registered)
         {
             let     reason_   = reason.StoreNotFound
-            if(store) reason_ = reason.UnapprovedSotre
+            if(store) reason_ = reason.UnapprovedStore
             Err_(code.BAD_REQUEST, reason_)
         }
 
@@ -379,7 +390,7 @@ function Store(data)
 
         const user  = new User()
         const resp = await user.Get(in_.UserID, query.ByID)
-        if (!resp) Err_(code.BAD_REQUEST, reason.StaffNotFound)
+        if (!resp) Err_(code.BAD_REQUEST, reason.UserNotFound)
         
         let data =
         {
