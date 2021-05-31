@@ -1,7 +1,6 @@
 const { Address }            = require("../objects/address")
     , router 	               = require("express").Router()
     , { code, status, text } = require("../common/error")
-    , { ObjectId }           = require("mongodb")
 
 // View Addr Missing
 // Set Default Addr Missing
@@ -11,12 +10,29 @@ router.post("/add", async (req, res, next) => {
   try
   {
     const entry = new Address(req.body)
-    await entry.Insert(ObjectId(req.body.UserID))
+    await entry.Insert(req.body.User._id)
     
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : text.AddressAdded,
-      Data    : ''
+      Data    : {}
+    })
+  } catch (err) { next(err) }
+})
+
+// Read addresss
+router.get("/view", async (req, res, next) =>
+{
+  try
+  {
+    const address     = new Address()
+    req.query.UserID  = req.body.User._id
+    const data        = await address.Read(req.query)
+
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : '',
+      Data    : data
     })
   } catch (err) { next(err) }
 })
@@ -26,8 +42,8 @@ router.get("/list", async (req, res, next) =>
 {
   try
   {
-    const address   = new Address() 
-    const data      = await address.List(req.query.UserID) // TODO
+    const address = new Address()
+        , data    = await address.List(req.body.User._id)
 
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -47,7 +63,7 @@ router.post("/modify", async (req, res, next) => {
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : text.AddressUpdated,
-      Data    : ''
+      Data    : {}
     })
   } catch (err) { next(err) }
 })
@@ -58,13 +74,13 @@ router.delete("/remove", async (req, res, next) =>
   try
   {
     const entry = new Address()
-    await entry.Remove( ObjectId(req.body.UserID),
-                        ObjectId(req.body.AddressID))
+    await entry.Remove( req.body.User._id,
+                        req.body.AddressID)
     
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : text.AddressRemoved,
-      Data    : ''
+      Data    : {}
     })
   } catch (err) { next(err) }
 })

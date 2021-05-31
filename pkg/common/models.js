@@ -1,5 +1,10 @@
 module.exports =
 {
+	tags:
+	{
+		  HOME 						: 'HOME'
+		, OFFICE 					: 'OFFICE'
+	},
 	query:
 	{
 		  ByID						: 'ByID'

@@ -1,84 +1,122 @@
-const { ObjectId }                  = require("mongodb")
-    , { users }                     = require("../common/database")
-    , { Err, code, status, reason } = require("../common/error")
+const { ObjectId, ObjectID } = require("mongodb")
+    , { users }              = require("../common/database")
+    , { Err_, code, reason } = require("../common/error")
+    , { states }             = require('../common/models')
+    , test                   = require('../common/test')
 
 function Address(data)
 {
-    this._id        = ''
-    this.Location   =
+    if(data)
+    this.Data =
     {
-          type          : 'Point'
-        , coordinates   : [data.Longitude, data.Latitude]
-    }
-    this.State      = states.New
-    this.Tag        = data.Tag
-    this.IsDefault  = data.IsDefault
+          _id               : ''
+        , Location          :
+        {
+              type          : 'Point'
+            , coordinates   : [data.Longitude, data.Latitude]
+        }
+        , State             : states.New
+        , Tag               : data.Tag
+        , IsDefault         : data.IsDefault
 
-    this.Address    =
-    {
-          Name          : data.Name
-        , Line1         : data.Line1
-        , Line2         : data.Line2
-        , City          : data.City
-        , PostalCode    : data.PostalCode
-        , State         : data.State
-        , Country       : data.Country
+        , Address           :
+        {
+              Name          : data.Address.Name
+            , Line1         : data.Address.Line1
+            , Line2         : data.Address.Line2
+            , City          : data.Address.City
+            , PostalCode    : data.Address.PostalCode
+            , State         : data.Address.State
+            , Country       : data.Address.Country
+        }
     }
 
     this.Insert     = async function (user_id)
     {
-        this._id    = new ObjectID()
-        const query = { _id: user_id }
-            , opts  = { $push: { AddressList: this } }
+        this.Data._id = new ObjectID()
+        const query   = { _id: ObjectId(user_id) }
+            , opts    = { $push: { AddressList: this.Data } }
 
-        const resp  = await users.updateOne(query, opts)
+        const resp    = await users.updateOne(query, opts)
         if (resp.modifiedCount !== 1) 
         {
             console.log('address-insertion-failed', this)
-            throw new Err(code.INTERNAL_SERVER,
-                            status.Failed,
-                            reason.DBInsertionFailed)
+            Err_(code.INTERNAL_SERVER, reason.DBInsertionFailed)
         }
-        console.log('address-inserted', query, opts)
+        test.Set('AddressID', this.Data._id) // #101
+        console.log('address-inserted', query, opts, this.Data.Address)
+    }
+
+    this.Read     = async function (data)
+    {
+        const   query   = 
+                {
+                      _id               : ObjectId(data.UserID) 
+                    , 'AddressList._id' : ObjectId(data.AddressID)
+                }
+              , proj = { projection: {'AddressList.$': 1} }
+        let resp = await users.findOne(query, proj)
+        if (!resp) Err_(code.NOT_FOUND, reason.AddressNotFound)
+        resp = resp.AddressList[0]
+        delete resp.State
+        resp.Longitude = resp.Location.coordinates[0]
+        resp.Latitude  = resp.Location.coordinates[1]
+        delete resp.Location
+        console.log('address-read', resp)
+        return resp
     }
 
     this.List     = async function (user_id)
     {
-        const   query   = { _id: ObjectId(user_id) }
-              , project = { AddressList: 1 }
-        const resp  = await users.find(query, project)
-        console.log('address-list', resp)
-        return resp
+        const query =  { _id: ObjectId(user_id) }
+
+        const opt = { $project  : { 'AddressList': 1 } }
+            , resp  = await users.findOne(query, opt)
+
+        resp.AddressList.forEach((addr)=>
+        {
+            delete addr.State
+            addr.Longitude = addr.Location.coordinates[0]
+            addr.Latitude  = addr.Location.coordinates[1]
+            delete addr.Location
+        })
+
+        console.log('address-list', resp.AddressList)
+        return resp.AddressList
     }
 
     this.Update     = async function (data)
     {
-        const   query = { _id: data.UserID, 'AddressList._id': data.AddressID }
-              , opts  = { $set: { 'AddressList.$': data }      }
+        const query =
+        {
+            _id               : ObjectId(data.User._id),
+            'AddressList._id' : ObjectId(data.AddressID)
+        }
 
+        data._id  = ObjectId(data.AddressID)
+        delete data.User
+        delete data.AddressID
+
+        const opts  = { $set : { 'AddressList.$': data } }
         const resp  = await users.updateOne(query, opts)
         if (resp.modifiedCount !== 1) 
         {
-            console.log('address-update-failed', this)
-            throw new Err(code.INTERNAL_SERVER,
-                            status.Failed,
-                            reason.DBUpdationFailed)
+            console.log('address-update-failed', query, opts)
+            Err_(code.INTERNAL_SERVER, reason.DBUpdationFailed)
         }
         console.log('address-updated', query, opts)
     }
 
     this.Remove     = async function (user_id, entry_id)
     {
-        const   query = { _id: user_id }
-                , opts  = { $pull: { AddressList: {_id: entry_id} } }
+        const query = { _id: ObjectId(user_id) }
+            , opts  = { $pull: { AddressList: {_id: ObjectId(entry_id)} } }
 
         const resp  = await users.updateOne(query, opts)
         if (resp.modifiedCount !== 1) 
         {
-            console.log('address-removal-failed', this)
-            throw new Err(code.INTERNAL_SERVER,
-                            status.Failed,
-                            reason.DBRemovalFailed)
+            console.log('address-removal-failed', query, opts)
+            Err_(code.INTERNAL_SERVER, reason.DBRemovalFailed)
         }
         console.log('address-removed', query, opts)
     }

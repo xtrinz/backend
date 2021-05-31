@@ -15,6 +15,12 @@ const { Suite } = require("./lib/driver")
         data  : require('./frames/data/product')
       , story : require('./frames/story/product')        
     }
+    , address   =
+    {
+        data  : require('./frames/data/address')
+      , story : require('./frames/story/address')        
+    }
+
 
     // User Management
     let user_   = user.data.Admin
@@ -30,5 +36,10 @@ const { Suite } = require("./lib/driver")
     let product_ = product.data.Product
       , tc3      = product.story.Std(product_)
     Suite.AddTest(tc3)
+
+    // Address Management
+    let addr_    = address.data.Address
+      , tc4      = address.story.Std(addr_)
+    Suite.AddTest(tc4)
 
     Suite.Run()

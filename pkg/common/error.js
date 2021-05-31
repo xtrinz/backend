@@ -63,6 +63,8 @@ module.exports =
     , Unknown                   : 'Unknown'
     , Unauthorized              : 'Unauthorized'
     , NoContextFound            : 'No context found'
+    , AddressNotFound           : 'Address not found'
+    , NoAddressFound            : 'No address found'
 	},
   text:
   {
