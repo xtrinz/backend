@@ -1,19 +1,19 @@
-const { ObjectId }      = require("mongodb")
-    , { code, text } 	  = require("../common/error")
-    , {Cart, CartEntry} = require("../objects/cart")
-    , router 	          = require("express").Router()
+const { ObjectId }           = require("mongodb")
+    , { code, text, status } = require("../common/error")
+    , {Cart, CartEntry}      = require("../objects/cart")
+    , router 	               = require("express").Router()
 
 // Insert product
 router.post("/insert", async (req, res, next) => {
   try
   {
     const entry = new CartEntry(req.body)
-    await entry.Insert(req.body.CartID)
+    await entry.Insert(req.body.User.CartID)
     
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : text.ProductAdded,
-      Data    : ''
+      Data    : {}
     })
   } catch (err) { next(err) }
 })
@@ -23,8 +23,8 @@ router.get("/list", async (req, res, next) =>
 {
   try
   {
-    const cart = new Cart() 
-    const data = await cart.Read(req.query.CardID) // TODO
+    const cart = new Cart()
+    const data = await cart.Read(req.body.User._id)
     
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -39,14 +39,14 @@ router.post("/modify", async (req, res, next) => {
   try
   {
     const entry = new CartEntry()
-    await entry.Update( ObjectId(req.body.CartID),
+    await entry.Update( ObjectId(req.body.User.CartID),
                         ObjectId(req.body.EntryID),
                         req.body.Quantity)
     
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : text.ProductUpdated,
-      Data    : ''
+      Data    : {}
     })
   } catch (err) { next(err) }
 })
@@ -57,13 +57,13 @@ router.delete("/remove", async (req, res, next) =>
   try
   {
     const entry = new CartEntry()
-    await entry.Remove( ObjectId(req.body.CartID),
+    await entry.Remove( ObjectId(req.body.User.CartID),
                         ObjectId(req.body.EntryID))
     
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : text.ProductRemoved,
-      Data    : ''
+      Data    : {}
     })
   } catch (err) { next(err) }
 })
