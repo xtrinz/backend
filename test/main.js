@@ -57,7 +57,8 @@ const { Suite } = require("./lib/driver")
     Suite.AddTest(tc5)
 
     // Journal Management
-    const tc6    = journal.story.Std(product_, cart_, addr_)
+    let journal_ = journal.data.Journal
+      , tc6      = journal.story.Std(journal_)
     Suite.AddTest(tc6)
 
     Suite.Run()

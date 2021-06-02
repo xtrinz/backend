@@ -3,7 +3,7 @@ const { Method, Type, Rest }  = require("../../lib/medium")
     , jwt                     = require("../../../pkg/common/jwt")
     , { code, status, text }  = require("../../../pkg/common/error")
 
-let Create = function(product, crt_entry, addr)
+let Create = function(journal)
 {
   this.Data =
   {
@@ -15,17 +15,17 @@ let Create = function(product, crt_entry, addr)
         , Path                  : '/journal/create'
         , Body                  : 
         {
-            Longitude           : addr.Longitude
-          , Latitude            : addr.Latitude
+            Longitude           : journal.Longitude
+          , Latitude            : journal.Latitude
           , Address             :
           {
-                 Name           : addr.Address.Name
-              , Line1           : addr.Address.Line1
-              , Line2           : addr.Address.Line2
-              , City            : addr.Address.City
-              , PostalCode      : addr.Address.PostalCode
-              , State           : addr.Address.State
-              , Country         : addr.Address.Country
+                 Name           : journal.Address.Name
+              , Line1           : journal.Address.Line1
+              , Line2           : journal.Address.Line2
+              , City            : journal.Address.City
+              , PostalCode      : journal.Address.PostalCode
+              , State           : journal.Address.State
+              , Country         : journal.Address.Country
           }
         }
         , Header                : { Authorization: '' }
@@ -42,17 +42,17 @@ let Create = function(product, crt_entry, addr)
               Products          : 
                 [{
                     ProductID   : ''
-                  , Name        : product.Name
-                  , Price       : product.Price
-                  , Image       : product.Image
-                  , Quantity    : crt_entry.Quantity
+                  , Name        : journal.Products[0].Name
+                  , Price       : journal.Products[0].Price
+                  , Image       : journal.Products[0].Image
+                  , Quantity    : journal.Products[0].Quantity
                 }]
               , Bill            : 
                 {
-                    Total       : crt_entry.Quantity * product.Price
-                  , TransitCost : 0
-                  , Tax         : 0
-                  , NetPrice    : crt_entry.Quantity * product.Price
+                    Total       : journal.Bill.Total
+                  , TransitCost : journal.Bill.TransitCost
+                  , Tax         : journal.Bill.Tax
+                  , NetPrice    : journal.Bill.NetPrice
                 }
             }
             , Stripe            : {}
