@@ -1,5 +1,3 @@
-const { states, type, channel } = require("../../../pkg/common/models")
-
 let Journal =
 {
     Longitude         : 18.1
