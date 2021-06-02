@@ -1,23 +1,19 @@
 const router                          = require("express").Router()
     , { Transit }                     = require("../objects/transit")
-    , { engine }                     = require("../engine/engine")
+    , { engine }                      = require("../engine/engine")
     , { alerts, events }              = require("../common/models")
-    , { Err, code, status, reason }   = require("../common/error")
+    , { Err_, code, status, reason }  = require("../common/error")
 
 /* Cargo cancellation by user */
 router.post("/user/cancel", async (req, res, next) =>
 {
     try
     {
-        let trans = new Transit()
-        const trans_ = trans.GetByIDAndUserID()
+        let trans  = new Transit()
+          , trans_ = trans.GetByIDAndUserID()
         if (!trans_)
-        {
-            const code_       = code.BAD_REQUEST
-                , status_     = status.Failed
-                , reason_     = reason.TransitNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST,
+            reason.TransitNotFound)
 
         trans.Event = events.EventCancellationByUser
         await engine.Transition(trans)
@@ -35,15 +31,11 @@ router.post("/store/reject", async (req, res, next) =>
 {
     try
     {
-        let trans = new Transit()
-        const trans_ = trans.GetByIDAndStoreID()
+        let trans  = new Transit()
+          , trans_ = trans.GetByIDAndStoreID()
         if (!trans_)
-        {
-            const code_       = code.BAD_REQUEST
-                , status_     = status.Failed
-                , reason_     = reason.TransitNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST,
+            reason.TransitNotFound)
 
         trans.Event = events.EventRejectionByStore
         await engine.Transition(trans)
@@ -61,15 +53,11 @@ router.post("/store/accept", async (req, res, next) =>
 {
     try
     {
-        let trans = new Transit()
-        const trans_ = trans.GetByIDAndStoreID()
+        let trans  = new Transit()
+          , trans_ = trans.GetByIDAndStoreID()
         if (!trans_)
-        {
-            const code_       = code.BAD_REQUEST
-                , status_     = status.Failed
-                , reason_     = reason.TransitNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST,
+            reason.TransitNotFound)
 
         trans.Event = events.EventAcceptanceByStore
         await engine.Transition(trans)
@@ -87,15 +75,11 @@ router.post("/store/despatch", async (req, res, next) =>
 {
     try
     {
-        let trans = new Transit()
-        const trans_ = trans.GetByIDAndStoreID()
+        let trans  = new Transit()
+          , trans_ = trans.GetByIDAndStoreID()
         if (!trans_)
-        {
-            const code_       = code.BAD_REQUEST
-                , status_     = status.Failed
-                , reason_     = reason.TransitNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST,
+            reason.TransitNotFound)
 
         trans.Event = events.EventDespatchmentByStore
         await engine.Transition(trans)
@@ -113,15 +97,11 @@ router.post("/agent/ignore", async (req, res, next) =>
 {
     try
     {
-        let trans = new Transit()
-        const trans_ = trans.GetByIDAndAgentInList()
+        let trans  = new Transit()
+           ,trans_ = trans.GetByIDAndAgentInList()
         if (!trans_)
-        {
-            const code_       = code.BAD_REQUEST
-                , status_     = status.Failed
-                , reason_     = reason.TransitNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST,
+            reason.TransitNotFound)
 
         trans.Event = events.EventIgnoranceByAgent
         await engine.Transition(trans)
@@ -139,15 +119,11 @@ router.post("/agent/accept", async (req, res, next) =>
 {
     try
     {
-        let trans = new Transit()
-        const trans_ = trans.GetByIDAndAgentInList()
+        let trans  = new Transit()
+          , trans_ = trans.GetByIDAndAgentInList()
         if (!trans_)
-        {
-            const code_       = code.BAD_REQUEST
-                , status_     = status.Failed
-                , reason_     = reason.TransitNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST,
+            reason.TransitNotFound)
 
         trans.Event = events.EventAcceptanceByStore
         await engine.Transition(trans)
@@ -165,15 +141,11 @@ router.post("/agent/reject", async (req, res, next) =>
 {
     try
     {
-        let trans = new Transit()
-        const trans_ = trans.GetByIDAndAgentID()
+        let trans  = new Transit()
+          , trans_ = trans.GetByIDAndAgentID()
         if (!trans_)
-        {
-            const code_       = code.BAD_REQUEST
-                , status_     = status.Failed
-                , reason_     = reason.TransitNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST,
+            reason.TransitNotFound)
 
         trans.Event = events.EventRejectionByStore
         await engine.Transition(trans)
@@ -191,15 +163,11 @@ router.post("/agent/complete", async (req, res, next) =>
 {
     try
     {
-        let trans = new Transit()
-        const trans_ = trans.GetByIDAndAgentID()
+        let trans  = new Transit()
+          , trans_ = trans.GetByIDAndAgentID()
         if (!trans_)
-        {
-            const code_       = code.BAD_REQUEST
-                , status_     = status.Failed
-                , reason_     = reason.TransitNotFound
-            throw new Err(code_, status_, reason_)
-        }
+        Err_(code.BAD_REQUEST,
+            reason.TransitNotFound)
 
         trans.Event = events.EventCompletionByAgent
         await engine.Transition(trans)
