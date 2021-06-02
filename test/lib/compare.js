@@ -6,6 +6,7 @@ const DeepEqual = function (obj, alt)
     if (keys1.length !== keys2.length) { return false }
     for (const key of keys1) 
     {
+      if(key === 'Stripe') continue
       const val1        = obj[key]
           , val2        = alt[key]
           , areObjects  = isObject(val1) && isObject(val2);

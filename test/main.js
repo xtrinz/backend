@@ -25,6 +25,11 @@ const { Suite } = require("./lib/driver")
         data  : require('./frames/data/cart')
       , story : require('./frames/story/cart')        
     }
+    , journal   =
+    {
+        data  : require('./frames/data/journal')
+      , story : require('./frames/story/journal')        
+    }
 
     // User Management
     let user_    = user.data.Admin
@@ -50,5 +55,9 @@ const { Suite } = require("./lib/driver")
     let cart_    = cart.data.CartEntry
       , tc5      = cart.story.Std(cart_, product_)
     Suite.AddTest(tc5)
+
+    // Journal Management
+    const tc6    = journal.story.Std(product_, cart_, addr_)
+    Suite.AddTest(tc6)
 
     Suite.Run()

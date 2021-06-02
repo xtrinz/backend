@@ -27,7 +27,7 @@ function TestRig()
             if(!sts)
             {
                 console.log(prints.Failed) // console.log('\nRequest :', data.Request)
-                console.log('\nExpected : ', data.Response, '\nReceived : ', resp)
+                console.log('\nExpected : ', data.Response, '\nReceived : ', resp,)
                 return false
             }
             console.log(prints.Passed)

@@ -1,198 +1,203 @@
-const { User }                     = require("./user")
-    , { Cart }                          = require("./cart")
-    , { Store }                         = require("./store")
-    , { ObjectID }                      = require("mongodb")
-    , { Transit }                       = require("./transit")
-    , { journals }                      = require("../common/database")
-    , { Err, code, status, reason }     = require("../common/error")
-    , { states, type, channel, entity } = require("../common/models")
-    , { Stripe }                        = require("../common/stripe")
+const { User }                 = require("./user")
+    , { Cart }                 = require("./cart")
+    , { Store }                = require("./store")
+    , { ObjectID, ObjectId }   = require("mongodb")
+    , { Transit }              = require("./transit")
+    , { Err_, code, reason }   = require("../common/error")
+    , { journals }             = require("../common/database")
+    , { states, type, channel,
+        entity, query }        = require("../common/models")
+    , { Stripe }               = require("../common/stripe")
+    , test                     = require('../common/test')
 
 function Journal()
 {
-    this._id      = ''
-    this.Status   = states.None
-    this.Type     = type.FORWARD
-    this.CartID   = ''
-    this.ReturnID = ''
-    this.Date     = Date.now()  // Millis eases math
-    this.Products = []          // { ProductID | Name | Price | Image | Quantity }
-
-    this.Buyer    =
+    this.Data =
     {
+        _id               : ''
+      , Status            : states.None
+      , Type              : type.FORWARD
+      , CartID            : ''
+      , ReturnID          : ''
+      , Date              : ''          // Millis eases math
+      
+      , Buyer             :
+      {
         ID              : ''
-      , Name            : ''
-      , Location        : {}
-      , Address         : {}
-    }
-    this.Seller   =
-    {
+        , Name            : ''
+        , Location        : {}
+        , Address         : {}
+      }
+      , Seller            :
+      {
         ID              : ''
-      , Name            : ''
-      , Location        : {}
-      , Address         : {}
-    }
-    this.Bill     = 
-    {
-        Total           : 0
-      , TransitCost     : 0
-      , Tax             : 0
-      , NetPrice        : 0
-    }
-    this.Payment  =
-    {
-        Channel         : channel.Stripe
-      , TransactionID   : ''
-      , Amount          : ''
-      , Status          : states.Initiated
-      , TimeStamp       : ''      // Webhook hit time
-    }
-    this.Transit  = 
-    {
-      ID              : ''
-      , FinalStatus     : states.None
+        , Name            : ''
+        , Location        : {}
+        , Address         : {}
+      }
+      , Order             :
+      {
+          Products        : 
+          [/*
+            { 
+                ProductID : ''
+              , Name      : ''
+              , Price     : 
+              , Image     : ''
+              , Quantity  : 
+            }*/
+          ]
+        , Bill            : 
+        {
+            Total         : 0
+          , TransitCost   : 0
+          , Tax           : 0
+          , NetPrice      : 0
+        }
+      }
+      , Payment           :
+      {
+          Channel         : channel.Stripe
+        , TransactionID   : ''
+        , ChannelParams   : {}
+        , Amount          : ''
+        , Status          : states.Initiated
+        , TimeStamp       : ''      // Webhook hit time
+      }
+      , Transit           : 
+      {
+          ID              : ''
+        , FinalStatus     : states.None
+      }
     }
 
-    this.Set(data)
+    this.GetByID    = async function(_id)
     {
-      this._id      = data._id
-      this.Status   = data.Status
-      this.Type     = data.Type
-      this.CartID   = data.CartID
-      this.ReturnID = data.ReturnID
-      this.Date     = data.Date
-      this.Products = data.Products 
-      this.Buyer    = data.Buyer
-      this.Seller   = data.Seller
-      this.Bill     = data.Bill
-      this.Payment  = data.Payment
-      this.Transit  = data.Transit
-    }
-
-    this.GetByID = async function(_id)
-    {
-       console.log(`find-journal-by-id. ID: ${_id}`)
+       console.log('find-journal-by-id', { ID: _id })
        const query = { _id: ObjectId(_id) }
        let journal = await journals.findOne(query)
        if (!journal)
        {
-         console.log(`journal-not-found. ID: ${query}`)
+         console.log('journal-not-found', { ID: query})
          return
        }
-       this.Set(journal)
-       console.log(`journal-found. cart: ${journal}`)
+       this.Data = journal
+       console.log('journal-found', { Cart: journal})
        return journal
     }
 
     this.Save       = async function()
     {
-        console.log('save-journal', this)
-        const   query = { _id     : this._id }
-              , act   = { $set    : this     }
-              , opt   = { upsert  : true     }
+        console.log('save-journal', this.Data)
+        const query = { _id    : this.Data._id }
+            , act   = { $set   : this.Data     }
+            , opt   = { upsert : true          }
         const resp  = await journals.updateOne(query, act, opt)
-        if (resp.modifiedCount !== 1)
+        if (!resp.result.ok)
         {
-            console.log('save-journal-failed', this)
-            const   code_   = code.INTERNAL_SERVER
-                  , status_ = status.Failed
-                  , reason_ = reason.DBAdditionFailed
-            throw new Err(code_, status_, reason_)
+            console.log('journal-save-failed', { Data: this.Data, Result: resp.result})
+            Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
         }
+        console.log('journal-saved', this.Data)
     }
 
-    this.New    = function(data)          // Flow, if not intent exists(no previous payment attempts)
+    this.New    = async function(data)
     {
-      let   cart  = new Cart()
-      const data_ = cart.Read(data)
-      if (!data_.Products.length)
-      {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.NoProductsFound
-            throw new Err(code_, status_, reason_)
+      // Set User
+      this.Data.Buyer     = 
+      {                 
+                ID        : data.User._id
+              , Name      : data.User.Name
+              , MobileNo  : data.User.MobNo
+              , Longitude : data.Longitude
+              , Latitude  : data.Latitude
+              , Address   : data.Address
       }
 
-      const   storeId = this.Products[0].StoreID
-            , store_  = new Store()
-            , store   = store_.GetByID(storeId)
-      if (!store)
+      // Set Cart
+      let cart_           = new Cart()
+      const cart_data     = await cart_.Read(data.User._id)
+
+      if(!cart_data.Products.length)
+      Err_(code.BAD_REQUEST, reason.NoProductsFound)
+
+      this.Data.Order     = { ...cart_data }
+      if(cart_.Data.JournalID)
+      await this.GetByID(cart_.Data.JournalID)
+
+      // Set Seller
+      const store_  = new Store()
+          , store   = await store_.Get(cart_.Data.Products[0].StoreID, query.ByID)
+      if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+      this.Data.Seller    = 
+      {                 
+                ID        : store._id
+              , Name      : store.Name
+              , MobileNo  : store.MobileNo
+              , Longitude : store.Location.coordinates[0]
+              , Latitude  : store.Location.coordinates[1]
+              , Address   : store.Address
+      }                 
+
+      // Set ID & Date
+      this.Data._id       = (this.Data._id) ? this.Data._id  : new ObjectID()
+      this.Data.Date      = (this.Data.Date)? this.Data.Date : Date.now()
+
+      // Set Payment
+      const intent_     = new Stripe({
+          Amount        : this.Data.Order.Bill.NetPrice
+        , JournalID     : this.Data._id
+      })
+      const intent      = await intent_.CreateIntent()
+      this.Data.Payment = 
+      { 
+          ChannelParams : intent
+        , Amount        : this.Data.Order.Bill.NetPrice
+      }
+      await this.Save()
+
+      test.Set('Stripe', intent) // #101
+
+      const data_ =
       {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.StoreNotFound
-            throw new Err(code_, status_, reason_)
+          Sheet   : { ...this.Data.Order }
+        , Stripe  : { ...intent          }
       }
 
-      this.CartID    = cart._id
-      this.Seller    = 
-      {
-              ID        : store._id
-            , Name      : store.Name
-            , Location  : store.Location
-            , Address   : store.Address
-      }
-      this.Buyer     = 
-      {
-              ID        : data.User._id
-            , Name      : data.User.Name
-            , Location  : data.Location
-            , Address   : data.Address
-      }
-      this.Products  = data_.Products
-      this.Bill      = data_.Bill
-      this._id       = new ObjectID()
-      const str_data =
-      {
-              Amount    : this.Bill.NetPrice
-            , UserID    : this._id
-            , JournalID : this.Buyer.ID
-      }
-      // Init payment intent
-      const intent_  = new Stripe(str_data)
-      const intent   = intent_.CreateIntent()
-
-      this.Payment.TransactionID    = intent.id
-      this.Payment.Amount           = data_.Bill.NetPrice
-      this.Save()
-
-      // TODO Add Journal ID to the cart & remove it only after payment success
-
-      data_ = {...data_, ...intent}
-      console.log('checkout-initiated', data_)
+      console.log('checkout-initiated', {Data : data_}, data_.Sheet)
       return data_
     }
 
-    this.UpdateStatusAndInitTransit = function(req)
+    this.UpdateStatusAndInitTransit = async function(req)
     {
       const   sign       = req.headers["stripe-signature"]
             , stripe_    = new Stripe()
-            , event      = stripe_.MatchEventSign(req, sign)
+            , event      = await stripe_.MatchEventSign(req, sign)
             , journal_id = event.data.object.metadata.JournalID
       
-      let journal = this.GetByID(journal_id)
-      if (!journal)
-      {
-            const   code_       = code.BAD_REQUEST
-                  , status_     = status.Failed
-                  , reason_     = reason.JournalNotFound
-            throw new Err(code_, status_, reason_)
-      }
+      let journal = await this.GetByID(journal_id)
+      if (!journal) Err_(code.BAD_REQUEST, reason.JournalNotFound)
 
       if (event.type === "payment_intent.succeeded")
       {
+            let cart_  = new Cart()
+            const cart = await cart_.Get(journal.Buyer.ID, query.ByUserID)
+            if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)  // What to do, if it breaks here
+            cart_.Data.JournalID = ''
+            await cart_.Save()
+
             this.Payment.Status = states.Success
             this.Transit.Status = states.Initiated
-            this.Save()
+            await this.Save()
 
             let transit = new Transit(this)
-            transit.Init()
+            await transit.Init()
             return
       } 
       else if (event.type === "payment_intent.payment_failed")
       {
             this.Payment.Status = states.Failed
-            this.Save()
+            await this.Save()
       }     
     }
 
@@ -203,13 +208,8 @@ function Journal()
             case entity.User:
             let user    = new User()
             const user_ = user.GetByID(data.UserID)
-            if (!user_)
-            {
-                  const     code_ = code.NOT_FOUND
-                        , status_ = status.Failed
-                        , reason_ = reason.UserNotFound
-                  throw new Err(code_, status_, reason_)
-            }
+            if (!user_) Err_(code.NOT_FOUND, reason.UserNotFound)
+
             const data_ = {}
             /* const   query = 
                         { 
@@ -230,13 +230,7 @@ function Journal()
             case entity.Store:
             let store    = new Store()
             const store_ = store.GetByIDAndMgmtID(data.UserID, data.StoreID)
-            if (!store_)
-            {
-                  const     code_ = code.NOT_FOUND
-                        , status_ = status.Failed
-                        , reason_ = reason.StoreNotFound
-                  throw new Err(code_, status_, reason_)
-            }
+            if (!store_) Err_(code.NOT_FOUND, reason.StoreNotFound)
             break
       }
     }
@@ -254,18 +248,18 @@ function Journal()
       }
     }
 
-    this.PayOut(ctxt)
+    this.PayOut = async function (ctxt)
     {
       switch (ctxt.State)
       {
-      case states.TranistCompleted:
-      break
-      case states.CargoCancelled  :
-      break
-      case states.OrderRejected   :
-      break
-      case states.TransitRejected :
-      break
+        case states.TranistCompleted :
+              break
+        case states.CargoCancelled   :
+              break
+        case states.OrderRejected    :
+              break
+        case states.TransitRejected  :
+              break
       }
     }
 }

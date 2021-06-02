@@ -11,6 +11,7 @@ module.exports =
 		, ByMail 					: 'ByMail'
 		, ByMobNo 					: 'ByMobNo'
 		, Custom 					: 'Custom'
+		, ByUserID					: 'ByUserID'
 	},
 	mode:
 	{

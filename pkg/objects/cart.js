@@ -2,8 +2,8 @@ const { ObjectID, ObjectId }  = require("mongodb")
     , { Product }             = require("./product")
     , { carts }               = require("../common/database")
     , { Err_, code , reason } = require("../common/error")
-    , test                    = require('../common/test')
     , { query }               = require("../common/models")
+    , test                    = require('../common/test')
 
 function Cart(user_id)
 {
@@ -12,7 +12,8 @@ function Cart(user_id)
    {
       _id         : ''
     , UserID      : ObjectId(user_id)
-    , Products    : []    
+    , Products    : []
+    , JournalID   : ''    
     , Bill        : 
     {
          Total           : 0
@@ -25,10 +26,10 @@ function Cart(user_id)
    this.Save       = async function()
    {
        console.log('save-cart', this.Data)
-       const query = { _id : this.Data._id }
+       const key = { _id : this.Data._id }
            , act   = { $set : this.Data }
            , opt   = { upsert : true }
-       const resp  = await carts.updateOne(query, act, opt)
+       const resp  = await carts.updateOne(key, act, opt)
        if (!resp.result.ok)
        {
            console.log('cart-save-failed', { Data: this.Data, Result: resp.result})
@@ -37,14 +38,19 @@ function Cart(user_id)
        console.log('cart-saved', this.Data)
    }
 
-   this.Get = async function(user_id)
+   this.Get = async function(id, mode)
    {
-      console.log('find-cart-by-user-id',{ UserID: user_id})
-      const query = { UserID: ObjectId(user_id) }
-      let cart = await carts.findOne(query)
+      console.log('find-cart-by-user-id',{ ID: id, Mode: mode})
+      let key
+      if (mode === query.ByUserID){
+        key = { UserID: ObjectId(id) }
+      } else if (mode === query.ByID) {
+        key = { _id: ObjectId(id) }
+      }
+      let cart = await carts.findOne(key)
       if (!cart)
       {
-        console.log('cart-not-found', {Query: query})
+        console.log('cart-not-found', {Query: key})
         return
       }
       this.Data = cart
@@ -54,7 +60,7 @@ function Cart(user_id)
 
    this.Create      = async function ()
    {
-        await this.Get(this.Data.UserID)
+        await this.Get(this.Data.UserID, query.ByUserID)
         if(!this.Data._id) this.Data._id = new ObjectID()
         const resp = await this.Save()
         console.log('cart-added', this.Data)
@@ -74,7 +80,7 @@ function Cart(user_id)
           , NetPrice        : 0
         }
       }
-      let cart = await this.Get(user_id)
+      let cart = await this.Get(user_id, query.ByUserID)
       if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)
       for (let i = 0; i < this.Data.Products.length; i++)
       {
@@ -101,20 +107,21 @@ function Cart(user_id)
 
    this.Delete      = async function (user_id)
    {
-        const query = {UserID: ObjectId(user_id)}
-            , resp  = await carts.deleteOne(query);
+        const key = {UserID: ObjectId(user_id)}
+            , resp  = await carts.deleteOne(key);
         if (resp.deletedCount !== 1)
         {
-            console.log('cart-deletion-failed', query)
+            console.log('cart-deletion-failed', key)
             Err_(code.INTERNAL_SERVER, reason.DBDeletionFailed)
         }
-        console.log('cart-deleted', query)
+        console.log('cart-deleted', key)
    }
 
    this.Flush       = async function(UserId)
    {
-      let cart = await this.Get(ObjectId(UserId))
+      let cart = await this.Get(UserId, query.ByUserID)
       if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)
+      this.Data.JournalID   = ''
       this.Data.Products    = []    
       this.Data.Bill        = 
       {
@@ -142,47 +149,47 @@ function CartEntry(data)
   {
     this.Data._id = new ObjectID()
     test.Set('EntryID', this.Data._id) // #101
-    const query   = { _id: ObjectId(cart_id)         }
+    const key   = { _id: ObjectId(cart_id)         }
         , opts    = { $push: { Products: this.Data } }
-        , resp    = await carts.updateOne(query, opts)
+        , resp    = await carts.updateOne(key, opts)
     if (resp.modifiedCount !== 1) 
     {
         console.log('product-insertion-failed', this.Data)
         Err_(code.INTERNAL_SERVER, reason.DBInsertionFailed)
     }
-    console.log('product-inserted', query, opts)
+    console.log('product-inserted', key, opts)
   }
 
   this.Update     = async function (cart_id, entry_id, qnty)
   {
-    const   query =
+    const   key =
           {
             _id           : ObjectId(cart_id),
             'Products._id': ObjectId(entry_id)
           }
           , opts  = { $set: { 'Products.$.Quantity': qnty }  }
 
-    const resp  = await carts.updateOne(query, opts)
+    const resp  = await carts.updateOne(key, opts)
     if (resp.modifiedCount !== 1) 
     {
         console.log('product-update-failed', this.Data)
         Err_(code.INTERNAL_SERVER, reason.DBUpdationFailed)
     }
-    console.log('product-updated', query, opts)
+    console.log('product-updated', key, opts)
   }
 
   this.Remove     = async function (cart_id, entry_id)
   {
-    const   query = { _id: ObjectId(cart_id)                         }
+    const   key = { _id: ObjectId(cart_id)                         }
           , opts  = { $pull: { Products: {_id: ObjectId(entry_id)} } }
 
-    const resp  = await carts.updateOne(query, opts)
+    const resp  = await carts.updateOne(key, opts)
     if (resp.modifiedCount !== 1) 
     {
         console.log('product-removal-failed', this)
         Err_(code.INTERNAL_SERVER, reason.DBRemovalFailed)
     }
-    console.log('product-removed', query, opts)
+    console.log('product-removed', key, opts)
   }
 }
 

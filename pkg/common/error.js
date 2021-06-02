@@ -90,6 +90,7 @@ module.exports =
     , NoContextFound            : 'No context found'
     , Relieved                  : 'Relieved'
     , TestNotEnabled            : 'Test disabled'
+    , PaymentInitiated          : 'Payment initiated'
   },
   code:
   {

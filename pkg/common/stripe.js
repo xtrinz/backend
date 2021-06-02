@@ -9,8 +9,7 @@ function Stripe(data)
     this.Amount     = data.Amount
     this.MetaData   = 
     {
-        UserID    : data.UserID
-      , JournalID : data.JournalID
+        JournalID : String(data.JournalID)
     }
     this.Currency   = 'inr'
 
@@ -25,7 +24,7 @@ function Stripe(data)
         const resp =
         {
             IntentID       : intent.id
-          , ClientSceret   : intent.client_secret
+          , ClientSecret   : intent.client_secret
           , PublishableKey : pub_key
         }
         return resp

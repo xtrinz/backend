@@ -13,22 +13,17 @@ function Store(data)
     {
           _id             : ''
         , AdminID         : ObjectId(data.User._id)
-        , Name            : data.Name
-        , Image           : data.Image
-        , Type            : data.Type
-        , Certs           : data.Certs
-        , MobileNo        : data.MobileNo
         , Email           : data.Email
+        , Image           : data.Image
+        , Certs           : data.Certs
+        , Type            : data.Type
+
+        , Name            : data.Name
+        , MobileNo        : data.MobileNo
         , Location        :
         {
               type        : 'Point'
             , coordinates : [data.Longitude, data.Latitude]
-        }
-        , State           : states.New
-        , StaffList       :
-        {
-              Approved    : []
-            , Pending     : []
         }
         , Address         :
         {
@@ -38,6 +33,13 @@ function Store(data)
             , PostalCode  : data.Address.PostalCode
             , State       : data.Address.State
             , Country     : data.Address.Country
+        }
+
+        , State           : states.New
+        , StaffList       :
+        {
+              Approved    : []
+            , Pending     : []
         }
     }
 
