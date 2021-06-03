@@ -52,8 +52,8 @@ const { Suite } = require("./lib/driver")
     Suite.AddTest(tc4)
 
     // Cart Management
-    let cart_    = cart.data.CartEntry
-      , tc5      = cart.story.Std(cart_, product_)
+    let cart_    = cart.data.Cart
+      , tc5      = cart.story.Std(cart_)
     Suite.AddTest(tc5)
 
     // Journal Management

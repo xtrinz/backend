@@ -1,27 +1,22 @@
 let Cart =
 {
-      _id             : ''
-    , UserID          : ''
-    , Products        : ['', '']
+      Products        : 
+    [{
+        Name          : 'Product'
+      , Image         : 'product.img.url'
+      , Price         : 99
+      , Quantity      : 3   
+    }]
     , Bill            : 
     {                 
-          Total       : 0
+          Total       : 297
         , TransitCost : 0
         , Tax         : 0
-        , NetPrice    : 0
+        , NetPrice    : 297
     }
-}
-
-let CartEntry =
-{
-      _id         : ''
-    , ProductsID  : ''
-    , StoreID     : ''
-    , Quantity    : 3
 }
 
 module.exports =
 {
     Cart      : Cart
-  , CartEntry : CartEntry
 }

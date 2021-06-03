@@ -3,7 +3,7 @@ const { Method, Type, Rest }  = require("../../lib/medium")
     , jwt                     = require("../../../pkg/common/jwt")
     , { code, status, text }  = require("../../../pkg/common/error")
 
-let Insert = function(crt_entry)
+let Insert = function(cart)
 {
   this.Data =
   {
@@ -15,9 +15,9 @@ let Insert = function(crt_entry)
         , Path              : '/cart/insert'
         , Body              : 
         {
-                ProductID  : ''
+                ProductID   : ''
               , StoreID     : ''
-              , Quantity    : crt_entry.Quantity
+              , Quantity    : cart.Products[0].Quantity
         }
         , Header            : { Authorization: '' }
     }
@@ -49,7 +49,7 @@ let Insert = function(crt_entry)
 
 }
 
-let List = function(crt_entry, product)
+let List = function(cart)
 {
   this.Data =
   {
@@ -72,17 +72,17 @@ let List = function(crt_entry, product)
               Products      : 
               [{
                   ProductID : ''
-                , Name      : product.Name
-                , Price     : product.Price
-                , Image     : product.Image
-                , Quantity  : crt_entry.Quantity
+                , Name      : cart.Products[0].Name
+                , Price     : cart.Products[0].Price
+                , Image     : cart.Products[0].Image
+                , Quantity  : cart.Products[0].Quantity
               }]
             , Bill          : 
             {
-                Total       : crt_entry.Quantity * product.Price
+                Total       : cart.Bill.Total
               , TransitCost : 0
               , Tax         : 0
-              , NetPrice    : crt_entry.Quantity * product.Price
+              , NetPrice    : cart.Bill.NetPrice
             }
         }
     }
@@ -108,7 +108,7 @@ let List = function(crt_entry, product)
 
 }
 
-let Update = function(crt_entry)
+let Update = function(cart)
 {
   this.Data =
   {
@@ -121,7 +121,7 @@ let Update = function(crt_entry)
         , Body              : 
         {
                 EntryID     : ''
-              , Quantity    : crt_entry.Quantity + 1
+              , Quantity    : cart.Products[0].Quantity + 1
         }
         , Header            : { Authorization: '' }
     }
@@ -152,7 +152,7 @@ let Update = function(crt_entry)
 
 }
 
-let Remove = function(crt_entry)
+let Remove = function(cart)
 {
   this.Data =
   {

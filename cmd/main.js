@@ -50,11 +50,11 @@ const server_ = () => console.log('server-started', {Port : port})
 io.on('connection', async (socket) =>
 {
     await event.Connect(socket)
-    const disc_ = ()=> await event.Disconnect(socket)
+    const disc_ = async ()=> await event.Disconnect(socket)
     socket.on('disconnect', disc_)
 })
 
-event.Channel.on('SendEvent', (data)=>
+event.Channel.on('SendEvent', async (data)=>
 {
   console.info('Sending-event', data)
   try        { await io.to(data.To).emit(data.Msg)      } 
