@@ -30,6 +30,11 @@ const { Suite } = require("./lib/driver")
         data  : require('./frames/data/journal')
       , story : require('./frames/story/journal')        
     }
+    , transit   =
+    {
+        data  : require('./frames/data/transit')
+      , story : require('./frames/story/transit')        
+    }
 
     // User Management
     let user_    = user.data.Admin
@@ -60,5 +65,10 @@ const { Suite } = require("./lib/driver")
     let journal_ = journal.data.Journal
       , tc6      = journal.story.Std(journal_)
     Suite.AddTest(tc6)
+
+    // Transit Events
+    let transit_ = transit.data.Transit
+      , tc7      = transit.story.Std(transit_)
+    Suite.AddTest(tc7)
 
     Suite.Run()
