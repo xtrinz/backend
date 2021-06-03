@@ -2,22 +2,23 @@ const { ObjectID } 				 = require("mongodb")
     , { transits } 				 = require("../common/database")
     , { Err_, code, reason }     = require("../common/error")
     , { states, events, entity } = require("../common/models")
-    , { engine }                 = require("../engine/engine")
+    , { Engine }                 = require("../engine/engine")
 
 function Transit (journal)
 {
     if(journal)
-    this.Date   =
+    this.Data   =
     {
-        _id 		      : ''
+        _id 		    : ''
       , JournalID       : journal._id
-      , Store 		  :
+      , Store 		    :
       {
             _id         : journal.Seller.ID
           , SockID      : []
           , Name        : journal.Seller.Name
-          , ContactNo   : journal.Seller.ContactNo
-          , Location    : journal.Seller.Location
+          , Longitude   : journal.Seller.Longitude
+          , Latitude    : journal.Seller.Latitude
+          , MobileNo    : journal.Seller.MobileNo
           , Address     : journal.Seller.Address
       }
 
@@ -26,8 +27,9 @@ function Transit (journal)
             _id         : journal.Buyer.ID
           , SockID      : []
           , Name        : journal.Buyer.Name
-          , ContactNo   : journal.Buyer.ContactNo
-          , Location    : journal.Buyer.Location
+          , Longitude   : journal.Buyer.Longitude
+          , Latitude    : journal.Buyer.Latitude          
+          , MobileNo    : journal.Buyer.MobileNo
           , Address     : journal.Buyer.Address
       }
 
@@ -60,7 +62,7 @@ function Transit (journal)
           , UserName 	  : this.Data.User.Name
           , StoreName 	  : this.Data.Store.Name
           , StoreCity     : this.Data.Store.Address.City
-          , StoreLocation : this.Data.Store.Location
+          , StoreLocation : [ this.Data.Store.Longitude, this.Data.Store.Latitude ]
         }
         if (this.Agent && !args.includes(entity.Agent))
         {
@@ -94,7 +96,8 @@ function Transit (journal)
         // Get Src & Dest Contexts & Update SockIDs
         this.Data._id = new ObjectID()
         await this.Save()
-        await engine.Transition(this.Data)
+        let engine = new Engine()
+        await engine.Transition(this)
         console.log('transit-initialised', this.Data)
     }
 }

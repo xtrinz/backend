@@ -10,24 +10,24 @@ const   { Emit } 					  = require("./events")
  * Start/End(States) 	:  None/CargoInitiated
  * Store				:  Event - NewOrder
  **/
-const CargoInitiatedByUser		=  function(ctxt)
+const CargoInitiatedByUser		= async function(ctxt)
 {
-	console.log('process-cargo-init', ctxt)
+	console.log('process-cargo-init', ctxt.Data)
 	const msg = 
 	{
 		// user? since event initiated by payment gw
-		To	: [...ctxt.User.SockID, ...ctxt.Store.SockID],
+		To	: [...ctxt.Data.User.SockID, ...ctxt.Data.Store.SockID],
 		Msg	:
 		{
 			Type: alerts.NewOrder,
 			Data: ctxt.Abstract()
 		}
 	}
-	Emit(msg)
-	ctxt.State = states.CargoInitiated
-	ctxt.Event = ""
-	ctxt.Save()
-	console.log('cargo-initialised', ctxt)
+	await Emit(msg)
+	ctxt.Data.State = states.CargoInitiated
+	ctxt.Data.Event = ""
+	await ctxt.Save()
+	console.log('cargo-initialised', ctxt.Data)
 }
 
 /**
@@ -40,38 +40,38 @@ const CargoInitiatedByUser		=  function(ctxt)
  **/
 const CargoCancelledByUser		=  function(ctxt)
 {
-	console.log('process-cargo-cancellation', ctxt)
+	console.log('process-cargo-cancellation', ctxt.Data)
 	let to = []
-	switch(ctxt.State)
+	switch(ctxt.Data.State)
 	{
 		case states.TransitAccepted :
-			to.push(...ctxt.Agent.SockID)
-			to.push(...ctxt.Shop.SockID)
+			to.push(...ctxt.Data.Agent.SockID)
+			to.push(...ctxt.Data.Shop.SockID)
 			break
 		case states.OrderAccepted 	:
-			ctxt.Agents.forEach((agent)=>
+			ctxt.Data.Agents.forEach((agent)=>
 			{ to.push(...agent.SockID) })
-			to.push(...ctxt.Shop.SockID)
+			to.push(...ctxt.Data.Shop.SockID)
 			break
 		case states.CargoInitiated:
-			to.push(...ctxt.Shop.SockID)
+			to.push(...ctxt.Data.Shop.SockID)
 			break
 		default :
-			console.log('cannot-be-cancelled', ctxt)
+			console.log('cannot-be-cancelled', ctxt.Data)
 			throw new Err(code.BAD_REQUEST,
 						  status.Failed,
 						  reason.CancellationDenied)
 	}
 
-	ctxt.Return 	= ctxt.State
-	ctxt.State 		= states.CargoCancelled
-	ctxt.Event 		= ""
+	ctxt.Data.Return 	= ctxt.Data.State
+	ctxt.Data.State 	= states.CargoCancelled
+	ctxt.Data.Event 	= ""
 	ctxt.Save()
 	
 	let journal = new Journal()
 	journal.PayOut(ctxt)
 
-	console.log('cargo-cancelled', ctxt)
+	console.log('cargo-cancelled', ctxt.Data)
 }
 
 /**
@@ -82,10 +82,10 @@ const CargoCancelledByUser		=  function(ctxt)
  **/ 
 const OrderRejectedByStore		=  function()
 {
-	console.log('process-order-rejection', ctxt)
+	console.log('process-order-rejection', ctxt.Data)
 	const msg = 
 	{		 
-		To	: [...ctxt.User.SockID],
+		To	: [...ctxt.Data.User.SockID],
 		Msg	:
 		{
 			Type: alerts.EnRoute,
@@ -93,14 +93,14 @@ const OrderRejectedByStore		=  function()
 		}
 	}
 	Emit(msg)
-	ctxt.State 		= states.OrderRejected
-	ctxt.Event 		= ""
+	ctxt.Data.State 		= states.OrderRejected
+	ctxt.Data.Event 		= ""
 	ctxt.Save()
 
 	let journal = new Journal()
 	journal.PayOut(ctxt)
 	
-	console.log('order-rejected', ctxt)
+	console.log('order-rejected', ctxt.Data)
 }
 
 /**
@@ -115,8 +115,8 @@ const OrderAcceptanceTimeout		=  function(ctxt)
 	// Create a machine call to this function from init API
 	// after saving the context setting event as timeout
 
-	ctxt.State 		= states.TransitAcceptanceTimeout
-	ctxt.Event 		= ""
+	ctxt.Data.State 		= states.TransitAcceptanceTimeout
+	ctxt.Data.Event 		= ""
 	ctxt.Save()
 }
 
@@ -131,17 +131,17 @@ const OrderAcceptanceTimeout		=  function(ctxt)
 */
 const OrderAcceptedByStore			=  function(ctxt)
 {
-	console.log('process-order-acceptance', ctxt)
+	console.log('process-order-acceptance', ctxt.Data)
 
 	const agent = new User()
-	const agents = agent.ListNearbyLiveAgents(ctxt.Store.Location)
+	const agents = agent.ListNearbyLiveAgents(ctxt.Data.Store.Location)
 	if(!agents)
 	{
-		console.log('no-pickup-agents-order-on-hold', ctxt)
+		console.log('no-pickup-agents-order-on-hold', ctxt.Data)
 		// Notify admin about the absents of live agents
 		const msg_to_admin = 
 		{		 
-			To	: ctxt.User.SockID, // SET ADMIN
+			To	: ctxt.Data.User.SockID, // SET ADMIN
 			Msg	:
 			{
 				Type: alerts.NoAgents,
@@ -150,8 +150,8 @@ const OrderAcceptedByStore			=  function(ctxt)
 		}
 		Emit(msg_to_admin)
 
-		ctxt.State  = states.OrderOnHold
-		ctxt.Event  = ""
+		ctxt.Data.State  = states.OrderOnHold
+		ctxt.Data.Event  = ""
 		ctxt.Save()
 		return
 	}

@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true  }))
 const stripe_ = function (req, res, buf)
 {
   if (req.originalUrl.startsWith("/journal/confirm")) 
-    req.rawBody = buf.toString()
+    req.RawBody = buf.toString()
 }
 app.use(express.json(      { verify: stripe_ }))
 

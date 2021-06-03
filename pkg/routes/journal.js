@@ -9,11 +9,19 @@ router.post("/confirm", async (req, res, next) =>
   {
     const journal = new Journal()
     await journal.UpdateStatusAndInitTransit(req)
-    return res.send(code.OK)
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : '',
+      Data    : {}
+    })
   } catch (err) 
   {
-    console.log('payment-confirmation-failed', err)
-    return res.send(code.BAD_REQUEST)
+    console.log('confirmation-failed', { Err: err } )
+    return res.status(code.BAD_REQUEST).json({
+      Status  : status.Failed,
+      Text    : '',
+      Data    : {}
+    })
   }
 })
 

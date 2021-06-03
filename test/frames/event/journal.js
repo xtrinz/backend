@@ -79,9 +79,30 @@ let Create = function(journal)
 
 }
 
-
+let ConfirmPayment = function(journal)
+{
+  this.Data =
+  {
+      Type                      : Type.Rest
+    , Describe                  : 'Journal Confirm Payment'
+    , Request                   :
+    {
+          Method                : Method.POST
+        , Path                  : '/journal/confirm'
+        , Body                  : {/* Masked Sign Verification for test */}
+        , Header                : {}
+    }
+    , Response                  :
+    {
+          Code                  : code.OK
+        , Status                : status.Success
+        , Text                  : ''
+        , Data                  : {}
+    }
+  }
+}
 
 module.exports =
 {
-    Create
+    Create, ConfirmPayment
 }

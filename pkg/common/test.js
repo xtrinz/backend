@@ -9,10 +9,24 @@ const router                 = require("express").Router()
     , UserID: ''
 }
 
+const IsEnabled = ()  => 
+{
+    if(test)
+        return true
+    else
+        return false
+}
+
 const Set = (key, val)  => 
 {
     if(test)
     Exports[key] = val
+}
+
+const Get = (key)  => 
+{
+    if(test)
+    return Exports[key]
 }
 
 router.get("/", async (req, res, next) => {
@@ -37,6 +51,8 @@ router.get("/", async (req, res, next) => {
 })
 module.exports = 
 {
-      test : router
-    , Set  : Set
+      test      : router
+    , Set       : Set
+    , Get       : Get
+    , IsEnabled : IsEnabled
 }

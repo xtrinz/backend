@@ -1,6 +1,6 @@
 const router                          = require("express").Router()
     , { Transit }                     = require("../objects/transit")
-    , { engine }                      = require("../engine/engine")
+    , { Engine }                      = require("../engine/engine")
     , { alerts, events }              = require("../common/models")
     , { Err_, code, status, reason }  = require("../common/error")
 
@@ -16,6 +16,7 @@ router.post("/user/cancel", async (req, res, next) =>
             reason.TransitNotFound)
 
         trans.Event = events.EventCancellationByUser
+        let engine = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
@@ -38,6 +39,7 @@ router.post("/store/reject", async (req, res, next) =>
             reason.TransitNotFound)
 
         trans.Event = events.EventRejectionByStore
+        let engine = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
@@ -60,6 +62,7 @@ router.post("/store/accept", async (req, res, next) =>
             reason.TransitNotFound)
 
         trans.Event = events.EventAcceptanceByStore
+        let engine = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
@@ -82,6 +85,7 @@ router.post("/store/despatch", async (req, res, next) =>
             reason.TransitNotFound)
 
         trans.Event = events.EventDespatchmentByStore
+        let engine = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
@@ -104,6 +108,7 @@ router.post("/agent/ignore", async (req, res, next) =>
             reason.TransitNotFound)
 
         trans.Event = events.EventIgnoranceByAgent
+        let engine  = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
@@ -126,6 +131,7 @@ router.post("/agent/accept", async (req, res, next) =>
             reason.TransitNotFound)
 
         trans.Event = events.EventAcceptanceByStore
+        let engine  = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
@@ -148,6 +154,7 @@ router.post("/agent/reject", async (req, res, next) =>
             reason.TransitNotFound)
 
         trans.Event = events.EventRejectionByStore
+        let engine  = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
@@ -170,6 +177,7 @@ router.post("/agent/complete", async (req, res, next) =>
             reason.TransitNotFound)
 
         trans.Event = events.EventCompletionByAgent
+        let engine  = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({

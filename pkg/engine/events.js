@@ -4,7 +4,7 @@ const emitter = new Emitter
 /*
     Sender API for events
  */
-const Emit = function(msg)
+const Emit = async function(msg)
 {
     if (!msg.To.length)
     {
@@ -13,7 +13,7 @@ const Emit = function(msg)
     }
     console.log('emit-message', msg)
 
-    try         { emitter.emit('SendEvent', msg)           } 
+    try         { await emitter.emit('SendEvent', msg)     } 
     catch(err)  { console.log('emission-failed', err, msg) }
 }
 

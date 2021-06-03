@@ -56,6 +56,9 @@ module.exports =
 		, PaymentFailedTransitSuccess 	: 'Payment-Failed-Transit-Success'
 		, PaymentFailedTransitFailed 	: 'Payment-Failed-Transit-Failed'
 
+		, StripeSucess 				: "payment_intent.succeeded"
+		, StripeFailed 				: "payment_intent.payment_failed"
+
 		, Success 					: 'Success'
 		, Failed 			        : 'Failed'
         , Initiated                 : 'Initiated'

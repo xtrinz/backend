@@ -16,9 +16,8 @@ function Journal()
     {
         _id               : ''
       , Status            : states.None
-      , Type              : type.FORWARD
-      , CartID            : ''
-      , ReturnID          : ''
+/*    , Type              : type.FORWARD
+      , ReturnID          : ''          */
       , Date              : ''          // Millis eases math
       
       , Buyer             :
@@ -156,7 +155,8 @@ function Journal()
       }
       await this.Save()
 
-      test.Set('Stripe', intent) // #101
+      test.Set('Stripe',    intent)        // #101
+      test.Set('JournalID', this.Data._id) // #101
 
       const data_ =
       {
@@ -170,34 +170,44 @@ function Journal()
 
     this.UpdateStatusAndInitTransit = async function(req)
     {
-      const   sign       = req.headers["stripe-signature"]
-            , stripe_    = new Stripe()
-            , event      = await stripe_.MatchEventSign(req, sign)
-            , journal_id = event.data.object.metadata.JournalID
-      
+      const sign    = req.headers["stripe-signature"]
+          , stripe_ = new Stripe()
+
+      let   event_ = {}, journal_id
+      if(!test.IsEnabled)
+      {
+        event_     = await stripe_.MatchEventSign(req.RawBody, sign)
+        journal_id = event_.data.object.metadata.JournalID
+      }
+      else
+      {
+        event_.type = states.StripeSucess
+        journal_id  = test.Get('JournalID')
+      }
+
       let journal = await this.GetByID(journal_id)
       if (!journal) Err_(code.BAD_REQUEST, reason.JournalNotFound)
 
-      if (event.type === "payment_intent.succeeded")
+      switch (event_.type)
       {
-            let cart_  = new Cart()
-            const cart = await cart_.Get(journal.Buyer.ID, query.ByUserID)
-            if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)  // What to do, if it breaks here
-            cart_.Data.JournalID = ''
-            await cart_.Save()
+      case states.StripeSucess:
+        let cart_ = new Cart()
+          , cart  = await cart_.Get(journal.Buyer.ID, query.ByUserID)
+        if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)
+        cart_.Data.JournalID = ''
+        await cart_.Save()
 
-            this.Payment.Status = states.Success
-            this.Transit.Status = states.Initiated
-            await this.Save()
+        this.Data.Payment.Status = states.Success
+        this.Data.Transit.Status = states.Initiated
+        await this.Save()
 
-            let transit = new Transit(this)
-            await transit.Init()
-            return
-      } 
-      else if (event.type === "payment_intent.payment_failed")
-      {
-            this.Payment.Status = states.Failed
-            await this.Save()
+        let transit = new Transit(this.Data)
+        await transit.Init()
+        return
+
+      case states.StripeFailed:
+        this.Data.Payment.Status = states.Failed
+        await this.Save()
       }     
     }
 

@@ -1,17 +1,20 @@
-const sec_key                       = process.env.STRIPE_SECRET_KEY
-    , wh_sec                        = process.env.STRIPE_WEBHOOK_SECRET
-    , pub_key                       = process.env.STRIPE_PUBLISHABLE_KEY
-    , stripe                        = require("stripe")(sec_key)
-    , { Err, code, status, reason } = require("../common/error")
+const sec_key                = process.env.STRIPE_SECRET_KEY
+    , wh_sec                 = process.env.STRIPE_WEBHOOK_SECRET
+    , pub_key                = process.env.STRIPE_PUBLISHABLE_KEY
+    , stripe                 = require("stripe")(sec_key)
+    , { Err_, code, reason } = require("../common/error")
 
 function Stripe(data)
 {
-    this.Amount     = data.Amount
-    this.MetaData   = 
+    if(data)
     {
-        JournalID : String(data.JournalID)
+      this.Amount     = data.Amount
+      this.MetaData   = 
+      {
+          JournalID : String(data.JournalID)
+      }
+      this.Currency   = 'inr'
     }
-    this.Currency   = 'inr'
 
     this.CreateIntent = async function()
     {
@@ -30,19 +33,17 @@ function Stripe(data)
         return resp
     }
 
-    this.MatchEventSign = async function(req, sign)
+    this.MatchEventSign = async function(raw_body, sign)
     {
       try
       {
-        console.log('match-stripe-event-sign', req, sign)
-        return stripe.webhooks.constructEvent(req, sign, wh_sec)
+        console.log('match-stripe-event-sign', { RawBody: raw_body, Sign: sign} )
+        let event_ = stripe.webhooks.constructEvent(raw_body, sign, wh_sec)
+        return event_
       } catch(err)
       {
         console.log('bad-signature', err)
-        const   code_       = code.BAD_REQUEST
-              , status_     = status.Failed
-              , reason_     = reason.BadSignature
-        throw new Err(code_, status_, reason_)
+        Err_(code.BAD_REQUEST, reason.BadSignature)
       }
     }
 }
