@@ -80,8 +80,8 @@ let List = function(cart)
             , Bill          : 
             {
                 Total       : cart.Bill.Total
-              , TransitCost : 0
-              , Tax         : 0
+              , TransitCost : cart.Bill.TransitCost
+              , Tax         : cart.Bill.Tax
               , NetPrice    : cart.Bill.NetPrice
             }
         }
