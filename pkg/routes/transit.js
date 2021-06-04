@@ -17,8 +17,7 @@ router.post("/user/cancel", async (req, res, next) =>
               _id  : ObjectId(req.body.JournalID)
           }
           , trans_ = await trans.Get(query_, query.Custom)
-        if (!trans_)
-        Err_(code.BAD_REQUEST, reason.TransitNotFound)
+        if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
         trans.Event = events.EventCancellationByUser
         let engine  = new Engine()
