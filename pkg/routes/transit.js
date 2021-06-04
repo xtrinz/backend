@@ -19,8 +19,8 @@ router.post("/user/cancel", async (req, res, next) =>
           , trans_ = await trans.Get(query_, query.Custom)
         if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
-        trans.Event = events.EventCancellationByUser
-        let engine  = new Engine()
+        trans.Data.Event = events.EventCancellationByUser
+        let engine       = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
@@ -35,43 +35,32 @@ router.post("/store", async (req, res, next) =>
 {
     try
     {
-        let query_, event_, text_
-          , store = new Store()
+        let event_, text_, store = new Store()
         await store.Authz(req.body.StoreID, req.body.User._id)
         
         switch(req.body.Task)
         {
           case task.Reject:
-            query_ =
-            {
-                Store : { _id: ObjectId(req.body.StoreID) },
-                _id   : ObjectId(req.body.JournalID)
-            }
             event_ = events.EventRejectionByStore
             text_  = alerts.Rejected
             break
 
           case task.Accept:
-            query_ =
-            {
-                Store : { _id: ObjectId(req.body.StoreID) },
-                _id   : ObjectId(req.body.JournalID)
-            }
             event_ = events.EventAcceptanceByStore
             text_  = alerts.Accepted          
             break
 
           case task.Despatch:
-            query_ =
-            {
-                Store : { _id: ObjectId(req.body.StoreID) },
-                _id   : ObjectId(req.body.JournalID)
-            }
             event_ = events.EventDespatchmentByStore
             text_  = alerts.EnRoute
             break
         }
 
+        const query_ =
+        {
+            Store : { _id: ObjectId(req.body.StoreID) },
+            _id   : ObjectId(req.body.JournalID)
+        }
         let trans  = new Transit()
         let trans_ = await trans.Get(query_, query.Custom)
         if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
@@ -121,8 +110,8 @@ router.post("/agent", async (req, res, next) =>
             break            
         }
 
-        trans.Event = event_
-        let engine  = new Engine()
+        trans.Data.Event = event_
+        let engine       = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
