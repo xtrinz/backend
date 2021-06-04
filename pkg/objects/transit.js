@@ -12,7 +12,7 @@ function Transit (journal)
         _id 		    : ''
       , JournalID       : journal._id
       , Store 		    :
-      {
+      {                  
             _id         : journal.Seller.ID
           , SockID      : []
           , Name        : journal.Seller.Name
@@ -20,10 +20,9 @@ function Transit (journal)
           , Latitude    : journal.Seller.Latitude
           , MobileNo    : journal.Seller.MobileNo
           , Address     : journal.Seller.Address
-      }
-
+      }                  
       , User 		    : 
-      {
+      {                  
             _id         : journal.Buyer.ID
           , SockID      : []
           , Name        : journal.Buyer.Name
@@ -31,16 +30,35 @@ function Transit (journal)
           , Latitude    : journal.Buyer.Latitude          
           , MobileNo    : journal.Buyer.MobileNo
           , Address     : journal.Buyer.Address
-      }
-
+      }                  
       , Agent           : {}
-      , Agents          : []                                    // Pool of live agents filtered for transit
-      , Return 	        : ""                                    // Machine's prev-state for fallbacks
-      , State 		    : states.None                           // Machine init state
-      , Event 		    : events.EventInitiationByUser          // Machine init event
-      , MaxWT           : 35                                    // Maximum Waiting Time (35min)
-      , OrderedAt 	    : Date.now()                            // Millis / https://currentmillis.com/
-      , ETD   		    : 0                                     // Estimated Time of Delivery
+      , Agents          : []                            // Pool of live agents filtered for transit
+      , Return 	        : ""                            // Machine's prev-state for fallbacks
+      , State 		    : states.None                   // Machine init state
+      , Event 		    : events.EventInitiationByUser  // Machine init event
+      , MaxWT           : 35                            // Maximum Waiting Time (35min)
+      , OrderedAt 	    : ''                            // Millis / https://currentmillis.com/
+      , ETD   		    : 0                             // Estimated Time of Delivery
+    }
+
+    this.Get = async function(param, qType)
+    {
+        console.log('find-transit', { Param: param, QType: qType})
+        let query_
+        switch (qType)
+        {
+            case query.ByID   : query_ = { _id: ObjectId(param) } ; break;
+            case query.Custom : query_ = param                    ; break;
+        }
+        let transit = await products.findOne(query_)
+        if (!transit)
+        {
+          console.log('transit-not-found', query_)
+          return
+        }
+        this.Data = transit
+        console.log('transit-found', { Product: transit })
+        return transit
     }
 
     // Time spend(in min) since order placement
@@ -49,7 +67,7 @@ function Transit (journal)
         const   now    = Date.now()
               , millis = now - this.Data.OrderedAt
               , delay  = Math.floor(millis / (1000*60))
-        console.log(`time elapsed in min: ${delay}`)
+        console.log('time elapsed in min', {Delay : delay})
         return delay
     }
 
@@ -78,7 +96,7 @@ function Transit (journal)
 
     this.Save       = async function()
     {
-        console.log('save-transit', this.Data)
+        console.log('save-transit', { Data: this.Data })
         const key  = { _id    : this.Data._id }
             , act  = { $set   : this.Data     }
             , opt  = { upsert : true          }
@@ -88,17 +106,18 @@ function Transit (journal)
             console.log('transit-save-failed', { Data: this.Data, Result: resp.result})
             Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
         }
-        console.log('transit-saved', this.Data)
+        console.log('transit-saved', { Data: this.Data })
     }
  
     this.Init       = async function()
     {
         // Get Src & Dest Contexts & Update SockIDs
-        this.Data._id = new ObjectID()
+        this.Data._id       = new ObjectID()
+        this.Data.OrderedAt = Date.now()
         await this.Save()
         let engine = new Engine()
         await engine.Transition(this)
-        console.log('transit-initialised', this.Data)
+        console.log('transit-initialised', { Data: this.Data })
     }
 }
 

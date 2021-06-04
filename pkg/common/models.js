@@ -39,6 +39,13 @@ module.exports =
 		, Accept 					: 'Accept'
 		, Deny 						: 'Deny'
 		, Relieve 					: 'Relieve'
+
+		, Reject 					: 'Reject'
+		, Accept 					: 'Accept'
+		, Despatch 					: 'Despatch'
+		, Ignore 					: 'Ignore'
+		, Complete 					: 'Complete'
+		
 	},
 	channel:
 	{

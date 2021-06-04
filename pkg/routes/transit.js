@@ -1,22 +1,27 @@
-const router                          = require("express").Router()
+const { ObjectId } 				      = require("mongodb")
+    , router                          = require("express").Router()
     , { Transit }                     = require("../objects/transit")
     , { Engine }                      = require("../engine/engine")
-    , { alerts, events }              = require("../common/models")
+    , { Store }                       = require("../objects/store")
+    , { alerts, events, query }       = require("../common/models")
     , { Err_, code, status, reason }  = require("../common/error")
 
-/* Cargo cancellation by user */
 router.post("/user/cancel", async (req, res, next) =>
 {
     try
     {
         let trans  = new Transit()
-          , trans_ = trans.GetByIDAndUserID()
+          , query_ =
+          {
+              User : { _id: ObjectId(req.body.User._id) },
+              _id  : ObjectId(req.body.JournalID)
+          }
+          , trans_ = await trans.Get(query_, query.Custom)
         if (!trans_)
-        Err_(code.BAD_REQUEST,
-            reason.TransitNotFound)
+        Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
         trans.Event = events.EventCancellationByUser
-        let engine = new Engine()
+        let engine  = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
@@ -27,162 +32,103 @@ router.post("/user/cancel", async (req, res, next) =>
     } catch (err) { next(err) }
 })
 
-/* Order rejection by store */
-router.post("/store/reject", async (req, res, next) =>
+router.post("/store", async (req, res, next) =>
 {
     try
     {
-        let trans  = new Transit()
-          , trans_ = trans.GetByIDAndStoreID()
-        if (!trans_)
-        Err_(code.BAD_REQUEST,
-            reason.TransitNotFound)
+        let query_, event_, text_
+          , store = new Store()
+        await store.Authz(req.body.StoreID, req.body.User._id)
+        
+        switch(req.body.Task)
+        {
+          case task.Reject:
+            query_ =
+            {
+                Store : { _id: ObjectId(req.body.StoreID) },
+                _id   : ObjectId(req.body.JournalID)
+            }
+            event_ = events.EventRejectionByStore
+            text_  = alerts.Rejected
+            break
 
-        trans.Event = events.EventRejectionByStore
-        let engine = new Engine()
+          case task.Accept:
+            query_ =
+            {
+                Store : { _id: ObjectId(req.body.StoreID) },
+                _id   : ObjectId(req.body.JournalID)
+            }
+            event_ = events.EventAcceptanceByStore
+            text_  = alerts.Accepted          
+            break
+
+          case task.Despatch:
+            query_ =
+            {
+                Store : { _id: ObjectId(req.body.StoreID) },
+                _id   : ObjectId(req.body.JournalID)
+            }
+            event_ = events.EventDespatchmentByStore
+            text_  = alerts.EnRoute
+            break
+        }
+
+        let trans  = new Transit()
+        let trans_ = await trans.Get(query_, query.Custom)
+        if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+
+        trans.Data.Event = event_
+        let engine       = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
             Status  : status.Success,
-            Text    : alerts.Rejected,
+            Text    : text_,
             Data    : {}
         })
     } catch (err) { next(err) }
 })
 
-/* Order acceptance by store */
-router.post("/store/accept", async (req, res, next) =>
+router.post("/agent", async (req, res, next) =>
 {
     try
     {
         let trans  = new Transit()
-          , trans_ = trans.GetByIDAndStoreID()
-        if (!trans_)
-        Err_(code.BAD_REQUEST,
-            reason.TransitNotFound)
+          , trans_ = await trans.AuthzAgent(req.body.TransitID, 
+                                            req.body.User._id)
+        if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
-        trans.Event = events.EventAcceptanceByStore
-        let engine = new Engine()
-        await engine.Transition(trans)
+        let event_, text_
+        switch(req.body.Task)
+        {
+          case task.Reject:
+            event_ = events.EventRejectionByAgent
+            text_  = alerts.Rejected
+            break
 
-        return res.status(code.OK).json({
-            Status  : status.Success,
-            Text    : alerts.Accepted,
-            Data    : {}
-        })
-    } catch (err) { next(err) }
-})
+          case task.Ignore:
+            event_ = events.EventIgnoranceByAgent
+            text_  = alerts.Ignored
+            break
 
-/* Order despatchment by store */
-router.post("/store/despatch", async (req, res, next) =>
-{
-    try
-    {
-        let trans  = new Transit()
-          , trans_ = trans.GetByIDAndStoreID()
-        if (!trans_)
-        Err_(code.BAD_REQUEST,
-            reason.TransitNotFound)
+          case task.Accept:
+            event_ = events.EventAcceptanceByAgent
+            text_  = alerts.Accepted          
+            break
 
-        trans.Event = events.EventDespatchmentByStore
-        let engine = new Engine()
-        await engine.Transition(trans)
+          case task.Complete:
+            event_ = events.EventCompletionByAgent
+            text_  = alerts.Delivered
+            break            
+        }
 
-        return res.status(code.OK).json({
-            Status  : status.Success,
-            Text    : alerts.EnRoute,
-            Data    : {}
-        })
-    } catch (err) { next(err) }
-})
-
-/* Transit ignorance by agent */
-router.post("/agent/ignore", async (req, res, next) =>
-{
-    try
-    {
-        let trans  = new Transit()
-           ,trans_ = trans.GetByIDAndAgentInList()
-        if (!trans_)
-        Err_(code.BAD_REQUEST,
-            reason.TransitNotFound)
-
-        trans.Event = events.EventIgnoranceByAgent
+        trans.Event = event_
         let engine  = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
             Status  : status.Success,
-            Text    : alerts.Ignored,
-            Data    : {}
-        })
-    } catch (err) { next(err) }
-})
-
-/* Transit acceptance by agent */
-router.post("/agent/accept", async (req, res, next) =>
-{
-    try
-    {
-        let trans  = new Transit()
-          , trans_ = trans.GetByIDAndAgentInList()
-        if (!trans_)
-        Err_(code.BAD_REQUEST,
-            reason.TransitNotFound)
-
-        trans.Event = events.EventAcceptanceByStore
-        let engine  = new Engine()
-        await engine.Transition(trans)
-
-        return res.status(code.OK).json({
-            Status  : status.Success,
-            Text    : alerts.Accepted,
-            Data    : {}
-        })
-    } catch (err) { next(err) }
-})
-
-/* Transit rejection by agent */
-router.post("/agent/reject", async (req, res, next) =>
-{
-    try
-    {
-        let trans  = new Transit()
-          , trans_ = trans.GetByIDAndAgentID()
-        if (!trans_)
-        Err_(code.BAD_REQUEST,
-            reason.TransitNotFound)
-
-        trans.Event = events.EventRejectionByStore
-        let engine  = new Engine()
-        await engine.Transition(trans)
-
-        return res.status(code.OK).json({
-            Status  : status.Success,
-            Text    : alerts.Rejected,
-            Data    : {}
-        })
-    } catch (err) { next(err) }
-})
-
-/* Transit completion by agent */
-router.post("/agent/complete", async (req, res, next) =>
-{
-    try
-    {
-        let trans  = new Transit()
-          , trans_ = trans.GetByIDAndAgentID()
-        if (!trans_)
-        Err_(code.BAD_REQUEST,
-            reason.TransitNotFound)
-
-        trans.Event = events.EventCompletionByAgent
-        let engine  = new Engine()
-        await engine.Transition(trans)
-
-        return res.status(code.OK).json({
-            Status  : status.Success,
-            Text    : alerts.Delivered,
+            Text    : text_,
             Data    : {}
         })
     } catch (err) { next(err) }

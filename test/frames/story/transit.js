@@ -8,7 +8,7 @@ const Std = function(transit)
     return tc
 }
 
-module.exports = 
+module.exports =
 {
     Std     : Std
 }

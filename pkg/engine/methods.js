@@ -1,9 +1,9 @@
-const   { Emit } 					  = require("./events")
-	  , otp 						  = require("../common/otp")
-	  , { Err, code, status, reason } = require("../common/error")
-	  , { states, alerts }	  		  = require("../common/models")
-	  , { User } 					  = require("../objects/user")
-	  , { Journal } 				  = require("../objects/journal")
+const   { Emit } 			   = require("./events")
+	  , otp 				   = require("../common/otp")
+	  , { Err_, code, reason } = require("../common/error")
+	  , { states, alerts }	   = require("../common/models")
+	  , { User } 			   = require("../objects/user")
+	  , { Journal } 		   = require("../objects/journal")
 
 /**
  * #Method/ActivatedBy 	:  01/Server(User)
@@ -58,9 +58,7 @@ const CargoCancelledByUser		=  function(ctxt)
 			break
 		default :
 			console.log('cannot-be-cancelled', ctxt.Data)
-			throw new Err(code.BAD_REQUEST,
-						  status.Failed,
-						  reason.CancellationDenied)
+			Err_(code.BAD_REQUEST, reason.CancellationDenied)
 	}
 
 	ctxt.Data.Return 	= ctxt.Data.State
@@ -215,12 +213,8 @@ const OrderDespatchedByStore		=  function(ctxt)
 	console.log('process-order-despatchment', ctxt)
 	
 	const otp_ = new otp.OneTimePasswd({MobNo: "", Body: ""})
-	if (!otp_.Confirm(ctxt.Agent.Otp, ctxt.Shop.Otp))
-	{
-		throw new Err(	code.BAD_REQUEST,
-						status.Failed,
-						reason.OtpRejected)
-	}
+	const status_ = await otp_.Confirm(ctxt.Agent.Otp, ctxt.Shop.Otp)
+	if (!status_) Err_(code.BAD_REQUEST, reason.OtpRejected)
 
 	const msg = 
 	{		 
@@ -454,13 +448,9 @@ const TransitCompletedByAgent		=  function(ctxt)
 {
 	console.log('process-transit-completion', ctxt)
 	// TODO set otp on agent context
-	const otp_ = new otp.OneTimePasswd({MobNo: "", Body: ""})
-	if (!otp_.Confirm(ctxt.User.Otp, ctxt.Agent.Otp))
-	{
-		throw new Err(	code.BAD_REQUEST,
-						status.Failed,
-						reason.OtpRejected)
-	}
+	const otp_    = new otp.OneTimePasswd({MobNo: "", Body: ""})
+	const status_ = otp_.Confirm(ctxt.User.Otp, ctxt.Agent.Otp)
+	if (!status_) Err_(code.BAD_REQUEST, reason.OtpRejected)
 
 	const msg = 
 	{		 

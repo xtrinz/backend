@@ -16,7 +16,7 @@ let Store =
           Line1       : 'Address.Line1'
         , Line2       : 'Address.Line2'
         , City        : 'Address.City'
-        , PostalCode  : 000000
+        , PostalCode  : 123456
         , State       : 'Address.State'
         , Country     : 'Address.Country'
     }
