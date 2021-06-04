@@ -14,7 +14,7 @@ router.post("/user/cancel", async (req, res, next) =>
           , query_ =
           {
               User : { _id: ObjectId(req.body.User._id) },
-              _id  : ObjectId(req.body.JournalID)
+              _id  : ObjectId(req.body.TransitID)
           }
           , trans_ = await trans.Get(query_, query.Custom)
         if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
@@ -59,7 +59,7 @@ router.post("/store", async (req, res, next) =>
         const query_ =
         {
             Store : { _id: ObjectId(req.body.StoreID) },
-            _id   : ObjectId(req.body.JournalID)
+            _id   : ObjectId(req.body.TransitID)
         }
         let trans  = new Transit()
         let trans_ = await trans.Get(query_, query.Custom)

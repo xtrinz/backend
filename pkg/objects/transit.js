@@ -3,6 +3,7 @@ const { ObjectID } 				 = require("mongodb")
     , { Err_, code, reason }     = require("../common/error")
     , { states, events, entity } = require("../common/models")
     , { Engine }                 = require("../engine/engine")
+    , test                       = require('../common/test')
 
 function Transit (journal)
 {
@@ -115,6 +116,9 @@ function Transit (journal)
         this.Data._id       = new ObjectID()
         this.Data.OrderedAt = Date.now()
         await this.Save()
+        
+        test.Set('TransitID', this.Data._id) // #101
+
         let engine = new Engine()
         await engine.Transition(this)
         console.log('transit-initialised', { Data: this.Data })
