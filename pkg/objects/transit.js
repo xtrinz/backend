@@ -1,7 +1,7 @@
 const { ObjectID } 				 = require("mongodb")
     , { transits } 				 = require("../common/database")
     , { Err_, code, reason }     = require("../common/error")
-    , { states, events, entity } = require("../common/models")
+    , { states, events, entity, query } = require("../common/models")
     , { Engine }                 = require("../engine/engine")
     , test                       = require('../common/test')
 
@@ -51,14 +51,14 @@ function Transit (journal)
             case query.ByID   : query_ = { _id: ObjectId(param) } ; break;
             case query.Custom : query_ = param                    ; break;
         }
-        let transit = await products.findOne(query_)
+        let transit = await transits.findOne(query_)
         if (!transit)
         {
           console.log('transit-not-found', query_)
           return
         }
         this.Data = transit
-        console.log('transit-found', { Product: transit })
+        console.log('transit-found', { Transits: transit })
         return transit
     }
 

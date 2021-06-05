@@ -1,5 +1,7 @@
-const Emitter = require('events')
-const emitter = new Emitter
+const { states, alerts } = require("../common/models")
+    , Emitter            = require('events')
+    , emitter            = new Emitter
+
 
 /*
     1. Authenticate user
@@ -113,7 +115,7 @@ const Emit = async function(alert, ctxt)
     , Msg : 
     {
         Type: alert
-      , Data: Data
+      , Data: data
     }
   }
 

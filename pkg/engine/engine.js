@@ -14,7 +14,7 @@ const Engine 				 = function()
 		{ 
 			  [events.EventCancellationByUser] 		: method.CargoCancelledByUser
 			, [events.EventRejectionByStore] 		: method.OrderRejectedByStore // #02
-			, [events.EventAcceptanceTimeout]		: method.OrderAcceptanceTimeout
+			, [events.EventRespTimeoutByStore]		: method.OrderAcceptanceTimeout
 			, [events.EventAcceptanceByStore]		: method.OrderAcceptedByStore
 		}
 		, [states.CargoCancelled] 					:

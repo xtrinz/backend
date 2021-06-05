@@ -2,7 +2,7 @@ const { Method, Type, Rest }  = require("../../lib/medium")
     , { prints }              = require("../../lib/driver")
     , jwt                     = require("../../../pkg/common/jwt")
     , { code, status }        = require("../../../pkg/common/error")
-    , { alerts }              = require("../../../pkg/common/models")
+    , { alerts, task }        = require("../../../pkg/common/models")
 
 let StoreAccept = function(addr)
 {
@@ -18,6 +18,7 @@ let StoreAccept = function(addr)
         {
               StoreID     : ''
             , TransitID   : ''
+            , Task        : task.Accept
         }
         , Header          : { Authorization: '' }
     }

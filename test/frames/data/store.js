@@ -8,8 +8,8 @@ let Store =
     , Certs        : ['a.cert', 'b.cert']
     , MobileNo     : '+91111111111'
     , Email        : 'store@store.com'
-    , Longitude    : 17.21
-    , Latitude 	   : 17.21
+    , Longitude    : 17.2
+    , Latitude 	   : 17.2
     , State        : states.Registered
     , Address      :
     {

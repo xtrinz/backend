@@ -1,7 +1,7 @@
 let Journal =
 {
-    Longitude         : 18.1
-  , Latitude          : 15.2
+    Longitude         : 17.2
+  , Latitude          : 17.2
   , Address           :
   {
       Name            : 'Address.Name'

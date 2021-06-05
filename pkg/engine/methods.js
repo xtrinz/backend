@@ -59,8 +59,10 @@ const OrderAcceptedByStore			=  async function(ctxt)
 {
 	console.log('process-order-acceptance', ctxt.Data)
 	const agent  = new User()
-	const agents = await agent.ListNearbyLiveAgents(ctxt.Data.Store.Location)
-	if(!agents)
+	const agents = await agent.NearbyAgents(
+			ctxt.Data.Store.Longitude,
+			ctxt.Data.Store.Latitude)
+	if(!agents.length)
 	{
 		console.log('no-agents-order-on-hold', ctxt.Data)
 		await Emit(alerts.NoAgents, ctxt)
@@ -145,11 +147,13 @@ const TransitRejectedByAgent		= async function(ctxt)
 	{
 	case states.TransitAccepted:
 		const agent = new User()
-		const agents = agent.ListNearbyLiveAgents(ctxt.Store.Location)
-		if(!agents)
+		const agents = await agent.NearbyAgents(
+			ctxt.Data.Store.Longitude,
+			ctxt.Data.Store.Latitude)
+		if(!agents.length)
 		{
 			console.log('no-nearby-agents', ctxt.Data)
-			await Emit(alerts.NoAgents, ctxt) // Notify Admin
+			await Emit(alerts.NoAgents, ctxt) 	// Notify Admin
 			await Save(ctxt, states.OrderOnHold)
 			return
 		}

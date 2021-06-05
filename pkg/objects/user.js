@@ -67,29 +67,34 @@ function User(mob_no, user_mode)
         return user
     }
 
-    this.ListNearbyLiveAgents = async function(Loc)
+    this.NearbyAgents = async function(ln, lt)
     {
-        console.log('list-nearby-live-agents', {Location: Loc})
-        const lon     = parseFloat(Loc[0])
-        const lat     = parseFloat(Loc[1])
-        /*  1) Filter UserID, UserName & SocketID 
-            2) No of Agents : <= 10 [Limit]
-            3) Nearest free / near-to-free agents
-            4) Live
-            5) Within 5km radius
-            6) User Type: Agent                */
-        const agentLimit    = 10
-            , maxDist       = 5000
-            , geometry      = { $geometry: { type: "Point", coordinates: [lon, lat] }, $maxDistance: maxDist }
-            , projections   = { _id: 1, Name: 1, SockID: 1 }
-            , query         = { location: { $near: geometry }, IsLive : true, Mode: mode.Agent }
-        const agents = await users.find(query, projections).limit(agentLimit).toArray()
+        console.log('list-nearby-live-agents', {Location: [ln, lt]})
+        /* Agent { _id, Name, SocketID }, count <=10,
+           Nearest, Live, Radius < 5km             */
+        const cnt     = 10
+            , maxDist = 5000
+            , proj    = { _id: 1, Name: 1, SockID: 1 }
+            , query   =
+            { 
+                Location  :
+                {
+                $near :
+                {
+                  $geometry    : { type: "Point", coordinates: [ln, lt] }
+                , $maxDistance : maxDist
+                }
+                }
+                , IsLive  : true
+                , Mode    : mode.Agent
+            }
+        const agents = await users.find(query, proj).limit(cnt).toArray()
         if (!agents.length)
         {
-            console.log(`no-agents-found. _id: ${Loc}`)
+            console.log('no-agents-found',{ Location: [ln, lt]})
             return
         }
-        console.log(`agents-found. agents: ${agents}`)
+        console.log('agents-found', { Agents: agents})
         return agents
     }
 

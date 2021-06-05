@@ -3,7 +3,7 @@ const { ObjectId } 				      = require("mongodb")
     , { Transit }                     = require("../objects/transit")
     , { Engine }                      = require("../engine/engine")
     , { Store }                       = require("../objects/store")
-    , { alerts, events, query }       = require("../common/models")
+    , { alerts, events, query, task } = require("../common/models")
     , { Err_, code, status, reason }  = require("../common/error")
 
 router.post("/user/cancel", async (req, res, next) =>
@@ -13,7 +13,7 @@ router.post("/user/cancel", async (req, res, next) =>
         let trans  = new Transit()
           , query_ =
           {
-              User : { _id: ObjectId(req.body.User._id) },
+              'User._id' : ObjectId(req.body.User._id),
               _id  : ObjectId(req.body.TransitID)
           }
           , trans_ = await trans.Get(query_, query.Custom)
@@ -40,7 +40,7 @@ router.post("/store", async (req, res, next) =>
 
         const query_ =
         {
-            Store : { _id: ObjectId(req.body.StoreID) },
+            'Store._id': ObjectId(req.body.StoreID),
             _id   : ObjectId(req.body.TransitID)
         }
         let trans  = new Transit()
