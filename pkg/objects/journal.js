@@ -258,7 +258,10 @@ function Journal()
 
     this.PayOut = async function (ctxt)
     {
-      switch (ctxt.State)
+      let journal = await this.GetByID(ctxt.Data.JournalID)
+      if (!journal) Err_(code.BAD_REQUEST, reason.JournalNotFound)
+
+      switch (ctxt.Data.State)
       {
         case states.TranistCompleted :
               break
@@ -269,6 +272,8 @@ function Journal()
         case states.TransitRejected  :
               break
       }
+      this.Data.Transit.Status = ctxt.Data.State
+      await this.Save()
     }
 }
 

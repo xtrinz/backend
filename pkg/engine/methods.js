@@ -37,7 +37,7 @@ const CargoCancelledByUser		=  async function(ctxt)
 	await Save(ctxt, states.CargoCancelled)
 
 	let journal = new Journal()
-	journal.PayOut(ctxt)
+	await journal.PayOut(ctxt)
 	console.log('cargo-cancelled', ctxt.Data)
 }
 
@@ -47,7 +47,7 @@ const OrderRejectedByStore		= async function()
 	await Emit(alerts.Rejected, ctxt)
 	await Save(ctxt, states.OrderRejected)
 	let journal = new Journal()
-	journal.PayOut(ctxt)
+	await journal.PayOut(ctxt)
 	console.log('order-rejected', ctxt.Data)
 }
 
@@ -180,7 +180,7 @@ const TransitCompletedByAgent		= async function(ctxt)
 	delete ctxt.Data.Agent.Otp
 	delete ctxt.Data.User.Otp
 	await Save(ctxt, states.TranistCompleted)
-	console.log('eeeeeeeee', typeof Journal, Journal, User)
+
 	let journal = new Journal()
 	await journal.PayOut(ctxt)
 	console.log('transit-completed', ctxt.Data)
