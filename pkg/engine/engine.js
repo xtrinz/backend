@@ -1,7 +1,8 @@
-const {states, events}				= require("../common/models")
-const method						= require("./methods")
-const { Err, code, status, reason } = require("../common/error")
-const Engine 						= function()
+const {states, events}		 = require("../common/models")
+	, method				 = require("./methods")
+	, { Err_, code, reason } = require("../common/error")
+
+const Engine 				 = function()
 {
 	this.Handler =
 	{
@@ -80,19 +81,15 @@ const Engine 						= function()
 	, this.GetHandler = (state_, event_) =>
 	{
 		console.log('new-event', { Event: event_, State: state_ }) 
-		return this.Handler[state_][event_] 
+		const hdlr = this.Handler[state_][event_]
+		if(!hdlr) console.log('no-handler-found', { Event: event_, State: state_ })
+		return hdlr 
 	}
 
 	, this.Transition = async function (ctxt)
 	{
-		let method = this.GetHandler(ctxt.Data.State, ctxt.Data.Event)
-		if (!method)
-		{
-			console.log('transit-machine-handler-not-found', ctxt.State, ctxt.Event)
-			throw new Err(code.BAD_REQUEST,
-						  status.Failed,
-						  reason.MachineHandlerNotFound)
-		}
+		let method = this.GetHandler(ctxt.Data.State,     ctxt.Data.Event)
+		if (!method) Err_(code.BAD_REQUEST, reason.MachineHandlerNotFound)
 		await method(ctxt)
 	}
 }

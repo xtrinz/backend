@@ -37,7 +37,16 @@ router.post("/store", async (req, res, next) =>
     {
         let event_, text_, store = new Store()
         await store.Authz(req.body.StoreID, req.body.User._id)
-        
+
+        const query_ =
+        {
+            Store : { _id: ObjectId(req.body.StoreID) },
+            _id   : ObjectId(req.body.TransitID)
+        }
+        let trans  = new Transit()
+        let trans_ = await trans.Get(query_, query.Custom)
+        if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+
         switch(req.body.Task)
         {
           case task.Reject:
@@ -51,19 +60,11 @@ router.post("/store", async (req, res, next) =>
             break
 
           case task.Despatch:
+            trans.Data.Shop.Otp = req.body.Otp
             event_ = events.EventDespatchmentByStore
             text_  = alerts.EnRoute
             break
         }
-
-        const query_ =
-        {
-            Store : { _id: ObjectId(req.body.StoreID) },
-            _id   : ObjectId(req.body.TransitID)
-        }
-        let trans  = new Transit()
-        let trans_ = await trans.Get(query_, query.Custom)
-        if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
         trans.Data.Event = event_
         let engine       = new Engine()
@@ -95,6 +96,7 @@ router.post("/agent", async (req, res, next) =>
             break
 
           case task.Ignore:
+            trans.Data.Agent._id = req.body.User._id
             event_ = events.EventIgnoranceByAgent
             text_  = alerts.Ignored
             break
@@ -105,6 +107,7 @@ router.post("/agent", async (req, res, next) =>
             break
 
           case task.Complete:
+            trans.Data.Agent.Otp = req.body.Otp
             event_ = events.EventCompletionByAgent
             text_  = alerts.Delivered
             break            
