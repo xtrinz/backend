@@ -60,7 +60,7 @@ router.post("/store", async (req, res, next) =>
             break
 
           case task.Despatch:
-            trans.Data.Shop.Otp = req.body.Otp
+            trans.Data.Store.Otp = req.body.OTP
             event_ = events.EventDespatchmentByStore
             text_  = alerts.EnRoute
             break
@@ -83,9 +83,7 @@ router.post("/agent", async (req, res, next) =>
     try
     {
         let trans  = new Transit()
-          , trans_ = await trans.AuthzAgent(req.body.TransitID, 
-                                            req.body.User._id)
-        if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+        await trans.AuthzAgent(req.body.TransitID, req.body.User._id)
 
         let event_, text_
         switch(req.body.Task)
@@ -102,17 +100,23 @@ router.post("/agent", async (req, res, next) =>
             break
 
           case task.Accept:
+            trans.Data.Agent =
+            {
+                _id      : req.body.User._id
+              , SockID   : req.body.User.SockID
+              , Name     : req.body.User.Name
+              , MobileNo : req.body.User.MobNo
+            }
             event_ = events.EventAcceptanceByAgent
             text_  = alerts.Accepted          
             break
 
           case task.Complete:
-            trans.Data.Agent.Otp = req.body.Otp
+            trans.Data.Agent.Otp = req.body.OTP
             event_ = events.EventCompletionByAgent
             text_  = alerts.Delivered
             break            
         }
-
         trans.Data.Event = event_
         let engine       = new Engine()
         await engine.Transition(trans)

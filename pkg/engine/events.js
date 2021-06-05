@@ -70,9 +70,9 @@ const Emit = async function(alert, ctxt)
           TransitID       : ctxt.Data._id
         , JournalID       : ctxt.Data.JournalID
         , OriginName      : ctxt.Data.Store.Name
-        , OriginCity      : ctxt.Data.Store.City
-        , OriginLocation  : ctxt.Data.Store.Location
-        , Destination     : ctxt.Data.User.Location
+        , OriginCity      : ctxt.Data.Store.Address.City
+        , OriginLocation  : [ ctxt.Data.Store.Longitude, ctxt.Data.Store.Latitude ]
+        , Destination     : [ ctxt.Data.User.Longitude,  ctxt.Data.User.Latitude  ]
         , ETD             : ctxt.Data.ETD
       }
       // Calculate reach to origin and ETD to origin if needed
@@ -107,6 +107,10 @@ const Emit = async function(alert, ctxt)
       data = ctxt.Abstract()
       break
 
+    case alerts.Delivered:
+      to   = [...ctxt.Data.Store.SockID, ...ctxt.Data.User.SockID]
+      data = ctxt.Abstract()
+      break
   }
 
   const Ind =

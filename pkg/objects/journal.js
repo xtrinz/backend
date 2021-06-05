@@ -2,7 +2,6 @@ const { User }                 = require("./user")
     , { Cart }                 = require("./cart")
     , { Store }                = require("./store")
     , { ObjectID, ObjectId }   = require("mongodb")
-    , { Transit }              = require("./transit")
     , { Err_, code, reason }   = require("../common/error")
     , { journals }             = require("../common/database")
     , { states, type, channel,
@@ -105,12 +104,12 @@ function Journal()
       // Set User
       this.Data.Buyer     = 
       {                 
-                ID        : data.User._id
-              , Name      : data.User.Name
-              , MobileNo  : data.User.MobNo
-              , Longitude : data.Longitude
-              , Latitude  : data.Latitude
-              , Address   : data.Address
+          ID        : data.User._id
+        , Name      : data.User.Name
+        , MobileNo  : data.User.MobNo
+        , Longitude : data.Longitude
+        , Latitude  : data.Latitude
+        , Address   : data.Address
       }
 
       // Set Cart
@@ -168,7 +167,7 @@ function Journal()
       return data_
     }
 
-    this.UpdateStatusAndInitTransit = async function(req)
+    this.UpdateStatus = async function(req)
     {
       const sign    = req.headers["stripe-signature"]
           , stripe_ = new Stripe()
@@ -200,15 +199,14 @@ function Journal()
         this.Data.Payment.Status = states.Success
         this.Data.Transit.Status = states.Initiated
         await this.Save()
-
-        let transit = new Transit(this.Data)
-        await transit.Init()
-        return
+        break
 
       case states.StripeFailed:
         this.Data.Payment.Status = states.Failed
         await this.Save()
-      }     
+        break
+      }
+      return event_.type
     }
 
     this.List = function(data)

@@ -1,9 +1,9 @@
-const { ObjectID } 				 = require("mongodb")
-    , { transits } 				 = require("../common/database")
-    , { Err_, code, reason }     = require("../common/error")
+const { ObjectID, ObjectId } 			= require("mongodb")
+    , { transits } 				        = require("../common/database")
+    , { Err_, code, reason }            = require("../common/error")
     , { states, events, entity, query } = require("../common/models")
-    , { Engine }                 = require("../engine/engine")
-    , test                       = require('../common/test')
+    , { Engine }                        = require("../engine/engine")
+    , test                              = require('../common/test')
 
 function Transit (journal)
 {
@@ -14,25 +14,31 @@ function Transit (journal)
       , JournalID       : journal._id
       , Store 		    :
       {                  
-            _id         : journal.Seller.ID
-          , SockID      : []
-          , Name        : journal.Seller.Name
-          , Longitude   : journal.Seller.Longitude
-          , Latitude    : journal.Seller.Latitude
-          , MobileNo    : journal.Seller.MobileNo
-          , Address     : journal.Seller.Address
+        _id             : journal.Seller.ID
+        , SockID        : []
+        , Name          : journal.Seller.Name
+        , Longitude     : journal.Seller.Longitude
+        , Latitude      : journal.Seller.Latitude
+        , MobileNo      : journal.Seller.MobileNo
+        , Address       : journal.Seller.Address
       }                  
       , User 		    : 
       {                  
-            _id         : journal.Buyer.ID
-          , SockID      : []
-          , Name        : journal.Buyer.Name
-          , Longitude   : journal.Buyer.Longitude
-          , Latitude    : journal.Buyer.Latitude          
-          , MobileNo    : journal.Buyer.MobileNo
-          , Address     : journal.Buyer.Address
+        _id             : journal.Buyer.ID
+        , SockID        : []
+        , Name          : journal.Buyer.Name
+        , Longitude     : journal.Buyer.Longitude
+        , Latitude      : journal.Buyer.Latitude          
+        , MobileNo      : journal.Buyer.MobileNo
+        , Address       : journal.Buyer.Address
       }                  
-      , Agent           : {}
+      , Agent           :
+      {                 
+          _id           : ''
+        , SockID        : []
+        , Name          : ''         
+        , MobileNo      : ''
+      }                 
       , Agents          : []                            // Pool of live agents filtered for transit
       , Return 	        : ""                            // Machine's prev-state for fallbacks
       , State 		    : states.None                   // Machine init state
@@ -76,11 +82,11 @@ function Transit (journal)
     {
         let obj =
         {
-            TransitID     : this.Data._id
-          , JournalID	  : this.Data.JournalID
-          , UserName 	  : this.Data.User.Name
-          , StoreName 	  : this.Data.Store.Name
-          , StoreCity     : this.Data.Store.Address.City
+            TransitID     :   this.Data._id
+          , JournalID	  :   this.Data.JournalID
+          , UserName 	  :   this.Data.User.Name
+          , StoreName 	  :   this.Data.Store.Name
+          , StoreCity     :   this.Data.Store.Address.City
           , StoreLocation : [ this.Data.Store.Longitude, this.Data.Store.Latitude ]
         }
         if (this.Agent && !args.includes(entity.Agent))
@@ -122,6 +128,31 @@ function Transit (journal)
         let engine = new Engine()
         await engine.Transition(this)
         console.log('transit-initialised', { Data: this.Data })
+    }
+
+    this.AuthzAgent       = async function(transit_id, user_id)
+    {
+        const tranist_ = await this.Get(transit_id, query.ByID)
+        if (!tranist_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+
+        if (this.Data.Agent._id !== '')
+        {
+            if(String(this.Data.Agent._id) === String(user_id))
+            {
+                console.log('agent-authorized', this.Data.Agent)
+                return
+            }            
+        }
+        for(let i =0; i < this.Data.Agents.length; i++)
+        {
+            if(String(this.Data.Agents[i]._id) === String(user_id))
+            {
+                console.log('agent-authorized', this.Data.Agents[i])
+                return
+            }
+        }
+        console.log('agent-not-listed', { AgentID: user_id, Agents: this.Data.Agents })
+        Err_(code.UNAUTHORIZED, reason.Unauthorized)
     }
 }
 

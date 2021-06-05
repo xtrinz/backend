@@ -1,14 +1,22 @@
 const { code, text, status } = require("../common/error")
+    , { states }             = require("../common/models")
     , router 	               = require("express").Router()
     , { Journal }            = require("../objects/journal")
+    , { Transit }            = require("../objects/transit")
 
 // Stripe confirmation webhook
 router.post("/confirm", async (req, res, next) =>
 {
   try
   {
-    const journal = new Journal()
-    await journal.UpdateStatusAndInitTransit(req)
+    let   journal = new Journal()
+    const status_ = await journal.UpdateStatus(req)
+    if (status_ === states.StripeSucess)
+    {
+      let transit = new Transit(journal.Data)
+      await transit.Init()
+    }
+
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : '',

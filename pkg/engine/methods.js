@@ -35,6 +35,7 @@ const CargoCancelledByUser		=  async function(ctxt)
 	}
 	await Emit(alerts.Cancelled, ctxt)
 	await Save(ctxt, states.CargoCancelled)
+
 	let journal = new Journal()
 	journal.PayOut(ctxt)
 	console.log('cargo-cancelled', ctxt.Data)
@@ -69,19 +70,19 @@ const OrderAcceptedByStore			=  async function(ctxt)
 		await Save(ctxt, states.OrderOnHold)
 		return
 	}
-	ctxt.Agents = agents
+	ctxt.Data.Agents = agents
 	await Emit(alerts.NewTransit, ctxt)	// To Agents
 	await Emit(alerts.Accepted, ctxt)	// To User
 	await Save(ctxt, states.OrderAccepted)
-	console.log('order-accepted-by-shop', ctxt)
+	console.log('order-accepted-by-shop', ctxt.Data)
 }
 
 const OrderDespatchedByStore		= async function(ctxt)
 {
-	console.log('process-order-despatchment', ctxt)
+	console.log('process-order-despatchment', ctxt.Data)
 
 	const otp_ 	  = new otp.OneTimePasswd({MobNo: "", Body: ""})
-	const status_ = await otp_.Confirm(ctxt.Data.Agent.Otp, ctxt.Data.Shop.Otp)
+	const status_ = await otp_.Confirm(ctxt.Data.Agent.Otp, ctxt.Data.Store.Otp)
 	if  (!status_)  Err_(code.BAD_REQUEST, reason.OtpRejected)
 
 	await Emit(alerts.EnRoute, ctxt)
@@ -91,10 +92,12 @@ const OrderDespatchedByStore		= async function(ctxt)
 			Body: 	otp.Msgs.ForPkg
 		})
 	  , hash 	  = await otp_sms.Send(otp.Opts.SMS)
-	
+
+	delete ctxt.Data.Agent.Otp
+	delete ctxt.Data.Store.Otp
 	ctxt.Data.User.Otp 	= hash
 	await Save(ctxt, states.OrderDespatched)
-	console.log('order-despatched', ctxt)
+	console.log('order-despatched', ctxt.Data)
 }
 
 const TransitIgnoredByAgent		= async function(ctxt)
@@ -110,7 +113,7 @@ const TransitIgnoredByAgent		= async function(ctxt)
 	}
 	if(!ctxt.Agents.length)
 	{
-		console.log('all-agents-ignored-the-tranist-transit-on-hold', ctxt)
+		console.log('all-agents-ignored-the-tranist-transit-on-hold', ctxt.Data)
 		await Emit(alerts.NoAgents, ctxt)
 		await Save(ctxt, states.TransitIgnored)
 		return	
@@ -127,18 +130,18 @@ const TransitAcceptanceTimeout		= async function()
 
 const TransitAcceptedByAgent		= async function(ctxt)
 {
-	console.log('process-transit-acceptace', ctxt)
+	console.log('process-transit-acceptace', ctxt.Data)
 	await Emit(alerts.AgentReady, ctxt)
 	let   otp_sms 		= new otp.OneTimePasswd(
 							{
-								MobNo: 	ctxt.Data.Agent.ContactNo,	// To Authz@Shop 
+								MobNo: 	ctxt.Data.Agent.MobileNo,	// To Authz@Shop 
 								Body: 	otp.Msgs.ForPkg
 							})
-		, hash 			= otp_sms.Send(otp.Opts.SMS)
+		, hash 			= await otp_sms.Send(otp.Opts.SMS)
 	ctxt.Data.Agent.Otp = hash
 	ctxt.Data.Agents	= []
 	await Save(ctxt, states.TransitAccepted)
-	console.log('transit-accepted', ctxt)
+	console.log('transit-accepted', ctxt.Data)
 }
 
 const TransitRejectedByAgent		= async function(ctxt)
@@ -173,9 +176,11 @@ const TransitCompletedByAgent		= async function(ctxt)
 	const status_ = await otp_.Confirm(ctxt.Data.User.Otp, ctxt.Data.Agent.Otp)
 	if (!status_) Err_(code.BAD_REQUEST, reason.OtpRejected)
 
-	await Emit(alerts.EnRoute, ctxt)
-	await Save(ctxt, states.TransitComplete)
-
+	await Emit(alerts.Delivered, ctxt)
+	delete ctxt.Data.Agent.Otp
+	delete ctxt.Data.User.Otp
+	await Save(ctxt, states.TranistCompleted)
+	console.log('eeeeeeeee', typeof Journal, Journal, User)
 	let journal = new Journal()
 	await journal.PayOut(ctxt)
 	console.log('transit-completed', ctxt.Data)

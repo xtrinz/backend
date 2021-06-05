@@ -21,6 +21,7 @@ function User(mob_no, user_mode)
       , Passwd     : ''
       , Email      : ''
       , CartID     : ''
+      , SockID     : []
       , AddressList: []
       , StoreList  : 
       {
@@ -77,7 +78,7 @@ function User(mob_no, user_mode)
             , proj    = { _id: 1, Name: 1, SockID: 1 }
             , query   =
             { 
-                Location  :
+/*              Location  :
                 {
                 $near :
                 {
@@ -86,9 +87,9 @@ function User(mob_no, user_mode)
                 }
                 }
                 , IsLive  : true
-                , Mode    : mode.Agent
+                  Mode    : mode.Agent*/
             }
-        const agents = await users.find(query, proj).limit(cnt).toArray()
+        const agents = await users.find(query).project(proj).limit(cnt).toArray()
         if (!agents.length)
         {
             console.log('no-agents-found',{ Location: [ln, lt]})
