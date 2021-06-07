@@ -82,7 +82,7 @@ const OrderDespatchedByStore		= async function(ctxt)
 	console.log('process-order-despatchment', ctxt.Data)
 
 	const otp_ 	  = new otp.OneTimePasswd({MobNo: "", Body: ""})
-	const status_ = await otp_.Confirm(ctxt.Data.Agent.Otp, ctxt.Data.Store.Otp)
+		, status_ = await otp_.Confirm(ctxt.Data.Agent.Otp, ctxt.Data.Store.Otp)
 	if  (!status_)  Err_(code.BAD_REQUEST, reason.OtpRejected)
 
 	await Emit(alerts.EnRoute, ctxt)
@@ -119,7 +119,6 @@ const TransitIgnoredByAgent		= async function(ctxt)
 		return	
 	}
 	ctxt.Event  = ""
-	ctxt.Data.State
 	await ctxt.Save()
 }
 
@@ -131,13 +130,15 @@ const TransitAcceptanceTimeout		= async function()
 const TransitAcceptedByAgent		= async function(ctxt)
 {
 	console.log('process-transit-acceptace', ctxt.Data)
+
 	await Emit(alerts.AgentReady, ctxt)
-	let   otp_sms 		= new otp.OneTimePasswd(
-							{
-								MobNo: 	ctxt.Data.Agent.MobileNo,	// To Authz@Shop 
-								Body: 	otp.Msgs.ForPkg
-							})
-		, hash 			= await otp_sms.Send(otp.Opts.SMS)
+	let   otp_sms 	= new otp.OneTimePasswd(
+		{
+			MobNo: 	ctxt.Data.Agent.MobileNo,	// To Authz@Shop 
+			Body: 	otp.Msgs.ForPkg
+		})
+		, hash 		= await otp_sms.Send(otp.Opts.SMS)
+
 	ctxt.Data.Agent.Otp = hash
 	ctxt.Data.Agents	= []
 	await Save(ctxt, states.TransitAccepted)

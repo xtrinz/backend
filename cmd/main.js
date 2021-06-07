@@ -49,6 +49,9 @@ const server_ = () => console.log('server-started', {Port : port})
 
 io.on('connection', async (socket) =>
 {
+
+//  await io.to(socket.id).emit('res', 'Hi')
+
     await event.Connect(socket)
     const disc_ = async ()=> await event.Disconnect(socket)
     socket.on('disconnect', disc_)

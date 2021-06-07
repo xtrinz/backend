@@ -44,9 +44,23 @@ const Type   =
     })
 }
 
+    , socketIo  = require('socket.io-client')
+    , socket    = await socketIo('http://'+ opt_g.host + ':' + opt_g.port)
+    , Socket    = async function(event_)
+{
+	let res = new Promise((resolve) =>
+	{
+	   socket.on(event_, (resp) => { resolve(resp) } )
+  	})
+	await res
+    await socket.disconnect()	
+	return res
+}
+
 module.exports =
 {
       Method    : Method
     , Type      : Type
     , Rest      : Rest
+    , Socket    : Socket
 }
