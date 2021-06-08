@@ -180,6 +180,7 @@ function Store(data)
         user.Data.StoreList.Owned.push(String(this.Data._id))
         await user.Save()
         console.log('new-store-created', {Store: this.Data})
+        return this.Data._id
     }
 
     this.ConfirmMobNo   = async function(data)
@@ -297,7 +298,7 @@ function Store(data)
         }
 
         const staff_  = new User()
-        const staff   = await staff_.Get(data.StaffID, query.ByID)
+        const staff   = await staff_.Get(data.StaffMobileNo, query.ByMobNo)
         if (!staff) Err_( code.BAD_REQUEST, reason.StaffNotFound)
 
         if( !staff_.Data.StoreList.Accepted.includes(String(store._id)) ||
@@ -325,7 +326,7 @@ function Store(data)
         }
 
         const staff_  = new User()
-        const staff   = await staff_.Get(data.StaffID, query.ByID)
+        const staff   = await staff_.Get(data.StaffMobileNo, query.ByMobNo)
         if (!staff) Err_(code.BAD_REQUEST, reason.StaffNotFound )
 
         if( !staff_.Data.StoreList.Pending.includes(String(store._id)) ||
@@ -364,9 +365,8 @@ function Store(data)
           if (!staff) Err_(code.BAD_REQUEST, reason.StaffNotFound)
           const res =
           {
-              StaffID : staff._id
-            , Name    : staff.Name
-            , MobileNo: staff.MobNo
+              Name     : staff.Name
+            , MobileNo : staff.MobNo
           }
           return res
         }

@@ -14,9 +14,10 @@ router.post("/register", async (req, res, next) =>
     {
         case task.New:
             store = new Store(req.body)
-            await store.New(req.body)
+            let id = await store.New(req.body)
             text_ = text.OTPSendToMobNo.format(
                     store.Data.MobileNo.slice(-4))
+            data_ = { StoreID : id }
             break
 
         case task.ReadOTP:

@@ -1,4 +1,5 @@
-const qs = require('querystring')
+const qs        = require('querystring')
+    , socketIo  = require('socket.io-client')
 
 const Type   =
 {
@@ -44,11 +45,10 @@ const Type   =
     })
 }
 
-    , socketIo  = require('socket.io-client')
-    , socket    = socketIo('http://'+ opt_g.host + ':' + opt_g.port)
     , Socket    = async function(event_)
 {
-	let res = new Promise((resolve) =>
+    let socket   = socketIo('http://'+ opt_g.host + ':' + opt_g.port)
+    let res = new Promise((resolve) =>
 	{
 	   socket.on(event_, (resp) => { resolve(resp) } )
   	})
