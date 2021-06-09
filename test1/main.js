@@ -15,28 +15,26 @@ const { Suite } = require("./lib/driver")
         data  : require('./frames/data/product')
       , story : require('./frames/story/product')        
     }
+    , address   =
+    {
+        data  : require('./frames/data/address')
+      , story : require('./frames/story/address')        
+    }
 
-    // User Management
-    let admin_1  = new user.data.User('Admin')
-      , tc1      = user.story.Std(admin_1.Name)
-    Suite.AddTest(tc1)
+  let admin_1       = new    user.data.User   ('Admin')
+    , user_1_owner  = new    user.data.User   ('User')
+    , user_2_staff  = new    user.data.User   ('User')
+    , user_3_buyer  = new    user.data.User   ('User')
+    , store_1       = new   store.data.Store  ()
+    , product_1     = new product.data.Product()
+    , addr_1        = new address.data.Address()
 
-    // Store Management
-    let owner_user_1  = new  user.data.User('User')
-      , staff_user_1  = new  user.data.User('User')
-      , store_1       = new  store.data.Store()
-      , tc2           = store.story.Std(
-                            admin_1.Name
-                          , owner_user_1.Name
-                          , staff_user_1.Name
-                          , store_1.Name)
-    Suite.AddTest(tc2)
+    , tc1 =    user.story.Std(admin_1.Name )
+    , tc2 =   store.story.Std(admin_1.Name, user_1_owner.Name, user_2_staff.Name, store_1.Name )
+    , tc3 = product.story.Std(user_2_staff.Name, store_1.Name, product_1.Name )
+    , tc4 = address.story.Std(addr_1.Address.Name, user_3_buyer.Name )
 
-    // Product Management
-    let product_1 = new product.data.Product()
-      , tc3       = product.story.Std(staff_user_1.Name
-                                    ,      store_1.Name
-                                    ,    product_1.Name)
-    Suite.AddTest(tc3)
+  const tc = [ tc1, tc2, tc3, tc4 ]
+  tc.forEach((test)=> Suite.AddTest(test))
 
-    Suite.Run()
+  Suite.Run()

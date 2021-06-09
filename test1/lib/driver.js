@@ -68,8 +68,8 @@ function TestRig()
                     {
                         No      : suite + 1,
                         Title   : test.Describe,
-                        StepNo  : step.Data.Index,
-                        Step    : step.Data.Describe
+                        StepNo  : data.Index,
+                        Step    : data.Describe
                     })
                     failed = true
                 }

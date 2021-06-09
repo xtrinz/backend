@@ -45,6 +45,7 @@ function Address(data)
         }
         test.Set('AddressID', this.Data._id) // #101
         console.log('address-inserted', query, opts, this.Data.Address)
+        return this.Data._id
     }
 
     this.Read     = async function (data)

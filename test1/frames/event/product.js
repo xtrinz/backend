@@ -1,8 +1,6 @@
 const { Method, Type, Rest }  = require("../../lib/medium")
-    , { prints }              = require("../../lib/driver")
-    , data                    = require("../data/data")
-    , jwt                     = require("../../../pkg/common/jwt")
     , { code, status, text }  = require("../../../pkg/common/error")
+    , data                    = require("../data/data")
 
 let Add = function(staff_, store_, product_) 
 {
