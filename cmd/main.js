@@ -36,16 +36,19 @@ app.use( adptr.ErrorHandler   )
 
 const excp_ = (err) => console.log(err)
 process.on(`unhandledRejection`, excp_)
-const sce_  = [ `uncaughtException`,
-                `exit`, `SIGINT`,
-                `SIGKILL`, `SIGTERM`]
-//sce_.forEach((type) => process.on(type, adptr.GracefulExit))
+const sce_  =
+[ 
+      `uncaughtException` //, `exit`
+    , `SIGINT`            //, `SIGKILL`
+//  , `SIGTERM`
+]
+sce_.forEach((type) => process.on(type, adptr.GracefulExit))
 
 const server_ = () => console.log('server-started', {Port : port})
-    , server = app.listen(port, server_)
-
-    , io     = require('socket.io')(server)
-    , event  = require('../pkg/engine/events')
+    , server        = app.listen(port, server_)
+    , io            = require('socket.io')(server)
+    , event         = require('../pkg/engine/events')
+      adptr.SetServer(server)
 
 io.on('connection', async (socket) =>
 {

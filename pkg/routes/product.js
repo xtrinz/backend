@@ -15,7 +15,7 @@ router.post("/add", async (req, res, next) => {
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : text.ProductAdded,
-      Data    : {}
+      Data    : { ProductID: product.Data._id }
     })
   } catch (err) { next(err) }
 })

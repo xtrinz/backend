@@ -2,6 +2,9 @@ const { Err, code, status, reason } = require("./error")
     , { client }                    = require("./database")
     , { User }                      = require('../objects/user')
 
+let   Server
+const SetServer = (server) => Server = server
+
 const Auth = async function (req, res, next)
 {
   try 
@@ -36,7 +39,22 @@ const GracefulExit = async function ()
   try 
   {
     console.log('graceful-exit')
-    await client.close()
+    await new Promise((res)=>
+    {
+      client.close((err)=>
+      {
+        if(!err) { res(1); console.log('db-connection-closed') } 
+        else console.log('db-abruptly-disconnected')
+      })
+    })
+    await new Promise((res)=>
+    {
+      Server.close((err)=>
+      {
+        if(!err) { res(1); console.log('server-stopped') }
+        else console.log('server-abruptly-terminated')
+      })
+    })
     process.exit(1)
   } catch (err) { console.log(err) }
 }
@@ -63,6 +81,7 @@ const ErrorHandler = function(err, req, res, next)
 module.exports =
 {
     Auth          : Auth
+  , SetServer     : SetServer
   , Forbidden     : Forbidden
   , GracefulExit  : GracefulExit
   , ErrorHandler  : ErrorHandler

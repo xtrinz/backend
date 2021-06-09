@@ -1,9 +1,8 @@
-const { Method, Type, Rest }  = require("../../lib/medium")
-    , { prints, read }              = require("../../lib/driver")
-    , data                    = require("../data/data")
-    , jwt                     = require("../../../pkg/common/jwt")
-    , { code, status, text }  = require("../../../pkg/common/error")
-    , { task }                = require("../../../pkg/common/models")
+const { Method, Type }       = require("../../lib/medium")
+    , data                   = require("../data/data")
+    , { read }               = require("../../lib/driver")
+    , { code, status, text } = require("../../../pkg/common/error")
+    , { task }               = require("../../../pkg/common/models")
 
 let RegisterNew = function(user_, store_) 
 {
