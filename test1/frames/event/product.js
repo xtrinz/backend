@@ -9,9 +9,11 @@ let Add = function(staff_, store_, product_)
     this.ProductID  = product_
     this.Data     = function()
     {
-      let store  = data.Get(data.Obj.Store, this.StoreID)
-      let staff  = data.Get(data.Obj.User, this.StaffID)
-      let product= data.Get(data.Obj.Product, this.ProductID)
+      let store       = data.Get(data.Obj.Store, this.StoreID)
+      let staff       = data.Get(data.Obj.User, this.StaffID)
+      let product     = data.Get(data.Obj.Product, this.ProductID)
+      product.StoreID = store.ID
+      data.Set(data.Obj.Product, this.ProductID, product)
       let templ =
       {
           Type                  : Type.Rest
@@ -47,7 +49,7 @@ let Add = function(staff_, store_, product_)
     this.PostSet = async function(res_)
     {
       let product = data.Get(data.Obj.Product, this.ProductID)
-      product.ID  = res_.Data.ProductID
+      product.ID       = res_.Data.ProductID
       data.Set(data.Obj.Product, this.ProductID, product)
     }
 }

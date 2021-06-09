@@ -1,3 +1,4 @@
+const { Cart } = require('./cart')
 
 let User = function(mode)
 {
@@ -17,6 +18,8 @@ let User = function(mode)
   this.Token       = ''
   this.SocketID    = ''
   this.OTP         = ''
+
+  new Cart(this.Name) // Create a cart for the user
 
   User.Users[this.Name] = this
 }

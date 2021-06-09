@@ -40,7 +40,7 @@ router.post("/modify", async (req, res, next) => {
   {
     const entry = new CartEntry()
     await entry.Update( ObjectId(req.body.User.CartID),
-                        ObjectId(req.body.EntryID),
+                        ObjectId(req.body.ProductID),
                         req.body.Quantity)
     
     return res.status(code.OK).json({
@@ -58,7 +58,7 @@ router.delete("/remove", async (req, res, next) =>
   {
     const entry = new CartEntry()
     await entry.Remove( ObjectId(req.body.User.CartID),
-                        ObjectId(req.body.EntryID))
+                        ObjectId(req.body.ProductID))
     
     return res.status(code.OK).json({
       Status  : status.Success,

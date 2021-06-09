@@ -6,7 +6,7 @@ const Std = function(addr_, user_)
 {
         let tc = new TestCase('Address Management')
             tc = AddUser(tc, user_)
-    const addr =
+    const steps =
     [
           new event.Add    (user_, addr_)
         , new event.View   (user_, addr_)
@@ -15,7 +15,7 @@ const Std = function(addr_, user_)
         , new event.Remove (user_, addr_)
         , new event.Add    (user_, addr_)
     ]
-    addr.forEach((step) => tc.AddStep(step))             
+    steps.forEach((step) => tc.AddStep(step))             
     return tc
 }
 

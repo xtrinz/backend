@@ -20,6 +20,11 @@ const { Suite } = require("./lib/driver")
         data  : require('./frames/data/address')
       , story : require('./frames/story/address')        
     }
+    , cart      =
+    {
+        data  : require('./frames/data/cart')
+      , story : require('./frames/story/cart')        
+    }
 
   let admin_1       = new    user.data.User   ('Admin')
     , user_1_owner  = new    user.data.User   ('User')
@@ -33,8 +38,9 @@ const { Suite } = require("./lib/driver")
     , tc2 =   store.story.Std(admin_1.Name, user_1_owner.Name, user_2_staff.Name, store_1.Name )
     , tc3 = product.story.Std(user_2_staff.Name, store_1.Name, product_1.Name )
     , tc4 = address.story.Std(addr_1.Address.Name, user_3_buyer.Name )
+    , tc5 =    cart.story.Std(user_3_buyer.Name, product_1.Name )
 
-  const tc = [ tc1, tc2, tc3, tc4 ]
+  const tc = [ tc1, tc2, tc3, tc4, tc5 ]
   tc.forEach((test)=> Suite.AddTest(test))
 
   Suite.Run()

@@ -147,7 +147,7 @@ function CartEntry(data)
 
   this.Insert     = async function (cart_id)
   {
-    this.Data._id = new ObjectID()
+    this.Data._id = ObjectId(this.Data.ProductID)
     test.Set('EntryID', this.Data._id) // #101
     const key   = { _id: ObjectId(cart_id)         }
         , opts    = { $push: { Products: this.Data } }
@@ -160,12 +160,12 @@ function CartEntry(data)
     console.log('product-inserted', key, opts)
   }
 
-  this.Update     = async function (cart_id, entry_id, qnty)
+  this.Update     = async function (cart_id, product_id, qnty)
   {
     const   key =
           {
             _id           : ObjectId(cart_id),
-            'Products._id': ObjectId(entry_id)
+            'Products._id': ObjectId(product_id)
           }
           , opts  = { $set: { 'Products.$.Quantity': qnty }  }
 
@@ -178,10 +178,10 @@ function CartEntry(data)
     console.log('product-updated', key, opts)
   }
 
-  this.Remove     = async function (cart_id, entry_id)
+  this.Remove     = async function (cart_id, product_id)
   {
     const   key = { _id: ObjectId(cart_id)                         }
-          , opts  = { $pull: { Products: {_id: ObjectId(entry_id)} } }
+          , opts  = { $pull: { Products: {_id: ObjectId(product_id)} } }
 
     const resp  = await carts.updateOne(key, opts)
     if (resp.modifiedCount !== 1) 
