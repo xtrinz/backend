@@ -1,392 +1,365 @@
-const { Method, Type, Rest }  = require("../../lib/medium")
-    , { prints }              = require("../../lib/driver")
-    , { task }                = require("../../../pkg/common/models")
-    , { code, status, text }  = require("../../../pkg/common/error")
-    , jwt                     = require("../../../pkg/common/jwt")
+const { task }               = require("../../../pkg/common/models")
+    , { code, status, text } = require("../../../pkg/common/error")
+    , { Method, Type }       = require("../../lib/medium")
+    , { read }               = require("../../lib/driver")
+    , data                   = require("../data/data")
 
-let RegisterNew = function(user) 
+let RegisterNew = function(name) 
 {
-    this.Data =
+    this.ID     = name
+    this.Data   = function()
     {
-          Type           : Type.Rest
-        , Describe       : 'User Register New'
-        , Request        :
+      let user  = data.Get(data.Obj.User, this.ID)
+      let templ =
+      {
+          Type         : Type.Rest
+        , Describe     : 'User Register New'
+        , Request      :
         {
-              Method     : Method.POST
-            , Path       : '/user/register'
-            , Body       : 
-            {
-                Task     : task.New
-              , MobileNo : user.MobileNo
-              , Mode     : user.Mode
-            }
-            , Header     : {}
+            Method     : Method.POST
+          , Path       : '/user/register'
+          , Body       : 
+          {
+              Task     : task.New
+            , MobileNo : user.MobileNo
+            , Mode     : user.Mode
+          }
+          , Header     : {}
         }
-        , Response       :
+        , Skip         : []
+        , Response     :
         {
-              Code       : code.OK
-            , Status     : status.Success
-            , Text       : text.OTPSendToMobNo.format(
-                            user.MobileNo.substr(
-                            user.MobileNo.length - 4))
-            , Data       : {}
+            Code       : code.OK
+          , Status     : status.Success
+          , Text       : text.OTPSendToMobNo.format(
+                          user.MobileNo.substr(
+                          user.MobileNo.length - 4))
+          , Data       : {}
         }
+      }
+      return templ
+    }
+
+    this.PostSet        = async function(res_)
+    {
+      let resp  = await read()
+        , user  = data.Get(data.Obj.User, this.ID)
+      user.OTP  = resp.Data.OTP
+      data.Set(data.Obj.User, this.ID, user)
     }
 }
 
-let RegisterReadOTP = function(user)
+let RegisterReadOTP = function(name) 
 {
-  this.Data =
-  {
-      Type         : Type.Rest
-    , Describe     : 'User Register Read_OTP'
-    , Request      :
+    this.ID     = name
+    this.Data   = function()
     {
-        Method     : Method.POST
-      , Path       : '/user/register'
-      , Body       : 
+      let user  = data.Get(data.Obj.User, this.ID)
+      let templ =
       {
-          Task     : task.ReadOTP
-        , MobileNo : user.MobileNo
-        , OTP      : ''
+          Type         : Type.Rest
+        , Describe     : 'User Register Read_OTP'
+        , Request      :
+        {
+            Method     : Method.POST
+          , Path       : '/user/register'
+          , Body       : 
+          {
+              Task     : task.ReadOTP
+            , MobileNo : user.MobileNo
+            , OTP      : user.OTP
+          }
+          , Header     : {}
+        }
+        , Skip         : [ 'Token' ]
+        , Response     :
+        {
+            Code       : code.OK
+          , Status     : status.Success
+          , Text       : text.OTPConfirmed
+          , Data       : { Token: '' }
+        }
       }
-      , Header     : {}
-    }
-    , Response     :
-    {
-        Code       : code.OK
-      , Status     : status.Success
-      , Text       : text.OTPConfirmed
-      , Data       : ''
-    }
+      return templ
   }
-
-  this.PreSet        = async function(data)
+  this.PostSet        = async function(res_)
   {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp              = await Rest(req)
-    data.Request.Body.OTP = resp.Data.OTP
-    let token             = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Response.Data    = {Token : token}
-    return data
+    let user   = data.Get(data.Obj.User, this.ID)
+    user.Token = res_.Data.Token
+    data.Set(data.Obj.User, this.ID, user)
   }
 }
 
-let Register = function(user)
+let Register = function(name) 
 {
-  this.Data =
-  {
-      Type            : Type.Rest
-    , Describe        : 'User Register Register'
-    , Request         :
+    this.ID     = name
+    this.Data   = function()
     {
-        Method        : Method.POST
-      , Path          : '/user/register'
-      , Body          : 
+      let user  = data.Get(data.Obj.User, this.ID)
+      let templ =      
       {
-          Task        : task.Register
-        , MobileNo    : user.MobileNo
-        , Name        : user.Name
-        , Email       : user.Email
-        , Password    : user.Password
+          Type            : Type.Rest
+        , Describe        : 'User Register Register'
+        , Request         :
+        {
+            Method        : Method.POST
+          , Path          : '/user/register'
+          , Body          : 
+          {
+              Task        : task.Register
+            , MobileNo    : user.MobileNo
+            , Name        : user.Name
+            , Email       : user.Email
+            , Password    : user.Password
+          }
+          , Header        :
+          {
+            Authorization : 'Bearer ' + user.Token
+          }
+        }
+        , Skip            : []
+        , Response        :
+        {
+            Code          : code.OK
+          , Status        : status.Success
+          , Text          : text.Registered
+          , Data          : {}
+        }
       }
-      , Header        :
-      {
-        Authorization : ''
-      }
+      return templ
     }
-    , Response        :
-    {
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : text.Registered
-      , Data          : {}
-    }
-  }
+}
 
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = 
+let Login = function(name) 
+{
+    this.ID     = name
+    this.Data   = function()
     {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
+      let user  = data.Get(data.Obj.User, this.ID)
+      let templ =
+      {
+          Type      : Type.Rest
+        , Describe  : 'User Login'
+        , Request   :
+        {
+            Method : Method.POST
+          , Path   : '/user/login'
+          , Body   : 
+          {
+              MobileNo : user.MobileNo
+            , Password : user.Password
+          }
+          , Header: {}
+        }
+        , Response  :
+        {
+            Code  : code.OK
+          , Status: status.Success
+          , Text  : text.LoggedIn
+          , Data  : { Token : user.Token }
+        }
+      }
+      return templ
     }
-    let resp  = await Rest(req)
-      , token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+}
+
+let PasswordGenOTP = function(name) 
+{
+    this.ID     = name
+    this.Data   = function()
+    {
+      let user  = data.Get(data.Obj.User, this.ID)
+      let templ =
+      {
+          Type         : Type.Rest
+        , Describe     : 'User Password Generate_OTP'
+        , Request      :
+        {              
+            Method     : Method.POST
+          , Path       : '/user/passwd/reset'
+          , Body       : 
+          {              
+              MobileNo : user.MobileNo
+            , Password : user.Password
+            , Task     : task.GenOTP
+          }              
+          , Header     : {}
+        }              
+        , Response     :
+        {              
+            Code       : code.OK
+          , Status     : status.Success
+          , Text       : text.OTPSendVia.format((user.MobileNo)? 'SMS': 'MAIL')
+          , Data       : {}
+        }
+      }
+      return templ
+    }
+
+    this.PostSet        = async function(res_)
+    {
+      let resp  = await read()
+        , user  = data.Get(data.Obj.User, this.ID)
+      user.OTP  = resp.Data.OTP
+      data.Set(data.Obj.User, this.ID, user)
+    }
+}
+
+let PasswordConfirmMobNo = function(name) 
+{
+  this.ID     = name
+  this.Data   = function()
+  {
+    let user  = data.Get(data.Obj.User, this.ID)
+    let templ =
+    {
+        Type         : Type.Rest
+      , Describe     : 'User Password Confirm_OTP'
+      , Request      :
+      {               
+          Method     : Method.POST
+        , Path       : '/user/passwd/reset'
+        , Body       : 
+        {            
+            Task     : task.ConfirmOTP
+          , MobileNo : user.MobileNo
+          , OTP      : user.OTP
+        }            
+        , Header     : {}
+      }
+      , Response     :
+      {               
+          Code       : code.OK
+        , Status     : status.Success
+        , Text       : text.OTPConfirmed
+        , Data       : {Token : user.Token}
+      }
+    }
+    return templ
   }
 }
 
-let Login = function(user)
+let PasswordSet = function(name) 
 {
-  this.Data =
+  this.ID     = name
+  this.Data   = function()
   {
-      Type      : Type.Rest
-    , Describe  : 'User Login'
-    , Request   :
+    let user  = data.Get(data.Obj.User, this.ID)
+    let templ =
     {
-        Method : Method.POST
-      , Path   : '/user/login'
-      , Body   : 
+        Type            : Type.Rest
+      , Describe        : 'User Password Set_Password'
+      , Request         :
       {
-          MobileNo : user.MobileNo
-        , Password : user.Password
+          Method        : Method.POST
+        , Path          : '/user/passwd/reset'
+        , Body          : 
+        {
+            Task        : task.SetPassword
+          , Password    : user.Password
+        }
+        , Header        :
+        {
+          Authorization : 'Bearer ' + user.Token
+        }
       }
-      , Header: {}
+      , Response        :
+      {
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : text.PasswdUpdated
+        , Data          : {}
+      }
     }
-    , Response  :
-    {
-        Code  : code.OK
-      , Status: status.Success
-      , Text  : text.LoggedIn
-      , Data  : { Token : '' }
-    }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = 
-    {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp  = await Rest(req)
-      , token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Response.Data = {Token : token}
-    return data
+    return templ
   }
 }
 
-let PasswordGenOTP = function(user)
+let ProfileGet = function(name) 
 {
-  this.Data =
+  this.ID     = name
+  this.Data   = function()
   {
-      Type         : Type.Rest
-    , Describe     : 'User Password Generate_OTP'
-    , Request      :
-    {              
-        Method     : Method.POST
-      , Path       : '/user/passwd/reset'
-      , Body       : 
-      {              
-          MobileNo : user.MobileNo
-        , Password : user.Password
-        , Task     : task.GenOTP
-      }              
-      , Header     : {}
-    }              
-    , Response     :
-    {              
-        Code       : code.OK
-      , Status     : status.Success
-      , Text       : text.OTPSendVia.format((user.MobileNo)? 'SMS': 'MAIL')
-      , Data       : {}
+    let user  = data.Get(data.Obj.User, this.ID)
+    let templ =
+    {
+        Type            : Type.Rest
+      , Describe        : 'User Profile'
+      , Request         :
+      {
+          Method        : Method.GET
+        , Path          : '/user/profile'
+        , Body          : {}
+        , Header        :
+        {
+          Authorization : 'Bearer ' + user.Token
+        }
+      }
+      , Response        :
+      {
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : ''
+        , Data          : 
+        {
+            Name        : user.Name
+          , MobileNo    : user.MobileNo
+          , Email       : user.Email
+          , Mode        : user.Mode
+        }
+      }
     }
+    return templ
   }
 }
 
-let PasswordConfirmMobNo = function(user)
+let ProfileEdit =  function(name) 
 {
-  this.Data =
+  this.ID     = name
+  this.Data   = function()
   {
-      Type         : Type.Rest
-    , Describe     : 'User Password Confirm_OTP'
-    , Request      :
-    {               
-        Method     : Method.POST
-      , Path       : '/user/passwd/reset'
-      , Body       : 
-      {            
-          Task     : task.ConfirmOTP
-        , MobileNo : user.MobileNo
-        , OTP      : ''
-      }            
-      , Header     : {}
-    }
-    , Response     :
-    {               
-        Code       : code.OK
-      , Status     : status.Success
-      , Text       : text.OTPConfirmed
-      , Data       : ''
-    }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.OTP = resp.Data.OTP
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Response.Data = {Token : token}
-    return data
-  }
-}
-
-let PasswordSet = function(user)
-{
-  this.Data =
-  {
-      Type            : Type.Rest
-    , Describe        : 'User Password Set_Password'
-    , Request         :
+    let user  = data.Get(data.Obj.User, this.ID)
+    let templ =
     {
-        Method        : Method.POST
-      , Path          : '/user/passwd/reset'
-      , Body          : 
-      {
-          Task        : task.SetPassword
-        , Password    : user.Password
-      }
-      , Header        :
-      {
-        Authorization : ''
-      }
-    }
-    , Response        :
-    {
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : text.PasswdUpdated
-      , Data          : {}
-    }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
-  }
-
-}
-
-let ProfileGet = function(user)
-{
-  this.Data =
-  {
-      Type            : Type.Rest
-    , Describe        : 'User Profile'
-    , Request         :
-    {
-        Method        : Method.GET
-      , Path          : '/user/profile'
-      , Body          : {}
-      , Header        :
-      {
-        Authorization : ''
-      }
-    }
-    , Response        :
-    {
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : ''
-      , Data          : 
-      {
-          Name        : user.Name
-        , MobileNo    : user.MobileNo
-        , Email       : user.Email
-        , Mode        : user.Mode
-      }
-    }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
-  }
-
-}
-
-let ProfileEdit = function(user)
-{
-  this.Data =
-  {
-      Type            : Type.Rest
-    , Describe        : 'User Profile Edit'
-    , Request         :
-    {                   
-        Method        : Method.PUT
-      , Path          : '/user/profile'
-      , Body          : 
+        Type            : Type.Rest
+      , Describe        : 'User Profile Edit'
+      , Request         :
       {                   
-          Password    : user.Password
-        , NewPassword : user.Password
-        , Name        : user.Name
-        , Email       : user.Email
+          Method        : Method.PUT
+        , Path          : '/user/profile'
+        , Body          : 
+        {                   
+            Password    : user.Password
+          , NewPassword : user.Password
+          , Name        : user.Name
+          , Email       : user.Email
+        }                   
+        , Header        :
+        {                   
+          Authorization : 'Bearer ' + user.Token
+        }                   
       }                   
-      , Header        :
+      , Response        :
       {                   
-        Authorization : ''
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : text.ProfileUpdated
+        , Data          : {}
       }                   
-    }                   
-    , Response        :
-    {                   
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : text.ProfileUpdated
-      , Data          : {}
-    }                   
-  }                   
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
     }
-    let resp = await Rest(req)
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    return templ
   }
 }
 
 module.exports =
 {
-      RegisterNew     , RegisterReadOTP      , Register    // User registration sequence
-    , Login                                                // Login
-    , PasswordGenOTP  , PasswordConfirmMobNo , PasswordSet // Forgot password sequence
-    , ProfileGet      , ProfileEdit                        // Profile Read & Edit
+      RegisterNew
+    , RegisterReadOTP
+    , Register
+    , Login
+    , PasswordGenOTP
+    , PasswordConfirmMobNo
+    , PasswordSet
+    , ProfileGet
+    , ProfileEdit
 }

@@ -1,198 +1,164 @@
-const { Method, Type, Rest }  = require("../../lib/medium")
+const data                    = require("../data/data")
+    , { Method, Type, Rest }  = require("../../lib/medium")
     , { prints }              = require("../../lib/driver")
     , jwt                     = require("../../../pkg/common/jwt")
     , { code, status, text }  = require("../../../pkg/common/error")
 
-let Insert = function(cart)
+let Insert = function(user_, cart_, product_) 
 {
-  this.Data =
+  this.UserID  	 = user_
+  this.CartID  	 = cart_
+  this.ProductID = product_
+  this.Data     = function()
   {
-      Type                  : Type.Rest
-    , Describe              : 'Cart Insert'
-    , Request               :
+    let user    = data.Get(data.Obj.User,    this.UserID)
+    let product = data.Get(data.Obj.Product, this.ProductID)
+    let cart    = data.Get(data.Obj.Cart,    this.CartID)
+    cart.AddProduct(this.ProductID)
+    // TODO set custom product qnty
+    let templ   =
     {
-          Method            : Method.POST
-        , Path              : '/cart/insert'
-        , Body              : 
-        {
-                ProductID   : ''
-              , StoreID     : ''
-              , Quantity    : cart.Products[0].Quantity
-        }
-        , Header            : { Authorization: '' }
+        Type          : Type.Rest
+      , Describe      : 'Cart Insert'
+      , Request       :
+      {                 
+          Method      : Method.POST
+        , Path        : '/cart/insert'
+        , Body        : 
+        {             
+            ProductID : product.ID
+          , StoreID   : product.StoreID
+          , Quantity  : product.Quantity
+        }             
+        , Header      : { Authorization: 'Bearer ' + user.Token }
+      }                 
+      , Skip          : [ 'EntryID' ]
+      , Response      :
+      {                 
+          Code        : code.OK
+        , Status      : status.Success
+        , Text        : text.ProductAdded
+        , Data        : {}
+      }
     }
-    , Response              :
-    {
-          Code              : code.OK
-        , Status            : status.Success
-        , Text              : text.ProductAdded
-        , Data              : {}
-    }
+    return templ
   }
+}
 
-  this.PreSet        = async function(data)
+let List = function(user_, cart_) 
+{
+  this.UserID  	 = user_
+  this.CartID  	 = cart_
+  this.Data     = function()
   {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
+    let user    = data.Get(data.Obj.User,    this.UserID)
+    let cart    = data.Get(data.Obj.Cart,    this.CartID)
+    // TODO set custom product qnty
+    let templ   =
+    {
+        Type                  : Type.Rest
+      , Describe              : 'Cart List'
+      , Request               :
+      {
+            Method            : Method.GET
+          , Path              : '/cart/list'
+          , Body              : {}
+          , Header            : { Authorization: 'Bearer ' + user.Token }
+      }
+      , Response              :
+      {
+            Code              : code.OK
+          , Status            : status.Success
+          , Text              : ''
+          , Data              : 
+          {
+                Products      : cart.Products
+              , Bill          : 
+              {
+                  Total       : cart.Bill.Total
+                , TransitCost : cart.Bill.TransitCost
+                , Tax         : cart.Bill.Tax
+                , NetPrice    : cart.Bill.NetPrice
+              }
+          }
+      }
     }
-    let resp = await Rest(req)
-    data.Request.Body.ProductID  = resp.Data.ProductID    
-    data.Request.Body.StoreID    = resp.Data.StoreID
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    return templ
   }
 
 }
 
-let List = function(cart)
+let Update = function(user_, product_) 
 {
-  this.Data =
+  this.UserID  	 = user_
+  this.ProductID = product_
+  this.Data     = function()
   {
-      Type                  : Type.Rest
-    , Describe              : 'Cart List'
-    , Request               :
+    let user    = data.Get(data.Obj.User,    this.UserID)
+    let product = data.Get(data.Obj.Product, this.ProductID)
+    // TODO set custom product qnty
+    let templ   =
     {
-          Method            : Method.GET
-        , Path              : '/cart/list'
-        , Body              : {}
-        , Header            : { Authorization: '' }
-    }
-    , Response              :
-    {
-          Code              : code.OK
-        , Status            : status.Success
-        , Text              : ''
-        , Data              : 
+        Type            : Type.Rest
+      , Describe        : 'Cart Update'
+      , Request         :
+      {
+          Method        : Method.POST
+        , Path          : '/cart/modify'
+        , Body          : 
         {
-              Products      : 
-              [{
-                  ProductID : ''
-                , Name      : cart.Products[0].Name
-                , Price     : cart.Products[0].Price
-                , Image     : cart.Products[0].Image
-                , Quantity  : cart.Products[0].Quantity
-              }]
-            , Bill          : 
-            {
-                Total       : cart.Bill.Total
-              , TransitCost : cart.Bill.TransitCost
-              , Tax         : cart.Bill.Tax
-              , NetPrice    : cart.Bill.NetPrice
-            }
+            ProductID   : product.ID
+          , Quantity    : 5
         }
+        , Header        : { Authorization: 'Bearer ' + user.Token }
+      }
+      , Response        :
+      {
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : text.ProductUpdated
+        , Data          : {}
+      }
     }
+    return templ
   }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Response.Data.Products[0].ProductID  = resp.Data.ProductID    
-    data.Request.Body.StoreID                 = resp.Data.StoreID    
-    data.Request.Body.ProductID               = resp.Data.ProductID
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
-  }
-
 }
 
-let Update = function(cart)
+let Remove = function(user_, product_) 
 {
-  this.Data =
+  this.UserID  	 = user_
+  this.ProductID = product_
+  this.Data     = function()
   {
-      Type                  : Type.Rest
-    , Describe              : 'Cart Update'
-    , Request               :
+    let user    = data.Get(data.Obj.User,    this.UserID)
+    let product = data.Get(data.Obj.Product, this.ProductID)
+    let cart_id = this.UserID
+    let cart    = data.Get(data.Obj.Cart,    cart_id)
+    cart.RemoveProduct(this.ProductID)
+    let templ   =
     {
-          Method            : Method.POST
-        , Path              : '/cart/modify'
-        , Body              : 
-        {
-                EntryID     : ''
-              , Quantity    : cart.Products[0].Quantity + 1
-        }
-        , Header            : { Authorization: '' }
+        Type                  : Type.Rest
+      , Describe              : 'Cart Remove'
+      , Request               :
+      {
+            Method            : Method.DELETE
+          , Path              : '/cart/remove'
+          , Body              : 
+          {
+            ProductID         : product.ID
+          }
+          , Header            : { Authorization: 'Bearer ' + user.Token }
+      }
+      , Response              :
+      {
+            Code              : code.OK
+          , Status            : status.Success
+          , Text              : text.ProductRemoved
+          , Data              : {}
+      }
     }
-    , Response              :
-    {
-          Code              : code.OK
-        , Status            : status.Success
-        , Text              : text.ProductUpdated
-        , Data              : {}
-    }
+    return templ
   }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.EntryID  = resp.Data.EntryID
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
-  }
-
-}
-
-let Remove = function(cart)
-{
-  this.Data =
-  {
-      Type                  : Type.Rest
-    , Describe              : 'Cart Remove'
-    , Request               :
-    {
-          Method            : Method.DELETE
-        , Path              : '/cart/remove'
-        , Body              : 
-        {
-             EntryID        : ''
-        }
-        , Header            : { Authorization: '' }
-    }
-    , Response              :
-    {
-          Code              : code.OK
-        , Status            : status.Success
-        , Text              : text.ProductRemoved
-        , Data              : {}
-    }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.EntryID  = resp.Data.EntryID
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
-  }
-
 }
 
 module.exports =

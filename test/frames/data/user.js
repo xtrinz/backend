@@ -1,65 +1,32 @@
-const { mode } = require("../../../pkg/common/models")
+const { Cart } = require('./cart')
 
-let Customer =
+let User = function(mode)
 {
-    MobileNo  : '+911122334455'
-  , Name      : 'Customer'
-  , Email     : 'cutomer@cutomer.com'
-  , Password  : 'PasswordCustomer'
-  , Mode      : mode.User
-}
+  User.Count[mode]++
+  let off
+  switch(mode)
+  {
+  case 'Admin': off = 0 ; break;
+  case 'User' : off = 30; break;
+  case 'Agent': off = 60; break;
+  }
+  this.MobileNo    = '+9100110011{0}'.format(('00' + (User.Count[mode] + off)).substr(-2))
+  this.Name        = mode + User.Count[mode]
+  this.Email       = this.Name + '@' + mode + '.com'
+  this.Password    = 'Password' + this.Name
+  this.Mode        = mode
+  this.Token       = ''
+  this.SocketID    = ''
+  this.OTP         = ''
 
-let Seller =
-{
-    MobileNo  : '+916677889900'
-  , Name      : 'Seller'
-  , Email     : 'seller@seller.com'
-  , Password  : 'PasswordSeller'
-  , Mode      : mode.User
-}
+  new Cart(this.Name) // Create a cart for the user
 
-let Staff =
-{
-    MobileNo  : '+911133557799'
-  , Name      : 'Staff'
-  , Email     : 'staff@staff.com'
-  , Password  : 'PasswordStaff'
-  , Mode      : mode.User
+  User.Users[this.Name] = this
 }
-
-let Staff2 =
-{
-    MobileNo  : '+911133557711'
-  , Name      : 'Staff2'
-  , Email     : 'staff2@staff2.com'
-  , Password  : 'PasswordStaff2'
-  , Mode      : mode.User
-}
-
-let Agent =
-{
-    MobileNo  : '+912244668800'
-  , Name      : 'Agent'
-  , Email     : 'agent@agent.com'
-  , Password  : 'PasswordAgent'
-  , Mode      : mode.Agent
-}
-
-let Admin =
-{
-    MobileNo  : '+910044008800'
-  , Name      : 'Admin'
-  , Email     : 'admin@admin.com'
-  , Password  : 'PasswordAdmin'
-  , Mode      : mode.Admin
-}
+User.Count = { Admin: 0, User: 0, Agent: 0 }
+User.Users = {}
 
 module.exports =
 {
-      Customer  : Customer
-    , Seller    : Seller
-    , Staff     : Staff
-    , Staff2    : Staff2
-    , Agent     : Agent
-    , Admin     : Admin
+  User  : User
 }

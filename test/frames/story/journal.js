@@ -1,11 +1,16 @@
 const event        = require('../event/journal')
     , { TestCase } = require("../../lib/driver")
 
-const Std = function(journal)
+const Std = function(user_, addr_)
 {
+    let cart_  = user_
     let tc     = new TestCase('Journal Management')
-    let step01 = new event.Create(journal)          ; tc.AddStep(step01)
-    let step02 = new event.ConfirmPayment(journal)  ; tc.AddStep(step02)
+    let steps  =
+    [
+          new event.Create         (user_, addr_, cart_)
+        //, new event.ConfirmPayment (user_, addr_, cart_)
+    ]
+    steps.forEach((step) => tc.AddStep(step))
     return tc
 }
 

@@ -4,27 +4,38 @@ const event         = require('../event/user')
 const Std = function(user_)
 {
     let tc    = new TestCase('User Management')
-    let step1 = new event.RegisterNew(user_)          ; tc.AddStep(step1)
-    let step2 = new event.RegisterReadOTP(user_)      ; tc.AddStep(step2)
-    let step3 = new event.Register(user_)             ; tc.AddStep(step3)
-    let step4 = new event.Login(user_)                ; tc.AddStep(step4)
-    let step5 = new event.PasswordGenOTP(user_)       ; tc.AddStep(step5)
-    let step6 = new event.PasswordConfirmMobNo(user_) ; tc.AddStep(step6)
-    let step7 = new event.PasswordSet(user_)          ; tc.AddStep(step7)
-    let step8 = new event.ProfileGet(user_)           ; tc.AddStep(step8)
-    let step9 = new event.ProfileEdit(user_)          ; tc.AddStep(step9)
+    const steps_ =
+    [
+          new event.RegisterNew         (user_)
+        , new event.RegisterReadOTP     (user_)
+        , new event.Register            (user_)
+        , new event.Login               (user_)
+        , new event.PasswordGenOTP      (user_)
+        , new event.PasswordConfirmMobNo(user_)
+        , new event.PasswordSet         (user_)
+        , new event.ProfileGet          (user_)
+        , new event.ProfileEdit         (user_)
+    ]
+    steps_.forEach((step)=> {tc.AddStep(step) })
     return tc
 }
+
 
 const AddUser = function(tc, user_)
 {
-    let step1 = new event.RegisterNew(user_)          ; tc.AddStep(step1)
-    let step2 = new event.RegisterReadOTP(user_)      ; tc.AddStep(step2)
-    let step3 = new event.Register(user_)             ; tc.AddStep(step3)
+    const steps_ =
+    [
+        new event.RegisterNew         (user_)
+      , new event.RegisterReadOTP     (user_)
+      , new event.Register            (user_)
+    ]
+    steps_.forEach((step)=> {tc.AddStep(step) })
     return tc
 }
 
-module.exports = {
+
+module.exports =
+{
       Std     : Std
     , AddUser : AddUser
 }

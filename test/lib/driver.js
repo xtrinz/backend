@@ -1,6 +1,6 @@
-const compare        = require("./compare")
-    , { Rest, Type } = require("./medium")
-    , db             = require("../../pkg/common/database")
+const compare                = require("./compare")
+    , { Rest, Type, Method } = require("./medium")
+    , db                     = require("../../pkg/common/database")
 
 const prints = 
 {
@@ -23,17 +23,25 @@ function TestRig()
         if (data.Type == Type.Rest)
         {
             let resp = await Rest(data.Request)
-               , sts = await compare.DeepEqual(resp, data.Response)
+               , sts = await compare.DeepEqual(resp, data.Response, data.Skip)
             if(!sts)
             {
                 console.log(prints.Failed) // console.log('\nRequest :', data.Request)
-                console.log('\nExpected : ', data.Response, '\nReceived : ', resp,)
-                return false
+                console.log('\nExpected : ', data.Response, '\nReceived : ', resp)
+                return {
+                    Status: false
+                    , Data: resp
+                }
             }
-            console.log(prints.Passed)
-            return true
+            return {
+                Status: true
+                , Data: resp
+            }
         }
-        else { return false }
+        else { return {
+            Status: false
+            , Data: {}
+        } }
     }
     this.Run         = async function()
     {
@@ -45,19 +53,22 @@ function TestRig()
             console.log(prints.Head.format(('000' + (suite + 1)).substr(-2), test.Describe))
             for(let case_=0; case_ < test.Steps.length; case_++)
             {                        
-                let step = test.Steps[case_]
-                console.log(prints.Step.format(('000' + (case_ + 1)).substr(-2), step.Data.Describe))
-                if(step.PreSet) { step.Data = await step.PreSet(step.Data) }
-                step.Data.Index = suite + 1
-                let res         = await this.Exec(step.Data)
-                if (!res)
+                let step    = test.Steps[case_]
+                let data    = step.Data()
+                console.log(prints.Step.format(('000' + (case_ + 1)).substr(-2), data.Describe))
+                
+                data.Index  = suite + 1
+                let res     = await this.Exec(data)
+                if(step.PostSet) { await step.PostSet(res.Data) }
+                
+                if (!res.Status)
                 {
                      this.Failed.push(
                     {
                         No      : suite + 1,
                         Title   : test.Describe,
-                        StepNo  : step.Data.Index,
-                        Step    : step.Data.Describe
+                        StepNo  : data.Index,
+                        Step    : data.Describe
                     })
                     failed = true
                 }
@@ -75,8 +86,8 @@ function TestRig()
             ))
         }
 
-        console.log('\nPassed: ', this.Tests.length - this.FailedCnt)
-        console.log('Failed: '  , this.FailedCnt)
+        //console.log('\nPassed: ', this.Tests.length - this.FailedCnt)
+        console.log('\nFailed: '  , this.FailedCnt)
         console.log('Total : '  , this.Tests.length)
 
         await db.client.close()
@@ -92,9 +103,24 @@ function TestCase(desc)
 
 var TestSuite  = new TestRig()
 
+var read = async function ()
+{
+    console.log(prints.ReadParam)
+    let req =
+    {
+        Method       : Method.GET
+        , Path       : '/test'
+        , Body       : {}
+        , Header     : {}
+    }
+    let resp = await Rest(req)
+    return resp
+}
+
 module.exports =
 {
       Suite    : TestSuite
     , TestCase : TestCase
     , prints   : prints
+    , read     : read
 }

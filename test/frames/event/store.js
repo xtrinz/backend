@@ -1,506 +1,439 @@
-const { Method, Type, Rest }  = require("../../lib/medium")
-    , { prints }              = require("../../lib/driver")
-    , jwt                     = require("../../../pkg/common/jwt")
-    , { code, status, text }  = require("../../../pkg/common/error")
-    , { task }                = require("../../../pkg/common/models")
+const { Method, Type }       = require("../../lib/medium")
+    , data                   = require("../data/data")
+    , { read }               = require("../../lib/driver")
+    , { code, status, text } = require("../../../pkg/common/error")
+    , { task }               = require("../../../pkg/common/models")
 
-let RegisterNew = function(store)
+let RegisterNew = function(user_, store_) 
 {
-  this.Data =
-  {
-      Type                  : Type.Rest
-    , Describe              : 'Store Register New'
-    , Request               :
+    this.UserID   = user_
+    this.StoreID  = store_
+    this.Data     = function()
     {
-          Method            : Method.POST
-        , Path              : '/store/register'
-        , Body              : 
+      let store  = data.Get(data.Obj.Store, this.StoreID)
+      let user   = data.Get(data.Obj.User, this.UserID)      
+      let templ =
+      {
+          Type                  : Type.Rest
+        , Describe              : 'Store Register New'
+        , Request               :
         {
-            Task            : task.New
-          , Name            : store.Name
-          , Image           : store.Image
-          , Type            : store.Type
-          , Certs           : store.Certs
-          , MobileNo        : store.MobileNo
-          , Email           : store.Email
-          , Longitude       : store.Longitude
-          , Latitude        : store.Latitude
-          , Address         :
+              Method            : Method.POST
+            , Path              : '/store/register'
+            , Body              : 
+            {
+                Task            : task.New
+              , Name            : store.Name
+              , Image           : store.Image
+              , Type            : store.Type
+              , Certs           : store.Certs
+              , MobileNo        : store.MobileNo
+              , Email           : store.Email
+              , Longitude       : store.Longitude
+              , Latitude        : store.Latitude
+              , Address         :
+              {
+                    Line1       : store.Address.Line1
+                  , Line2       : store.Address.Line2
+                  , City        : store.Address.City
+                  , PostalCode  : store.Address.PostalCode
+                  , State       : store.Address.State
+                  , Country     : store.Address.Country
+              }
+            }
+            , Header            : { Authorization : 'Bearer ' + user.Token }
+        }
+        , Skip                  : [ 'StoreID' ]
+        , Response              :
+        {
+              Code              : code.OK
+            , Status            : status.Success
+            , Text              : text.OTPSendToMobNo.format(
+                                    store.MobileNo.substr(
+                                    store.MobileNo.length - 4))
+            , Data              : { StoreID: '' }
+        }
+      }
+      return templ
+    }
+
+    this.PostSet        = async function(res_)
+    {
+      let resp  = await read()
+        , store = data.Get(data.Obj.Store, this.StoreID)
+      store.OTP = resp.Data.OTP
+      store.ID  = res_.Data.StoreID
+      data.Set(data.Obj.Store, this.StoreID, store)
+    }
+}
+
+let RegisterReadOTP = function(user_, store_) 
+{
+  this.UserID   = user_
+  this.StoreID  = store_
+  this.Data     = function()
+  {
+    let store = data.Get(data.Obj.Store, this.StoreID)
+    let user  = data.Get(data.Obj.User , this.UserID )      
+    let templ =
+    {
+          Type         : Type.Rest
+        , Describe     : 'Store Register Read_OTP'
+        , Request      :
+        {
+            Method     : Method.POST
+          , Path       : '/store/register'
+          , Body       : 
           {
-                Line1       : store.Address.Line1
-              , Line2       : store.Address.Line2
-              , City        : store.Address.City
-              , PostalCode  : store.Address.PostalCode
-              , State       : store.Address.State
-              , Country     : store.Address.Country
+              Task     : task.ReadOTP
+            , MobileNo : store.MobileNo
+            , OTP      : store.OTP
+          }
+          , Header     : { Authorization: 'Bearer ' + user.Token }
+        }
+        , Response     :
+        {
+            Code       : code.OK
+          , Status     : status.Success
+          , Text       : text.OTPConfirmed
+          , Data       : {}
+        }
+
+    } 
+    return templ
+  }
+}
+
+let RegisterApprove =  function(admin_, store_) 
+{
+  this.AdminID  = admin_
+  this.StoreID  = store_
+  this.Data     = function()
+  {
+    let store = data.Get(data.Obj.Store, this.StoreID)
+    let admin = data.Get(data.Obj.User, this.AdminID)
+    let templ =
+    {
+        Type            : Type.Rest
+      , Describe        : 'Store Register Approve'
+      , Request         :
+      {
+          Method        : Method.POST
+        , Path          : '/store/register'
+        , Body          : 
+        {
+            Task        : task.Approve
+          , StoreID     : store.ID
+        }
+        , Header        :
+        {
+          Authorization : 'Bearer ' + admin.Token
+        }
+      }
+      , Response        :
+      {
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : text.Approved
+        , Data          : {}
+      }
+    }
+    return templ
+  }
+}
+
+let Read =   function(user_, store_) 
+{
+  this.UserID   = user_
+  this.StoreID  = store_
+  this.Data     = function()
+  {
+    let store = data.Get(data.Obj.Store, this.StoreID)
+    let user  = data.Get(data.Obj.User, this.UserID)
+    let templ =
+    {
+        Type            : Type.Rest
+      , Describe        : 'Store View'
+      , Request         :
+      {
+          Method        : Method.GET
+        , Path          : '/store/view'
+        , Body          : {}
+        , Query         : 
+        {
+          StoreID       : store.ID
+        }
+        , Header        :
+        {
+          Authorization : 'Bearer ' + user.Token
+        }
+      }
+      , Response         :
+      {
+          Code           : code.OK
+        , Status         : status.Success
+        , Text           : ''
+        , Data           :
+        {
+            StoreID      : store.ID
+          , Name         : store.Name
+          , Image        : store.Image
+          , Type         : store.Type
+          , Certs        : store.Certs
+          , MobileNo     : store.MobileNo
+          , Email        : store.Email
+          , Longitude    : store.Longitude
+          , Latitude     : store.Latitude
+          , Address      :
+          {
+              Line1      : store.Address.Line1
+            , Line2      : store.Address.Line2
+            , City       : store.Address.City
+            , PostalCode : store.Address.PostalCode
+            , State      : store.Address.State
+            , Country    : store.Address.Country
           }
         }
-        , Header            : {}
+      }
     }
-    , Response              :
-    {
-          Code              : code.OK
-        , Status            : status.Success
-        , Text              : text.OTPSendToMobNo.format(
-                                store.MobileNo.substr(
-                                store.MobileNo.length - 4))
-        , Data              : {}
-    }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = 
-    {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp  = await Rest(req)
-      , token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    return templ
   }
 }
 
-let RegisterReadOTP = function(store)
+let List = function(user_, store_) 
 {
-  this.Data =
+  this.UserID   = user_
+  this.StoreID  = store_
+  this.Data     = function()
   {
-        Type         : Type.Rest
-      , Describe     : 'Store Register Read_OTP'
-      , Request      :
+    let store = data.Get(data.Obj.Store, this.StoreID)
+    let user  = data.Get(data.Obj.User, this.UserID)
+    let templ =
+    {
+        Type            : Type.Rest
+      , Describe        : 'Store List'
+      , Request         :
       {
-          Method     : Method.POST
-        , Path       : '/store/register'
-        , Body       : 
+          Method        : Method.GET
+        , Path          : '/store/list'
+        , Body          : {}
+        , Header        : { Authorization : 'Bearer ' + user.Token }
+      }
+      , Response        :
+      {
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : ''
+        , Data          :
         {
-            Task     : task.ReadOTP
-          , MobileNo : store.MobileNo
-          , OTP      : ''
+          Owned :
+            [{
+                StoreID : store.ID
+              , Name    : store.Name
+              , Image   : store.Image
+              , Type    : store.Type
+              , State   : store.State
+            }]
+          , Accepted : []
+          , Pending  : []
         }
-        , Header     : { Authorization: '' }
       }
-      , Response     :
-      {
-          Code       : code.OK
-        , Status     : status.Success
-        , Text       : text.OTPConfirmed
-        , Data       : {}
-      }
-
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
     }
-    let resp = await Rest(req)
-    data.Request.Body.OTP = resp.Data.OTP
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    return templ
   }
 }
 
-let RegisterApprove = function(store)
+let AddStaffRequest = function(owner_, staff_, store_) 
 {
-  this.Data =
+  this.OwnerID  = owner_
+  this.StoreID  = store_
+  this.StaffID  = staff_
+  this.Data     = function()
   {
-      Type            : Type.Rest
-    , Describe        : 'Store Register Approve'
-    , Request         :
+    let store  = data.Get(data.Obj.Store, this.StoreID)
+    let owner  = data.Get(data.Obj.User, this.OwnerID)
+    let staff  = data.Get(data.Obj.User, this.StaffID)
+    let templ =
     {
-        Method        : Method.POST
-      , Path          : '/store/register'
-      , Body          : 
+        Type            : Type.Rest
+      , Describe        : 'Store Add-Staff Request'
+      , Request         :
       {
-          Task        : task.Approve
-        , StoreID     : ''
+          Method        : Method.POST
+        , Path          : '/store/staff'
+        , Body          : 
+        {
+            Task        : task.Request
+          , StoreID     : store.ID
+          , MobileNo    : staff.MobileNo
+        }
+        , Header        : { Authorization : 'Bearer ' + owner.Token }
       }
-      , Header        :
+      , Response        :
       {
-        Authorization : ''
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : text.WaitingForStaffReply
+        , Data          : {}
       }
     }
-    , Response        :
-    {
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : text.Approved
-      , Data          : {}
-    }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.StoreID = resp.Data.StoreID
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    return templ
   }
 }
 
-let Read = function(store)
+let AddStaffAccept = function(staff_, store_) 
 {
-  this.Data =
+  this.StaffID  = staff_
+  this.StoreID  = store_
+  this.Data     = function()
   {
-      Type            : Type.Rest
-    , Describe        : 'Store View'
-    , Request         :
+    let store  = data.Get(data.Obj.Store, this.StoreID)
+    let staff  = data.Get(data.Obj.User, this.StaffID)
+    let templ =
     {
-        Method        : Method.GET
-      , Path          : '/store/view'
-      , Body          : {}
-      , Query         : 
+        Type            : Type.Rest
+      , Describe        : 'Store Add-Staff Accept'
+      , Request         :
       {
-        StoreID       : ''
+          Method        : Method.POST
+        , Path          : '/store/staff'
+        , Body          :
+        {
+            Task        : task.Accept
+          , StoreID     : store.ID
+        }
+        , Header        : { Authorization : 'Bearer ' + staff.Token }
       }
-      , Header        :
+      , Response        :
       {
-        Authorization : ''
-      }
-    }
-    , Response        :
-    {
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : ''
-      , Data          :
-      {
-            StoreID         : ''
-          , Name            : store.Name
-          , Image           : store.Image
-          , Type            : store.Type
-          , Certs           : store.Certs
-          , MobileNo        : store.MobileNo
-          , Email           : store.Email
-          , Longitude       : store.Longitude
-          , Latitude        : store.Latitude
-          , Address         :
-          {
-                Line1       : store.Address.Line1
-              , Line2       : store.Address.Line2
-              , City        : store.Address.City
-              , PostalCode  : store.Address.PostalCode
-              , State       : store.Address.State
-              , Country     : store.Address.Country
-          }
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : text.ResponseUpdated
+        , Data          : {}
       }
     }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Query.StoreID = resp.Data.StoreID
-    data.Response.Data.StoreID = resp.Data.StoreID    
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    return templ
   }
 }
 
-let List = function(store)
+let AddStaffRevoke = function(owner_, staff_, store_) 
 {
-  this.Data =
+  this.OwnerID  = owner_
+  this.StoreID  = store_
+  this.StaffID  = staff_
+  this.Data     = function()
   {
-      Type            : Type.Rest
-    , Describe        : 'Store List'
-    , Request         :
+    let store  = data.Get(data.Obj.Store, this.StoreID)
+    let owner  = data.Get(data.Obj.User, this.OwnerID)
+    let staff  = data.Get(data.Obj.User, this.StaffID)
+    let templ =
     {
-        Method        : Method.GET
-      , Path          : '/store/list'
-      , Body          : {}
-      , Header        : { Authorization : '' }
-    }
-    , Response        :
-    {
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : ''
-      , Data          :
+        Type            : Type.Rest
+      , Describe        : 'Store Add-Staff Revoke'
+      , Request         :
       {
-        Owned :
-          [{
-              StoreID : ''
-            , Name    : store.Name
-            , Image   : store.Image
-            , Type    : store.Type
-            , State   : store.State
-          }]
-        , Accepted : []
-        , Pending  : []
+          Method        : Method.POST
+        , Path          : '/store/staff'
+        , Body          :
+        {
+            Task          : task.Revoke
+          , StaffMobileNo : staff.MobileNo
+          , StoreID       : store.ID
+        }
+        , Header        : { Authorization : 'Bearer ' + owner.Token }
+      }
+      , Response        :
+      {
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : text.Revoked
+        , Data          : {}
       }
     }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Response.Data.Owned[0].StoreID = resp.Data.StoreID    
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    return templ
   }
 }
 
-let AddStaffRequest = function(user)
+let AddStaffRelieve = function(owner_, staff_, store_) 
 {
-  this.Data =
+  this.OwnerID  = owner_
+  this.StoreID  = store_
+  this.StaffID  = staff_
+  this.Data     = function()
   {
-      Type            : Type.Rest
-    , Describe        : 'Store Add-Staff Request'
-    , Request         :
+    let store  = data.Get(data.Obj.Store, this.StoreID)
+    let owner  = data.Get(data.Obj.User, this.OwnerID)
+    let staff  = data.Get(data.Obj.User, this.StaffID)
+    let templ =
     {
-        Method        : Method.POST
-      , Path          : '/store/staff'
-      , Body          : 
+        Type            : Type.Rest
+      , Describe        : 'Store Add-Staff Relieve'
+      , Request         :
       {
-          Task        : task.Request
-        , StoreID     : ''
-        , MobileNo    : user.MobileNo
+          Method        : Method.POST
+        , Path          : '/store/staff'
+        , Body          :
+        {
+          Task          : task.Relieve
+        , StaffMobileNo : staff.MobileNo
+        , StoreID       : store.ID
+        }
+        , Header        : { Authorization : 'Bearer ' + owner.Token }
       }
-      , Header        : { Authorization : '' }
+      , Response        :
+      {
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : text.Relieved
+        , Data          : {}
+      }
     }
-    , Response        :
-    {
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : text.WaitingForStaffReply
-      , Data          : {}
-    }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.StoreID = resp.Data.StoreID    
-    let token = await jwt.Sign({ _id: resp.Data.AdminID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    return templ
   }
 }
 
-let AddStaffAccept = function(user)
+let ListStaff = function(owner_, staff_, store_) 
 {
-  this.Data =
+  this.OwnerID  = owner_
+  this.StoreID  = store_
+  this.StaffID  = staff_
+  this.Data     = function()
   {
-      Type            : Type.Rest
-    , Describe        : 'Store Add-Staff Accept'
-    , Request         :
+    let store  = data.Get(data.Obj.Store, this.StoreID)
+    let owner  = data.Get(data.Obj.User, this.OwnerID)
+    let staff  = data.Get(data.Obj.User, this.StaffID)
+    let templ =
     {
-        Method        : Method.POST
-      , Path          : '/store/staff'
-      , Body          :
-      { 
-          Task    : task.Accept
-        , StoreID : ''
-      }
-      , Header        : { Authorization : '' }
-    }
-    , Response        :
-    {
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : text.ResponseUpdated
-      , Data          : {}
-    }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.StoreID = resp.Data.StoreID
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
-  }
-}
-
-let AddStaffRevoke = function(user)
-{
-  this.Data =
-  {
-      Type            : Type.Rest
-    , Describe        : 'Store Add-Staff Revoke'
-    , Request         :
-    {
-        Method        : Method.POST
-      , Path          : '/store/staff'
-      , Body          :
+        Type            : Type.Rest
+      , Describe        : 'Store Staff List'
+      , Request         :
       {
-          Task    : task.Revoke
-        , StaffID : ''
-        , StoreID : ''
+          Method        : Method.GET
+        , Path          : '/store/staff'
+        , Body          : {}
+        , Query         : 
+        {
+          StoreID       : store.ID
+        }
+        , Header        : { Authorization : 'Bearer ' + owner.Token }
       }
-      , Header        : { Authorization : '' }
-    }
-    , Response        :
-    {
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : text.Revoked
-      , Data          : {}
-    }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.StaffID = resp.Data.UserID
-    data.Request.Body.StoreID = resp.Data.StoreID
-    let token = await jwt.Sign({ _id: resp.Data.AdminID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
-  }
-}
-
-let AddStaffRelieve = function(user)
-{
-  this.Data =
-  {
-      Type            : Type.Rest
-    , Describe        : 'Store Add-Staff Relieve'
-    , Request         :
-    {
-        Method        : Method.POST
-      , Path          : '/store/staff'
-      , Body          :
+      , Response        :
       {
-          Task    : task.Relieve
-        , StaffID : ''
-        , StoreID : ''
-      }
-      , Header        : { Authorization : '' }
-    }
-    , Response        :
-    {
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : text.Relieved
-      , Data          : {}
-    }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.StaffID = resp.Data.UserID
-    data.Request.Body.StoreID = resp.Data.StoreID
-    let token = await jwt.Sign({ _id: resp.Data.AdminID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
-  }
-}
-
-let ListStaff = function(user)
-{
-  this.Data =
-  {
-      Type            : Type.Rest
-    , Describe        : 'Store Staff List'
-    , Request         :
-    {
-        Method        : Method.GET
-      , Path          : '/store/staff'
-      , Body          : {}
-      , Query         : 
-      {
-        StoreID       : ''
-      }
-      , Header        : { Authorization : '' }
-    }
-    , Response        :
-    {
-        Code          : code.OK
-      , Status        : status.Success
-      , Text          : ''
-      , Data          :
-      {
-          Approved :
-          [{
-              StaffID : ''
-            , Name    : user.Name
-            , MobileNo: user.MobileNo
-          }]
-        , Pending  : []
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : ''
+        , Data          :
+        {
+            Approved :
+            [{
+                Name    : staff.Name
+              , MobileNo: staff.MobileNo
+            }]
+          , Pending  : []
+        }
       }
     }
-  }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Query.StoreID = resp.Data.StoreID
-    data.Response.Data.Approved[0].StaffID = resp.Data.UserID    
-    let token = await jwt.Sign({ _id: resp.Data.AdminID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    return templ
   }
 }
 

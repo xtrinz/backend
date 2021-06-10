@@ -1,82 +1,59 @@
-const { Method, Type, Rest }  = require("../../lib/medium")
-    , { prints }              = require("../../lib/driver")
-    , jwt                     = require("../../../pkg/common/jwt")
-    , { code, status, text }  = require("../../../pkg/common/error")
+const { Method, Type }       = require("../../lib/medium")
+    , { code, status, text } = require("../../../pkg/common/error")
+    , data                   = require("../data/data")
 
-let Create = function(journal)
+let Create = function(user_, addr_, cart_) 
 {
-  this.Data =
+  this.UserID  	 = user_
+  this.AddressID = addr_
+  this.CartID    = cart_
+  this.Data      = function()
   {
-      Type                      : Type.Rest
-    , Describe                  : 'Journal Create [Checkout]'
-    , Request                   :
-    {
-          Method                : Method.POST
-        , Path                  : '/journal/create'
-        , Body                  : 
-        {
-            Longitude           : journal.Longitude
-          , Latitude            : journal.Latitude
-          , Address             :
-          {
-                 Name           : journal.Address.Name
-              , Line1           : journal.Address.Line1
-              , Line2           : journal.Address.Line2
-              , City            : journal.Address.City
-              , PostalCode      : journal.Address.PostalCode
-              , State           : journal.Address.State
-              , Country         : journal.Address.Country
-          }
-        }
-        , Header                : { Authorization: '' }
-    }
-    , Response                  :
-    {
-          Code                  : code.OK
-        , Status                : status.Success
-        , Text                  : text.PaymentInitiated
-        , Data                  :
-        {
-            Sheet               :
-            {
-              Products          : 
-                [{
-                    ProductID   : ''
-                  , Name        : journal.Products[0].Name
-                  , Price       : journal.Products[0].Price
-                  , Image       : journal.Products[0].Image
-                  , Quantity    : journal.Products[0].Quantity
-                }]
-              , Bill            : 
-                {
-                    Total       : journal.Bill.Total
-                  , TransitCost : journal.Bill.TransitCost
-                  , Tax         : journal.Bill.Tax
-                  , NetPrice    : journal.Bill.NetPrice
-                }
-            }
-            , Stripe            : {}
-        }
-    }
-  }
+    let user     = data.Get(data.Obj.User,    this.UserID)
+    let addr     = data.Get(data.Obj.Address, this.AddressID)
+    let cart     = data.Get(data.Obj.Cart,    this.CartID)
 
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
+    let templ =
+    {
+        Type              : Type.Rest
+      , Describe          : 'Journal Create [Checkout]'
+      , Request           :
+      {                     
+          Method          : Method.POST
+        , Path            : '/journal/create'
+        , Body            : 
+        {                     
+            Longitude     : addr.Longitude
+          , Latitude      : addr.Latitude
+          , Address       : addr.Address
+        }                     
+        , Header          : { Authorization: 'Bearer ' + user.Token }
+      }                       
+      , Skip              : [ 'Stripe' ]                    
+      , Response          :
+      {                       
+          Code            : code.OK
+        , Status          : status.Success
+        , Text            : text.PaymentInitiated
+        , Data            :
+        {                       
+          Sheet           :
+          {                     
+            Products      : cart.Products
+          , Bill          : 
+            {                 
+              Total       : cart.Bill.Total
+            , TransitCost : cart.Bill.TransitCost
+            , Tax         : cart.Bill.Tax
+            , NetPrice    : cart.Bill.NetPrice
+            }               
+          }                 
+          , Stripe        : {}
+        }
+      }
     }
-    let resp  = await Rest(req)
-    data.Response.Data.Sheet.Products[0].ProductID = resp.Data.ProductID
-    data.Response.Data.Stripe = { ...resp.Data.Stripe }
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    return templ
   }
-
 }
 
 let ConfirmPayment = function(journal)

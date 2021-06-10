@@ -1,15 +1,19 @@
-const event                                = require('../event/cart')
-    , { TestCase }                         = require("../../lib/driver")
+const event        = require('../event/cart')
+    , { TestCase } = require("../../lib/driver")
 
-const Std = function(cart)
+    , Std = function(user_, product_)
 {
-    let tc     = new TestCase('Cart Management')
-    let step01 = new event.Insert(cart)         ; tc.AddStep(step01)
-    let step02 = new event.Update(cart)         ; tc.AddStep(step02)
-    let step03 = new event.Remove(cart)         ; tc.AddStep(step03)
-
-    let step04 = new event.Insert(cart)         ; tc.AddStep(step04)
-    let step05 = new event.List  (cart)         ; tc.AddStep(step05)
+    let cart_   = user_
+    let tc      = new TestCase('Cart Management')
+    const steps =
+    [
+          new event.Insert (user_, cart_, product_)
+        , new event.List   (user_, cart_)
+        , new event.Update (user_, product_)
+        , new event.Remove (user_, product_)
+        , new event.Insert (user_, cart_, product_)
+    ]
+    steps.forEach((step) => tc.AddStep(step))
     return tc
 }
 

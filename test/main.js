@@ -36,39 +36,25 @@ const { Suite } = require("./lib/driver")
       , story : require('./frames/story/transit')        
     }
 
-    // User Management
-    let user_    = user.data.Admin
-      , tc1      = user.story.Std(user_)
-    Suite.AddTest(tc1)
+  let admin_1       = new    user.data.User   ('Admin')
+    , user_1_owner  = new    user.data.User   ('User')
+    , user_2_staff  = new    user.data.User   ('User')
+    , user_3_buyer  = new    user.data.User   ('User')
+    , store_1       = new   store.data.Store  ()
+    , product_1     = new product.data.Product()
+    , addr_1        = new address.data.Address()
+    , addr_2        = new address.data.Address()
 
-    // Store Management
-    let store_   = store.data.Store
-      , tc2      = store.story.Std(store_)
-    Suite.AddTest(tc2)
+  const tc =
+  [
+         user.story.Std(admin_1.Name )
+    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_2_staff.Name, store_1.Name )
+    , product.story.Std(user_2_staff.Name, store_1.Name, product_1.Name )
+    , address.story.Std(addr_1.Address.Name, user_3_buyer.Name )
+    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
+    , journal.story.Std(user_3_buyer.Name, addr_2.Address.Name)
+    //, transit.story.Std()
+  ]
+  tc.forEach((test)=> Suite.AddTest(test))
 
-    // Product Management
-    let product_ = product.data.Product
-      , tc3      = product.story.Std(product_)
-    Suite.AddTest(tc3)
-
-    // Address Management
-    let addr_    = address.data.Address
-      , tc4      = address.story.Std(addr_)
-    Suite.AddTest(tc4)
-
-    // Cart Management
-    let cart_    = cart.data.Cart
-      , tc5      = cart.story.Std(cart_)
-    Suite.AddTest(tc5)
-
-    // Journal Management
-    let journal_ = journal.data.Journal
-      , tc6      = journal.story.Std(journal_)
-    Suite.AddTest(tc6)
-
-    // Transit Events
-    let transit_ = transit.data.Transit
-      , tc7      = transit.story.Std(transit_)
-    Suite.AddTest(tc7)
-
-    Suite.Run()
+  Suite.Run()
