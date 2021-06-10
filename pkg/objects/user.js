@@ -1,7 +1,6 @@
 const { users }               = require("../common/database")
-    , { states, mode, query } = require("../common/models")
+    , { states, query }       = require("../common/models")
     , { Err_, code, reason}   = require('../common/error')
-    , test                    = require('../common/test')
     , otp                     = require('../common/otp')
     , jwt                     = require("../common/jwt")
     , { ObjectID, ObjectId }  = require("mongodb")
@@ -131,7 +130,6 @@ function User(mob_no, user_mode)
         this.Data.Otp             = hash
         this.Data.State           = states.New
         await this.Save()
-        test.Set('UserID', this.Data._id) // #101
         console.log('user-created', { User: this.Data})
     }
 

@@ -1,6 +1,5 @@
 const { ObjectId, ObjectID } = require('mongodb')
     , { Err_, code, reason } = require("../common/error")
-    , test                    = require('../common/test')
     , { query }              = require("../common/models")
     , { products }           = require("../common/database")
 
@@ -71,7 +70,6 @@ function Product(data)
         const product = await this.Get(key, query.Custom)
         if (product) Err_(code.BAD_REQUEST, reason.ProductExists)
         this.Data._id = new ObjectID()
-        test.Set('ProductID', this.Data._id) // #101
         await this.Save()
         console.log('new-product-added', { Product: this.Data})
    }

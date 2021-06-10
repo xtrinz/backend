@@ -2,7 +2,6 @@ const { ObjectId, ObjectID } = require("mongodb")
     , { users }              = require("../common/database")
     , { Err_, code, reason } = require("../common/error")
     , { states }             = require('../common/models')
-    , test                   = require('../common/test')
 
 function Address(data)
 {
@@ -43,7 +42,6 @@ function Address(data)
             console.log('address-insertion-failed', this)
             Err_(code.INTERNAL_SERVER, reason.DBInsertionFailed)
         }
-        test.Set('AddressID', this.Data._id) // #101
         console.log('address-inserted', query, opts, this.Data.Address)
         return this.Data._id
     }

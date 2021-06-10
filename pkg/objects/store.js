@@ -2,7 +2,6 @@ const { User }                      = require("./user")
     , { ObjectID, ObjectId }        = require("mongodb")
     , { stores }                    = require("../common/database")
     , otp                           = require('../common/otp')
-    , test                          = require('../common/test')
     , { Err_, code, reason}         = require('../common/error')
     , { states, mode, query, task } = require("../common/models")
 
@@ -170,9 +169,6 @@ function Store(data)
         this.Data.Otp        = hash
         this.Data.State      = states.New
         await this.Save()
-
-        test.Set('StoreID', this.Data._id) // #101
-        test.Set('AdminID', this.Data.AdminID) // #101
 
         const user = new User()
         const resp  = await user.Get(this.Data.AdminID, query.ByID)

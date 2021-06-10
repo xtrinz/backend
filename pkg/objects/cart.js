@@ -3,7 +3,6 @@ const { ObjectID, ObjectId }  = require("mongodb")
     , { carts }               = require("../common/database")
     , { Err_, code , reason } = require("../common/error")
     , { query }               = require("../common/models")
-    , test                    = require('../common/test')
 
 function Cart(user_id)
 {
@@ -148,7 +147,6 @@ function CartEntry(data)
   this.Insert     = async function (cart_id)
   {
     this.Data._id = ObjectId(this.Data.ProductID)
-    test.Set('EntryID', this.Data._id) // #101
     const key   = { _id: ObjectId(cart_id)         }
         , opts    = { $push: { Products: this.Data } }
         , resp    = await carts.updateOne(key, opts)
