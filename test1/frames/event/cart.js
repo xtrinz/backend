@@ -132,6 +132,9 @@ let Remove = function(user_, product_)
   {
     let user    = data.Get(data.Obj.User,    this.UserID)
     let product = data.Get(data.Obj.Product, this.ProductID)
+    let cart_id = this.UserID
+    let cart    = data.Get(data.Obj.Cart,    cart_id)
+    cart.RemoveProduct(this.ProductID)
     let templ   =
     {
         Type                  : Type.Rest

@@ -25,6 +25,11 @@ const { Suite } = require("./lib/driver")
         data  : require('./frames/data/cart')
       , story : require('./frames/story/cart')        
     }
+    , journal   =
+    {
+        data  : require('./frames/data/journal')
+      , story : require('./frames/story/journal')        
+    }
 
   let admin_1       = new    user.data.User   ('Admin')
     , user_1_owner  = new    user.data.User   ('User')
@@ -33,14 +38,23 @@ const { Suite } = require("./lib/driver")
     , store_1       = new   store.data.Store  ()
     , product_1     = new product.data.Product()
     , addr_1        = new address.data.Address()
+    , addr_2        = new address.data.Address()
+
+    /**
+     * -> Admin   -> Owner   -> Store   -> Staff 
+     * -> Product -> User    -> Address -> Cart
+     * -> Journal -> Transit -> Agent
+     */
 
     , tc1 =    user.story.Std(admin_1.Name )
     , tc2 =   store.story.Std(admin_1.Name, user_1_owner.Name, user_2_staff.Name, store_1.Name )
     , tc3 = product.story.Std(user_2_staff.Name, store_1.Name, product_1.Name )
     , tc4 = address.story.Std(addr_1.Address.Name, user_3_buyer.Name )
     , tc5 =    cart.story.Std(user_3_buyer.Name, product_1.Name )
+   // , tc6 = address.story.Std(addr_2.Address.Name, user_3_buyer.Name )
+    , tc7 = journal.story.Std(user_3_buyer.Name, addr_2.Address.Name)
 
-  const tc = [ tc1, tc2, tc3, tc4, tc5 ]
+  const tc = [ tc1, tc2, tc3, tc4, tc5, tc7 ]
   tc.forEach((test)=> Suite.AddTest(test))
 
   Suite.Run()

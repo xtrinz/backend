@@ -49,13 +49,13 @@ let Cart = function(user)
       , Quantity  : product.Quantity
     }
 
-    this.Products.pull(prod)
-    this.Bill.Total       -= prod.Price
+    this.Products.pop(prod)
+    this.Bill.Total       -= prod.Price * prod.Quantity
     // this.Bill.TransitCost  = 
     // this.Bill.Tax          =     
-    this.NetPrice          = this.Total 
-                           + this.TransitCost
-                           + this.Tax
+    this.Bill.NetPrice     = this.Bill.Total 
+                           + this.Bill.TransitCost
+                           + this.Bill.Tax
 
     Cart.Carts[this.UserName] = this
   }
