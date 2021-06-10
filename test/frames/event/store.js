@@ -256,7 +256,7 @@ let AddStaffRequest = function(owner_, staff_, store_)
     let templ =
     {
         Type            : Type.Rest
-      , Describe        : 'Store Add-Staff Request'
+      , Describe        : 'Store Staff Request'
       , Request         :
       {
           Method        : Method.POST
@@ -292,7 +292,7 @@ let AddStaffAccept = function(staff_, store_)
     let templ =
     {
         Type            : Type.Rest
-      , Describe        : 'Store Add-Staff Accept'
+      , Describe        : 'Store Staff Accept'
       , Request         :
       {
           Method        : Method.POST
@@ -329,7 +329,7 @@ let AddStaffRevoke = function(owner_, staff_, store_)
     let templ =
     {
         Type            : Type.Rest
-      , Describe        : 'Store Add-Staff Revoke'
+      , Describe        : 'Store Staff Revoke'
       , Request         :
       {
           Method        : Method.POST
@@ -367,7 +367,7 @@ let AddStaffRelieve = function(owner_, staff_, store_)
     let templ =
     {
         Type            : Type.Rest
-      , Describe        : 'Store Add-Staff Relieve'
+      , Describe        : 'Store Staff Relieve'
       , Request         :
       {
           Method        : Method.POST

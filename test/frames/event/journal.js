@@ -56,26 +56,30 @@ let Create = function(user_, addr_, cart_)
   }
 }
 
-let ConfirmPayment = function(journal)
+let ConfirmPayment = function() 
 {
-  this.Data =
+  this.Data      = function()
   {
-      Type                      : Type.Rest
-    , Describe                  : 'Journal Confirm Payment'
-    , Request                   :
+    let templ =
     {
-          Method                : Method.POST
-        , Path                  : '/journal/confirm'
-        , Body                  : {/* Masked Sign Verification for test */}
-        , Header                : {}
+        Type     : Type.Rest
+      , Describe : 'Journal Confirm Payment'
+      , Request  :
+      {              
+          Method : Method.POST
+        , Path   : '/journal/confirm'
+        , Body   : {/* Masked Sign Verification for test */}
+        , Header : {}
+      }              
+      , Response :
+      {              
+          Code   : code.OK
+        , Status : status.Success
+        , Text   : ''
+        , Data   : {}
+      }
     }
-    , Response                  :
-    {
-          Code                  : code.OK
-        , Status                : status.Success
-        , Text                  : ''
-        , Data                  : {}
-    }
+    return templ
   }
 }
 

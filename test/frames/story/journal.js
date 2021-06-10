@@ -8,7 +8,7 @@ const Std = function(user_, addr_)
     let steps  =
     [
           new event.Create         (user_, addr_, cart_)
-        //, new event.ConfirmPayment (user_, addr_, cart_)
+        , new event.ConfirmPayment ()
     ]
     steps.forEach((step) => tc.AddStep(step))
     return tc

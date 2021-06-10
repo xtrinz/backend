@@ -24,24 +24,13 @@ function TestRig()
         {
             let resp = await Rest(data.Request)
                , sts = await compare.DeepEqual(resp, data.Response, data.Skip)
-            if(!sts)
-            {
-                console.log(prints.Failed) // console.log('\nRequest :', data.Request)
-                console.log('\nExpected : ', data.Response, '\nReceived : ', resp)
-                return {
-                    Status: false
-                    , Data: resp
-                }
-            }
-            return {
-                Status: true
-                , Data: resp
-            }
+            if(sts) { return { Status: true, Data: resp } }
+
+            console.log(prints.Failed) // console.log('\nRequest :', data.Request)
+            console.log('\nExpected : ', data.Response, '\nReceived : ', resp)
+            return { Status: false, Data: resp }
         }
-        else { return {
-            Status: false
-            , Data: {}
-        } }
+        else { return { Status: false, Data: {} } }
     }
     this.Run         = async function()
     {
@@ -50,28 +39,28 @@ function TestRig()
         for(let suite =0; suite < this.Tests.length; suite++)
         {
             let test = this.Tests[suite], failed = false
+
             console.log(prints.Head.format(('000' + (suite + 1)).substr(-2), test.Describe))
+            
             for(let case_=0; case_ < test.Steps.length; case_++)
             {                        
                 let step    = test.Steps[case_]
                 let data    = step.Data()
+
                 console.log(prints.Step.format(('000' + (case_ + 1)).substr(-2), data.Describe))
                 
                 data.Index  = suite + 1
                 let res     = await this.Exec(data)
-                if(step.PostSet) { await step.PostSet(res.Data) }
-                
-                if (!res.Status)
+                if (step.PostSet) { await step.PostSet(res.Data) }
+                if (res.Status  ) continue
+                this.Failed.push(
                 {
-                     this.Failed.push(
-                    {
-                        No      : suite + 1,
-                        Title   : test.Describe,
-                        StepNo  : data.Index,
-                        Step    : data.Describe
-                    })
-                    failed = true
-                }
+                    No      : suite + 1,
+                    Title   : test.Describe,
+                    StepNo  : data.Index,
+                    Step    : data.Describe
+                })
+                failed = true
             }
             if(failed) this.FailedCnt++
         }
@@ -79,15 +68,12 @@ function TestRig()
         if (this.Failed.length)
         {
             console.log('\nFailed Test Cases: ')
-            this.Failed.forEach(
-                (fail) => 
-                console.log(prints.FailedTC.format(('00' + fail.No).substr(-2),
-                            fail.Title, ('00' + fail.StepNo).substr(-2), fail.Step)
-            ))
+            this.Failed.forEach( (fail) => {
+            console.log(prints.FailedTC.format(('00' + fail.No).substr(-2),
+            fail.Title, ('00' + fail.StepNo).substr(-2), fail.Step))})
         }
 
-        //console.log('\nPassed: ', this.Tests.length - this.FailedCnt)
-        console.log('\nFailed: '  , this.FailedCnt)
+        console.log('\nFailed: ', this.FailedCnt   )
         console.log('Total : '  , this.Tests.length)
 
         await db.client.close()
@@ -105,7 +91,7 @@ var TestSuite  = new TestRig()
 
 var read = async function ()
 {
-    console.log(prints.ReadParam)
+    //console.log(prints.ReadParam)
     let req =
     {
         Method       : Method.GET

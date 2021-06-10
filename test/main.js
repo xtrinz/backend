@@ -27,8 +27,7 @@ const { Suite } = require("./lib/driver")
     }
     , journal   =
     {
-        data  : require('./frames/data/journal')
-      , story : require('./frames/story/journal')        
+        story : require('./frames/story/journal')        
     }
     , transit   =
     {

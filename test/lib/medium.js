@@ -3,8 +3,9 @@ const qs        = require('querystring')
 
 const Type   =
 {
-      Rest  : 'REST'
-    , Event : 'EVENT'
+      Rest   : 'REST'
+    , Event  : 'EVENT'
+    , EWithR : 'EventWithRest'
 }
 
     , http   = require('http')
