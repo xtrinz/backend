@@ -28,23 +28,14 @@ function Journal()
       }
       , Seller            :
       {
-        ID              : ''
+          ID              : ''
         , Name            : ''
         , Location        : {}
         , Address         : {}
       }
       , Order             :
       {
-          Products        : 
-          [/*
-            { 
-                ProductID : ''
-              , Name      : ''
-              , Price     : 
-              , Image     : ''
-              , Quantity  : 
-            }*/
-          ]
+          Products        : [] // {  ProductID, Name, Price, Image, Quantity }
         , Bill            : 
         {
             Total         : 0
@@ -65,7 +56,8 @@ function Journal()
       , Transit           : 
       {
           ID              : ''
-        , FinalStatus     : states.None
+        , ClosingState    : ''
+        , Status          : states.Running
       }
     }
 
@@ -219,19 +211,19 @@ function Journal()
             if (!user_) Err_(code.NOT_FOUND, reason.UserNotFound)
 
             const data_ = {}
-            /* const   query = 
-                        { 
-                                Buyer :  { UserID : user._id }
-                              , Payment: { Status : states.Success } 
-                        }
-                  , proj  = 
-                        {
-                                _id      : 1
-                              , Seller   : { ID : 1 , Name : 1 }
-                              , Bill     : 1
-                              , Products : 1
-                              , Transit  : { ID : 1 , FinalStatus : 1 }
-                        }
+            /* const query =
+            { 
+                Buyer :  { UserID : user._id }
+              , Payment: { Status : states.Success } 
+            }
+            , proj  = 
+            {
+                _id      : 1
+              , Seller   : { ID : 1 , Name : 1 }
+              , Bill     : 1
+              , Products : 1
+              , Transit  : { ID : 1 , Status : 1, ClosingState: 1 }
+            }
             const data_   = this.Get(query, proj) */
             return data_
 
@@ -264,15 +256,16 @@ function Journal()
       switch (ctxt.Data.State)
       {
         case states.TranistCompleted :
-              break
+        break
         case states.CargoCancelled   :
-              break
+        break
         case states.OrderRejected    :
-              break
+        break
         case states.TransitRejected  :
-              break
+        break
       }
-      this.Data.Transit.Status = ctxt.Data.State
+      this.Data.Transit.Status        = states.Closed
+      this.Data.Transit.ClosingState  = ctxt.Data.State
       await this.Save()
     }
 }

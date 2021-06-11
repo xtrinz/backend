@@ -53,7 +53,10 @@ module.exports =
 	},
 	states:
 	{
-		None 						: 'None'
+		  Running 					: 'Running'
+		, Closed 					: 'Closed'
+
+		, None 						: 'None'
         , New 						: 'New'
         , MobConfirmed              : 'MobileNumberConfirmed'
         , Registered                : 'Registered'

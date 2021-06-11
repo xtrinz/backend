@@ -65,6 +65,7 @@ module.exports =
     , NoContextFound            : 'No context found'
     , AddressNotFound           : 'Address not found'
     , NoAddressFound            : 'No address found'
+    , NoSocketFound             : 'No socket found'
 	},
   text:
   {

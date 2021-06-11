@@ -34,6 +34,7 @@ const CargoCancelledByUser		=  async function(ctxt)
 		Err_(code.BAD_REQUEST, reason.CancellationDenied)
 	}
 	await Emit(alerts.Cancelled, ctxt)
+	ctxt.Data.IsLive = false
 	await Save(ctxt, states.CargoCancelled)
 
 	let journal = new Journal()
@@ -45,6 +46,7 @@ const OrderRejectedByStore		= async function()
 {
 	console.log('process-order-rejection', ctxt.Data)
 	await Emit(alerts.Rejected, ctxt)
+	ctxt.Data.IsLive = false
 	await Save(ctxt, states.OrderRejected)
 	let journal = new Journal()
 	await journal.PayOut(ctxt)
@@ -180,6 +182,7 @@ const TransitCompletedByAgent		= async function(ctxt)
 	await Emit(alerts.Delivered, ctxt)
 	delete ctxt.Data.Agent.Otp
 	delete ctxt.Data.User.Otp
+	ctxt.Data.IsLive = false
 	await Save(ctxt, states.TranistCompleted)
 
 	let journal = new Journal()

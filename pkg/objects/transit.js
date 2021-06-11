@@ -11,10 +11,10 @@ function Transit (journal)
     this.Data   =
     {
         _id 		    : ''
-      , JournalID       : journal._id
+      , JournalID       : ObjectId(journal._id)
       , Store 		    :
       {                  
-        _id             : journal.Seller.ID
+        _id             : ObjectId(journal.Seller.ID)
         , SockID        : []
         , Name          : journal.Seller.Name
         , Longitude     : journal.Seller.Longitude
@@ -24,7 +24,7 @@ function Transit (journal)
       }                  
       , User 		    : 
       {                  
-        _id             : journal.Buyer.ID
+        _id             : ObjectId(journal.Buyer.ID)
         , SockID        : []
         , Name          : journal.Buyer.Name
         , Longitude     : journal.Buyer.Longitude
@@ -42,6 +42,7 @@ function Transit (journal)
       , Agents          : []                            // Pool of live agents filtered for transit
       , Return 	        : ""                            // Machine's prev-state for fallbacks
       , State 		    : states.None                   // Machine init state
+      , IsLive          : true                          // Is it ongoing transit
       , Event 		    : events.EventInitiationByUser  // Machine init event
       , MaxWT           : 35                            // Maximum Waiting Time (35min)
       , OrderedAt 	    : ''                            // Millis / https://currentmillis.com/

@@ -1,32 +1,69 @@
-const { states, alerts } = require("../common/models")
-    , Emitter            = require('events')
-    , emitter            = new Emitter
+const { states, alerts, query } = require("../common/models")
+    , { User }                  = require('../objects/user')
+    , { code }                  = require("../common/error")
+    , { Socket }                = require('../objects/socket')
+    , Emitter                   = require('events')
+    , emitter                   = new Emitter()
 
-
-/*
-    1. Authenticate user
-    2. Create sock_id-vs-user lookup
-    3. Push sock_id to user record
-    4. Push sock_id to transaction record if any
-*/
-const Connect = function(socket)
+const Connect = async function(socket_)
 {
-    console.info('client-connected', socket.id, socket.handshake.auth)
-    /*
-        sock_id
-        auth.user_id
-        auth.token
-    */
+  try
+  {
+    const user  = new User()
+        , token = socket_.handshake.Token
+    try { await user.Auth(token) }
+    catch(err)
+    {
+      console.log('socket-auth-failed', {Token : socket_.handshake.Token })
+      try         { await socket_.disconnect() }
+      catch(err_) { console.log('disconnection-failed', {Err: err_ }) }
+      return
+    }
+
+    user.Data.SockID.push(socket_.id)
+    user.Data.IsLive = true    
+    await user.Save()
+
+    const socket = new Socket()
+    await socket.Insert(user, socket_.id)
+
+    console.info('client-connected',
+    {
+        User : user.Data
+      , ID   : socket_.id 
+      , Auth : socket_.handshake.Token
+    })
+
+  } catch(err) { console.log('internal-error', { Error: err }) }
 }
 
-/*
-    1. Pull sock_id from transit record if any
-    2. Pull sock_id from user record
-    3. Delete sock_id-vs-user lookup
-*/
-const Disconnect = function(socket)
+const Disconnect = async function(socket_)
 {
-    console.info(`client-disconnected ${socket}`)
+  try
+  {
+  
+    const socket = new Socket()
+        , sckt   = await socket.Get(socket_.id)
+        , user   = new User()
+    await user.Get(sckt._id, query.ByID)
+
+    user.Data.SockID.pop(socket_.id)
+    if(user.Data.SockID.length === 0)
+    user.Data.IsLive = false    
+    await user.Save()
+
+    await socket.Remove(user)
+
+    console.info('client-disconnected', 
+    {
+        SockID : socket_.id
+      , User   : user.Data
+    })
+
+  }
+  catch(err)
+  { console.log('client-disconnection-failed', err) }
+
 }
 
 const Emit = async function(alert, ctxt)
@@ -110,7 +147,7 @@ const Emit = async function(alert, ctxt)
     case alerts.Delivered:
       to   = [...ctxt.Data.Store.SockID, ...ctxt.Data.User.SockID]
       data = ctxt.Abstract()
-      break
+      break      
   }
 
   const Ind =

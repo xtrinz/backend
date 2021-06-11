@@ -48,13 +48,10 @@ const server_ = () => console.log('server-started', {Port : port})
     , server        = app.listen(port, server_)
     , io            = require('socket.io')(server)
     , event         = require('../pkg/engine/events')
-      adptr.SetServer(server)
+      adptr.SetServer(server, io)
 
 io.on('connection', async (socket) =>
 {
-
-//  await io.to(socket.id).emit('res', 'Hi')
-
     await event.Connect(socket)
     const disc_ = async ()=> await event.Disconnect(socket)
     socket.on('disconnect', disc_)

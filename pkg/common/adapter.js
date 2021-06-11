@@ -2,8 +2,8 @@ const { Err, code, status, reason } = require("./error")
     , { client }                    = require("./database")
     , { User }                      = require('../objects/user')
 
-let   Server
-const SetServer = (server) => Server = server
+let   Server, io
+const SetServer = (server, io_) => { Server = server; io = io_ }
 
 const Auth = async function (req, res, next)
 {
@@ -55,6 +55,13 @@ const GracefulExit = async function ()
         else console.log('server-abruptly-terminated')
       })
     })
+
+    io.sockets.sockets.forEach((socket) =>
+    {
+      console.log('disconnetcting-socket', { ID: socket.id })
+      socket.disconnect(true);
+    })
+
     process.exit(1)
   } catch (err) { console.log(err) }
 }
