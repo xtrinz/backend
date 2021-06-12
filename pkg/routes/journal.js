@@ -9,13 +9,16 @@ router.post("/confirm", async (req, res, next) =>
 {
   try
   {
+    let   transit
     let   journal = new Journal()
     const status_ = await journal.UpdateStatus(req)
     if (status_ === states.StripeSucess)
     {
-      let transit = new Transit(journal.Data)
+      transit = new Transit(journal.Data)
       await transit.Init()
     }
+    journal.Data.Transit.ID = transit.Data._id
+    await journal.Save()
 
     return res.status(code.OK).json({
       Status  : status.Success,

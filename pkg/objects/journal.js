@@ -14,7 +14,6 @@ function Journal()
     this.Data =
     {
         _id               : ''
-      , Status            : states.None
 /*    , Type              : type.FORWARD
       , ReturnID          : ''          */
       , Date              : ''          // Millis eases math
@@ -190,12 +189,10 @@ function Journal()
 
         this.Data.Payment.Status = states.Success
         this.Data.Transit.Status = states.Initiated
-        await this.Save()
         break
 
       case states.StripeFailed:
         this.Data.Payment.Status = states.Failed
-        await this.Save()
         break
       }
       return event_.type

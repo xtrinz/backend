@@ -12,7 +12,7 @@ let User = function(mode)
   }
   this.MobileNo    = '+9100110011{0}'.format(('00' + (User.Count[mode] + off)).substr(-2))
   this.Name        = mode + User.Count[mode]
-  this.Email       = this.Name + '@' + mode + '.com'
+  this.Email       = this.Name.toLowerCase() + '@' + mode.toLowerCase() + '.com'
   this.Password    = 'Password' + this.Name
   this.Mode        = mode
   this.Token       = ''
