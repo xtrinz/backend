@@ -51,7 +51,7 @@ const { Suite } = require("./lib/driver")
     , product.story.Std(user_2_staff.Name, store_1.Name, product_1.Name )
     , address.story.Std(addr_1.Address.Name, user_3_buyer.Name )
     ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , journal.story.Std(user_3_buyer.Name, addr_2.Address.Name)
+    , journal.story.Std(user_3_buyer.Name, addr_2.Address.Name, user_1_owner.Name)
     //, transit.story.Std()
 
     , user.story.Disconnect(user_1_owner.Name, user_2_staff.Name, user_3_buyer.Name)

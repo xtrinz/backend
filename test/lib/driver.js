@@ -38,7 +38,7 @@ function TestRig()
                 return { Status: true, Data: res }
             case Method.EVENT      :
                 let resp = await Socket.Read(data.Socket)
-                  , sts  = await compare.DeepEqual(resp, data.Event, data.Skip)
+                let sts  = await compare.DeepEqual(resp, data.Event, data.Skip)
                 if(sts) { return { Status: true, Data: resp } }
                 console.log(prints.Failed)
                 console.log('\nExpected : ', data.Event, '\nReceived : ', resp)

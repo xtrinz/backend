@@ -151,7 +151,8 @@ let Connect = function(name)
     this.PostSet        = async function(res_)
     {
       let user    = data.Get(data.Obj.User, this.ID)
-      user.Socket = res_
+      user.Socket = res_.Socket
+      user.Channel= res_.Channel
       data.Set(data.Obj.User, this.ID, user)
     }
 }

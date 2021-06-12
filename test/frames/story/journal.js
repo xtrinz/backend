@@ -1,7 +1,7 @@
 const event        = require('../event/journal')
     , { TestCase } = require("../../lib/driver")
 
-const Std = function(user_, addr_)
+const Std = function(user_, addr_, owner_)
 {
     let cart_  = user_
     let tc     = new TestCase('Journal Management')
@@ -9,6 +9,8 @@ const Std = function(user_, addr_)
     [
           new event.Create         (user_, addr_, cart_)
         , new event.ConfirmPayment ()
+        , new event.NewOrder       (user_)     
+        , new event.NewOrder       (owner_)        
     ]
     steps.forEach((step) => tc.AddStep(step))
     return tc

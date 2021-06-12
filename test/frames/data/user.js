@@ -16,8 +16,10 @@ let User = function(mode)
   this.Password    = 'Password' + this.Name
   this.Mode        = mode
   this.Token       = ''
-  this.SocketID    = ''
+  this.Socket      = ''
+  this.Channel     = ''
   this.OTP         = ''
+  this.TransitID   = ''
 
   new Cart(this.Name) // Create a cart for the user
 

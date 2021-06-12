@@ -1,6 +1,8 @@
 const qs        = require('querystring')
     , socketIo  = require('socket.io-client')
 
+let SockQ    = {}
+
 const Type   =
 {
       Rest   : 'REST'
@@ -55,19 +57,21 @@ const Type   =
       Connect : async function(auth)
     {
         let socket   = await socketIo('http://'+ opt_g.host + ':' + opt_g.port, auth)
-        return socket
+        socket.on('Event', (msg) => 
+        {
+            if(!SockQ[socket.id]) {SockQ[socket.id] = []}
+            SockQ[socket.id].push(msg) 
+        })
+        return {Socket: socket, Channel: {} }
     }
     , Read  : async function(socket)
     {
-        let res = new Promise((resolve) =>
-        {
-            socket.on('Event', (resp) => { resolve(resp) } )
-        })
-        await res
-        return res
+        let result = SockQ[socket.id].shift() 
+        return result
     }
     , Disconnect : async function(socket)
     {
+        delete SockQ[socket.id]
         await socket.disconnect()
     }
 }

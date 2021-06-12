@@ -1,3 +1,4 @@
+const { alerts } = require("../../../pkg/common/models")
 const { Method, Type }       = require("../../lib/medium")
     , { code, status, text } = require("../../../pkg/common/error")
     , data                   = require("../data/data")
@@ -83,7 +84,37 @@ let ConfirmPayment = function()
   }
 }
 
+let NewOrder = function(name) 
+{
+    this.ID     = name
+    this.Data   = function()
+    {
+      let user  = data.Get(data.Obj.User, this.ID)
+      let templ =      
+      {
+          Type          : Type.Event
+        , Describe      : 'Tranist Alert New_Order ' + user.Name
+        , Method        : Method.EVENT
+        , Authorization : {}
+        , Socket        : user.Socket
+        , Skip          : [ 'TransitID' ]
+        , Event         : 
+        {
+            Type : alerts.NewOrder
+          , Data : { TransitID : '' }
+        }
+      }
+      return templ
+    }
+    this.PostSet        = async function(res_)
+    {
+      let user        = data.Get(data.Obj.User, this.ID)
+      user.TransitID  = res_.Data.TransitID
+      data.Set(data.Obj.User, this.ID, user)
+    }
+}
+
 module.exports =
 {
-    Create, ConfirmPayment
+    Create, ConfirmPayment, NewOrder
 }
