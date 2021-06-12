@@ -1,5 +1,5 @@
 const { ObjectID, ObjectId } 			= require("mongodb")
-    , { transits } 				        = require("../common/database")
+    , { transits, users, stores } 		= require("../common/database")
     , { Err_, code, reason }            = require("../common/error")
     , { states, events, entity, query } = require("../common/models")
     , { Engine }                        = require("../engine/engine")
@@ -120,12 +120,29 @@ function Transit (journal)
     this.Init       = async function()
     {
         // Get Src & Dest Contexts & Update SockIDs
-        
-        this.Data._id       = new ObjectID()
-        this.Data.OrderedAt = Date.now()
+        const query_user = { _id: ObjectId(this.Data.User._id), IsLive: true }
+        let       user   = await users.findOne(query_user)
+        if(!user) console.log('user-not-found', query_user)
+        if (user)  this.Data.User.SockID = user.SockID
+
+        const query_store = 
+        { 
+            $or : 
+            [
+                { 'StoreList.Owned'    : { $elemMatch: { $eq: String(this.Data.Store._id) } }, IsLive: true }
+            , { 'StoreList.Accepted' : { $elemMatch: { $eq: String(this.Data.Store._id) } }, IsLive: true }
+            ] 
+        }
+        , proj   = { SockID: 1 }
+        let users_ = await users.find(query_store).project(proj).toArray()
+        if (!users_.length) { console.log('no-users-found', query_store['$or']) }
+    
+        let sckts = []
+        users_.forEach((u) => { sckts.push(...u.SockID)})
+        this.Data.Store.SockID  = sckts
+        this.Data._id           = new ObjectID()
+        this.Data.OrderedAt     = Date.now()
         await this.Save()
-        
-        test.Set('TransitID', this.Data._id) // #101
 
         let engine = new Engine()
         await engine.Transition(this)

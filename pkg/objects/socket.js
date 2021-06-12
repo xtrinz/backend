@@ -48,7 +48,7 @@ function Socket()
         let str_stores = [ ...user.Data.StoreList.Owned, ...user.Data.StoreList.Accepted ]
             str_stores = str_stores.map(ObjectId)
         const key3  = { 'Store._id' : { $in: str_stores }, IsLive : true }
-            , act3  = { $push      : { 'User.SockID' : sock_id } }
+            , act3  = { $push      : { 'Store.SockID' : sock_id } }
             , resp3 = await transits.updateMany(key3, act3)
         if (!resp3.result.ok)
         {
@@ -114,7 +114,7 @@ function Socket()
         let str_stores = [ ...user.Data.StoreList.Owned, ...user.Data.StoreList.Accepted ]
             str_stores = str_stores.map(ObjectId)
         const key3  = { 'Store._id' : { $in: str_stores }, IsLive : true }
-            , act3  = { $pull       : { 'User.SockID' : sock_id } }
+            , act3  = { $pull       : { 'Store.SockID' : sock_id } }
             , resp3 = await transits.updateMany(key3, act3)
         if (!resp3.result.ok)
         {
