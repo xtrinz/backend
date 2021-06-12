@@ -130,6 +130,32 @@ let Register = function(name)
     }
 }
 
+let Connect = function(name) 
+{
+    this.ID     = name
+    this.Data   = function()
+    {
+      let user  = data.Get(data.Obj.User, this.ID)
+      let templ =      
+      {
+          Type          : Type.Event
+        , Describe      : 'User Socket Connect'
+        , Method        : Method.CONNECT
+        , Authorization : {'auth' : {Token : 'Bearer ' + user.Token }}
+        , Socket        : {}
+        , Skip          : []
+        , Event         : {}
+      }
+      return templ
+    }
+    this.PostSet        = async function(res_)
+    {
+      let user    = data.Get(data.Obj.User, this.ID)
+      user.Socket = res_
+      data.Set(data.Obj.User, this.ID, user)
+    }
+}
+
 let Login = function(name) 
 {
     this.ID     = name
@@ -351,15 +377,37 @@ let ProfileEdit =  function(name)
   }
 }
 
+let Disconnect = function(name) 
+{
+    this.ID     = name
+    this.Data   = function()
+    {
+      let user  = data.Get(data.Obj.User, this.ID)
+      let templ =      
+      {
+          Type          : Type.Event
+        , Describe      : 'User Socket Disconnect'
+        , Method        : Method.DISCONNECT
+        , Authorization : {}
+        , Socket        : user.Socket
+        , Skip          : []
+        , Event         : {}
+      }
+      return templ
+    }
+}
+
 module.exports =
 {
       RegisterNew
     , RegisterReadOTP
     , Register
+    , Connect
     , Login
     , PasswordGenOTP
     , PasswordConfirmMobNo
     , PasswordSet
     , ProfileGet
     , ProfileEdit
+    , Disconnect
 }

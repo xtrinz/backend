@@ -120,6 +120,7 @@ function Transit (journal)
     this.Init       = async function()
     {
         // Get Src & Dest Contexts & Update SockIDs
+        
         this.Data._id       = new ObjectID()
         this.Data.OrderedAt = Date.now()
         await this.Save()

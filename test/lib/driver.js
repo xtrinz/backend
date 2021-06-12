@@ -1,5 +1,5 @@
 const compare                = require("./compare")
-    , { Rest, Type, Method } = require("./medium")
+    , { Rest, Socket, Type, Method } = require("./medium")
     , db                     = require("../../pkg/common/database")
 
 const prints = 
@@ -20,8 +20,9 @@ function TestRig()
     this.AddTest     = (test) => this.Tests.push(test)
     this.Exec        = async function(data)
     {
-        if (data.Type == Type.Rest)
+        switch(data.Type)
         {
+        case Type.Rest:
             let resp = await Rest(data.Request)
                , sts = await compare.DeepEqual(resp, data.Response, data.Skip)
             if(sts) { return { Status: true, Data: resp } }
@@ -29,8 +30,27 @@ function TestRig()
             console.log(prints.Failed) // console.log('\nRequest :', data.Request)
             console.log('\nExpected : ', data.Response, '\nReceived : ', resp)
             return { Status: false, Data: resp }
+        case Type.Event:
+            switch(data.Method)
+            {
+            case Method.CONNECT    :
+                let res = await Socket.Connect(data.Authorization)
+                return { Status: true, Data: res }
+            case Method.EVENT      :
+                let resp = await Socket.Read(data.Socket)
+                  , sts  = await compare.DeepEqual(resp, data.Event, data.Skip)
+                if(sts) { return { Status: true, Data: resp } }
+                console.log(prints.Failed)
+                console.log('\nExpected : ', data.Event, '\nReceived : ', resp)
+                return { Status: false, Data: resp }
+            case Method.DISCONNECT :
+                await Socket.Disconnect(data.Socket)
+                return { Status: true, Data: {} }
+            }
+            break
+        default:
+             return { Status: false, Data: {} }
         }
-        else { return { Status: false, Data: {} } }
     }
     this.Run         = async function()
     {

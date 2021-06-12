@@ -41,12 +41,22 @@ const GracefulExit = async function ()
     console.log('graceful-exit')
     await new Promise((res)=>
     {
+      io.close((err)=>
+      {
+        if(!err) { res(1); console.log('socket-stopped') }
+        else console.log('socket-abruptly-terminated')
+      })
+    })
+
+    await new Promise((res)=>
+    {
       client.close((err)=>
       {
         if(!err) { res(1); console.log('db-connection-closed') } 
         else console.log('db-abruptly-disconnected')
       })
     })
+
     await new Promise((res)=>
     {
       Server.close((err)=>
@@ -54,12 +64,6 @@ const GracefulExit = async function ()
         if(!err) { res(1); console.log('server-stopped') }
         else console.log('server-abruptly-terminated')
       })
-    })
-
-    io.sockets.sockets.forEach((socket) =>
-    {
-      console.log('disconnetcting-socket', { ID: socket.id })
-      socket.disconnect(true);
     })
 
     process.exit(1)

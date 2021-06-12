@@ -14,7 +14,7 @@ function Socket()
             console.log('socket-insertion-failed', rcd_)
             Err_(code.INTERNAL_SERVER, reason.DBInsertionFailed)
         }
-        console.log('socket-inserted', resp)
+        console.log('socket-inserted', rcd_)
 
         console.log('set-socket-id', { UserID: user.Data._id, SockID: sock_id })
         const key1  = { 'Agent._id' : ObjectId(user.Data._id), IsLive : true }
@@ -71,7 +71,7 @@ function Socket()
         console.log('socket-read', resp)
         return resp
     }
-    this.Remove     = async function (user)
+    this.Remove     = async function (user, sock_id)
     {
         const query = { _id: ObjectId(user.Data._id) }
             , resp  = await sockets.deleteOne(query)

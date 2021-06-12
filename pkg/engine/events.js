@@ -1,6 +1,5 @@
 const { states, alerts, query } = require("../common/models")
     , { User }                  = require('../objects/user')
-    , { code }                  = require("../common/error")
     , { Socket }                = require('../objects/socket')
     , Emitter                   = require('events')
     , emitter                   = new Emitter()
@@ -10,15 +9,7 @@ const Connect = async function(socket_)
   try
   {
     const user  = new User()
-        , token = socket_.handshake.Token
-    try { await user.Auth(token) }
-    catch(err)
-    {
-      console.log('socket-auth-failed', {Token : socket_.handshake.Token })
-      try         { await socket_.disconnect() }
-      catch(err_) { console.log('disconnection-failed', {Err: err_ }) }
-      return
-    }
+    await user.Auth(String(socket_.handshake.auth.Token))
 
     user.Data.SockID.push(socket_.id)
     user.Data.IsLive = true    
@@ -30,11 +21,15 @@ const Connect = async function(socket_)
     console.info('client-connected',
     {
         User : user.Data
-      , ID   : socket_.id 
-      , Auth : socket_.handshake.Token
+      , ID   : socket_.id
     })
 
-  } catch(err) { console.log('internal-error', { Error: err }) }
+  } catch(err) 
+  {
+    console.log('socket-auth-failed', {Error : err })
+    try         { await socket_.disconnect() }
+    catch(err_) { console.log('disconnection-failed', {Err: err_ }) }   
+  }
 }
 
 const Disconnect = async function(socket_)
@@ -52,7 +47,7 @@ const Disconnect = async function(socket_)
     user.Data.IsLive = false    
     await user.Save()
 
-    await socket.Remove(user)
+    await socket.Remove(user, socket_.id)
 
     console.info('client-disconnected', 
     {

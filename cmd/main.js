@@ -60,6 +60,6 @@ io.on('connection', async (socket) =>
 event.Channel.on('SendEvent', async (data)=>
 {
   console.info('Sending-event', data)
-  try        { await io.to(data.To).emit(data.Msg)      } 
-  catch(err) { console.log('emission-error', err, data) }
+  try        { await io.to(data.To).emit('Event', data.Msg) } 
+  catch(err) { console.log('emission-error', err, data)     }
 })

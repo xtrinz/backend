@@ -17,6 +17,10 @@ const Type   =
     , POST  : 'POST'
     , PUT   : 'PUT'
     , DELETE: 'DELETE'
+
+    , CONNECT    : 'CONNECT'
+    , DISCONNECT : 'DISCONNECT'
+    , EVENT      : 'EVENT'    
 }
 
     , Rest  = function(in_)
@@ -46,16 +50,26 @@ const Type   =
     })
 }
 
-    , Socket    = async function(event_)
+    , Socket =
 {
-    let socket   = socketIo('http://'+ opt_g.host + ':' + opt_g.port)
-    let res = new Promise((resolve) =>
-	{
-	   socket.on(event_, (resp) => { resolve(resp) } )
-  	})
-	await res
-    await socket.disconnect()	
-	return res
+      Connect : async function(auth)
+    {
+        let socket   = await socketIo('http://'+ opt_g.host + ':' + opt_g.port, auth)
+        return socket
+    }
+    , Read  : async function(socket)
+    {
+        let res = new Promise((resolve) =>
+        {
+            socket.on('Event', (resp) => { resolve(resp) } )
+        })
+        await res
+        return res
+    }
+    , Disconnect : async function(socket)
+    {
+        await socket.disconnect()
+    }
 }
 
 module.exports =
