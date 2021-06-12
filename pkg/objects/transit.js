@@ -79,29 +79,6 @@ function Transit (journal)
         return delay
     }
 
-    this.Abstract   = function(...args)
-    {
-        let obj =
-        {
-            TransitID     :   this.Data._id
-          , JournalID	  :   this.Data.JournalID
-          , UserName 	  :   this.Data.User.Name
-          , StoreName 	  :   this.Data.Store.Name
-          , StoreCity     :   this.Data.Store.Address.City
-          , StoreLocation : [ this.Data.Store.Longitude, this.Data.Store.Latitude ]
-        }
-        if (this.Agent && !args.includes(entity.Agent))
-        {
-            obj.AgentName      = this.Data.Agent.Name
-            obj.AgentContactNo = this.Data.Agent.ContactNo
-        }
-        if (this.Admin && !args.includes(entity.Admin))
-        {
-            obj.AdminName      = this.Data.Admin.Name
-        }
-        return obj
-    }
-
     this.Save       = async function()
     {
         console.log('save-transit', { Data: this.Data })
