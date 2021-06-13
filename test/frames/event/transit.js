@@ -4,7 +4,7 @@ const { Method, Type }        = require("../../lib/medium")
     , { code, status, text }  = require("../../../pkg/common/error")
     , { alerts, task }        = require("../../../pkg/common/models")
 
-let Create = function(user_, addr_, cart_) 
+let Checkout = function(user_, addr_, cart_) 
 {
   this.UserID  	 = user_
   this.AddressID = addr_
@@ -18,7 +18,7 @@ let Create = function(user_, addr_, cart_)
     let templ =
     {
         Type              : Type.Rest
-      , Describe          : 'Journal Create [Checkout]'
+      , Describe          : 'Cart Checkout'
       , Request           :
       {                     
           Method          : Method.POST
@@ -65,7 +65,7 @@ let ConfirmPayment = function()
     let templ =
     {
         Type     : Type.Rest
-      , Describe : 'Journal Confirm Payment'
+      , Describe : 'Confirm Payment'
       , Request  :
       {              
           Method : Method.POST
@@ -392,7 +392,7 @@ let Delivered = function(user_)
 
 module.exports =
 {
-      Create
+      Checkout
     , ConfirmPayment
     , NewOrder
     , StoreAccept

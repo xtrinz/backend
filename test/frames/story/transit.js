@@ -9,7 +9,7 @@ const Std = function(user_, addr_, agent_, owner_, staff_)
         tc      = AddUser(tc, agent_)
     let steps =
     [
-          new event.Create         (user_, addr_, cart_)
+          new event.Checkout       (user_, addr_, cart_)
         , new event.ConfirmPayment ()
         , new event.NewOrder       (owner_)
         , new event.NewOrder       (staff_)
