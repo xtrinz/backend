@@ -65,7 +65,7 @@ const OrderAcceptedByStore			=  async function(ctxt)
 	const agents = await agent.NearbyAgents(
 			ctxt.Data.Store.Longitude,
 			ctxt.Data.Store.Latitude)
-	if(!agents.length)
+	if(!agents)
 	{
 		console.log('no-agents-order-on-hold', ctxt.Data)
 		await Emit(alerts.NoAgents, ctxt)

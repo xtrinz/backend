@@ -1,5 +1,5 @@
 const { users }               = require("../common/database")
-    , { states, query }       = require("../common/models")
+    , { states, query, mode } = require("../common/models")
     , { Err_, code, reason}   = require('../common/error')
     , otp                     = require('../common/otp')
     , jwt                     = require("../common/jwt")
@@ -84,9 +84,9 @@ function User(mob_no, user_mode)
                   $geometry    : { type: "Point", coordinates: [ln, lt] }
                 , $maxDistance : maxDist
                 }
-                }
-                , IsLive  : true
-                  Mode    : mode.Agent*/
+                }*/
+                  IsLive  : true
+                , Mode    : mode.Agent
             }
         const agents = await users.find(query).project(proj).limit(cnt).toArray()
         if (!agents.length)

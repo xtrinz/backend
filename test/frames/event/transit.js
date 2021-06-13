@@ -1,195 +1,293 @@
-const { Method, Type, Rest }  = require("../../lib/medium")
-    , { prints }              = require("../../lib/driver")
-    , jwt                     = require("../../../pkg/common/jwt")
-    , { code, status }        = require("../../../pkg/common/error")
-    , { alerts, task }        = require("../../../pkg/common/models")
+const { Method, Type }  = require("../../lib/medium")
+    , data              = require("../data/data")
+    , { read }          = require("../../lib/driver")
+    , { code, status }  = require("../../../pkg/common/error")
+    , { alerts, task }  = require("../../../pkg/common/models")
 
-let StoreAccept = function(addr)
+let StoreAccept = function(staff_) 
 {
-  this.Data =
+  this.StaffID   = staff_
+  this.Data      = function()
   {
-      Type                : Type.Rest
-    , Describe            : 'Transit Store Accept'
-    , Request             :
+    let staff = data.Get(data.Obj.User, this.StaffID)
+    let templ =
     {
-          Method          : Method.POST
-        , Path            : '/transit/store'
-        , Body            : 
-        {
-              StoreID     : ''
-            , TransitID   : ''
-            , Task        : task.Accept
-        }
-        , Header          : { Authorization: '' }
+        Type                : Type.Rest
+      , Describe            : 'Transit Store Accept'
+      , Request             :
+      {
+            Method          : Method.POST
+          , Path            : '/transit/store'
+          , Body            : 
+          {
+                TransitID   : staff.TransitID
+              , Task        : task.Accept
+          }
+          , Header          : { Authorization: 'Bearer ' + staff.Token }
+      }
+      , Response            :
+      {
+            Code            : code.OK
+          , Status          : status.Success
+          , Text            : alerts.Accepted
+          , Data            : {}
+      }
     }
-    , Response            :
-    {
-          Code            : code.OK
-        , Status          : status.Success
-        , Text            : alerts.Accepted
-        , Data            : {}
-    }
+    return templ
   }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.StoreID   = resp.Data.StoreID
-    data.Request.Body.TransitID = resp.Data.TransitID
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
-  }
-
 }
 
-let AgentAccept = function(addr)
+let NewTransit = function(agent_) 
 {
-  this.Data =
+  this.AgentID = agent_
+  this.Data    = function()
   {
-      Type                : Type.Rest
-    , Describe            : 'Transit Agent Accept'
-    , Request             :
+    let agent  = data.Get(data.Obj.User, this.AgentID)
+    let templ  =      
     {
-          Method          : Method.POST
-        , Path            : '/transit/agent'
-        , Body            : 
-        {
-              TransitID   : ''
-            , Task        : task.Accept
-        }
-        , Header          : { Authorization: '' }
+        Type          : Type.Event
+      , Describe      : 'Tranist Alert New_Transit ' + agent.Name
+      , Method        : Method.EVENT
+      , Authorization : {}
+      , Socket        : agent.Socket
+      , Skip          : [ 'TransitID' ]
+      , Event         : 
+      {
+          Type : alerts.NewTransit
+        , Data : { TransitID : '' }
+      }
     }
-    , Response            :
-    {
-          Code            : code.OK
-        , Status          : status.Success
-        , Text            : alerts.Accepted
-        , Data            : {}
-    }
+    return templ
   }
 
-  this.PreSet        = async function(data)
+  this.PostSet        = async function(res_)
   {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.TransitID = resp.Data.TransitID
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    let agent        = data.Get(data.Obj.User, this.AgentID)
+    agent.TransitID  = res_.Data.TransitID
+    data.Set(data.Obj.User, this.AgentID, agent)
   }
-
 }
 
-let StoreDespatch = function(addr)
+let Accepted = function(user_) 
 {
-  this.Data =
+  this.UserID  = user_
+  this.Data    = function()
   {
-      Type                : Type.Rest
-    , Describe            : 'Transit Store Despatch'
-    , Request             :
+    let user   = data.Get(data.Obj.User, this.UserID)
+    let templ  =      
     {
-          Method          : Method.POST
-        , Path            : '/transit/store'
-        , Body            : 
-        {
-              StoreID     : ''
-            , TransitID   : ''
-            , OTP         : ''
-            , Task        : task.Despatch
-        }
-        , Header          : { Authorization: '' }
+        Type          : Type.Event
+      , Describe      : 'Tranist Alert Accepted ' + user.Name
+      , Method        : Method.EVENT
+      , Authorization : {}
+      , Socket        : user.Socket
+      , Event         : 
+      {
+          Type : alerts.Accepted
+        , Data : { TransitID : user.TransitID }
+      }
     }
-    , Response            :
-    {
-          Code            : code.OK
-        , Status          : status.Success
-        , Text            : alerts.EnRoute
-        , Data            : {}
-    }
+    return templ
   }
-
-  this.PreSet        = async function(data)
-  {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.StoreID   = resp.Data.StoreID
-    data.Request.Body.TransitID = resp.Data.TransitID
-    data.Request.Body.OTP       = resp.Data.OTP    
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
-  }
-
 }
 
-let AgentComplete = function(addr)
+let AgentAccept =  function(agent_, staff_) 
 {
-  this.Data =
+  this.AgentID   = agent_
+  this.StaffID   = staff_  
+  this.Data      = function()
   {
-      Type                : Type.Rest
-    , Describe            : 'Transit Agent Complete'
-    , Request             :
+    let agent = data.Get(data.Obj.User, this.AgentID)
+    let templ =
     {
-          Method          : Method.POST
-        , Path            : '/transit/agent'
-        , Body            : 
-        {
-              OTP         : ''
-            , TransitID   : ''
-            , Task        : task.Complete
-        }
-        , Header          : { Authorization: '' }
+        Type                : Type.Rest
+      , Describe            : 'Transit Agent Accept'
+      , Request             :
+      {
+            Method          : Method.POST
+          , Path            : '/transit/agent'
+          , Body            : 
+          {
+                TransitID   : agent.TransitID
+              , Task        : task.Accept
+          }
+          , Header          : { Authorization: 'Bearer ' + agent.Token }
+      }
+      , Response            :
+      {
+            Code            : code.OK
+          , Status          : status.Success
+          , Text            : alerts.Accepted
+          , Data            : {}
+      }
     }
-    , Response            :
+    return templ
+  }
+  
+  this.PostSet = async function(res_)
+  {
+    let resp  = await read()
+      , user  = data.Get(data.Obj.User, this.StaffID)
+    user.OTP  = resp.Data.OTP
+    data.Set(data.Obj.User, this.StaffID, user)
+  }
+}
+
+let AgentReady = function(user_) 
+{
+  this.UserID  = user_
+  this.Data    = function()
+  {
+    let user   = data.Get(data.Obj.User, this.UserID)
+    let templ  =      
     {
-          Code            : code.OK
-        , Status          : status.Success
-        , Text            : alerts.Delivered
-        , Data            : {}
+        Type          : Type.Event
+      , Describe      : 'Tranist Alert AgentReady ' + user.Name
+      , Method        : Method.EVENT
+      , Authorization : {}
+      , Socket        : user.Socket
+      , Event         : 
+      {
+          Type : alerts.AgentReady
+        , Data : { TransitID : user.TransitID }
+      }
     }
+    return templ
+  }
+}
+
+let StoreDespatch = function(staff_, agent_) 
+{
+  this.StaffID   = staff_
+  this.AgentID   = agent_
+  this.Data      = function()
+  {
+    let staff = data.Get(data.Obj.User, this.StaffID)
+    let templ =
+    {
+        Type             : Type.Rest
+      , Describe         : 'Transit Store Despatch'
+      , Request          :
+      {                  
+          Method         : Method.POST
+        , Path           : '/transit/store'
+        , Body           : 
+        {                
+              TransitID  : staff.TransitID
+            , OTP        : staff.OTP
+            , Task       : task.Despatch
+        }                 
+        , Header         : { Authorization: 'Bearer ' + staff.Token }
+      }                  
+      , Response         :
+      {                    
+            Code         : code.OK
+          , Status       : status.Success
+          , Text         : alerts.EnRoute
+          , Data         : {}
+      }
+    }
+    return templ
   }
 
-  this.PreSet        = async function(data)
+  this.PostSet = async function(res_)
   {
-    console.log(prints.ReadParam)
-    let req = {
-        Method     : Method.GET
-      , Path       : '/test'
-      , Body       : {}
-      , Header     : {}
-    }
-    let resp = await Rest(req)
-    data.Request.Body.StoreID   = resp.Data.StoreID
-    data.Request.Body.TransitID = resp.Data.TransitID
-    data.Request.Body.OTP       = resp.Data.OTP    
-    let token = await jwt.Sign({ _id: resp.Data.UserID })
-    data.Request.Header.Authorization = 'Bearer ' + token
-    return data
+    let resp  = await read()
+      , user  = data.Get(data.Obj.User, this.AgentID)
+    user.OTP  = resp.Data.OTP
+    data.Set(data.Obj.User, this.AgentID, user)
   }
+}
 
+let EnRoute = function(user_) 
+{
+  this.UserID  = user_
+  this.Data    = function()
+  {
+    let user   = data.Get(data.Obj.User, this.UserID)
+    let templ  =      
+    {
+        Type          : Type.Event
+      , Describe      : 'Tranist Alert EnRoute ' + user.Name
+      , Method        : Method.EVENT
+      , Authorization : {}
+      , Socket        : user.Socket
+      , Event         : 
+      {
+          Type : alerts.EnRoute
+        , Data : { TransitID : user.TransitID }
+      }
+    }
+    return templ
+  }
+}
+
+let AgentComplete = function(agent_) 
+{
+  this.AgentID   = agent_
+  this.Data      = function()
+  {
+    let agent = data.Get(data.Obj.User, this.AgentID)
+    let templ =
+    {
+        Type                : Type.Rest
+      , Describe            : 'Transit Agent Complete'
+      , Request             :
+      {
+            Method          : Method.POST
+          , Path            : '/transit/agent'
+          , Body            : 
+          {
+                OTP         : agent.OTP
+              , TransitID   : agent.TransitID
+              , Task        : task.Complete
+          }
+          , Header          : { Authorization: 'Bearer ' + agent.Token }
+      }
+      , Response            :
+      {
+            Code            : code.OK
+          , Status          : status.Success
+          , Text            : alerts.Delivered
+          , Data            : {}
+      }
+    }
+    return templ
+  }
+}
+
+let Delivered = function(user_) 
+{
+  this.UserID  = user_
+  this.Data    = function()
+  {
+    let user   = data.Get(data.Obj.User, this.UserID)
+    let templ  =      
+    {
+        Type          : Type.Event
+      , Describe      : 'Tranist Alert Delivered ' + user.Name
+      , Method        : Method.EVENT
+      , Authorization : {}
+      , Socket        : user.Socket
+      , Event         : 
+      {
+          Type : alerts.Delivered
+        , Data : { TransitID : user.TransitID }
+      }
+    }
+    return templ
+  }
 }
 
 module.exports =
 {
-    StoreAccept, AgentAccept, StoreDespatch, AgentComplete
+      StoreAccept
+    , NewTransit
+    , Accepted
+    , AgentAccept
+    , AgentReady
+    , StoreDespatch
+    , EnRoute
+    , AgentComplete
+    , Delivered
 }

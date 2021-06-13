@@ -35,18 +35,14 @@ router.post("/store", async (req, res, next) =>
 {
     try
     {
-        let event_, text_, store = new Store()
-        await store.Authz(req.body.StoreID, req.body.User._id)
-
-        const query_ =
-        {
-            'Store._id': ObjectId(req.body.StoreID),
-            _id   : ObjectId(req.body.TransitID)
-        }
+        const query_ = { _id   : ObjectId(req.body.TransitID) }
         let trans  = new Transit()
         let trans_ = await trans.Get(query_, query.Custom)
         if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
+        let event_, text_, store = new Store()
+        await store.Authz(trans.Data.Store._id, req.body.User._id)
+        
         switch(req.body.Task)
         {
           case task.Reject:

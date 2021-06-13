@@ -150,6 +150,7 @@ let Connect = function(name)
     }
     this.PostSet        = async function(res_)
     {
+      if(this.ID.startsWith('Agent1')) { await read() }
       let user    = data.Get(data.Obj.User, this.ID)
       user.Socket = res_.Socket
       user.Channel= res_.Channel
