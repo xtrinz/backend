@@ -13,13 +13,7 @@ function Cart(user_id)
     , UserID      : ObjectId(user_id)
     , Products    : []
     , JournalID   : ''    
-    , Bill        : 
-    {
-         Total           : 0
-       , TransitCost     : 0
-       , Tax             : 0
-       , NetPrice        : 0
-    }
+    //, Bill : { Total : 0, TransitCost : 0, Tax : 0, NetPrice : 0 }
    }
 
    this.Save       = async function()
@@ -121,14 +115,7 @@ function Cart(user_id)
       let cart = await this.Get(UserId, query.ByUserID)
       if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)
       this.Data.JournalID   = ''
-      this.Data.Products    = []    
-      this.Data.Bill        = 
-      {
-            Total           : 0
-          , TransitCost     : 0
-          , Tax             : 0
-          , NetPrice        : 0
-      }
+      this.Data.Products    = []
       await this.Save()
    }
 }

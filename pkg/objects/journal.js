@@ -14,13 +14,11 @@ function Journal()
     this.Data =
     {
         _id               : ''
-/*    , Type              : type.FORWARD
-      , ReturnID          : ''          */
-      , Date              : ''          // Millis eases math
+      , Date              : ''
       
       , Buyer             :
       {
-        ID              : ''
+          ID              : ''
         , Name            : ''
         , Location        : {}
         , Address         : {}
@@ -34,7 +32,7 @@ function Journal()
       }
       , Order             :
       {
-          Products        : [] // {  ProductID, Name, Price, Image, Quantity }
+          Products        : [] // ProductID, Name, Price, Image, Quantity
         , Bill            : 
         {
             Total         : 0
@@ -107,12 +105,10 @@ function Journal()
       let cart_           = new Cart()
       const cart_data     = await cart_.Read(data.User._id)
 
-      if(!cart_data.Products.length)
-      Err_(code.BAD_REQUEST, reason.NoProductsFound)
+      if(!cart_data.Products.length) Err_(code.BAD_REQUEST, reason.NoProductsFound)
 
       this.Data.Order     = { ...cart_data }
-      if(cart_.Data.JournalID)
-      await this.GetByID(cart_.Data.JournalID)
+      if(cart_.Data.JournalID) { await this.GetByID(cart_.Data.JournalID) }
 
       // Set Seller
       const store_  = new Store()
@@ -120,12 +116,12 @@ function Journal()
       if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
       this.Data.Seller    = 
       {                 
-                ID        : store._id
-              , Name      : store.Name
-              , MobileNo  : store.MobileNo
-              , Longitude : store.Location.coordinates[0]
-              , Latitude  : store.Location.coordinates[1]
-              , Address   : store.Address
+          ID        : store._id
+        , Name      : store.Name
+        , MobileNo  : store.MobileNo
+        , Longitude : store.Location.coordinates[0]
+        , Latitude  : store.Location.coordinates[1]
+        , Address   : store.Address
       }                 
 
       // Set ID & Date
@@ -145,7 +141,6 @@ function Journal()
       }
       await this.Save()
 
-      test.Set('Stripe',    intent)        // #101
       test.Set('JournalID', this.Data._id) // #101
 
       const data_ =
@@ -178,15 +173,12 @@ function Journal()
       let journal = await this.GetByID(journal_id)
       if (!journal) Err_(code.BAD_REQUEST, reason.JournalNotFound)
 
+      this.Data.Payment.TimeStamp = Date.now()
       switch (event_.type)
       {
       case states.StripeSucess:
         let cart_ = new Cart()
-          , cart  = await cart_.Get(journal.Buyer.ID, query.ByUserID)
-        if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)
-        cart_.Data.JournalID = ''
-        await cart_.Save()
-
+        await cart_.Flush(journal.Buyer.ID)
         this.Data.Payment.Status = states.Success
         this.Data.Transit.Status = states.Initiated
         break

@@ -71,22 +71,15 @@ let RegisterReadOTP = function(name)
           }
           , Header     : {}
         }
-        , Skip         : [ 'Token' ]
         , Response     :
         {
             Code       : code.OK
           , Status     : status.Success
           , Text       : text.OTPConfirmed
-          , Data       : { Token: '' }
+          , Data       : {}
         }
       }
       return templ
-  }
-  this.PostSet        = async function(res_)
-  {
-    let user   = data.Get(data.Obj.User, this.ID)
-    user.Token = res_.Data.Token
-    data.Set(data.Obj.User, this.ID, user)
   }
 }
 
@@ -117,16 +110,22 @@ let Register = function(name)
             Authorization : 'Bearer ' + user.Token
           }
         }
-        , Skip            : []
+        , Skip            : [ 'Token' ]
         , Response        :
         {
             Code          : code.OK
           , Status        : status.Success
           , Text          : text.Registered
-          , Data          : {}
+          , Data          : { Token: '' }
         }
       }
       return templ
+    }
+    this.PostSet        = async function(res_)
+    {
+      let user   = data.Get(data.Obj.User, this.ID)
+      user.Token = res_.Data.Token
+      data.Set(data.Obj.User, this.ID, user)
     }
 }
 
