@@ -93,7 +93,7 @@ let NewOrder = function(name)
       let templ =      
       {
           Type          : Type.Event
-        , Describe      : 'Tranist Alert New_Order ' + user.Name
+        , Describe      : 'Transit Alert New_Order ' + user.Name
         , Method        : Method.EVENT
         , Authorization : {}
         , Socket        : user.Socket

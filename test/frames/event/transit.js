@@ -46,7 +46,7 @@ let NewTransit = function(agent_)
     let templ  =      
     {
         Type          : Type.Event
-      , Describe      : 'Tranist Alert New_Transit ' + agent.Name
+      , Describe      : 'Transit Alert New_Transit ' + agent.Name
       , Method        : Method.EVENT
       , Authorization : {}
       , Socket        : agent.Socket
@@ -77,7 +77,7 @@ let Accepted = function(user_)
     let templ  =      
     {
         Type          : Type.Event
-      , Describe      : 'Tranist Alert Accepted ' + user.Name
+      , Describe      : 'Transit Alert Accepted ' + user.Name
       , Method        : Method.EVENT
       , Authorization : {}
       , Socket        : user.Socket
@@ -142,7 +142,7 @@ let AgentReady = function(user_)
     let templ  =      
     {
         Type          : Type.Event
-      , Describe      : 'Tranist Alert AgentReady ' + user.Name
+      , Describe      : 'Transit Alert AgentReady ' + user.Name
       , Method        : Method.EVENT
       , Authorization : {}
       , Socket        : user.Socket
@@ -208,7 +208,7 @@ let EnRoute = function(user_)
     let templ  =      
     {
         Type          : Type.Event
-      , Describe      : 'Tranist Alert EnRoute ' + user.Name
+      , Describe      : 'Transit Alert EnRoute ' + user.Name
       , Method        : Method.EVENT
       , Authorization : {}
       , Socket        : user.Socket
@@ -265,7 +265,7 @@ let Delivered = function(user_)
     let templ  =      
     {
         Type          : Type.Event
-      , Describe      : 'Tranist Alert Delivered ' + user.Name
+      , Describe      : 'Transit Alert Delivered ' + user.Name
       , Method        : Method.EVENT
       , Authorization : {}
       , Socket        : user.Socket
