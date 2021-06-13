@@ -25,14 +25,9 @@ const { Suite } = require("./lib/driver")
         data  : require('./frames/data/cart')
       , story : require('./frames/story/cart')        
     }
-    , journal   =
-    {
-        story : require('./frames/story/journal')        
-    }
     , transit   =
     {
-        data  : require('./frames/data/transit')
-      , story : require('./frames/story/transit')        
+        story : require('./frames/story/transit')        
     }
 
   let admin_1       = new    user.data.User    ('Admin')
@@ -51,8 +46,8 @@ const { Suite } = require("./lib/driver")
     , product.story.Std(user_2_staff.Name, store_1.Name, product_1.Name )
     , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
     ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , journal.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, user_1_owner.Name, user_2_staff.Name)
-    , transit.story.Std(user_3_buyer.Name, agent_1.Name, user_1_owner.Name, user_2_staff.Name)
+
+    , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_2_staff.Name)
 
     , user.story.Disconnect(user_1_owner.Name, user_2_staff.Name, user_3_buyer.Name, agent_1.Name)
   ]

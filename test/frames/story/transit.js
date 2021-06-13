@@ -2,13 +2,20 @@ const event        = require('../event/transit')
     , { TestCase } = require("../../lib/driver")
     , { AddUser }  = require('./user')
 
-const Std = function(user_, agent_, owner_, staff_)
+const Std = function(user_, addr_, agent_, owner_, staff_)
 {
-    let tc = new TestCase('Transit Events')
-        tc = AddUser(tc, agent_)
+    let cart_   = user_
+    let tc      = new TestCase('Transit Process')
+        tc      = AddUser(tc, agent_)
     let steps =
     [
-          new event.StoreAccept   (staff_)
+          new event.Create         (user_, addr_, cart_)
+        , new event.ConfirmPayment ()
+        , new event.NewOrder       (owner_)
+        , new event.NewOrder       (staff_)
+        , new event.NewOrder       (user_)
+
+        , new event.StoreAccept   (staff_)
         , new event.NewTransit    (agent_)
         , new event.Accepted      (user_ )
         
