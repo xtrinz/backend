@@ -128,6 +128,118 @@ let NewOrder = function(name)
     }
 }
 
+let CancelByUser = function(user_) 
+{
+  this.UserID    = user_
+  this.Data      = function()
+  {
+    let user = data.Get(data.Obj.User, this.UserID)
+    let templ =
+    {
+        Type                : Type.Rest
+      , Describe            : 'Transit Cancel By User'
+      , Request             :
+      {
+            Method          : Method.POST
+          , Path            : '/transit/user/cancel'
+          , Body            : 
+          {
+                TransitID   : user.TransitID
+              , Task        : task.Accept
+          }
+          , Header          : { Authorization: 'Bearer ' + user.Token }
+      }
+      , Response            :
+      {
+            Code            : code.OK
+          , Status          : status.Success
+          , Text            : alerts.Cancelled
+          , Data            : {}
+      }
+    }
+    return templ
+  }
+}
+
+let Cancelled = function(user_) 
+{
+  this.UserID  = user_
+  this.Data    = function()
+  {
+    let user   = data.Get(data.Obj.User, this.UserID)
+    let templ  =      
+    {
+        Type          : Type.Event
+      , Describe      : 'Transit Alert Cancelled ' + user.Name
+      , Method        : Method.EVENT
+      , Authorization : {}
+      , Socket        : user.Socket
+      , Event         : 
+      {
+          Type : alerts.Cancelled
+        , Data : { TransitID : user.TransitID }
+      }
+    }
+    return templ
+  }
+}
+
+let RejectedByStore = function(staff_) 
+{
+  this.StaffID   = staff_
+  this.Data      = function()
+  {
+    let staff = data.Get(data.Obj.User, this.StaffID)
+    let templ =
+    {
+        Type                : Type.Rest
+      , Describe            : 'Transit Store Reject'
+      , Request             :
+      {
+            Method          : Method.POST
+          , Path            : '/transit/store'
+          , Body            : 
+          {
+                TransitID   : staff.TransitID
+              , Task        : task.Reject
+          }
+          , Header          : { Authorization: 'Bearer ' + staff.Token }
+      }
+      , Response            :
+      {
+            Code            : code.OK
+          , Status          : status.Success
+          , Text            : alerts.Rejected
+          , Data            : {}
+      }
+    }
+    return templ
+  }
+}
+
+let Rejected = function(user_) 
+{
+  this.UserID  = user_
+  this.Data    = function()
+  {
+    let user   = data.Get(data.Obj.User, this.UserID)
+    let templ  =      
+    {
+        Type          : Type.Event
+      , Describe      : 'Transit Alert Rejected ' + user.Name
+      , Method        : Method.EVENT
+      , Authorization : {}
+      , Socket        : user.Socket
+      , Event         : 
+      {
+          Type : alerts.Rejected
+        , Data : { TransitID : user.TransitID }
+      }
+    }
+    return templ
+  }
+}
+
 let StoreAccept = function(staff_) 
 {
   this.StaffID   = staff_
@@ -408,6 +520,10 @@ module.exports =
       Checkout
     , ConfirmPayment
     , NewOrder
+    , CancelByUser
+    , Cancelled
+    , RejectedByStore
+    , Rejected
     , StoreAccept
     , NewTransit
     , Accepted

@@ -26,13 +26,7 @@ const InitiatedByUser		= async function(ctxt)
 const CancelledByUser		=  async function(ctxt)
 {
 	console.log('process-cargo-cancellation', ctxt.Data)
-	if (   ctxt.Data.State !== states.TransitAccepted
-		&& ctxt.Data.State !== states.OrderAccepted
-		&& ctxt.Data.State !== states.CargoInitiated)
-	{
-		console.log('cannot-be-cancelled', ctxt.Data)
-		Err_(code.BAD_REQUEST, reason.CancellationDenied)
-	}
+
 	await Emit(alerts.Cancelled, ctxt)
 	ctxt.Data.IsLive = false
 	await Save(ctxt, states.CargoCancelled)
@@ -42,7 +36,7 @@ const CancelledByUser		=  async function(ctxt)
 	console.log('cargo-cancelled', ctxt.Data)
 }
 
-const RejectedByStore		= async function()
+const RejectedByStore		= async function(ctxt)
 {
 	console.log('process-order-rejection', ctxt.Data)
 	await Emit(alerts.Rejected, ctxt)
@@ -152,7 +146,7 @@ const RejectedByAgent		= async function(ctxt)
 	switch(ctxt.State)
 	{
 	case states.TransitAccepted:
-		const agent = new User()
+		const agent  = new User()
 		const agents = await agent.NearbyAgents(
 			ctxt.Data.Store.Longitude,
 			ctxt.Data.Store.Latitude)

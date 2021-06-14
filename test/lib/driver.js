@@ -37,6 +37,7 @@ function TestRig()
                         return { Status: true,  Data: res   }
                     case Method.EVENT      :
                         let resp = await Socket.Read(data.Socket)
+                        if(!resp) return { Status: false,  Data: {}  }
                         let sts  = await compare.DeepEqual(resp, data.Event, data.Skip)
                         if(sts)
                         return { Status: true,  Data: resp  }

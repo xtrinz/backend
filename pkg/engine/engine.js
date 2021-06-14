@@ -13,7 +13,7 @@ const Engine 				 = function()
 		, [states.CargoInitiated] 				:
 		{ 												
 			  [event.CancellationByUser] 		: method.CancelledByUser
-			, [event.RejectionByStore] 			: method.RejectedByStore // #02
+			, [event.RejectionByStore] 			: method.RejectedByStore
 			, [event.TimeoutByStore]			: method.TimeoutByStore
 			, [event.AcceptanceByStore]			: method.AcceptedByStore
 		}												
@@ -22,9 +22,10 @@ const Engine 				 = function()
 		, [states.OrderTimeExceeded] 			: {}
 		, [states.OrderAccepted] 				:
 		{ 												
-			  [event.IgnoranceByAgent] 			: method.IgnoredByAgent
+			  [event.CancellationByUser] 		: method.CancelledByUser
+			, [event.IgnoranceByAgent] 			: method.IgnoredByAgent
 			, [event.TimeoutByAgent] 			: method.TimeoutByAgent
-			, [event.RejectionByStore] 			: method.RejectedByStore 		// handle separately #02
+			, [event.RejectionByStore] 			: method.RejectedByStore
 			, [event.AcceptanceByAgent] 		: method.AcceptedByAgent
 		}												
 		, [states.OrderOnHold] 					:
@@ -38,7 +39,8 @@ const Engine 				 = function()
 		, [states.TransitTimeout] 				: {}
 		, [states.TransitAccepted] 				:
 		{												
-			  [event.RejectionByAgent] 			: method.RejectedByAgent 
+			  [event.CancellationByUser] 		: method.CancelledByUser
+			, [event.RejectionByAgent] 			: method.RejectedByAgent 
 			, [event.RejectionByStore]  		: method.RejectedByStore
 			, [event.DespatchmentByStore] 		: method.DespatchedByStore
 		}												
