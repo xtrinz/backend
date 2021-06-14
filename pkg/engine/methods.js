@@ -15,7 +15,7 @@ const Save = async function(ctxt, state_)
 	await ctxt.Save()
 }
 
-const CargoInitiatedByUser		= async function(ctxt)
+const InitiatedByUser		= async function(ctxt)
 {
 	console.log('process-cargo-init', ctxt.Data)
 	await Emit(alerts.NewOrder, ctxt)
@@ -23,7 +23,7 @@ const CargoInitiatedByUser		= async function(ctxt)
 	console.log('cargo-initialised', ctxt.Data)
 }
 
-const CargoCancelledByUser		=  async function(ctxt)
+const CancelledByUser		=  async function(ctxt)
 {
 	console.log('process-cargo-cancellation', ctxt.Data)
 	if (   ctxt.Data.State !== states.TransitAccepted
@@ -42,7 +42,7 @@ const CargoCancelledByUser		=  async function(ctxt)
 	console.log('cargo-cancelled', ctxt.Data)
 }
 
-const OrderRejectedByStore		= async function()
+const RejectedByStore		= async function()
 {
 	console.log('process-order-rejection', ctxt.Data)
 	await Emit(alerts.Rejected, ctxt)
@@ -53,12 +53,12 @@ const OrderRejectedByStore		= async function()
 	console.log('order-rejected', ctxt.Data)
 }
 
-const OrderAcceptanceTimeout		= async function(ctxt)
+const TimeoutByStore		= async function(ctxt)
 {
 	await Save(ctxt, states.TransitAcceptanceTimeout)
 }
 
-const OrderAcceptedByStore			=  async function(ctxt)
+const AcceptedByStore			=  async function(ctxt)
 {
 	console.log('process-order-acceptance', ctxt.Data)
 	const agent  = new User()
@@ -79,7 +79,7 @@ const OrderAcceptedByStore			=  async function(ctxt)
 	console.log('order-accepted-by-shop', ctxt.Data)
 }
 
-const OrderDespatchedByStore		= async function(ctxt)
+const DespatchedByStore		= async function(ctxt)
 {
 	console.log('process-order-despatchment', ctxt.Data)
 
@@ -102,7 +102,7 @@ const OrderDespatchedByStore		= async function(ctxt)
 	console.log('order-despatched', ctxt.Data)
 }
 
-const TransitIgnoredByAgent		= async function(ctxt)
+const IgnoredByAgent		= async function(ctxt)
 {
 	for (idx = 0; idx < ctxt.Agents.length; idx++) 
 	{
@@ -124,12 +124,12 @@ const TransitIgnoredByAgent		= async function(ctxt)
 	await ctxt.Save()
 }
 
-const TransitAcceptanceTimeout		= async function()
+const TimeoutByAgent		= async function()
 {
 	await Save(ctxt, states.TransitTimeout)
 }
 
-const TransitAcceptedByAgent		= async function(ctxt)
+const AcceptedByAgent		= async function(ctxt)
 {
 	console.log('process-transit-acceptace', ctxt.Data)
 
@@ -147,7 +147,7 @@ const TransitAcceptedByAgent		= async function(ctxt)
 	console.log('transit-accepted', ctxt.Data)
 }
 
-const TransitRejectedByAgent		= async function(ctxt)
+const RejectedByAgent		= async function(ctxt)
 {
 	switch(ctxt.State)
 	{
@@ -171,7 +171,7 @@ const TransitRejectedByAgent		= async function(ctxt)
 	await Save(ctxt, states.TransitRejected)
 }
 
-const TransitCompletedByAgent		= async function(ctxt)
+const CompletedByAgent		= async function(ctxt)
 {
 	console.log('process-transit-completion', ctxt.Data)
 
@@ -192,15 +192,15 @@ const TransitCompletedByAgent		= async function(ctxt)
 
 module.exports = 
 {
-	CargoInitiatedByUser	 : CargoInitiatedByUser,
-	CargoCancelledByUser	 : CargoCancelledByUser,
-	OrderRejectedByStore	 : OrderRejectedByStore,
-	OrderAcceptanceTimeout	 : OrderAcceptanceTimeout,
-	OrderAcceptedByStore	 : OrderAcceptedByStore,
-	OrderDespatchedByStore	 : OrderDespatchedByStore,
-	TransitIgnoredByAgent	 : TransitIgnoredByAgent,
-	TransitAcceptanceTimeout : TransitAcceptanceTimeout,
-	TransitAcceptedByAgent	 : TransitAcceptedByAgent,
-	TransitRejectedByAgent	 : TransitRejectedByAgent,
-	TransitCompletedByAgent	 : TransitCompletedByAgent
+	InitiatedByUser	  : InitiatedByUser,
+	CancelledByUser	  : CancelledByUser,
+	RejectedByStore	  : RejectedByStore,
+	TimeoutByStore	  : TimeoutByStore,
+	AcceptedByStore	  : AcceptedByStore,
+	DespatchedByStore : DespatchedByStore,
+	IgnoredByAgent	  : IgnoredByAgent,
+	TimeoutByAgent 	  : TimeoutByAgent,
+	AcceptedByAgent	  : AcceptedByAgent,
+	RejectedByAgent	  : RejectedByAgent,
+	CompletedByAgent  : CompletedByAgent
 }

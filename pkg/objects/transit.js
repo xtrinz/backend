@@ -1,7 +1,7 @@
 const { ObjectID, ObjectId } 	= require("mongodb")
     , { transits, users } 		= require("../common/database")
     , { Err_, code, reason }    = require("../common/error")
-    , { states, events, query } = require("../common/models")
+    , { states, event, query }  = require("../common/models")
     , { Engine }                = require("../engine/engine")
 
 function Transit (journal)
@@ -42,7 +42,7 @@ function Transit (journal)
       , Return 	        : ""                            // Machine's prev-state for fallbacks
       , State 		    : states.None                   // Machine init state
       , IsLive          : true                          // Is it ongoing transit
-      , Event 		    : events.EventInitiationByUser  // Machine init event
+      , Event 		    : event.InitiationByUser  // Machine init event
       , MaxWT           : 35                            // Maximum Waiting Time (35min)
       , OrderedAt 	    : ''                            // Millis / https://currentmillis.com/
       , ETD   		    : 0                             // Estimated Time of Delivery

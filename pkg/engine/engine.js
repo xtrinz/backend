@@ -1,4 +1,4 @@
-const {states, events}		 = require("../common/models")
+const {states, event}		 = require("../common/models")
 	, { Err_, code, reason } = require("../common/error")
 	, method				 = require("./methods")
 
@@ -6,76 +6,52 @@ const Engine 				 = function()
 {
 	this.Handler =
 	{
-		  [states.None] 							:
-		{
-			  [events.EventInitiationByUser] 		: method.CargoInitiatedByUser
-		}
-		, [states.CargoInitiated] 					:
-		{ 
-			  [events.EventCancellationByUser] 		: method.CargoCancelledByUser
-			, [events.EventRejectionByStore] 		: method.OrderRejectedByStore // #02
-			, [events.EventRespTimeoutByStore]		: method.OrderAcceptanceTimeout
-			, [events.EventAcceptanceByStore]		: method.OrderAcceptedByStore
-		}
-		, [states.CargoCancelled] 					:
-		{
-
-		}
-
-		, [states.OrderRejected] 					:
-		{ 
-
-		}
-		, [states.OrderTimeExceeded] 				:
-		{ 
-			
-		}
-
-		, [states.OrderAccepted] 					:
-		{ 
-			  [events.EventIgnoranceByAgent] 		: method.TransitIgnoredByAgent
-			, [events.EventRespTimeoutByAgent] 		: method.TransitAcceptanceTimeout
-			, [events.EventRejectionByStore] 		: method.OrderRejectedByStore 		// handler separately #02
-			, [events.EventAcceptanceByAgent] 		: method.TransitAcceptedByAgent
-		}
-
-		, [states.OrderOnHold] 						:
-		{ 
-			  [events.EventRefeedAgentsByAdmin] 	: method.OrderAcceptedByStore
-		}
-
-		, [states.TransitIgnored] 					:
-		{
-			[events.EventRefeedAgentsByAdmin] 		: method.OrderAcceptedByStore
-		}
-
-		, [states.TransitTimeout] 					:
-		{
-
-		}
-
-		, [states.TransitAccepted] 					:
-		{
-			  [events.EventRejectionByAgent] 		: method.TransitRejectedByAgent 
-			, [events.EventRejectionByStore]  		: method.CargoCancelledByUser
-			, [events.EventDespatchmentByStore] 	: method.OrderDespatchedByStore
-		}
-
-		, [states.OrderDespatched] 					:
-		{
-			  [events.EventRejectionByAgent] 		: method.TransitRejectedByAgent 
-			, [events.EventCompletionByAgent] 		: method.TransitCompletedByAgent
-		}
-
-		, [states.TransitRejected] 					:
-		{
-			  [events.EventAcceptanceByAgent] 		: method.TransitAcceptedByAgent
-		}
-
-		, [states.TranistComplete] 					:
-		{
-
-		}
+		  [states.None] 						:
+		{												
+			  [event.InitiationByUser] 			: method.InitiatedByUser
+		}												
+		, [states.CargoInitiated] 				:
+		{ 												
+			  [event.CancellationByUser] 		: method.CancelledByUser
+			, [event.RejectionByStore] 			: method.RejectedByStore // #02
+			, [event.TimeoutByStore]			: method.TimeoutByStore
+			, [event.AcceptanceByStore]			: method.AcceptedByStore
+		}												
+		, [states.CargoCancelled] 				: {}
+		, [states.OrderRejected] 				: {}
+		, [states.OrderTimeExceeded] 			: {}
+		, [states.OrderAccepted] 				:
+		{ 												
+			  [event.IgnoranceByAgent] 			: method.IgnoredByAgent
+			, [event.TimeoutByAgent] 			: method.TimeoutByAgent
+			, [event.RejectionByStore] 			: method.RejectedByStore 		// handle separately #02
+			, [event.AcceptanceByAgent] 		: method.AcceptedByAgent
+		}												
+		, [states.OrderOnHold] 					:
+		{ 												
+			  [event.RefeedByAdmin] 			: method.AcceptedByStore
+		}												
+		, [states.TransitIgnored] 				:
+		{												
+			[event.RefeedByAdmin] 				: method.AcceptedByStore
+		}												
+		, [states.TransitTimeout] 				: {}
+		, [states.TransitAccepted] 				:
+		{												
+			  [event.RejectionByAgent] 			: method.RejectedByAgent 
+			, [event.RejectionByStore]  		: method.RejectedByStore
+			, [event.DespatchmentByStore] 		: method.DespatchedByStore
+		}												
+		, [states.OrderDespatched] 				:
+		{												
+			  [event.RejectionByAgent] 			: method.RejectedByAgent 
+			, [event.CompletionByAgent] 		: method.CompletedByAgent
+		}												
+		, [states.TransitRejected] 				:
+		{												
+			  [event.AcceptanceByAgent] 		: method.AcceptedByAgent
+		}												
+		, [states.TranistComplete] 				: {}
 	}
 
 	, this.GetHandler = (state_, event_) =>

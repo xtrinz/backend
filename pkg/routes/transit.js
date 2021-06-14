@@ -3,7 +3,7 @@ const { ObjectId } 				      = require("mongodb")
     , { Transit }                     = require("../objects/transit")
     , { Engine }                      = require("../engine/engine")
     , { Store }                       = require("../objects/store")
-    , { alerts, events, query, task } = require("../common/models")
+    , { alerts, event, query, task }  = require("../common/models")
     , { Err_, code, status, reason }  = require("../common/error")
 
 router.post("/user/cancel", async (req, res, next) =>
@@ -19,7 +19,7 @@ router.post("/user/cancel", async (req, res, next) =>
           , trans_ = await trans.Get(query_, query.Custom)
         if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
-        trans.Data.Event = events.EventCancellationByUser
+        trans.Data.Event = event.CancellationByUser
         let engine       = new Engine()
         await engine.Transition(trans)
 
@@ -46,18 +46,18 @@ router.post("/store", async (req, res, next) =>
         switch(req.body.Task)
         {
           case task.Reject:
-            event_ = events.EventRejectionByStore
+            event_ = event.RejectionByStore
             text_  = alerts.Rejected
             break
 
           case task.Accept:
-            event_ = events.EventAcceptanceByStore
+            event_ = event.AcceptanceByStore
             text_  = alerts.Accepted          
             break
 
           case task.Despatch:
             trans.Data.Store.Otp = req.body.OTP
-            event_ = events.EventDespatchmentByStore
+            event_ = event.DespatchmentByStore
             text_  = alerts.EnRoute
             break
         }
@@ -85,13 +85,13 @@ router.post("/agent", async (req, res, next) =>
         switch(req.body.Task)
         {
           case task.Reject:
-            event_ = events.EventRejectionByAgent
+            event_ = event.RejectionByAgent
             text_  = alerts.Rejected
             break
 
           case task.Ignore:
             trans.Data.Agent._id = req.body.User._id
-            event_ = events.EventIgnoranceByAgent
+            event_ = event.IgnoranceByAgent
             text_  = alerts.Ignored
             break
 
@@ -103,13 +103,13 @@ router.post("/agent", async (req, res, next) =>
               , Name     : req.body.User.Name
               , MobileNo : req.body.User.MobNo
             }
-            event_ = events.EventAcceptanceByAgent
+            event_ = event.AcceptanceByAgent
             text_  = alerts.Accepted          
             break
 
           case task.Complete:
             trans.Data.Agent.Otp = req.body.OTP
-            event_ = events.EventCompletionByAgent
+            event_ = event.CompletionByAgent
             text_  = alerts.Delivered
             break            
         }

@@ -49,7 +49,7 @@ module.exports =
 	},
 	channel:
 	{
-		Stripe 						: 'Stripe'
+		  Stripe 					: 'Stripe'
 	},
 	states:
 	{
@@ -61,17 +61,13 @@ module.exports =
         , MobConfirmed              : 'MobileNumberConfirmed'
         , Registered                : 'Registered'
 
-		, PaymentSuccessTransitSuccess 	: 'Payment-Success-Transit-Success'
-		, PaymentSuccessTransitFailed 	: 'Payment-Success-Transit-Failed'
-		, PaymentFailedTransitSuccess 	: 'Payment-Failed-Transit-Success'
-		, PaymentFailedTransitFailed 	: 'Payment-Failed-Transit-Failed'
-
 		, StripeSucess 				: "payment_intent.succeeded"
 		, StripeFailed 				: "payment_intent.payment_failed"
 
 		, Success 					: 'Success'
 		, Failed 			        : 'Failed'
         , Initiated                 : 'Initiated'
+
 
 		, None 						: 'None'						// None
 		, CargoInitiated 			: 'CargoInitiated'				// Payment had succeeded
@@ -96,19 +92,20 @@ module.exports =
 		, AgentRespLimit 			: 3 							// Transit acceptace delay for agents
 		, AgentFilterLimit 			: 8 							// Time upper limit to find an agent for delivery
 	},
-	events:
+	event:
 	{
-		  EventInitiationByUser		: 'EventInitiationByUser'		// event cargo initiated by user
-		, EventCancellationByUser	: 'EventCancellationByUser'		// event cargo cancellation by user
-		, EventRejectionByStore		: 'EventRejectionByStore'		// event order rejection by shop
-		, EventRespTimeoutByStore	: 'EventRespTimeoutByStore'		// event order acceptance timeout
-		, EventAcceptanceByStore	: 'EventAcceptanceByStore'		// event order acception by shop
-		, EventDespatchmentByStore	: 'EventDespatchmentByStore'	// event order despatchment by shop
-		, EventIgnoranceByAgent		: 'EventIgnoranceByAgent'		// event transit ignorance by agent
-		, EventRespTimeoutByAgent	: 'EventRespTimeoutByAgent'		// event transit acceptance timeout
-		, EventAcceptanceByAgent	: 'EventAcceptanceByAgent'		// event transit acception by agent
-		, EventRejectionByAgent		: 'EventRejectionByAgent'		// event transit rejection by agent
-		, EventCompletionByAgent	: 'EventCompletionByAgent'		// event tranist completion by agent
+		  InitiationByUser			: 'InitiationByUser'			// event cargo initiated by user
+		, CancellationByUser		: 'CancellationByUser'			// event cargo cancellation by user
+		, RejectionByStore			: 'RejectionByStore'			// event order rejection by shop
+		, TimeoutByStore			: 'RespTimeoutByStore'			// event order acceptance timeout
+		, AcceptanceByStore			: 'AcceptanceByStore'			// event order acception by shop
+		, DespatchmentByStore		: 'DespatchmentByStore'			// event order despatchment by shop
+		, IgnoranceByAgent			: 'IgnoranceByAgent'			// event transit ignorance by agent
+		, TimeoutByAgent			: 'RespTimeoutByAgent'			// event transit acceptance timeout
+		, RefeedByAdmin				: 'RefeedAgentsByAdmin'			// event re-initiate search for agents 
+		, AcceptanceByAgent			: 'AcceptanceByAgent'			// event transit acception by agent
+		, RejectionByAgent			: 'RejectionByAgent'			// event transit rejection by agent
+		, CompletionByAgent			: 'CompletionByAgent'			// event tranist completion by agent
 	},
 	alerts:
 	{
