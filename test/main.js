@@ -1,5 +1,5 @@
                   require("./lib/settings")
-const { Suite } = require("./lib/driver")
+const { Test, TestSuite } = require("./lib/driver")
     , user      =
     {
         data  : require('./frames/data/user')
@@ -38,7 +38,8 @@ const { Suite } = require("./lib/driver")
     , store_1       = new   store.data.Store   ()
     , product_1     = new product.data.Product ()
     , addr_1_user_3 = new address.data.Address ()
-
+    
+  var suite = new TestSuite("End to End Process")
   const tc =
   [
          user.story.Std(admin_1.Name )
@@ -46,11 +47,11 @@ const { Suite } = require("./lib/driver")
     , product.story.Std(user_2_staff.Name, store_1.Name, product_1.Name )
     , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
     ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-
     , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_2_staff.Name)
-
     , user.story.Disconnect(user_1_owner.Name, user_2_staff.Name, user_3_buyer.Name, agent_1.Name)
   ]
-  tc.forEach((test)=> Suite.AddTest(test))
+  tc.forEach((test)=> suite.AddCase(test))
 
-  Suite.Run()
+  Test.AddTestSuite(suite)
+
+  Test.Run()
