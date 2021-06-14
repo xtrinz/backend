@@ -39,8 +39,8 @@ const { Test, TestSuite } = require("./lib/driver")
     , product_1     = new product.data.Product ()
     , addr_1_user_3 = new address.data.Address ()
     
-  var suite = new TestSuite("End to End Process")
-  const tc =
+  var suite_1 = new TestSuite("End to End Process")
+  let cases =
   [
          user.story.Std(admin_1.Name )
     ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_2_staff.Name, store_1.Name )
@@ -48,10 +48,25 @@ const { Test, TestSuite } = require("./lib/driver")
     , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
     ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
     , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_2_staff.Name)
-    , user.story.Disconnect(user_1_owner.Name, user_2_staff.Name, user_3_buyer.Name, agent_1.Name)
+    ,    user.story.Disconnect(user_1_owner.Name, user_2_staff.Name, user_3_buyer.Name, agent_1.Name)
   ]
-  tc.forEach((test)=> suite.AddCase(test))
 
-  Test.AddTestSuite(suite)
+  cases.forEach((test)=> suite_1.AddCase(test))
+  Test.AddTestSuite(suite_1)
+
+  var suite_2 = new TestSuite("End to End Process-2")
+  cases =
+  [
+         user.story.Std(admin_1.Name )
+    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_2_staff.Name, store_1.Name )
+    , product.story.Std(user_2_staff.Name, store_1.Name, product_1.Name )
+    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
+    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
+    , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_2_staff.Name)
+    ,    user.story.Disconnect(user_1_owner.Name, user_2_staff.Name, user_3_buyer.Name, agent_1.Name)
+  ]
+
+  cases.forEach((test)=> suite_2.AddCase(test))
+  Test.AddTestSuite(suite_2)
 
   Test.Run()

@@ -56,6 +56,19 @@ let Checkout = function(user_, addr_, cart_)
     }
     return templ
   }
+  this.PostSet        = async function(res_)
+  {
+    let cart        = data.Get(data.Obj.Cart, this.CartID)
+    cart.Products     = [] // { ProductID, Name, Image, Price, Quantity } 
+    cart.Bill         = 
+    {                 
+          Total       : 0
+        , TransitCost : 0
+        , Tax         : 0
+        , NetPrice    : 0
+    }
+    data.Set(data.Obj.Cart, this.CartID, cart)
+  }
 }
 
 let ConfirmPayment = function() 

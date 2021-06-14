@@ -178,12 +178,13 @@ let Login = function(name)
           }
           , Header: {}
         }
+        , Skip      : [ 'Token' ]
         , Response  :
         {
             Code  : code.OK
           , Status: status.Success
           , Text  : text.LoggedIn
-          , Data  : { Token : user.Token }
+          , Data  : { Token : '' }
         }
       }
       return templ
@@ -254,12 +255,13 @@ let PasswordConfirmMobNo = function(name)
         }            
         , Header     : {}
       }
+      , Skip         : [ 'Token' ]
       , Response     :
       {               
           Code       : code.OK
         , Status     : status.Success
         , Text       : text.OTPConfirmed
-        , Data       : {Token : user.Token}
+        , Data       : {Token : ''}
       }
     }
     return templ

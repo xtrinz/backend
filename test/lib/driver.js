@@ -52,7 +52,9 @@ function TestRig()
     {
         for(let suite_ =0; suite_ < this.TestSuites.length; suite_++)
         {
-            await db.database.dropDatabase()
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            db.database.dropDatabase()
+            await new Promise((resolve) => setTimeout(resolve, 5000));
             
             let suite = this.TestSuites[suite_], failed = false
             let net_step_cnt = 0
