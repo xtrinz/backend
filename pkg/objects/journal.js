@@ -1,13 +1,12 @@
-const { User }                 = require("./user")
-    , { Cart }                 = require("./cart")
-    , { Store }                = require("./store")
-    , { ObjectID, ObjectId }   = require("mongodb")
-    , { Err_, code, reason }   = require("../common/error")
-    , { journals }             = require("../common/database")
-    , { states, type, channel,
-        entity, query }        = require("../common/models")
-    , { Stripe }               = require("../common/stripe")
-    , test                     = require('../common/test')
+const { User }                           = require("./user")
+    , { Cart }                           = require("./cart")
+    , { Store }                          = require("./store")
+    , { ObjectID, ObjectId }             = require("mongodb")
+    , test                               = require('../common/test')
+    , { Err_, code, reason }             = require("../common/error")
+    , { states, channel, entity, query } = require("../common/models")
+    , { Stripe }                         = require("../common/stripe")
+    , { journals }                       = require("../common/database")
 
 function Journal()
 {
@@ -48,7 +47,7 @@ function Journal()
         , ChannelParams   : {}
         , Amount          : ''
         , Status          : states.Initiated
-        , TimeStamp       : ''      // Webhook hit time
+        , TimeStamp       : ''      // Webhook entry time
       }
       , Transit           : 
       {
