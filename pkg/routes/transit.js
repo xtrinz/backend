@@ -1,10 +1,10 @@
-const { ObjectId } 				      = require("mongodb")
-    , router                          = require("express").Router()
-    , { Transit }                     = require("../objects/transit")
-    , { Engine }                      = require("../engine/engine")
-    , { Store }                       = require("../objects/store")
-    , { alerts, event, query, task }  = require("../common/models")
-    , { Err_, code, status, reason }  = require("../common/error")
+const { ObjectId } 				                  = require("mongodb")
+    , router                                = require("express").Router()
+    , { Transit }                           = require("../objects/transit")
+    , { Engine }                            = require("../engine/engine")
+    , { Store }                             = require("../objects/store")
+    , { alerts, event, query, task, mode }  = require("../common/models")
+    , { Err_, code, status, reason }        = require("../common/error")
 
 router.post("/user/cancel", async (req, res, next) =>
 {
@@ -112,6 +112,40 @@ router.post("/agent", async (req, res, next) =>
             event_ = event.CompletionByAgent
             text_  = alerts.Delivered
             break            
+        }
+        trans.Data.Event = event_
+        let engine       = new Engine()
+        await engine.Transition(trans)
+
+        return res.status(code.OK).json({
+            Status  : status.Success,
+            Text    : text_,
+            Data    : {}
+        })
+    } catch (err) { next(err) }
+})
+
+router.post("/admin", async (req, res, next) =>
+{
+    try
+    {
+        if(req.body.User._id !== mode.Admin)
+        if (!trans_) Err_(code.BAD_REQUEST, reason.Unauthorized)
+
+        let event_, text_
+        switch(req.body.Task)
+        {
+          case task.Accept:
+            trans.Data.Admin =
+            {
+                _id      : req.body.User._id
+              , SockID   : req.body.User.SockID
+              , Name     : req.body.User.Name
+              , MobileNo : req.body.User.MobNo
+            }
+            event_ = event.LockByAdmin
+            text_  = alerts.Locked          
+            break           
         }
         trans.Data.Event = event_
         let engine       = new Engine()

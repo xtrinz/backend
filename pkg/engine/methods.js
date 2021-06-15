@@ -55,6 +55,10 @@ const TimeoutByStore		= async function(ctxt)
 const AcceptedByStore			=  async function(ctxt)
 {
 	console.log('process-order-acceptance', ctxt.Data)
+
+	// must alert irrespective of transit get holded or not
+	await Emit(alerts.Accepted, ctxt)	// To User
+
 	const agent  = new User()
 	const agents = await agent.NearbyAgents(
 			ctxt.Data.Store.Longitude,
@@ -62,13 +66,18 @@ const AcceptedByStore			=  async function(ctxt)
 	if(!agents)
 	{
 		console.log('no-agents-order-on-hold', ctxt.Data)
+		const admin   = new User()
+		const admins  = await admin.NearbyAdmins(
+				ctxt.Data.Store.Longitude,
+				ctxt.Data.Store.Latitude)
 		await Emit(alerts.NoAgents, ctxt)
-		await Save(ctxt, states.OrderOnHold)
+		
+		ctxt.Data.Admins = admins
+		await Save(ctxt, states.OrderIgnored)
 		return
 	}
 	ctxt.Data.Agents = agents
 	await Emit(alerts.NewTransit, ctxt)	// To Agents
-	await Emit(alerts.Accepted, ctxt)	// To User
 	await Save(ctxt, states.OrderAccepted)
 	console.log('order-accepted-by-shop', ctxt.Data)
 }
@@ -98,29 +107,53 @@ const DespatchedByStore		= async function(ctxt)
 
 const IgnoredByAgent		= async function(ctxt)
 {
-	for (idx = 0; idx < ctxt.Agents.length; idx++) 
+	for (idx = 0; idx < ctxt.Data.Agents.length; idx++) 
 	{
-		let agent = ctxt.Agents[idx]
+		let agent = ctxt.Data.Agents[idx]
 		if (String(agent._id) === String(ctxt.Data.Agent._id)) 
-		{
-			ctxt.Agents.pop(agent)
-			break; 
-		}
+			{ ctxt.Data.Agents.pop(agent); break }
 	}
-	if(!ctxt.Agents.length)
+	if(!ctxt.Data.Agents.length)
 	{
-		console.log('all-agents-ignored-the-tranist-transit-on-hold', ctxt.Data)
+		console.log('on-hold-agents-ignored-the-tranist', ctxt.Data)
+		const admin   = new User()
+		const admins  = await admin.NearbyAdmins(
+				ctxt.Data.Store.Longitude,
+				ctxt.Data.Store.Latitude)
+		ctxt.Data.Admins = admins
 		await Emit(alerts.NoAgents, ctxt)
 		await Save(ctxt, states.TransitIgnored)
 		return	
 	}
-	ctxt.Event  = ""
+	delete 	ctxt.Data.Agent
+			ctxt.Data.Event  = ""
 	await ctxt.Save()
 }
 
 const TimeoutByAgent		= async function()
 {
 	await Save(ctxt, states.TransitTimeout)
+}
+
+const LockedByAdmin		= async function(ctxt)
+{
+	console.log('process-lock-by-admin', ctxt.Data)
+	await Emit(alerts.Locked, ctxt)
+
+	let state_
+	switch(ctxt.Data.State)
+	{
+		case states.OrderIgnored	 :
+			state_ = states.OrderOnHold	  ; break
+		case states.TransitIgnored	 :
+			state_ = states.TransitOnHold ; break
+		case states.TransitAbandoned :
+			state_ = states.TransitOnHold ; break
+	}
+
+	ctxt.Data.Admins = []
+	await Save(ctxt, state_)
+	console.log('transit-locked-by-admin', ctxt.Data)
 }
 
 const AcceptedByAgent		= async function(ctxt)
@@ -143,18 +176,24 @@ const AcceptedByAgent		= async function(ctxt)
 
 const RejectedByAgent		= async function(ctxt)
 {
+	// ? Agent History
 	switch(ctxt.State)
 	{
 	case states.TransitAccepted:
 		const agent  = new User()
 		const agents = await agent.NearbyAgents(
-			ctxt.Data.Store.Longitude,
-			ctxt.Data.Store.Latitude)
+				ctxt.Data.Store.Longitude,
+				ctxt.Data.Store.Latitude)
 		if(!agents.length)
 		{
 			console.log('no-nearby-agents', ctxt.Data)
-			await Emit(alerts.NoAgents, ctxt) 	// Notify Admin
-			await Save(ctxt, states.OrderOnHold)
+			const admin   = new User()
+			const admins  = await admin.NearbyAdmins(
+					ctxt.Data.Store.Longitude,
+					ctxt.Data.Store.Latitude)
+			ctxt.Data.Admins = admins
+			await Emit(alerts.NoAgents, ctxt)
+			await Save(ctxt, states.TransitAbandoned)
 			return
 		}
 		await Emit(alerts.NewTransit, ctxt)
@@ -193,6 +232,7 @@ module.exports =
 	AcceptedByStore	  : AcceptedByStore,
 	DespatchedByStore : DespatchedByStore,
 	IgnoredByAgent	  : IgnoredByAgent,
+	LockedByAdmin	  : LockedByAdmin,
 	TimeoutByAgent 	  : TimeoutByAgent,
 	AcceptedByAgent	  : AcceptedByAgent,
 	RejectedByAgent	  : RejectedByAgent,

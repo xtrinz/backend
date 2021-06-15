@@ -17,6 +17,7 @@ const Std = function(user_)
         , new event.ProfileGet          (user_)
         , new event.ProfileEdit         (user_)
         , new event.Disconnect          (user_)
+        , new event.Connect             (user_)
     ]
     steps_.forEach((step)=> {tc.AddStep(step) })
     return tc

@@ -42,6 +42,7 @@ module.exports =
 
 		, Reject 					: 'Reject'
 		, Accept 					: 'Accept'
+		, Assign 					: 'Assign'
 		, Despatch 					: 'Despatch'
 		, Ignore 					: 'Ignore'
 		, Complete 					: 'Complete'
@@ -77,11 +78,14 @@ module.exports =
 		, OrderTimeExceeded 		: 'OrderTimeExceeded'			// Order acceptance time limit for shop has been exceeded
 		, OrderAccepted 			: 'OrderAccepted'				// Order accpeted by shop
 		, OrderOnHold 				: 'OrderOnHold'					// Order on hold due to no nearby live agents
+		, OrderIgnored 				: 'OrderIgnored'
 		, OrderDespatched 			: 'OrderDespatched'				// Order gave to agent by shop
 
 		, TransitIgnored 			: 'TransitIgnored'				// Agent manually ingored the transit
 		, TransitTimeout 			: 'TransitTimeout'				// Agent transit acceptance deadline exceeded
+		, TransitOnHold 			: 'TransitOnHold'
 		, TransitAccepted 			: 'TransitAccepted'				// Agent accepted the transit
+		, TransitAbandoned			: 'TransitAbandoned'
 		, TransitRejected 			: 'TransitRejected'				// Agent droped/rejected the transit after acceptance
 		, TransitEnroute 			: 'TransitEnroute'				// The package is on the way.[state in hold, not decided]
 		, TranistCompleted 			: 'TranistCompleted'			// The package delivered
@@ -101,6 +105,7 @@ module.exports =
 		, AcceptanceByStore			: 'AcceptanceByStore'			// event order acception by shop
 		, DespatchmentByStore		: 'DespatchmentByStore'			// event order despatchment by shop
 		, IgnoranceByAgent			: 'IgnoranceByAgent'			// event transit ignorance by agent
+		, LockByAdmin				: 'LockByAdmin'					// event tranist under ctrl of admin
 		, TimeoutByAgent			: 'RespTimeoutByAgent'			// event transit acceptance timeout
 		, RefeedByAdmin				: 'RefeedAgentsByAdmin'			// event re-initiate search for agents 
 		, AcceptanceByAgent			: 'AcceptanceByAgent'			// event transit acception by agent
@@ -109,17 +114,18 @@ module.exports =
 	},
 	alerts:
 	{
-		  NewOrder 					: 'New_Order'					// to shop 		 on init
-		, Rejected 					: 'Rejected'					// to user 		 on rejection by shop
-		, Cancelled 				: 'Cancelled'					// to shop 		 on cancel by user
-		, Accepted 					: 'Accepted'					// to user 		 on acceptance from shop
-		, AutoCancelled 			: 'Auto_Cancelled'				// to user/shop  on outstanding delay
-		, NewTransit 				: 'New_Transit'					// to agents 	 on acceptance from shop
-		, AgentReady 				: 'Agent_Ready'					// to shop/user  on acceptance from agent 
-		, EnRoute 					: 'En_Route'					// to agent/user on despachement from shop
-		, Delivered 				: 'Delivered'					// to user/shop  on delivery
-		, Ignored 					: 'Ignored'						// to none
-		, NoAgents 					: 'No_Agents'					// to admin 	 on absents of live agents
+		  NewOrder 					: 'New_Order'					// to shop 		   on init
+		, Rejected 					: 'Rejected'					// to user 		   on rejection by shop
+		, Cancelled 				: 'Cancelled'					// to shop 		   on cancel by user
+		, Accepted 					: 'Accepted'					// to user 		   on acceptance from shop
+		, AutoCancelled 			: 'Auto_Cancelled'				// to user/shop    on outstanding delay
+		, NewTransit 				: 'New_Transit'					// to agents 	   on acceptance from shop
+		, AgentReady 				: 'Agent_Ready'					// to shop/user    on acceptance from agent 
+		, EnRoute 					: 'En_Route'					// to agent/user   on despachement from shop
+		, Delivered 				: 'Delivered'					// to user/shop    on delivery
+		, Ignored 					: 'Ignored'						// to none		   
+		, NoAgents 					: 'No_Agents'					// to admin 	   on absents of live agents
+		, Locked 					: 'Admin_Locked'				// to other admins on an admin choose a ticket
 	},
 	entity:
 	{

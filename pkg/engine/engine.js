@@ -17,9 +17,9 @@ const Engine 				 = function()
 			, [event.TimeoutByStore]			: method.TimeoutByStore
 			, [event.AcceptanceByStore]			: method.AcceptedByStore
 		}												
-		, [states.CargoCancelled] 				: {}
-		, [states.OrderRejected] 				: {}
-		, [states.OrderTimeExceeded] 			: {}
+		//, [states.CargoCancelled] 			: {}
+		//, [states.OrderRejected] 				: {}
+		//, [states.OrderTimeExceeded] 			: {}
 		, [states.OrderAccepted] 				:
 		{ 												
 			  [event.CancellationByUser] 		: method.CancelledByUser
@@ -28,15 +28,27 @@ const Engine 				 = function()
 			, [event.RejectionByStore] 			: method.RejectedByStore
 			, [event.AcceptanceByAgent] 		: method.AcceptedByAgent
 		}												
-		, [states.OrderOnHold] 					:
+		, [states.OrderIgnored] 				:
 		{ 												
-			  [event.RefeedByAdmin] 			: method.AcceptedByStore
+			  [event.LockByAdmin] 				: method.LockedByAdmin
 		}												
 		, [states.TransitIgnored] 				:
 		{												
-			[event.RefeedByAdmin] 				: method.AcceptedByStore
+			  [event.LockByAdmin] 				: method.LockedByAdmin
+		}
+		, [states.TransitAbandoned] 			:
+		{												
+			  [event.LockByAdmin] 				: method.LockedByAdmin
+		}
+		, [states.OrderOnHold] 					:
+		{ 												
+			// [event.LockByAdmin] 				: method.LockedByAdmin
 		}												
-		, [states.TransitTimeout] 				: {}
+		, [states.TransitOnHold] 				:
+		{												
+			// [event.LockByAdmin] 				: method.LockedByAdmin
+		}														
+		//, [states.TransitTimeout] 			: {}
 		, [states.TransitAccepted] 				:
 		{												
 			  [event.CancellationByUser] 		: method.CancelledByUser
@@ -53,7 +65,7 @@ const Engine 				 = function()
 		{												
 			  [event.AcceptanceByAgent] 		: method.AcceptedByAgent
 		}												
-		, [states.TranistComplete] 				: {}
+		//, [states.TranistComplete] 			: {}
 	}
 
 	, this.GetHandler = (state_, event_) =>

@@ -190,6 +190,30 @@ const CancellationByStoreAfterTransitAcceptance = function(user_, addr_, agent_,
     return tc
 }
 
+const IgnoredByLastAgent = function(user_, addr_, agent_, owner_, staff_, admin_)
+{
+    let cart_   = user_
+    let tc      = new TestCase('Ignored by last agent')
+        tc      = AddUser(tc, agent_)
+    let steps =
+    [
+          new event.Checkout       (user_, addr_, cart_)
+        , new event.ConfirmPayment ()
+        , new event.NewOrder       (owner_)
+        , new event.NewOrder       (staff_)
+        , new event.NewOrder       (user_)
+
+        , new event.StoreAccept    (staff_)
+        , new event.NewTransit     (agent_)
+        , new event.Accepted       (user_ )
+
+        , new event.AgentIgnore    (agent_)
+        , new event.NoAgents       (admin_)
+    ]
+    steps.forEach((step) => tc.AddStep(step))
+    return tc
+}
+
 module.exports =
 {
       Std                                       : Std
@@ -199,4 +223,5 @@ module.exports =
     , CancellationByStoreAfterInit              : CancellationByStoreAfterInit
     , CancellationByStoreAfterOrderAcceptance   : CancellationByStoreAfterOrderAcceptance
     , CancellationByStoreAfterTransitAcceptance : CancellationByStoreAfterTransitAcceptance
+    , IgnoredByLastAgent                        : IgnoredByLastAgent
 }

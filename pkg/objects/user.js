@@ -72,6 +72,7 @@ function User(mob_no, user_mode)
         console.log('list-nearby-live-agents', {Location: [ln, lt]})
         /* Agent { _id, Name, SocketID }, count <=10,
            Nearest, Live, Radius < 5km             */
+        // TODO Not participted in any activities currelty           
         const cnt     = 10
             , maxDist = 5000
             , proj    = { _id: 1, Name: 1, SockID: 1 }
@@ -96,6 +97,27 @@ function User(mob_no, user_mode)
         }
         console.log('agents-found', { Agents: agents})
         return agents
+    }
+
+    this.NearbyAdmins = async function(ln, lt)
+    {
+        console.log('list-nearby-admins', {Location: [ln, lt]})
+        /* Admin { _id, Name, SocketID }, count <=5,
+           Nearest, Radius < 5km             */
+        // TODO Not participted in any activities currelty
+        const cnt     = 5
+            , proj    = { _id: 1, Name: 1, SockID: 1 }
+            , query   =
+            { 
+              /*Location  :
+                {
+                    $near : { $geometry    : { type: "Point", coordinates: [ln, lt] } }
+                }*/
+                 Mode    : mode.Admin
+            }
+        const admins = await users.find(query).project(proj).limit(cnt).toArray()
+        console.log('admins-filtered', { Admin: admins})
+        return admins
     }
 
     this.Auth   = async function (token)

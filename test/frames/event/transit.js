@@ -327,6 +327,64 @@ let Accepted = function(user_)
   }
 }
 
+let AgentIgnore = function(agent_) 
+{
+  this.AgentID   = agent_
+  this.Data      = function()
+  {
+    let agent = data.Get(data.Obj.User, this.AgentID)
+    let templ =
+    {
+        Type                : Type.Rest
+      , Describe            : 'Transit Agent Ignore'
+      , Request             :
+      {
+            Method          : Method.POST
+          , Path            : '/transit/agent'
+          , Body            : 
+          {
+                TransitID   : agent.TransitID
+              , Task        : task.Ignore
+          }
+          , Header          : { Authorization: 'Bearer ' + agent.Token }
+      }
+      , Response            :
+      {
+            Code            : code.OK
+          , Status          : status.Success
+          , Text            : alerts.Ignored
+          , Data            : {}
+      }
+    }
+    return templ
+  }
+}
+
+let NoAgents = function(admin_) 
+{
+  this.AdminID = admin_
+  this.Data    = function()
+  {
+    let admin   = data.Get(data.Obj.User, this.AdminID)
+    let templ  =      
+    {
+        Type          : Type.Event
+      , Describe      : 'Transit Alert NoAgents ' + admin.Name
+      , Method        : Method.EVENT
+      , Authorization : {}
+      , Socket        : admin.Socket
+      , Skip          : [ 'TransitID' ]
+      , Event         : 
+      {
+          Type : alerts.NoAgents
+        , Data : { TransitID : admin.TransitID }
+      }
+    }
+    return templ
+  }
+}
+
+
 let AgentAccept =  function(agent_, staff_) 
 {
   this.AgentID   = agent_
@@ -527,6 +585,8 @@ module.exports =
     , StoreAccept
     , NewTransit
     , Accepted
+    , AgentIgnore
+    , NoAgents
     , AgentAccept
     , AgentReady
     , StoreDespatch
