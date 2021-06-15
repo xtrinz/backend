@@ -1,9 +1,9 @@
-const   { Emit } 			   = require("./events")
-	  , otp 				   = require("../common/otp")
-	  , { Err_, code, reason } = require("../common/error")
-	  , { states, alerts, query }	   = require("../common/models")
-	  , { User } 			   = require("../objects/user")
-	  , { Journal } 		   = require("../objects/journal")
+const   { Emit } 			   	  = require("./events")
+	  , otp 				   	  = require("../common/otp")
+	  , { Err_, code, reason } 	  = require("../common/error")
+	  , { states, alerts, query } = require("../common/models")
+	  , { User } 			   	  = require("../objects/user")
+	  , { Journal } 		   	  = require("../objects/journal")
 
 // Notify | UpdateState | Payout | OTP
 
@@ -126,12 +126,18 @@ const IgnoredByAgent		= async function(ctxt)
 		await Save(ctxt, states.TransitIgnored)
 		return	
 	}
-	delete 	ctxt.Data.Agent
-			ctxt.Data.Event  = ""
+	ctxt.Data.Agent  =
+	{                 
+		_id           : ''
+	  , SockID        : []
+	  , Name          : ''         
+	  , MobileNo      : ''
+	}
+	ctxt.Data.Event  = ""
 	await ctxt.Save()
 }
 
-const TimeoutByAgent		= async function()
+const TimeoutByAgent		= async function(ctxt)
 {
 	await Save(ctxt, states.TransitTimeout)
 }
@@ -185,7 +191,7 @@ const AssignedByAdmin		= async function(ctxt)
 	console.log('agent-set-by-admin', ctxt.Data)
 }
 
-const TerminatedByAdmin		= async function()
+const TerminatedByAdmin		= async function(ctxt)
 {
 	console.log('process-termination-by-admin', ctxt.Data)
 
@@ -241,12 +247,24 @@ const RejectedByAgent		= async function(ctxt)
 		// ? TODO Resolve the loop
 		ctxt.Data.Agents = agents
 		await Emit(alerts.NewTransit, ctxt)
-		delete ctxt.Data.Agent
+		ctxt.Data.Agent = 
+		{                 
+			_id           : ''
+		  , SockID        : []
+		  , Name          : ''         
+		  , MobileNo      : ''
+		}
 		await Save(ctxt, states.TransitRejected)
 		return
 	case states.OrderDespatched:
 		/** TODO: Set 911 ops */
-		delete ctxt.Data.Agent
+		ctxt.Data.Agent =
+		{                 
+			_id           : ''
+		  , SockID        : []
+		  , Name          : ''         
+		  , MobileNo      : ''
+		}
 		await Save(ctxt, states.TransitOnDrift)
 		return
 	}

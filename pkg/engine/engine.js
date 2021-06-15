@@ -38,7 +38,9 @@ const Engine 				 = function()
 		}
 		, [states.TransitAbandoned] 			:
 		{												
-			  [event.LockByAdmin] 				: method.LockedByAdmin
+			  [event.TerminationByAdmin] 		: method.TerminatedByAdmin
+			, [event.AssignmentByAdmin] 		: method.AssignedByAdmin
+			, [event.LockByAdmin] 				: method.LockedByAdmin
 		}
 		, [states.OrderOnHold] 					:
 		{ 												
@@ -66,6 +68,7 @@ const Engine 				 = function()
 		, [states.TransitRejected] 				:
 		{												
 			  [event.AcceptanceByAgent] 		: method.AcceptedByAgent
+			, [event.IgnoranceByAgent] 			: method.IgnoredByAgent
 		}												
 		//, [states.TranistComplete] 			: {}
 	}
