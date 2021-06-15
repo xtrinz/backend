@@ -41,6 +41,7 @@ function Transit (journal)
       , Agents          : []                            // Pool of live agents filtered for transit
       , Admin           : {}
       , Admins          : []
+      , StateHistory    : []
       , Return 	        : ""                            // Machine's prev-state for fallbacks
       , State 		    : states.None                   // Machine init state
       , IsLive          : true                          // Is it ongoing transit

@@ -42,11 +42,13 @@ const Engine 				 = function()
 		}
 		, [states.OrderOnHold] 					:
 		{ 												
-			// [event.LockByAdmin] 				: method.LockedByAdmin
+			  [event.TerminationByAdmin] 		: method.TerminatedByAdmin
+			, [event.AssignmentByAdmin] 		: method.AssignedByAdmin
 		}												
 		, [states.TransitOnHold] 				:
 		{												
-			// [event.LockByAdmin] 				: method.LockedByAdmin
+			  [event.TerminationByAdmin] 		: method.TerminatedByAdmin
+			, [event.AssignmentByAdmin] 		: method.AssignedByAdmin
 		}														
 		//, [states.TransitTimeout] 			: {}
 		, [states.TransitAccepted] 				:

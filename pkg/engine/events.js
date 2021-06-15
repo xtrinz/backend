@@ -83,6 +83,11 @@ const Emit = async function(alert, ctxt)
     case alerts.Locked          :
         ctxt.Data.Admins.forEach((admin) =>
         { if (String(admin._id) !== String(ctxt.Data.Admin._id)) to.push(...admin.SockID)});          break
+    case alerts.Terminated      :
+
+    
+    break
+    case alerts.Assigned        : to.push(...ctxt.Data.Agent.SockID);                                 break
     case alerts.Accepted        : to = ctxt.Data.User.SockID;                                         break
     case alerts.NewTransit      : ctxt.Data.Agents.forEach((agent)=>{ to.push(...agent.SockID)});     break
     case alerts.EnRoute         : to = [...ctxt.Data.Agent.SockID, ...ctxt.Data.User.SockID];         break

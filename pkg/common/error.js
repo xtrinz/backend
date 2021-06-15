@@ -66,6 +66,7 @@ module.exports =
     , AddressNotFound           : 'Address not found'
     , NoAddressFound            : 'No address found'
     , NoSocketFound             : 'No socket found'
+    , AgentNotFound             : 'Agent not found'
 	},
   text:
   {

@@ -131,6 +131,11 @@ router.post("/admin", async (req, res, next) =>
     {
         if(req.body.User._id !== mode.Admin)
         if (!trans_) Err_(code.BAD_REQUEST, reason.Unauthorized)
+        
+        const query_ = { _id   : ObjectId(req.body.TransitID) }
+        let trans  = new Transit()
+        let trans_ = await trans.Get(query_, query.Custom)
+        if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
         let event_, text_
         switch(req.body.Task)
@@ -145,7 +150,21 @@ router.post("/admin", async (req, res, next) =>
             }
             event_ = event.LockByAdmin
             text_  = alerts.Locked          
-            break           
+            break 
+          
+          case task.Assign:
+            trans.Data.Agent =
+            {
+                MobileNo : req.body.MobileNo
+            }
+            event_ = event.AssignmentByAdmin
+            text_  = alerts.Assigned
+            break
+
+          case task.Termiate:
+            event_ = event.TerminationByAdmin
+            text_  = alerts.Terminated
+            break          
         }
         trans.Data.Event = event_
         let engine       = new Engine()

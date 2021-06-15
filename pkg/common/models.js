@@ -43,6 +43,7 @@ module.exports =
 		, Reject 					: 'Reject'
 		, Accept 					: 'Accept'
 		, Assign 					: 'Assign'
+		, Termiate 					: 'Terminate'
 		, Despatch 					: 'Despatch'
 		, Ignore 					: 'Ignore'
 		, Complete 					: 'Complete'
@@ -88,6 +89,8 @@ module.exports =
 		, TransitAbandoned			: 'TransitAbandoned'
 		, TransitRejected 			: 'TransitRejected'				// Agent droped/rejected the transit after acceptance
 		, TransitEnroute 			: 'TransitEnroute'				// The package is on the way.[state in hold, not decided]
+		, TransitOnDrift 			: 'TransitOnDrift'				// Agent need help on the way of delivery
+		, TransitTerminated 		: 'TransitTerminated'
 		, TranistCompleted 			: 'TranistCompleted'			// The package delivered
 	},
 	delay:
@@ -106,6 +109,9 @@ module.exports =
 		, DespatchmentByStore		: 'DespatchmentByStore'			// event order despatchment by shop
 		, IgnoranceByAgent			: 'IgnoranceByAgent'			// event transit ignorance by agent
 		, LockByAdmin				: 'LockByAdmin'					// event tranist under ctrl of admin
+		, AssignmentByAdmin			: 'AssignmentByAdmin'
+		, TerminationByAdmin		: 'TerminationByAdmin'
+		, ScheduleByAdmin 			: 'ScheduleByAdmin'		
 		, TimeoutByAgent			: 'RespTimeoutByAgent'			// event transit acceptance timeout
 		, RefeedByAdmin				: 'RefeedAgentsByAdmin'			// event re-initiate search for agents 
 		, AcceptanceByAgent			: 'AcceptanceByAgent'			// event transit acception by agent
@@ -126,6 +132,9 @@ module.exports =
 		, Ignored 					: 'Ignored'						// to none		   
 		, NoAgents 					: 'No_Agents'					// to admin 	   on absents of live agents
 		, Locked 					: 'Admin_Locked'				// to other admins on an admin choose a ticket
+		, Assigned 					: 'Agent_Assigned'
+		, Terminated				: 'Order_Terminated'
+		, Scheduled 				: 'Scheduled'
 	},
 	entity:
 	{

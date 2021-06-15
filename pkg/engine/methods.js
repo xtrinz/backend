@@ -1,7 +1,7 @@
 const   { Emit } 			   = require("./events")
 	  , otp 				   = require("../common/otp")
 	  , { Err_, code, reason } = require("../common/error")
-	  , { states, alerts }	   = require("../common/models")
+	  , { states, alerts, query }	   = require("../common/models")
 	  , { User } 			   = require("../objects/user")
 	  , { Journal } 		   = require("../objects/journal")
 
@@ -12,6 +12,7 @@ const Save = async function(ctxt, state_)
 	ctxt.Data.Return = ctxt.Data.State
 	ctxt.Data.State  = state_
 	ctxt.Data.Event  = ""
+	ctxt.Data.StateHistory.push(state_) 
 	await ctxt.Save()
 }
 
@@ -143,17 +144,58 @@ const LockedByAdmin		= async function(ctxt)
 	let state_
 	switch(ctxt.Data.State)
 	{
-		case states.OrderIgnored	 :
-			state_ = states.OrderOnHold	  ; break
-		case states.TransitIgnored	 :
-			state_ = states.TransitOnHold ; break
-		case states.TransitAbandoned :
-			state_ = states.TransitOnHold ; break
+	case states.OrderIgnored	  :
+	state_ = states.OrderOnHold	  ; break
+	case states.TransitIgnored	  :
+	state_ = states.TransitOnHold ; break
+	case states.TransitAbandoned  :	// Accepted by agent then rejected and we could not filter new agent pool
+	state_ = states.TransitOnHold ; break
 	}
 
 	ctxt.Data.Admins = []
 	await Save(ctxt, state_)
 	console.log('transit-locked-by-admin', ctxt.Data)
+}
+
+const AssignedByAdmin		= async function(ctxt)
+{
+	console.log('agent-assignment-by-admin', ctxt.Data)
+	const agent   = new User()
+	const agent_  = await agent.Get(ctxt.Data.Agent.MobileNo, query.ByMobNo)
+	if(!agent_) Err_(code.NOT_FOUND, reason.AgentNotFound)
+	ctxt.Data.Agent =
+	{
+		_id      : agent_._id
+	  , SockID   : agent_.SockID
+	  , Name     : agent_.Name
+	  , MobileNo : agent_.MobNo
+	}
+	await Emit(alerts.Assigned,   ctxt)
+	await Emit(alerts.AgentReady, ctxt)
+	let   otp_sms 	= new otp.OneTimePasswd(
+		{
+			MobNo: 	ctxt.Data.Agent.MobileNo,	// To Authz@Shop 
+			Body: 	otp.Msgs.ForPkg
+		})
+		, hash 		= await otp_sms.Send(otp.Opts.SMS)
+
+	ctxt.Data.Agent.Otp = hash
+	ctxt.Data.Agents	= []
+	await Save(ctxt, states.TransitAccepted)
+	console.log('agent-set-by-admin', ctxt.Data)
+}
+
+const TerminatedByAdmin		= async function()
+{
+	console.log('process-termination-by-admin', ctxt.Data)
+
+	await Emit(alerts.Terminated, ctxt)
+	ctxt.Data.IsLive = false
+	await Save(ctxt, states.TransitTerminated)
+
+	let journal = new Journal()
+	await journal.PayOut(ctxt) // ? Handle loops
+	console.log('transit-completed', ctxt.Data)
 }
 
 const AcceptedByAgent		= async function(ctxt)
@@ -177,7 +219,7 @@ const AcceptedByAgent		= async function(ctxt)
 const RejectedByAgent		= async function(ctxt)
 {
 	// ? Agent History
-	switch(ctxt.State)
+	switch(ctxt.Data.State)
 	{
 	case states.TransitAccepted:
 		const agent  = new User()
@@ -196,12 +238,18 @@ const RejectedByAgent		= async function(ctxt)
 			await Save(ctxt, states.TransitAbandoned)
 			return
 		}
+		// ? TODO Resolve the loop
+		ctxt.Data.Agents = agents
 		await Emit(alerts.NewTransit, ctxt)
-		break
+		delete ctxt.Data.Agent
+		await Save(ctxt, states.TransitRejected)
+		return
 	case states.OrderDespatched:
+		/** TODO: Set 911 ops */
+		delete ctxt.Data.Agent
+		await Save(ctxt, states.TransitOnDrift)
+		return
 	}
-	delete ctxt.Agent
-	await Save(ctxt, states.TransitRejected)
 }
 
 const CompletedByAgent		= async function(ctxt)
@@ -236,5 +284,7 @@ module.exports =
 	TimeoutByAgent 	  : TimeoutByAgent,
 	AcceptedByAgent	  : AcceptedByAgent,
 	RejectedByAgent	  : RejectedByAgent,
+	AssignedByAdmin   : AssignedByAdmin,
+	TerminatedByAdmin : TerminatedByAdmin,
 	CompletedByAgent  : CompletedByAgent
 }
