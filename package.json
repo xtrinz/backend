@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node cmd/main.js",
     "test": "echo \"Project X\n---------\" && node test/main.js",
-    "clean": "rm -rf node_modules && rm package-lock.json"
+    "clean": "rm -rf node_modules && rm package-lock.json",
+    "cdeps": "echo \"Circular Deps\n\" && node aid/cdeps.js"
   },
   "keywords": [],
   "author": "dev.io.yasir@gmail.com, ubaidrahman231@gmail.com",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "http": "^0.0.1-security",
+    "madge": "^4.0.2",
     "socket.io-client": "^4.1.2"
   }
 }
