@@ -1,7 +1,7 @@
 {
-  "name": "Project X",
+  "name": "pj_x",
   "version": "1.0.0",
-  "description": "A delivery management software.",
+  "description": "A transit mgmt sw",
   "main": "cmd/main.js",
   "scripts": {
     "start": "node cmd/main.js",
@@ -10,7 +10,7 @@
     "cdeps": "echo \"Circular Deps\n\" && node aid/cdeps.js"
   },
   "keywords": [],
-  "author": "dev.io.yasir@gmail.com, ubaidrahman231@gmail.com",
+  "author": "dev.io.yasir@gmail.com,ubaidrahman231@gmail.com",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
