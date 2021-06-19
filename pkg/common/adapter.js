@@ -1,4 +1,5 @@
 const { Err, code, status, reason } = require("./error")
+    , { states }                    = require("./models")
     , { client }                    = require("./database")
     , { User }                      = require('../objects/user')
 
@@ -16,6 +17,10 @@ const Auth = async function (req, res, next)
       const user    = new User()
       const token   = req.headers["authorization"]
       await user.Auth(token)
+
+      if (user.Data.State !== states.Registered)
+      Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+
       if(!req.body) req.body = {}
       req.body.User = user.Data
       next()

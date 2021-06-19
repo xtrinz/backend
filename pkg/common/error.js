@@ -67,6 +67,7 @@ module.exports =
     , NoAddressFound            : 'No address found'
     , NoSocketFound             : 'No socket found'
     , AgentNotFound             : 'Agent not found'
+    , RegIncomplete             : 'Registration in progress'
 	},
   text:
   {

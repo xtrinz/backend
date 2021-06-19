@@ -170,12 +170,14 @@ function User(mob_no, user_mode)
         this.Data.Otp   = ''
         await this.Save()
         console.log('user-mobile-number-confirmed', { User: this.Data})
+        
+        const token = await jwt.Sign({ _id: this.Data._id })
+        return token
     }
 
     this.Register   = async function (data)
     {
-        let user = await this.Get(data.MobileNo, query.ByMobNo)
-        if (!user || user.State !== states.MobConfirmed)
+        if (this.Data.State !== states.MobConfirmed)
         Err_(code.BAD_REQUEST, reason.MobNoNotConfirmed)
 
         const cart       = new Cart(this.Data._id)
@@ -192,8 +194,6 @@ function User(mob_no, user_mode)
                 , Name    : data.Name
                 , Email   : data.Email
             })
-        const token = await jwt.Sign({ _id: this.Data._id })
-        return token
     }
 
     this.Login   = async function (data)

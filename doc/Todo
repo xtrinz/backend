@@ -1,0 +1,247 @@
+where to stand
+peak hour
+disaster mgmt
+drone delivery
+chat placement
+automated stores
+------------------------------------------------------
+https://www.mongodb.com/try/download/compass
+sudo iptables -A INPUT -p tcp --dport 27017 -j ACCEPT
+sudo su
+iptables-save > /etc/iptables/rules.v4
+exit
+------------------------------------------------------
+0. We sprout at fire, we won't fade in sunlight
+1. How to hold people without hurting their dreams
+
+------------------------------------------------------
+Make the following logic of agent selection
+	1. Data driven
+	2. Dynamic
+
+	Logic : Filter agents for first mile
+		1) No of Agents : <= 10 [Limit]
+		2) Nearest free / near-to-free agents
+------------------------------------------------------
+1. add UserMode(Customer,Agent,Seller,Admin),IsLive&SockID to User [agent record]
+2. Use only 'Name' for Users (no first or last)
+3. And ask ubaid can we convert all jsons to camecase format (firstname-> Name)
+------------------------------------------------------
+
+	TransitAcceptedByAgent
+	// Insert Agent Data to Ctxt from API
+------------------------------------------------------
+# Pending Work
+1. Token Secuirity
+2. ssl
+3. shop apis - validation
+4. delivery boy apis 
+5. transaction real time event handling
+6. DOCUMENTATION UPDATION PENDING
+------------------------------------------------------
+TransitCompletedByAgent
+[ Rating/ Issue Reporting] [TODO Set an API to handle issue reporting]
+----------------------------------------------------------
+Create a transit history array with {Time: enitity:action}
+----------------------------------------------------------
+otp verification apis
+----------------------------------------------------------
+add timestamp in jwt, and set time check in auth route
+----------------------------------------------------------
+within auth middlewarre find some way to attach 'user._id' with 'req'
+----------------------------------------------------------
+add item count in api itself
+----------------------------------------------------------
+api to ask otp again
+
+sms/email
+user{profile/reg/login}/cart/shop
+
+product/addr/payment/transit
+----------------------------------------------------------
+add logic for multiple admin
+----------------------------------------------------------
+    productvariations: product1.productvariations,
+    producttype: product1.producttype,
+    gstcategory: product1.gstcategory,
+    warrentycard: product1.warrentycard,
+    extradiscount: product1.extradiscount,
+    productdescription: product1.productdescription,
+    productdetails: product1.productdetails,
+----------------------------------------------------------
+User registration has to set manual [capcha/passwd-retry(latency/blocking)]
+Find faults comes form public data [feed& get queries]
+----------------------------------------------------------
+// User/Shop can be targeted with flood of approval requests.
+----------------------------------------------------------
+Condition the limit of how many staff a store can have
+a staff can part of how many stores 
+convert approved/pending/accepted lists in to map
+----------------------------------------------------------
+need to store history of action of users [eg: accepted invitaion/ denied...]
+----------------------------------------------------------
+when a product get deleted what to do for its associated journals
+----------------------------------------------------------
+Calculate rest of the Bill attrs and shipmeent cost
+----------------------------------------------------------
+### do not create a new stripe intent, if already one exist, just update the price
+### and no new journal also 
+----------------------------------------------------------
+[TODO set a retry tirggering API from admin]
+----------------------------------------------------------
+check if one of the socket id is not present at the time of emission, how system crashes
+----------------------------------------------------------
+for duplicate notifications reject the same in frond end
+----------------------------------------------------------
+when listing of tranist occures, list available tranits also for agents
+----------------------------------------------------------
+ctxt.User.SockID, // SET ADMIN
+----------------------------------------------------------
+if (ctxt.Delay() > ctxt.MaxWT)
+{
+	console.log('order-delay-exceeded', ctxt)
+	const msg = 
+	{		 
+		To	: [...ctxt.Store.SockID, ...ctxt.User.SockID],
+		Msg	:
+		{
+			Type: alerts.AutoCancelled,
+			Data: ctxt.Abstract(entity.Agent)
+		}
+	}
+	Emit(msg)
+	ctxt.State 		= states.TransitRejected
+	ctxt.Event 		= ""
+	ctxt.Save()
+	return
+}
+
+/* not for now
+   validate reason for rejection + take necessary actions
+   increment fault count of current agent agent */ 
+case states.TransitAccepted:
+	/* Logic to be streamlined :
+	0) Not for now: Handle reason for rejection/ agent fault rating index/ admin actions if any 
+	1) How to cutoff if a agent intentionally delays an order with repeatetion accept/reapeat
+	2) How to handle if accept /reject loop grows beyond a expected time */
+----------------------------------------------------------
+/user/register
+	Need to add a check for req.body.Task at input validator for catching below scenario
+      default:
+        console.log('register-user-unkown-task', req.body)
+----------------------------------------------------------
+firewall-cmd --runtime-to-permanent
+----------------------------------------------------------
+avoid printing password has in user doc, or find some other means
+that does not make this vulnearable
+{ Passwd: '$2a$05$ZzrqNnTgwv3r8E6/imY9x./.NRoY8a3pmpgBAOruiKlVvcUnpmXZy' }
+----------------------------------------------------------
+we must be able to forcefully update application
+----------------------------------------------------------
+store:
+// TODO Delete & Edit APIs
+// List orders...
+----------------------------------------------------------
+result: { ok: 1, nModified: 0, n: 0 }
+----------------------------------------------------------
+put a check to avoid adding products from multiple stores
+----------------------------------------------------------
+// TODO { Add Journal ID to the cart & remove it only after payment success }
+----------------------------------------------------------
+      if(cart_.Data.JournalID)
+      {
+        // Modify intent instead of creating one
+      }
+	// no new stripe intent in case of abortion in middle
+// Flow, if not intent exists(no previous payment attempts)
+----------------------------------------------------------
+Enable OTP
+----------------------------------------------------------
+	// Fraud Alert if for incorrect OTP
+----------------------------------------------------------
+Must Have:
+	// TODO: Set a API to resent OTP, if agent some how misses the first
+----------------------------------------------------------
+TransitIgnoredByAgent
+// This event can come from mutiple agent.
+// If waiting time goes beyond 7min auto cancel the order
+----------------------------------------------------------
+const OrderAcceptanceTimeout		= async function(ctxt)
+{
+	// Create a machine call to this function from init API
+	// after saving the context setting event as timeout
+
+	//  Generate automated voice alert(repeat thrice if no user action)
+	// If admin does not initiate explicitly action, 
+	// auto reject the order & refund [May be a different event]
+}
+----------------------------------------------------------
+const TransitRejectedByAgent		= async function(ctxt)
+{
+	switch(ctxt.State)
+	{
+	case states.TransitAccepted:
+/* Logic to be streamlined :
+	0) Not for now: Handle reason for rejection/ agent fault rating index/ admin actions if any 
+	1) How to cutoff if a agent intentionally delays an order with repeatetion accept/reapeat
+	2) How to handle if accept /reject loop grows beyond a expected time */
+			const agent = new User()
+			const agents = agent.ListNearbyLiveAgents(ctxt.Store.Location)
+			if(!agents)
+			{
+				// Notify admin about the absents of live agents
+				console.log('no-nearby-agents-order-on-hold', ctxt)
+				await Emit(alerts.NoAgents, ctxt)
+				await Save(ctxt, states.OrderOnHold)
+				return
+			}
+			await Emit(alerts.NewTransit, ctxt)
+	case states.OrderDespatched:
+	/**
+	 * Generate new notification to agent with
+	 * location as of current agent location
+	 * notify admin to track furthur progress
+	 */
+
+	}
+	delete ctxt.Agent
+	await Save(ctxt, states.TransitRejected)
+}
+----------------------------------------------------------
+/*                Location  :
+                {
+                $near :
+                {
+                  $geometry    : { type: "Point", coordinates: [ln, lt] }
+                , $maxDistance : maxDist
+                }
+                }
+                , IsLive  : true*/
+
+----------------------------------------------------------
+    this.Init       = async function()
+    {
+        // Get Src & Dest Contexts & Update SockIDs
+        this.Data._id       = new ObjectID()
+        let engine = new Engine()
+        await engine.Transition(this)
+        console.log('transit-initialised', { Data: this.Data })
+    }
+----------------------------------------------------------
+at read_otp : there is a race condition
+----------------------------------------------------------
+what if same product get inserted twice into a users cart,
+will it duplicate entry? 
+----------------------------------------------------------
+limit devices / socket connections
+----------------------------------------------------------
+for immediate connectivity triggern a rest request after socket connection
+----------------------------------------------------------
+lock cart checkout once the payment initated
+----------------------------------------------------------
+Beware do not modify current and previous state before payout
+----------------------------------------------------------
+issue special token for Partially registered users
+----------------------------------------------------------
+send token in cookies
+----------------------------------------------------------
