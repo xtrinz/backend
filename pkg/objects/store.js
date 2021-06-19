@@ -294,7 +294,7 @@ function Store(data)
         }
 
         const staff_  = new User()
-        const staff   = await staff_.Get(data.StaffMobileNo, query.ByMobNo)
+        const staff   = await staff_.Get(data.MobileNo, query.ByMobNo)
         if (!staff) Err_( code.BAD_REQUEST, reason.StaffNotFound)
 
         if( !staff_.Data.StoreList.Accepted.includes(String(store._id)) ||
@@ -322,7 +322,7 @@ function Store(data)
         }
 
         const staff_  = new User()
-        const staff   = await staff_.Get(data.StaffMobileNo, query.ByMobNo)
+        const staff   = await staff_.Get(data.MobileNo, query.ByMobNo)
         if (!staff) Err_(code.BAD_REQUEST, reason.StaffNotFound )
 
         if( !staff_.Data.StoreList.Pending.includes(String(store._id)) ||
