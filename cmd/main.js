@@ -61,5 +61,5 @@ event.Channel.on('SendEvent', async (data)=>
 {
   console.info('Sending-event', data)
   try        { await io.to(data.To).emit('Event', data.Msg) } 
-  catch(err) { console.log('emission-error', err, data)     }
+  catch(err) { console.log('emission-error', { Err: err, Data: data} )     }
 })
