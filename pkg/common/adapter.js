@@ -1,4 +1,5 @@
 const { Err, code, status, reason } = require("./error")
+    , { states }                    = require("./models")
     , { client }                    = require("./database")
     , { User }                      = require('../objects/user')
 
