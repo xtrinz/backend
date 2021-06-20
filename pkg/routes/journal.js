@@ -1,11 +1,11 @@
-const { code, text, status } = require("../common/error")
-    , { states }             = require("../common/models")
-    , router 	               = require("express").Router()
-    , { Journal }            = require("../objects/journal")
-    , { Transit }            = require("../objects/transit")
+const { code, text, status } = require('../common/error')
+    , { states }             = require('../common/models')
+    , router 	               = require('express').Router()
+    , { Journal }            = require('../objects/journal')
+    , { Transit }            = require('../objects/transit')
 
 // Stripe confirmation webhook
-router.post("/confirm", async (req, res, next) =>
+router.post('/confirm', async (req, res, next) =>
 {
   try
   {
@@ -36,7 +36,7 @@ router.post("/confirm", async (req, res, next) =>
   }
 })
 
-router.post("/create", async (req, res, next) =>
+router.post('/create', async (req, res, next) =>
 {
   try
   {
@@ -52,7 +52,7 @@ router.post("/create", async (req, res, next) =>
 })
 
 // List Journals (user/shop)
-router.get("/list", async (req, res, next) =>
+router.get('/list', async (req, res, next) =>
 {
   try
   {
@@ -73,7 +73,7 @@ router.get("/list", async (req, res, next) =>
 })
 
 // Journals (user/shop)
-router.get("/read", async (req, res, next) =>
+router.get('/read', async (req, res, next) =>
 {
   try
   {

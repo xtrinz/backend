@@ -1,4 +1,4 @@
-const { states } = require("../../../pkg/common/models")
+const { states } = require('../../../pkg/common/models')
 
 let Store = function()
 {

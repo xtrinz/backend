@@ -1,4 +1,4 @@
-const { User }     = require("./user")
+const { User }     = require('./user')
     , { Store }    = require('./store')
     , { Product }  = require('./product')
     , { Address }  = require('./address')

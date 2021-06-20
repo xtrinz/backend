@@ -1,10 +1,10 @@
 const twilio_sid   = process.env.TWILIO_ACCOUNT_SID
     , twilio_token = process.env.TWILIO_AUTH_TOKEN
-    , twilio       = require("twilio")(twilio_sid, twilio_token)
+    , twilio       = require('twilio')(twilio_sid, twilio_token)
     , Org          = process.env.ORGANISATION
-    ,  nodemailer  = require("nodemailer")
-    , bcrypt       = require("bcryptjs")
-    , test         = require("./test")
+    ,  nodemailer  = require('nodemailer')
+    , bcrypt       = require('bcryptjs')
+    , test         = require('./test')
 
 const Msgs =
 {
@@ -36,7 +36,7 @@ function OneTimePasswd(data)
   {
     this.Otp = Math.random()
                    .toFixed(len)
-                   .substr(`-${len}`)
+                   .substr('-${len}')
     test.Set('OTP', this.Otp) // #101
   }
 
@@ -100,7 +100,7 @@ function OneTimePasswd(data)
     
     const svc = nodemailer.createTransport(
     {
-      service: "gmail", // ?less secure of gmail enabled. catche access enabled
+      service: 'gmail', // ?less secure of gmail enabled. catche access enabled
       auth: { user: process.env.EMAIL, pass: process.env.EMAIL_PASS }
     })
     try { await svc.sendMail(email) }

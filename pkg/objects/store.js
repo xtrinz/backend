@@ -1,9 +1,9 @@
-const { User }                      = require("./user")
-    , { ObjectID, ObjectId }        = require("mongodb")
-    , { stores }                    = require("../common/database")
+const { User }                      = require('./user')
+    , { ObjectID, ObjectId }        = require('mongodb')
+    , { stores }                    = require('../common/database')
     , otp                           = require('../common/otp')
     , { Err_, code, reason}         = require('../common/error')
-    , { states, mode, query, task } = require("../common/models")
+    , { states, mode, query, task } = require('../common/models')
 
 function Store(data)
 {
@@ -133,7 +133,7 @@ function Store(data)
               , skip     = PageNo > 0 ? (PageNo - 1)*nPerPage : 0;
         const query      = 
         { Location: { $near: { $geometry: 
-            { type: "Point",
+            { type: 'Point',
               coordinates: [Lon, Lat] } } } }
 
         const data       = await stores.find(query).skip(skip).limit(nPerPage).toArray()
@@ -190,7 +190,7 @@ function Store(data)
             Err_(code.BAD_REQUEST, reason_)
         }
 
-        const otp_       = new otp.OneTimePasswd({MobNo: "", Body: ""})
+        const otp_       = new otp.OneTimePasswd({MobNo: '', Body: ''})
             , otp_status = await otp_.Confirm(this.Data.Otp, data.OTP)
         if (!otp_status) Err_(code.BAD_REQUEST, reason.OtpRejected)
 

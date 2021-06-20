@@ -1,4 +1,4 @@
-const jwt        = require("jsonwebtoken")
+const jwt        = require('jsonwebtoken')
     , jwt_secret = process.env.JWT_AUTHORIZATION_TOKEN_SECRET
 
     , Sign       = async function(data)

@@ -1,9 +1,9 @@
-const   { Emit } 			   	  = require("./events")
-	  , otp 				   	  = require("../common/otp")
-	  , { Err_, code, reason } 	  = require("../common/error")
-	  , { states, alerts, query } = require("../common/models")
-	  , { User } 			   	  = require("../objects/user")
-	  , { Journal } 		   	  = require("../objects/journal")
+const   { Emit } 			   	  = require('./events')
+	  , otp 				   	  = require('../common/otp')
+	  , { Err_, code, reason } 	  = require('../common/error')
+	  , { states, alerts, query } = require('../common/models')
+	  , { User } 			   	  = require('../objects/user')
+	  , { Journal } 		   	  = require('../objects/journal')
 
 // Notify | UpdateState | Payout | OTP
 
@@ -11,7 +11,7 @@ const Save = async function(ctxt, state_)
 {
 	ctxt.Data.Return = ctxt.Data.State
 	ctxt.Data.State  = state_
-	ctxt.Data.Event  = ""
+	ctxt.Data.Event  = ''
 	ctxt.Data.StateHistory.push(state_) 
 	await ctxt.Save()
 }
@@ -87,7 +87,7 @@ const DespatchedByStore		= async function(ctxt)
 {
 	console.log('process-order-despatchment', ctxt.Data)
 
-	const otp_ 	  = new otp.OneTimePasswd({MobNo: "", Body: ""})
+	const otp_ 	  = new otp.OneTimePasswd({MobNo: '', Body: ''})
 		, status_ = await otp_.Confirm(ctxt.Data.Agent.Otp, ctxt.Data.Store.Otp)
 	if  (!status_)  Err_(code.BAD_REQUEST, reason.OtpRejected)
 
@@ -133,7 +133,7 @@ const IgnoredByAgent		= async function(ctxt)
 	  , Name          : ''         
 	  , MobileNo      : ''
 	}
-	ctxt.Data.Event  = ""
+	ctxt.Data.Event  = ''
 	await ctxt.Save()
 }
 
@@ -274,7 +274,7 @@ const CompletedByAgent		= async function(ctxt)
 {
 	console.log('process-transit-completion', ctxt.Data)
 
-	const otp_    = new otp.OneTimePasswd({MobNo: "", Body: ""})
+	const otp_    = new otp.OneTimePasswd({MobNo: '', Body: ''})
 	const status_ = await otp_.Confirm(ctxt.Data.User.Otp, ctxt.Data.Agent.Otp)
 	if (!status_) Err_(code.BAD_REQUEST, reason.OtpRejected)
 

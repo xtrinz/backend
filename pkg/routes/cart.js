@@ -1,10 +1,10 @@
-const { ObjectId }           = require("mongodb")
-    , { code, text, status } = require("../common/error")
-    , {Cart, CartEntry}      = require("../objects/cart")
-    , router 	               = require("express").Router()
+const { ObjectId }           = require('mongodb')
+    , { code, text, status } = require('../common/error')
+    , {Cart, CartEntry}      = require('../objects/cart')
+    , router 	               = require('express').Router()
 
 // Insert product
-router.post("/insert", async (req, res, next) => {
+router.post('/insert', async (req, res, next) => {
   try
   {
     const entry = new CartEntry(req.body)
@@ -19,7 +19,7 @@ router.post("/insert", async (req, res, next) => {
 })
 
 // List products
-router.get("/list", async (req, res, next) =>
+router.get('/list', async (req, res, next) =>
 {
   try
   {
@@ -35,7 +35,7 @@ router.get("/list", async (req, res, next) =>
 })
 
 // Update product
-router.post("/modify", async (req, res, next) => {
+router.post('/modify', async (req, res, next) => {
   try
   {
     const entry = new CartEntry()
@@ -52,7 +52,7 @@ router.post("/modify", async (req, res, next) => {
 })
 
 // Remove product
-router.delete("/remove", async (req, res, next) =>
+router.delete('/remove', async (req, res, next) =>
 {
   try
   {

@@ -1,4 +1,4 @@
-const { states, alerts, query } = require("../common/models")
+const { states, alerts, query } = require('../common/models')
     , { User }                  = require('../objects/user')
     , { Socket }                = require('../objects/socket')
     , Emitter                   = require('events')

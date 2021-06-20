@@ -1,5 +1,5 @@
 const event        = require('../event/store')
-    , { TestCase } = require("../../lib/driver")
+    , { TestCase } = require('../../lib/driver')
     , { AddUser }  = require('./user')
 
 const Std = function(admin_, owner_, staff_, store_)

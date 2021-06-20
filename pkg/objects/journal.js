@@ -1,12 +1,12 @@
-const { User }                           = require("./user")
-    , { Cart }                           = require("./cart")
-    , { Store }                          = require("./store")
-    , { ObjectID, ObjectId }             = require("mongodb")
+const { User }                           = require('./user')
+    , { Cart }                           = require('./cart')
+    , { Store }                          = require('./store')
+    , { ObjectID, ObjectId }             = require('mongodb')
     , test                               = require('../common/test')
-    , { Err_, code, reason }             = require("../common/error")
-    , { states, channel, entity, query } = require("../common/models")
-    , { Stripe }                         = require("../common/stripe")
-    , { journals }                       = require("../common/database")
+    , { Err_, code, reason }             = require('../common/error')
+    , { states, channel, entity, query } = require('../common/models')
+    , { Stripe }                         = require('../common/stripe')
+    , { journals }                       = require('../common/database')
 
 function Journal()
 {
@@ -154,7 +154,7 @@ function Journal()
 
     this.UpdateStatus = async function(req)
     {
-      const sign    = req.headers["stripe-signature"]
+      const sign    = req.headers['stripe-signature']
           , stripe_ = new Stripe()
 
       let   event_ = {}, journal_id

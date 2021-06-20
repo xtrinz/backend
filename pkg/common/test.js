@@ -1,7 +1,7 @@
 //-- The packge acts as an enabler for unit test --//
-const router                 = require("express").Router()
+const router                 = require('express').Router()
     , test                   = process.env.ENABLETEST
-    , { code, status, text } = require("../common/error")
+    , { code, status, text } = require('../common/error')
 
     var Exports =
 {
@@ -29,7 +29,7 @@ const Get = (key)  =>
     return Exports[key]
 }
 
-router.get("/", async (req, res, next) => {
+router.get('/', async (req, res, next) => {
     let code_, status_, text_, data_
     if (test === '1')
     {
