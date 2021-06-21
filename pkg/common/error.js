@@ -40,7 +40,7 @@ module.exports =
     , DBRemovalFailed           : 'Database removal failed'
     , DBDeletionFailed          : 'Database deletion failed'
     , DBUpdationFailed          : 'Database updation failed'
-    , MachineHandlerNotFound    : 'Transit machine handler not found' 
+    , NoHandlerFound            : 'No handler found'
     , OtpRejected               : 'OTP rejected' 
 		, Internal 			            : 'Internal'   
     , StoreExists               : 'Store exists, use another name or number'
