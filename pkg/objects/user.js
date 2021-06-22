@@ -1,11 +1,11 @@
-const { users }               = require("../common/database")
-    , { states, query, mode } = require("../common/models")
+const { users }               = require('../common/database')
+    , { states, query, mode } = require('../common/models')
     , { Err_, code, reason}   = require('../common/error')
     , otp                     = require('../common/otp')
-    , jwt                     = require("../common/jwt")
-    , { ObjectID, ObjectId }  = require("mongodb")
-    , { Cart }                = require("./cart")
-    , bcrypt                  = require("bcryptjs")
+    , jwt                     = require('../common/jwt')
+    , { ObjectID, ObjectId }  = require('mongodb')
+    , { Cart }                = require('./cart')
+    , bcrypt                  = require('bcryptjs')
 
 function User(mob_no, user_mode)
 {
@@ -82,7 +82,7 @@ function User(mob_no, user_mode)
                 {
                 $near :
                 {
-                  $geometry    : { type: "Point", coordinates: [ln, lt] }
+                  $geometry    : { type: 'Point', coordinates: [ln, lt] }
                 , $maxDistance : maxDist
                 }
                 }*/
@@ -111,7 +111,7 @@ function User(mob_no, user_mode)
             { 
               /*Location  :
                 {
-                    $near : { $geometry    : { type: "Point", coordinates: [ln, lt] } }
+                    $near : { $geometry    : { type: 'Point', coordinates: [ln, lt] } }
                 }*/
                  Mode    : mode.Admin
             }
@@ -161,7 +161,7 @@ function User(mob_no, user_mode)
         if (!user || user.State === states.Registered)
            Err_(code.BAD_REQUEST, reason.UserNotFound)
 
-        const otp_   = new otp.OneTimePasswd({MobNo: "", Body: ""})
+        const otp_   = new otp.OneTimePasswd({MobNo: '', Body: ''})
             , status = await otp_.Confirm(this.Data.Otp, data.OTP)
 
         if (!status) Err_(code.BAD_REQUEST, reason.OtpRejected)
@@ -254,7 +254,7 @@ function User(mob_no, user_mode)
         if (!user || user.State !== states.Registered)
         Err_(code.BAD_REQUEST, reason.UserNotFound)
 
-        const otp_   = new otp.OneTimePasswd({MobNo: this.Data.MobNo, Body: ""})
+        const otp_   = new otp.OneTimePasswd({MobNo: this.Data.MobNo, Body: ''})
             , status = await otp_.Confirm(this.Data.Otp, data.OTP)
         if (!this.Data.ResetPasswd || !status)
         Err_(code.BAD_REQUEST, reason.OtpRejected)

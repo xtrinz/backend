@@ -1,12 +1,12 @@
-const { ObjectId } 				                  = require("mongodb")
-    , router                                = require("express").Router()
-    , { Transit }                           = require("../objects/transit")
-    , { Engine }                            = require("../engine/engine")
-    , { Store }                             = require("../objects/store")
-    , { alerts, event, query, task, mode }  = require("../common/models")
-    , { Err_, code, status, reason }        = require("../common/error")
+const { ObjectId } 				                  = require('mongodb')
+    , router                                = require('express').Router()
+    , { Transit }                           = require('../objects/transit')
+    , { Engine }                            = require('../engine/engine')
+    , { Store }                             = require('../objects/store')
+    , { alerts, event, query, task, mode }  = require('../common/models')
+    , { Err_, code, status, reason }        = require('../common/error')
 
-router.post("/user/cancel", async (req, res, next) =>
+router.post('/user/cancel', async (req, res, next) =>
 {
     try
     {
@@ -31,7 +31,7 @@ router.post("/user/cancel", async (req, res, next) =>
     } catch (err) { next(err) }
 })
 
-router.post("/store", async (req, res, next) =>
+router.post('/store', async (req, res, next) =>
 {
     try
     {
@@ -74,7 +74,7 @@ router.post("/store", async (req, res, next) =>
     } catch (err) { next(err) }
 })
 
-router.post("/agent", async (req, res, next) =>
+router.post('/agent', async (req, res, next) =>
 {
     try
     {
@@ -125,7 +125,7 @@ router.post("/agent", async (req, res, next) =>
     } catch (err) { next(err) }
 })
 
-router.post("/admin", async (req, res, next) =>
+router.post('/admin', async (req, res, next) =>
 {
     try
     {

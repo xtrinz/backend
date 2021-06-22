@@ -1,4 +1,4 @@
-const { MongoClient } = require("mongodb")
+const { MongoClient } = require('mongodb')
 const client    = new MongoClient(process.env.DB_URL,
 {
   useNewUrlParser: true,
@@ -15,13 +15,13 @@ client.connect()
 
 const database  = client.db(process.env.DB_NAME)
 
-    , users 	  = database.collection("user")
-    , sockets 	= database.collection("socket")
-    , stores 	  = database.collection("store")
-    , products 	= database.collection("product")
-    , carts 	  = database.collection("cart")
-    , journals 	= database.collection("journal")
-    , transits 	= database.collection("transit")
+    , users 	  = database.collection('user')
+    , sockets 	= database.collection('socket')
+    , stores 	  = database.collection('store')
+    , products 	= database.collection('product')
+    , carts 	  = database.collection('cart')
+    , journals 	= database.collection('journal')
+    , transits 	= database.collection('transit')
 
 module.exports  =
 {

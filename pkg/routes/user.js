@@ -1,9 +1,9 @@
-const { code, status, text }  = require("../common/error")
-    , router                  = require("express").Router()
-    , { User }                = require("../objects/user")
-    , { task }                = require("../common/models")
+const { code, status, text }  = require('../common/error')
+    , router                  = require('express').Router()
+    , { User }                = require('../objects/user')
+    , { task }                = require('../common/models')
 
-router.post("/register", async (req, res, next) => 
+router.post('/register', async (req, res, next) => 
 {
   try
   {
@@ -25,7 +25,7 @@ router.post("/register", async (req, res, next) =>
 
       case task.Register:
         user  = new User()
-        await user.Auth(req.headers["authorization"])
+        await user.Auth(req.headers['authorization'])
         await user.Register(req.body)
         text_ = text.Registered
         break
@@ -41,7 +41,7 @@ router.post("/register", async (req, res, next) =>
 
 // Login
 // validator.verify_login,
-router.post( "/login", async (req, res, next) =>
+router.post( '/login', async (req, res, next) =>
 {
   try
   {
@@ -56,7 +56,7 @@ router.post( "/login", async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-router.post( "/passwd/reset", async (req, res, next) =>
+router.post( '/passwd/reset', async (req, res, next) =>
 {
   try
   {
@@ -80,7 +80,7 @@ router.post( "/passwd/reset", async (req, res, next) =>
 
       case task.SetPassword:
                 user  = new User()
-          await user.Auth(req.headers["authorization"])
+          await user.Auth(req.headers['authorization'])
           await user.UpdatePasswd(req.body.Password)
                 text_ = text.PasswdUpdated
                 break
@@ -95,10 +95,10 @@ router.post( "/passwd/reset", async (req, res, next) =>
 })
 
 // Read Profile
-router.get("/profile", async (req, res, next) => {
+router.get('/profile', async (req, res, next) => {
   try {
     const user  = new User()
-    await user.Auth(req.headers["authorization"])
+    await user.Auth(req.headers['authorization'])
 
     const data = 
     {
@@ -116,12 +116,12 @@ router.get("/profile", async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-router.put("/profile", async (req, res, next) =>
+router.put('/profile', async (req, res, next) =>
 {
   try 
   {
     const user  = new User()
-    await user.Auth(req.headers["authorization"])
+    await user.Auth(req.headers['authorization'])
     await user.EditProfile(req.body)
 
     return res.status(code.OK).json({

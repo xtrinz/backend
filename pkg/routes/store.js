@@ -1,9 +1,9 @@
-const router 	               = require("express").Router()
-    , { code, text, status } = require("../common/error")
-    , { task }               = require("../common/models")
-    , { Store }              = require("../objects/store")
+const router 	               = require('express').Router()
+    , { code, text, status } = require('../common/error')
+    , { task }               = require('../common/models')
+    , { Store }              = require('../objects/store')
 
-router.post("/register", async (req, res, next) =>
+router.post('/register', async (req, res, next) =>
 {
   try
   {
@@ -41,7 +41,7 @@ router.post("/register", async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-router.get("/view", async (req, res, next) => {
+router.get('/view', async (req, res, next) => {
     try 
     {
       let  store = new Store()
@@ -57,7 +57,7 @@ router.get("/view", async (req, res, next) => {
     } catch (err) { next(err) }
 })
 
-router.get("/list", async (req, res, next) =>
+router.get('/list', async (req, res, next) =>
 {
     try 
     {
@@ -73,7 +73,7 @@ router.get("/list", async (req, res, next) =>
     } catch (err) { next(err) }
 })
 
-router.post("/staff", async (req, res, next) =>
+router.post('/staff', async (req, res, next) =>
 {
     try 
     {
@@ -111,7 +111,7 @@ router.post("/staff", async (req, res, next) =>
     } catch (err) { next(err) }
 })
 
-router.get("/staff", async (req, res, next) =>
+router.get('/staff', async (req, res, next) =>
 {
     try 
     {

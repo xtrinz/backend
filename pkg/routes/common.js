@@ -1,8 +1,8 @@
-const { Store }              = require("../objects/store")
-    , router                 = require("express").Router()
-    , { text, code, status } = require("../common/error") 
+const { Store }              = require('../objects/store')
+    , router                 = require('express').Router()
+    , { text, code, status } = require('../common/error') 
 
-router.get("/feed", async (req, res, next) => {
+router.get('/feed', async (req, res, next) => {
   try
   {
     let text_
@@ -24,7 +24,7 @@ router.get("/feed", async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-router.get("/search", async (req, res, next) => {
+router.get('/search', async (req, res, next) => {
   try
   {
     let text_

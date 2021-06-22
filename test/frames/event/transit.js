@@ -1,8 +1,8 @@
-const { Method, Type }        = require("../../lib/medium")
-    , data                    = require("../data/data")
-    , { read }                = require("../../lib/driver")
-    , { code, status, text }  = require("../../../pkg/common/error")
-    , { alerts, task }        = require("../../../pkg/common/models")
+const { Method, Type }        = require('../../lib/medium')
+    , data                    = require('../data/data')
+    , { read }                = require('../../lib/driver')
+    , { code, status, text }  = require('../../../pkg/common/error')
+    , { alerts, task }        = require('../../../pkg/common/models')
 
 let Checkout = function(user_, addr_, cart_) 
 {

@@ -1,5 +1,5 @@
-                  require("./lib/settings")
-const { Test, TestSuite } = require("./lib/driver")
+                  require('./lib/settings')
+const { Test, TestSuite } = require('./lib/driver')
     , user      =
     {
         data  : require('./frames/data/user')
@@ -39,7 +39,7 @@ const { Test, TestSuite } = require("./lib/driver")
     , product_1     = new product.data.Product ()
     , addr_1_user_3 = new address.data.Address ()
     
-  var suite_1 = new TestSuite("End to End Process")
+  var suite_1 = new TestSuite('End to End Process')
   let cases =
   [
          user.story.Std(admin_1.Name )
@@ -52,7 +52,7 @@ const { Test, TestSuite } = require("./lib/driver")
   ]
   cases.forEach((test)=> suite_1.AddCase(test))
 
-  var suite_2 = new TestSuite("E2E Cancel By User")
+  var suite_2 = new TestSuite('E2E Cancel By User')
   cases =
   [
          user.story.Std(admin_1.Name )
@@ -65,7 +65,7 @@ const { Test, TestSuite } = require("./lib/driver")
   ]
   cases.forEach((test)=> suite_2.AddCase(test))
 
-  var suite_3 = new TestSuite("E2E Cancel By User After Store Acceptance")
+  var suite_3 = new TestSuite('E2E Cancel By User After Store Acceptance')
   cases =
   [
          user.story.Std(admin_1.Name )
@@ -79,7 +79,7 @@ const { Test, TestSuite } = require("./lib/driver")
   cases.forEach((test)=> suite_3.AddCase(test))
 
 
-  var suite_4 = new TestSuite("E2E Cancel By User After Agent Accepted The Transit")
+  var suite_4 = new TestSuite('E2E Cancel By User After Agent Accepted The Transit')
   cases =
   [
          user.story.Std(admin_1.Name )
@@ -92,7 +92,7 @@ const { Test, TestSuite } = require("./lib/driver")
   ]
   cases.forEach((test)=> suite_4.AddCase(test))
 
-  var suite_5 = new TestSuite("E2E Cancel By Store After Init")
+  var suite_5 = new TestSuite('E2E Cancel By Store After Init')
   cases =
   [
          user.story.Std(admin_1.Name )
@@ -105,7 +105,7 @@ const { Test, TestSuite } = require("./lib/driver")
   ]
   cases.forEach((test)=> suite_5.AddCase(test))
 
-  var suite_6 = new TestSuite("E2E Cancel By Store After Accepting the order")
+  var suite_6 = new TestSuite('E2E Cancel By Store After Accepting the order')
   cases =
   [
          user.story.Std(admin_1.Name )
@@ -118,7 +118,7 @@ const { Test, TestSuite } = require("./lib/driver")
   ]
   cases.forEach((test)=> suite_6.AddCase(test))
 
-  var suite_7 = new TestSuite("E2E Cancel By Store After Accepting the Transit")
+  var suite_7 = new TestSuite('E2E Cancel By Store After Accepting the Transit')
   cases =
   [
          user.story.Std(admin_1.Name )
@@ -131,7 +131,7 @@ const { Test, TestSuite } = require("./lib/driver")
   ]
   cases.forEach((test)=> suite_7.AddCase(test))
 
-  var suite_8 = new TestSuite("Ignored By Last Agent")
+  var suite_8 = new TestSuite('Ignored By Last Agent')
   cases =
   [
          user.story.Std(admin_1.Name )

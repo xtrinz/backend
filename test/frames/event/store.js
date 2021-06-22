@@ -1,8 +1,8 @@
-const { Method, Type }       = require("../../lib/medium")
-    , data                   = require("../data/data")
-    , { read }               = require("../../lib/driver")
-    , { code, status, text } = require("../../../pkg/common/error")
-    , { task }               = require("../../../pkg/common/models")
+const { Method, Type }       = require('../../lib/medium')
+    , data                   = require('../data/data')
+    , { read }               = require('../../lib/driver')
+    , { code, status, text } = require('../../../pkg/common/error')
+    , { task }               = require('../../../pkg/common/models')
 
 let RegisterNew = function(user_, store_) 
 {
@@ -336,9 +336,9 @@ let AddStaffRevoke = function(owner_, staff_, store_)
         , Path          : '/store/staff'
         , Body          :
         {
-            Task          : task.Revoke
-          , StaffMobileNo : staff.MobileNo
-          , StoreID       : store.ID
+            Task        : task.Revoke
+          , MobileNo    : staff.MobileNo
+          , StoreID     : store.ID
         }
         , Header        : { Authorization : 'Bearer ' + owner.Token }
       }
@@ -375,7 +375,7 @@ let AddStaffRelieve = function(owner_, staff_, store_)
         , Body          :
         {
           Task          : task.Relieve
-        , StaffMobileNo : staff.MobileNo
+        , MobileNo      : staff.MobileNo
         , StoreID       : store.ID
         }
         , Header        : { Authorization : 'Bearer ' + owner.Token }

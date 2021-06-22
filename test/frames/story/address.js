@@ -1,5 +1,5 @@
 const event        = require('../event/address')
-    , { TestCase } = require("../../lib/driver")
+    , { TestCase } = require('../../lib/driver')
     , { AddUser }  = require('./user')
 
 const Std = function(addr_, user_)

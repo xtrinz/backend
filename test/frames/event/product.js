@@ -1,6 +1,6 @@
-const { Method, Type, Rest }  = require("../../lib/medium")
-    , { code, status, text }  = require("../../../pkg/common/error")
-    , data                    = require("../data/data")
+const { Method, Type }       = require('../../lib/medium')
+    , { code, status, text } = require('../../../pkg/common/error')
+    , data                   = require('../data/data')
 
 let Add = function(staff_, store_, product_) 
 {

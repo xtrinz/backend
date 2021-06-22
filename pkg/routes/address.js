@@ -1,12 +1,12 @@
-const { Address }            = require("../objects/address")
-    , router 	               = require("express").Router()
-    , { code, status, text } = require("../common/error")
+const { Address }            = require('../objects/address')
+    , router 	               = require('express').Router()
+    , { code, status, text } = require('../common/error')
 
 // View Addr Missing
 // Set Default Addr Missing
 
 // Add address
-router.post("/add", async (req, res, next) => {
+router.post('/add', async (req, res, next) => {
   try
   {
     const entry = new Address(req.body)
@@ -21,7 +21,7 @@ router.post("/add", async (req, res, next) => {
 })
 
 // Read addresss
-router.get("/view", async (req, res, next) =>
+router.get('/view', async (req, res, next) =>
 {
   try
   {
@@ -38,7 +38,7 @@ router.get("/view", async (req, res, next) =>
 })
 
 // List addresss
-router.get("/list", async (req, res, next) =>
+router.get('/list', async (req, res, next) =>
 {
   try
   {
@@ -54,7 +54,7 @@ router.get("/list", async (req, res, next) =>
 })
 
 // Modify address
-router.post("/modify", async (req, res, next) => {
+router.post('/modify', async (req, res, next) => {
   try
   {
     const entry = new Address()
@@ -69,7 +69,7 @@ router.post("/modify", async (req, res, next) => {
 })
 
 // Remove address
-router.delete("/remove", async (req, res, next) =>
+router.delete('/remove', async (req, res, next) =>
 {
   try
   {

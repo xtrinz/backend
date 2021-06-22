@@ -1,6 +1,6 @@
-const { Err, code, status, reason } = require("./error")
-    , { states }                    = require("./models")
-    , { client }                    = require("./database")
+const { Err, code, status, reason } = require('./error')
+    , { states }                    = require('./models')
+    , { client }                    = require('./database')
     , { User }                      = require('../objects/user')
 
 let   Server, io
@@ -10,12 +10,12 @@ const Auth = async function (req, res, next)
 {
   try 
   {
-    if(req.originalUrl.startsWith("/journal/confirm"))
+    if(req.originalUrl.startsWith('/journal/confirm'))
       next()
     else
     {
       const user    = new User()
-      const token   = req.headers["authorization"]
+      const token   = req.headers['authorization']
       await user.Auth(token)
 
       if (user.Data.State !== states.Registered)

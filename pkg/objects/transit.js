@@ -1,8 +1,8 @@
-const { ObjectID, ObjectId } 	= require("mongodb")
-    , { transits, users } 		= require("../common/database")
-    , { Err_, code, reason }    = require("../common/error")
-    , { states, event, query }  = require("../common/models")
-    , { Engine }                = require("../engine/engine")
+const { ObjectID, ObjectId } 	= require('mongodb')
+    , { transits, users } 		= require('../common/database')
+    , { Err_, code, reason }    = require('../common/error')
+    , { states, event, query }  = require('../common/models')
+    , { Engine }                = require('../engine/engine')
 
 function Transit (journal)
 {
@@ -42,7 +42,7 @@ function Transit (journal)
       , Admin           : {}
       , Admins          : []
       , StateHistory    : []
-      , Return 	        : ""                            // Machine's prev-state for fallbacks
+      , Return 	        : ''                            // Machine's prev-state for fallbacks
       , State 		    : states.None                   // Machine init state
       , IsLive          : true                          // Is it ongoing transit
       , Event 		    : event.InitiationByUser  // Machine init event

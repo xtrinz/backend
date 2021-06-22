@@ -38,6 +38,7 @@ module.exports =
 		, Request					: 'Request'
 		, Accept 					: 'Accept'
 		, Deny 						: 'Deny'
+		, Revoke 					: 'Revoke'
 		, Relieve 					: 'Relieve'
 
 		, Reject 					: 'Reject'

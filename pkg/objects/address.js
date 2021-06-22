@@ -1,6 +1,6 @@
-const { ObjectId, ObjectID } = require("mongodb")
-    , { users }              = require("../common/database")
-    , { Err_, code, reason } = require("../common/error")
+const { ObjectId, ObjectID } = require('mongodb')
+    , { users }              = require('../common/database')
+    , { Err_, code, reason } = require('../common/error')
     , { states }             = require('../common/models')
 
 function Address(data)

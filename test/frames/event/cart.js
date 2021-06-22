@@ -1,8 +1,6 @@
-const data                    = require("../data/data")
-    , { Method, Type, Rest }  = require("../../lib/medium")
-    , { prints }              = require("../../lib/driver")
-    , jwt                     = require("../../../pkg/common/jwt")
-    , { code, status, text }  = require("../../../pkg/common/error")
+const data                   = require('../data/data')
+    , { Method, Type }       = require('../../lib/medium')
+    , { code, status, text } = require('../../../pkg/common/error')
 
 let Insert = function(user_, cart_, product_) 
 {

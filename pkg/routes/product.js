@@ -1,9 +1,9 @@
-const { code, text, status } = require("../common/error")
-    , router 	               = require("express").Router()
-    , { Product }            = require("../objects/product")
-    , { Store }              = require("../objects/store")
+const { code, text, status } = require('../common/error')
+    , router 	               = require('express').Router()
+    , { Product }            = require('../objects/product')
+    , { Store }              = require('../objects/store')
 
-router.post("/add", async (req, res, next) => {
+router.post('/add', async (req, res, next) => {
   try
   {
     let store   = new Store()
@@ -20,7 +20,7 @@ router.post("/add", async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-router.get("/list", async (req, res, next) =>
+router.get('/list', async (req, res, next) =>
 {
   try
   {
@@ -35,7 +35,7 @@ router.get("/list", async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-router.get("/view", async (req, res, next) =>
+router.get('/view', async (req, res, next) =>
 {
   try
   {
@@ -50,7 +50,7 @@ router.get("/view", async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-router.post("/modify", async (req, res, next) => {
+router.post('/modify', async (req, res, next) => {
   try
   {
     let store   = new Store()
@@ -69,7 +69,7 @@ router.post("/modify", async (req, res, next) => {
 })
 
 // Remove a product from product
-router.delete("/remove", async (req, res, next) =>
+router.delete('/remove', async (req, res, next) =>
 {
   try
   {

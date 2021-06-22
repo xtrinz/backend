@@ -1,6 +1,6 @@
-const { ObjectId }           = require("mongodb")
-    , { sockets, transits }  = require("../common/database")
-    , { Err_, code, reason } = require("../common/error")
+const { ObjectId }           = require('mongodb')
+    , { sockets, transits }  = require('../common/database')
+    , { Err_, code, reason } = require('../common/error')
 
 function Socket()
 {

@@ -1,9 +1,9 @@
-const   { Emit } 			   	  = require("./events")
-	  , otp 				   	  = require("../common/otp")
-	  , { Err_, code, reason } 	  = require("../common/error")
-	  , { states, alerts, query } = require("../common/models")
-	  , { User } 			   	  = require("../objects/user")
-	  , { Journal } 		   	  = require("../objects/journal")
+const   { Emit } 			   	  = require('./events')
+	  , otp 				   	  = require('../common/otp')
+	  , { Err_, code, reason } 	  = require('../common/error')
+	  , { states, alerts, query } = require('../common/models')
+	  , { User } 			   	  = require('../objects/user')
+	  , { Journal } 		   	  = require('../objects/journal')
 
 // Notify | UpdateState | Payout | OTP
 
@@ -11,7 +11,7 @@ const Save = async function(ctxt, state_)
 {
 	ctxt.Data.Return = ctxt.Data.State
 	ctxt.Data.State  = state_
-	ctxt.Data.Event  = ""
+	ctxt.Data.Event  = ''
 	ctxt.Data.StateHistory.push(state_) 
 	await ctxt.Save()
 }
@@ -56,10 +56,7 @@ const TimeoutByStore		= async function(ctxt)
 const AcceptedByStore			=  async function(ctxt)
 {
 	console.log('process-order-acceptance', ctxt.Data)
-
-	// must alert irrespective of transit get holded or not
-	await Emit(alerts.Accepted, ctxt)	// To User
-
+	await Emit(alerts.Accepted, ctxt)	// To User: Emit irrespective of it turns to hold
 	const agent  = new User()
 	const agents = await agent.NearbyAgents(
 			ctxt.Data.Store.Longitude,
@@ -72,7 +69,6 @@ const AcceptedByStore			=  async function(ctxt)
 				ctxt.Data.Store.Longitude,
 				ctxt.Data.Store.Latitude)
 		await Emit(alerts.NoAgents, ctxt)
-		
 		ctxt.Data.Admins = admins
 		await Save(ctxt, states.OrderIgnored)
 		return
@@ -87,7 +83,7 @@ const DespatchedByStore		= async function(ctxt)
 {
 	console.log('process-order-despatchment', ctxt.Data)
 
-	const otp_ 	  = new otp.OneTimePasswd({MobNo: "", Body: ""})
+	const otp_ 	  = new otp.OneTimePasswd({MobNo: '', Body: ''})
 		, status_ = await otp_.Confirm(ctxt.Data.Agent.Otp, ctxt.Data.Store.Otp)
 	if  (!status_)  Err_(code.BAD_REQUEST, reason.OtpRejected)
 
@@ -116,7 +112,7 @@ const IgnoredByAgent		= async function(ctxt)
 	}
 	if(!ctxt.Data.Agents.length)
 	{
-		console.log('on-hold-agents-ignored-the-tranist', ctxt.Data)
+		console.log('on-hold-transit-ignored', ctxt.Data)
 		const admin   = new User()
 		const admins  = await admin.NearbyAdmins(
 				ctxt.Data.Store.Longitude,
@@ -126,14 +122,12 @@ const IgnoredByAgent		= async function(ctxt)
 		await Save(ctxt, states.TransitIgnored)
 		return	
 	}
-	ctxt.Data.Agent  =
-	{                 
-		_id           : ''
-	  , SockID        : []
-	  , Name          : ''         
-	  , MobileNo      : ''
+	ctxt.Data.Agent = 
+	{
+		  _id  : '' , SockID   : []
+		, Name : '' , MobileNo : ''
 	}
-	ctxt.Data.Event  = ""
+	ctxt.Data.Event = ''
 	await ctxt.Save()
 }
 
@@ -146,18 +140,14 @@ const LockedByAdmin		= async function(ctxt)
 {
 	console.log('process-lock-by-admin', ctxt.Data)
 	await Emit(alerts.Locked, ctxt)
-
 	let state_
 	switch(ctxt.Data.State)
 	{
-	case states.OrderIgnored	  :
-	state_ = states.OrderOnHold	  ; break
-	case states.TransitIgnored	  :
-	state_ = states.TransitOnHold ; break
-	case states.TransitAbandoned  :	// Accepted by agent then rejected and we could not filter new agent pool
-	state_ = states.TransitOnHold ; break
+		case states.OrderIgnored	  : state_ = states.OrderOnHold	  ; break
+		case states.TransitIgnored	  : state_ = states.TransitOnHold ; break
+		case states.TransitAbandoned  : state_ = states.TransitOnHold ; break
+	// Accepted by agent then rejected and we could not filter new agent pool
 	}
-
 	ctxt.Data.Admins = []
 	await Save(ctxt, state_)
 	console.log('transit-locked-by-admin', ctxt.Data)
@@ -170,25 +160,19 @@ const AssignedByAdmin		= async function(ctxt)
 	const agent_  = await agent.Get(ctxt.Data.Agent.MobileNo, query.ByMobNo)
 	if(!agent_) Err_(code.NOT_FOUND, reason.AgentNotFound)
 	ctxt.Data.Agent =
-	{
-		_id      : agent_._id
-	  , SockID   : agent_.SockID
-	  , Name     : agent_.Name
-	  , MobileNo : agent_.MobNo
+	{   _id  : agent_._id  , SockID   : agent_.SockID
+	  , Name : agent_.Name , MobileNo : agent_.MobNo
 	}
 	await Emit(alerts.Assigned,   ctxt)
 	await Emit(alerts.AgentReady, ctxt)
-	let   otp_sms 	= new otp.OneTimePasswd(
-		{
-			MobNo: 	ctxt.Data.Agent.MobileNo,	// To Authz@Shop 
-			Body: 	otp.Msgs.ForPkg
-		})
-		, hash 		= await otp_sms.Send(otp.Opts.SMS)
-
+	let otp_sms = new otp.OneTimePasswd(
+	{ MobNo: 	ctxt.Data.Agent.MobileNo,	// To Authz@Shop 
+	  Body: 	otp.Msgs.ForPkg })
+	, hash 		= await otp_sms.Send(otp.Opts.SMS)
 	ctxt.Data.Agent.Otp = hash
 	ctxt.Data.Agents	= []
 	await Save(ctxt, states.TransitAccepted)
-	console.log('agent-set-by-admin', ctxt.Data)
+	console.log('agent-assigned-by-admin', ctxt.Data)
 }
 
 const TerminatedByAdmin		= async function(ctxt)
@@ -210,11 +194,9 @@ const AcceptedByAgent		= async function(ctxt)
 
 	await Emit(alerts.AgentReady, ctxt)
 	let   otp_sms 	= new otp.OneTimePasswd(
-		{
-			MobNo: 	ctxt.Data.Agent.MobileNo,	// To Authz@Shop 
-			Body: 	otp.Msgs.ForPkg
-		})
-		, hash 		= await otp_sms.Send(otp.Opts.SMS)
+	{ MobNo: 	ctxt.Data.Agent.MobileNo,	// To Authz@Shop 
+	  Body: 	otp.Msgs.ForPkg })
+	, hash 		= await otp_sms.Send(otp.Opts.SMS)
 
 	ctxt.Data.Agent.Otp = hash
 	ctxt.Data.Agents	= []
@@ -248,23 +230,15 @@ const RejectedByAgent		= async function(ctxt)
 		ctxt.Data.Agents = agents
 		await Emit(alerts.NewTransit, ctxt)
 		ctxt.Data.Agent = 
-		{                 
-			_id           : ''
-		  , SockID        : []
-		  , Name          : ''         
-		  , MobileNo      : ''
-		}
+		{   _id  : '' , SockID   : []
+		  , Name : '' , MobileNo : '' }
 		await Save(ctxt, states.TransitRejected)
 		return
 	case states.OrderDespatched:
 		/** TODO: Set 911 ops */
 		ctxt.Data.Agent =
-		{                 
-			_id           : ''
-		  , SockID        : []
-		  , Name          : ''         
-		  , MobileNo      : ''
-		}
+		{   _id  : '' , SockID   : []
+		  , Name : '' , MobileNo : '' }
 		await Save(ctxt, states.TransitOnDrift)
 		return
 	}
@@ -274,14 +248,14 @@ const CompletedByAgent		= async function(ctxt)
 {
 	console.log('process-transit-completion', ctxt.Data)
 
-	const otp_    = new otp.OneTimePasswd({MobNo: "", Body: ""})
-	const status_ = await otp_.Confirm(ctxt.Data.User.Otp, ctxt.Data.Agent.Otp)
+	const otp_    = new otp.OneTimePasswd({MobNo: '', Body: ''})
+		, status_ = await otp_.Confirm(ctxt.Data.User.Otp, ctxt.Data.Agent.Otp)
 	if (!status_) Err_(code.BAD_REQUEST, reason.OtpRejected)
 
 	await Emit(alerts.Delivered, ctxt)
-	delete ctxt.Data.Agent.Otp
-	delete ctxt.Data.User.Otp
-	ctxt.Data.IsLive = false
+		delete ctxt.Data.Agent.Otp
+		delete ctxt.Data.User.Otp
+		ctxt.Data.IsLive = false
 	await Save(ctxt, states.TranistCompleted)
 
 	let journal = new Journal()

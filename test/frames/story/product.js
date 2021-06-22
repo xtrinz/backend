@@ -1,5 +1,5 @@
 const event        = require('../event/product')
-    , { TestCase } = require("../../lib/driver")
+    , { TestCase } = require('../../lib/driver')
 
     , Std = function(staff_, store_, product_)
 {

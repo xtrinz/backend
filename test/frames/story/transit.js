@@ -1,5 +1,5 @@
 const event        = require('../event/transit')
-    , { TestCase } = require("../../lib/driver")
+    , { TestCase } = require('../../lib/driver')
     , { AddUser }  = require('./user')
 
 const Std = function(user_, addr_, agent_, owner_, staff_)

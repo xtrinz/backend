@@ -1,4 +1,4 @@
-const { states, alerts, query } = require("../common/models")
+const { states, alerts, query } = require('../common/models')
     , { User }                  = require('../objects/user')
     , { Socket }                = require('../objects/socket')
     , Emitter                   = require('events')
@@ -18,11 +18,8 @@ const Connect = async function(socket_)
     const socket = new Socket()
     await socket.Insert(user, socket_.id)
 
-    console.info('client-connected',
-    {
-        User : user.Data
-      , ID   : socket_.id
-    })
+    console.info('client-connected'
+    , { User : user.Data, SockID : socket_.id })
 
   } catch(err) 
   {
@@ -49,15 +46,12 @@ const Disconnect = async function(socket_)
 
     await socket.Remove(user, socket_.id)
 
-    console.info('client-disconnected', 
-    {
-        SockID : socket_.id
-      , User   : user.Data
-    })
+    console.info('client-disconnected'
+    , { SockID : socket_.id , User   : user.Data })
 
   }
   catch(err)
-  { console.log('client-disconnection-failed', err) }
+  { console.log('client-disconnection-failed', {Err : err }) }
 
 }
 
@@ -83,11 +77,9 @@ const Emit = async function(alert, ctxt)
     case alerts.Locked          :
         ctxt.Data.Admins.forEach((admin) =>
         { if (String(admin._id) !== String(ctxt.Data.Admin._id)) to.push(...admin.SockID)});          break
-    case alerts.Terminated      :
-    to.push(...ctxt.Data.User.SockID)
-    to.push(...ctxt.Data.Store.SockID) 
-    to.push(...ctxt.Data.Agent.SockID)
-    ctxt.Data.Agents.forEach((agent)=> { to.push(...agent.SockID) });                                 break // If any
+    case alerts.Terminated      : to.push(...ctxt.Data.User.SockID);
+                                  to.push(...ctxt.Data.Store.SockID); to.push(...ctxt.Data.Agent.SockID)
+                                  ctxt.Data.Agents.forEach((agent)=> { to.push(...agent.SockID) });   break // If any
     case alerts.Assigned        : to.push(...ctxt.Data.Agent.SockID);                                 break
     case alerts.Accepted        : to = ctxt.Data.User.SockID;                                         break
     case alerts.NewTransit      : ctxt.Data.Agents.forEach((agent)=>{ to.push(...agent.SockID)});     break
@@ -110,7 +102,7 @@ const Emit = async function(alert, ctxt)
 
   if (!Ind.To.length)
   {
-      console.log('no-live-end-points-found-emission-dropped', Ind)
+      console.log('no-live-end-points-emission-dropped', Ind)
       return
   }
   console.log('emit-message', Ind)
