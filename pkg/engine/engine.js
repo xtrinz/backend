@@ -73,7 +73,7 @@ const Engine 				 = function()
 		//, [states.TranistComplete] 		: {}
 	}
 
-	, this.Handler = (state_, event_) =>
+	, this.GetHandler = (state_, event_) =>
 	{
 		console.log('new-event', { Event: event_, State: state_ }) 
 		const hdlr = this.Handler[state_][event_]
@@ -83,7 +83,7 @@ const Engine 				 = function()
 
 	, this.Transition = async function (ctxt)
 	{
-		let method_ = this.Handler(ctxt.Data.State, ctxt.Data.Event)
+		let method_ = this.GetHandler(ctxt.Data.State, ctxt.Data.Event)
 		if (!method_) Err_(code.BAD_REQUEST,  reason.NoHandlerFound)
 		await method_(ctxt)
 	}
