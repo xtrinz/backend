@@ -1,25 +1,10 @@
 const twilio_sid   = process.env.TWILIO_ACCOUNT_SID
     , twilio_token = process.env.TWILIO_AUTH_TOKEN
     , twilio       = require('twilio')(twilio_sid, twilio_token)
-    , Org          = process.env.ORGANISATION
     ,  nodemailer  = require('nodemailer')
     , bcrypt       = require('bcryptjs')
     , test         = require('./test')
-
-const Msgs =
-{
-      OnAuth    : `Your ${Org} authentication code is X-{0}`
-    , ForPkg    : `Your package collection code is X-{0}`
-    , EmailSub  : `OTP confirmation alert from ${Org}`
-    , EmailBody : `Your One Time Password(OTP) is : X-{0}`
-    , ResetPass : `Your OTP to reset password is : X-{0}`
-}
-
-const Opts =
-{
-      SMS : 'SMS'
-    , MAIL: 'MAIL'
-}
+    , { gw }       = require('./models')
 
 function OneTimePasswd(data)
 {
@@ -131,9 +116,9 @@ function OneTimePasswd(data)
     /*//
     switch (opts)
     {
-      case Opts.SMS   : await this.SMS();   break;
-      case Opts.MAIL  : await this.Email(); break;
-      default         : await this.SMS(); await this.Email();
+      case gw.SMS   : await this.SMS();   break;
+      case gw.MAIL  : await this.Email(); break;
+      default       : await this.SMS(); await this.Email();
     }//*/
 
     let   salt = this.Data.OtpLen
@@ -144,8 +129,6 @@ function OneTimePasswd(data)
 }
 
 module.exports =
-{
+{ 
     OneTimePasswd : OneTimePasswd
-  , Msgs          : Msgs
-  , Opts          : Opts
 }

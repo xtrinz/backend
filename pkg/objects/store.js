@@ -3,7 +3,8 @@ const { User }                      = require('./user')
     , { stores }                    = require('../common/database')
     , otp                           = require('../common/otp')
     , { Err_, code, reason}         = require('../common/error')
-    , { states, mode, query, task } = require('../common/models')
+    , { states, mode
+      , query, task, message, gw }  = require('../common/models')
 
 function Store(data)
 {
@@ -162,8 +163,8 @@ function Store(data)
 
         const otp_sms = new otp.OneTimePasswd({
                         MobNo: 	this.Data.MobileNo, 
-                        Body: 	otp.Msgs.OnAuth })
-            , hash    = await otp_sms.Send(otp.Opts.SMS)
+                        Body: 	message.OnAuth })
+            , hash    = await otp_sms.Send(gw.SMS)
 
         if(!this.Data._id) { this.Data._id = new ObjectID() }
         this.Data.Otp        = hash

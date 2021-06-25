@@ -1,11 +1,11 @@
-const { users }               = require('../common/database')
-    , { states, query, mode } = require('../common/models')
-    , { Err_, code, reason}   = require('../common/error')
-    , otp                     = require('../common/otp')
-    , jwt                     = require('../common/jwt')
-    , { ObjectID, ObjectId }  = require('mongodb')
-    , { Cart }                = require('./cart')
-    , bcrypt                  = require('bcryptjs')
+const { users }                            = require('../common/database')
+    , { states, query, mode, message, gw } = require('../common/models')
+    , { Err_, code, reason}                = require('../common/error')
+    , otp                                  = require('../common/otp')
+    , jwt                                  = require('../common/jwt')
+    , { ObjectID, ObjectId }               = require('mongodb')
+    , { Cart }                             = require('./cart')
+    , bcrypt                               = require('bcryptjs')
 
 function User(mob_no, user_mode)
 {
@@ -145,8 +145,8 @@ function User(mob_no, user_mode)
 
         const otp_sms = new otp.OneTimePasswd({
                         MobNo: 	this.Data.MobNo, 
-                        Body: 	otp.Msgs.OnAuth })
-            , hash    = await otp_sms.Send(otp.Opts.SMS)
+                        Body: 	message.OnAuth })
+            , hash    = await otp_sms.Send(gw.SMS)
 
         if(!user) { this.Data._id = new ObjectID() }
         this.Data.Otp             = hash
@@ -218,8 +218,8 @@ function User(mob_no, user_mode)
     {
 
         let param, qType, via
-        if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobNo; via = otp.Opts.SMS }
-        else               { param = data.Email;    qType = query.ByMail;  via = otp.Opts.MAIL }
+        if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobNo; via = gw.SMS }
+        else               { param = data.Email;    qType = query.ByMail;  via = gw.MAIL }
 
         let user = await this.Get(param, qType)
         if (!user || user.State !== states.Registered)
@@ -228,7 +228,7 @@ function User(mob_no, user_mode)
         const otp_  = new otp.OneTimePasswd({
                         MobNo:  user.MobNo,
                         Email:  user.Email,
-                        Body:   otp.Msgs.ResetPass })
+                        Body:   message.ResetPass })
         const hash  = await otp_.Send(via) 
         
         this.Data.Otp         = hash

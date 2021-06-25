@@ -1,7 +1,7 @@
-const { Err, code, status, reason } = require('./error')
-    , { states }                    = require('./models')
-    , { client }                    = require('./database')
-    , { User }                      = require('../objects/user')
+const { Err, Err_, code, status, reason } = require('./error')
+    , { states }                          = require('./models')
+    , { client }                          = require('./database')
+    , { User }                            = require('../objects/user')
 
 let   Server, io
 const SetServer = (server, io_) => { Server = server; io = io_ }
@@ -33,9 +33,7 @@ const Forbidden = (req, res, next) =>
   try 
   {
     console.log('page-not-found')
-    throw new Err(code.FORBIDDEN
-                , status.Failed
-                , reason.PageNotFound)
+    Err_(code.FORBIDDEN, reason.PageNotFound)
   } catch (err) { next(err) }
 }
 

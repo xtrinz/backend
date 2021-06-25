@@ -1,3 +1,4 @@
+const Org          = process.env.ORGANISATION
 module.exports =
 {
 	tags:
@@ -143,5 +144,18 @@ module.exports =
 		, Store 					: 'Store'						// the store
 		, Agent 					: 'Agent'						// the agent
 		, Admin 					: 'Admin'						// the admin
+	},
+	message:
+	{
+		  OnAuth    : `Your ${Org} authentication code is X-{0}`
+		, ForPkg    : `Your package collection code is X-{0}`
+		, EmailSub  : `OTP confirmation alert from ${Org}`
+		, EmailBody : `Your One Time Password(OTP) is : X-{0}`
+		, ResetPass : `Your OTP to reset password is : X-{0}`
+	},
+	gw :
+	{
+		  SMS : 'SMS'
+		, MAIL: 'MAIL'
 	}
 }
