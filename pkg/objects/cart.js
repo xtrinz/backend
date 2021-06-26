@@ -64,14 +64,14 @@ function Cart(user_id)
    {
       let data =
       {
-          Products: []
-        , Bill    : 
-        {
-            Total           : 0
-          , TransitCost     : 0
-          , Tax             : 0
-          , NetPrice        : 0
-        }
+          Products      : []
+        , Bill          : 
+        {               
+            Total       : 0
+          , TransitCost : 0
+          , Tax         : 0
+          , NetPrice    : 0
+        }               
       }
       let cart = await this.Get(user_id, query.ByUserID)
       if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)

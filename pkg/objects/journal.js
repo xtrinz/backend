@@ -29,6 +29,10 @@ function Journal()
         , Location        : {}
         , Address         : {}
       }
+      , Agents            : []
+      /**
+       * { ID: , Earnings: { FirstMile | SecondMile | Penalty | ReasonForPenalty |  }}
+       */
       , Order             :
       {
           Products        : [] // ProductID, Name, Price, Image, Quantity
@@ -106,8 +110,8 @@ function Journal()
 
       if(!cart_data.Products.length) Err_(code.BAD_REQUEST, reason.NoProductsFound)
 
-      this.Data.Order     = { ...cart_data }
       if(cart_.Data.JournalID) { await this.GetByID(cart_.Data.JournalID) }
+      this.Data.Order     = { ...cart_data }
 
       // Set Seller
       const store_  = new Store()

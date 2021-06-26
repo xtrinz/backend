@@ -2,7 +2,7 @@ const   { Emit } 			 	   = require('./events')
 	  , { Err_ , code, reason }    = require('../common/error')
 	  , { states , alerts, query } = require('../common/models')
 	  , { User } 			 	   = require('../objects/user')
-	  , { PayOut , SendOTP, Save
+	  , { PayOut , SendOTP, Save, SetAgent
 		, ConfirmOTP, ResetAgent } = require('./wrap')
 
 // Notify | UpdateState | Payout | OTP
@@ -131,8 +131,7 @@ const AssignedByAdmin		= async function(ctxt)
 	const agent_  = await agent.Get(ctxt.Data.Agent.MobileNo, query.ByMobNo)
 	if(!agent_) Err_(code.NOT_FOUND, reason.AgentNotFound)
 	ctxt.Data.Agents = []
-	ctxt.Data.Agent  = {  _id 	: agent_._id  , SockID   : agent_.SockID
-						, Name	: agent_.Name , MobileNo : agent_.MobNo  }
+	ctxt.Data.Agent  = SetAgent(agent_)
 
 	await Emit(alerts.Assigned,   ctxt)
 	await Emit(alerts.AgentReady, ctxt)

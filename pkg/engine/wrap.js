@@ -52,6 +52,12 @@ const ResetAgent =
 {   _id  : '' , SockID   : []
 , Name : '' , MobileNo : '' }
 
+const SetAgent   = function(agent_)
+{
+	return {  _id 	: agent_._id  , SockID   : agent_.SockID
+		, Name	: agent_.Name , MobileNo : agent_.MobNo  }
+}
+
 module.exports =
 {
       PayOut      : PayOut
@@ -60,4 +66,5 @@ module.exports =
     , Save        : Save
     , PingAdmins  : PingAdmins
     , ResetAgent  : ResetAgent
+	, SetAgent 	  : SetAgent
 }

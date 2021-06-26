@@ -1,7 +1,7 @@
 Configuration    :
 
-    1. Follow EXTERNAL.md
-    2. Follow INTERNAL.md
+    1. Set NODE_ENV variable as 'production' to avoid installation of dev dependencies
+	   export NODE_ENV=production
 
 Build essentials :
 
