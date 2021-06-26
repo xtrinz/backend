@@ -37,3 +37,20 @@ body :
     'OTP'       : 123456
     'TransitID' : 'a1234289hundl1281'
 }
+
+POST /transit/admin
+
+4. Accept / Termiate
+body :
+{
+    'Task'      : 'Accept'
+    'TransitID' : 'a1234289hundl1281'
+}
+
+5. Assign
+body :
+{
+    'Task'      : 'Assign'
+    'MobileNo'  : +911234567890
+    'TransitID' : 'a1234289hundl1281'
+}
