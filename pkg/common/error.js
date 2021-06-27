@@ -9,15 +9,11 @@ class Error_
 }
 
 const status   =
-{
-    Success 					        : 'Success'
-  , Failed 			              : 'Failed'
-}
-
-const Err_     = function(code, reason)
-{
-  throw new Error_(code, status.Failed, reason)
-}
+    {
+        Success 					        : 'Success'
+      , Failed 			              : 'Failed'
+    }
+    , Err_     = (code, reason) => { throw new Error_(code, status.Failed, reason) }
 
 module.exports =
 {

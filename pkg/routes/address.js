@@ -2,7 +2,6 @@ const { Address }            = require('../objects/address')
     , router 	               = require('express').Router()
     , { code, status, text } = require('../common/error')
 
-// View Addr Missing
 // Set Default Addr Missing
 
 // Add address

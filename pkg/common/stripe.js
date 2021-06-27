@@ -18,11 +18,11 @@ function Stripe(data)
 
     this.CreateIntent = async function()
     {
-        const intent = await stripe.paymentIntents.create({
+        const intent = {} /*= await stripe.paymentIntents.create({
             amount    : this.Amount * 100 // Need to be in pise as per stripe
           , currency  : this.Currency
           , metadata  : this.MetaData     // TODO Hash the data
-        })
+        })*/
 
         const resp =
         {
