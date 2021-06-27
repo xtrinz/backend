@@ -32,8 +32,15 @@ function Address(data)
 
     this.Insert     = async function (user_id)
     {
+        if(this.Data.IsDefault)
+        {
+            let   query   = { _id: ObjectId(user_id), 'AddressList.IsDefault': true }
+                , opts    = { $set: { 'AddressList.$.IsDefault': false } }
+            await users.updateOne(query, opts)
+        }
+
         this.Data._id = new ObjectID()
-        const query   = { _id: ObjectId(user_id) }
+        let   query   = { _id: ObjectId(user_id) }
             , opts    = { $push: { AddressList: this.Data } }
 
         const resp    = await users.updateOne(query, opts)
@@ -42,18 +49,19 @@ function Address(data)
             console.log('address-insertion-failed', this)
             Err_(code.INTERNAL_SERVER, reason.DBInsertionFailed)
         }
+
         console.log('address-inserted', query, opts, this.Data.Address)
         return this.Data._id
     }
 
     this.Read     = async function (data)
     {
-        const   query   = 
-                {
-                      _id               : ObjectId(data.UserID) 
-                    , 'AddressList._id' : ObjectId(data.AddressID)
-                }
-              , proj = { projection: {'AddressList.$': 1} }
+        const query = 
+            {
+                  _id               : ObjectId(data.UserID) 
+                , 'AddressList._id' : ObjectId(data.AddressID)
+            }
+            , proj  = { projection: {'AddressList.$': 1} }
         let resp = await users.findOne(query, proj)
         if (!resp) Err_(code.NOT_FOUND, reason.AddressNotFound)
         resp = resp.AddressList[0]
@@ -67,9 +75,8 @@ function Address(data)
 
     this.List     = async function (user_id)
     {
-        const query =  { _id: ObjectId(user_id) }
-
-        const opt = { $project  : { 'AddressList': 1 } }
+        const query = { _id: ObjectId(user_id) }
+            , opt   = { $project  : { 'AddressList': 1 } }
             , resp  = await users.findOne(query, opt)
 
         resp.AddressList.forEach((addr)=>
@@ -86,6 +93,12 @@ function Address(data)
 
     this.Update     = async function (data)
     {
+        if(data.IsDefault)
+        {
+            let   query = { _id: ObjectId(data.User._id), 'AddressList.IsDefault': true }
+                , opts  = { $set: { 'AddressList.$.IsDefault': false } }
+            await users.updateOne(query, opts)
+        }
         const query =
         {
             _id               : ObjectId(data.User._id),
@@ -97,7 +110,7 @@ function Address(data)
         delete data.AddressID
 
         const opts  = { $set : { 'AddressList.$': data } }
-        const resp  = await users.updateOne(query, opts)
+            , resp  = await users.updateOne(query, opts)
         if (resp.modifiedCount !== 1) 
         {
             console.log('address-update-failed', query, opts)
