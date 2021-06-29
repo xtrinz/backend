@@ -3,6 +3,7 @@ const { ObjectID, ObjectId }  = require('mongodb')
     , { carts }               = require('../common/database')
     , { Err_, code , reason } = require('../common/error')
     , { query }               = require('../common/models')
+    , tally                   = require('../common/tally')
 
 function Cart(user_id)
 {
@@ -34,12 +35,11 @@ function Cart(user_id)
    this.Get = async function(id, mode)
    {
       console.log('find-cart-by-user-id',{ ID: id, Mode: mode})
+
       let key
-      if (mode === query.ByUserID){
-        key = { UserID: ObjectId(id) }
-      } else if (mode === query.ByID) {
-        key = { _id: ObjectId(id) }
-      }
+      if (mode === query.ByUserID)  { key = { UserID : ObjectId(id) } }
+      if (mode === query.ByID)      { key = { _id    : ObjectId(id) } }
+
       let cart = await carts.findOne(key)
       if (!cart)
       {
@@ -60,11 +60,13 @@ function Cart(user_id)
         return this.Data._id
    }
 
-   this.Read        = async function (user_id)
+   this.Read        = async function (user_id, addr)
    {
       let data =
       {
-          Products      : []
+          Address       : addr
+        , Flagged       : false
+        , Products      : []
         , Bill          : 
         {               
             Total       : 0
@@ -75,25 +77,37 @@ function Cart(user_id)
       }
       let cart = await this.Get(user_id, query.ByUserID)
       if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)
+
+      if(!this.Data.Products.length)
+      Err_(code.BAD_REQUEST, reason.NoProductsFound)
+
+      let store_id
       for (let i = 0; i < this.Data.Products.length; i++)
       {
-        let item        = this.Data.Products[i]
-        const product_  = new Product()
-            , product   = await product_.Get(item.ProductID, query.ByID)
+        const item    = this.Data.Products[i]
+            , product = await (new Product()).Get(item.ProductID, query.ByID)
         if (!product) Err_(code.BAD_REQUEST, reason.ProductNotFound)
+
+        let flag      = false
+        if (item.Quantity > product.Quantity)
+        { flag = true ; data.Flagged = true }
+
         const node = 
         {
-            ProductID : item.ProductID
-          , Name      : product.Name
-          , Price     : product.Price
-          , Image     : product.Image
-          , Quantity  : item.Quantity
+            ProductID  : item.ProductID
+          , Name       : product.Name
+          , Price      : product.Price
+          , Image      : product.Image
+          , CategoryID : product.CategoryID
+          , Quantity   : item.Quantity
+          , Available  : product.Quantity
+          , Flagged    : flag
         }
         data.Products.push(node)
-        data.Bill.Total   += node.Price * node.Quantity
-        data.Bill.NetPrice = data.Bill.Total
-        // --TODO-- Calculate rest of the Bill attrs and shipmeent cost
+        store_id = product.StoreID
       }
+      await tally.SetBill(data, store_id)      
+
       console.log('cart-read', data)
       return data
    }
@@ -134,9 +148,9 @@ function CartEntry(data)
   this.Insert     = async function (cart_id)
   {
     this.Data._id = ObjectId(this.Data.ProductID)
-    const key   = { _id: ObjectId(cart_id)         }
-        , opts    = { $push: { Products: this.Data } }
-        , resp    = await carts.updateOne(key, opts)
+    const key  = { _id: ObjectId(cart_id)         }
+        , opts = { $push: { Products: this.Data } }
+        , resp = await carts.updateOne(key, opts)
     if (resp.modifiedCount !== 1) 
     {
         console.log('product-insertion-failed', this.Data)
@@ -163,10 +177,10 @@ function CartEntry(data)
     console.log('product-updated', key, opts)
   }
 
-  this.Remove     = async function (cart_id, product_id)
+  this.Remove  = async function (cart_id, product_id)
   {
-    const   key = { _id: ObjectId(cart_id)                         }
-          , opts  = { $pull: { Products: {_id: ObjectId(product_id)} } }
+    const  key = { _id: ObjectId(cart_id) }
+        , opts = { $pull: { Products: {_id: ObjectId(product_id)} } }
 
     const resp  = await carts.updateOne(key, opts)
     if (resp.modifiedCount !== 1) 

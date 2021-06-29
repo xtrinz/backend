@@ -245,3 +245,21 @@ issue special token for Partially registered users
 ----------------------------------------------------------
 send token in cookies
 ----------------------------------------------------------
+curl http://maps.googleapis.com/maps/api/distancematrix/json?origins=41.43206,-81.38992|-33.86748,151.20699
+----------------------------------------------------------
+/home/ubuntu/code1/pkg/common/map.js
+:18    return 19.2 // Set it once APIs are ready
+----------------------------------------------------------
+// TODO Create a Context for below parameters and load it from DB on server start
+let EffortFeePerKM = 3      // in rs
+  , PetrolFeePerKM = 2      // in rs
+  , FeePerKg       = .01    // in rs
+  , FeePerMCube    = 1      // in rs
+let TypeVSMargin   =        // in %
+{
+      Food         : { Business : 10, Agent : 5, Net: 15 }
+    , Electronics  : { Business : 15, Agent : 5, Net: 20 }
+    , Cloth        : { Business : 20, Agent : 5, Net: 25 }
+}
+let CostPerKM      = EffortFeePerKM + PetrolFeePerKM
+----------------------------------------------------------

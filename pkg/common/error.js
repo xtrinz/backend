@@ -64,6 +64,7 @@ module.exports =
     , NoSocketFound             : 'No socket found'
     , AgentNotFound             : 'Agent not found'
     , RegIncomplete             : 'Registration in progress'
+    , APIError                  : 'API Error'
 	},
   text:
   {
