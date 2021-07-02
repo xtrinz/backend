@@ -1,4 +1,4 @@
-const { Client }             = require('./rest')
+const { Client }             = require('../infra/rest')
     , { Err_, code, reason } = require('./error')
     , Distance = async function(data)
 {

@@ -1,4 +1,4 @@
-const   otp 				 	 = require('../common/otp')
+const   otp 				 	 = require('../infra/otp')
 	  , { Err_ , code, reason }  = require('../common/error')
 	  , { message, gw }          = require('../common/models')
 	  , { Journal } 		 	 = require('../driver/journal')

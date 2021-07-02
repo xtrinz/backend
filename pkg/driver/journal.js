@@ -1,7 +1,7 @@
 const { Cart }     = require('./cart')
     , { ObjectID } = require('mongodb')
     , test         = require('../common/test')
-    , { Stripe }   = require('../common/stripe')
+    , { Stripe }   = require('../infra/stripe')
     , db           =
     {
         cart       : require('../archive/cart')

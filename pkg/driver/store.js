@@ -1,5 +1,5 @@
 const { ObjectID, ObjectId }        = require('mongodb')
-    , otp                           = require('../common/otp')
+    , otp                           = require('../infra/otp')
     , { Err_, code, reason}         = require('../common/error')
     , { states, mode
       , query, task, message, gw }  = require('../common/models')
