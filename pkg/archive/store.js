@@ -1,5 +1,5 @@
 const { ObjectId }          = require('mongodb')
-    , { stores }            = require('../common/database')
+    , { stores }            = require('./database')
     , { Err_, code, reason} = require('../common/error')
     , { query }             = require('../common/models')
 

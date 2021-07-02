@@ -1,4 +1,4 @@
-const { users }             = require('../common/database')
+const { users }             = require('./database')
     , { query, mode }       = require('../common/models')
     , { Err_, code, reason} = require('../common/error')
     , { ObjectId }          = require('mongodb')

@@ -1,5 +1,5 @@
 const { ObjectId }           = require('mongodb')
-    , { transits } 	         = require('../common/database')
+    , { transits } 	         = require('./database')
     , { Err_, code, reason } = require('../common/error')
     , { query }              = require('../common/models')
 

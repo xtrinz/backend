@@ -6,7 +6,7 @@ const db                     =
     , { ObjectId }           = require('mongodb')
     , { Err_, code, reason } = require('../common/error')
     , { entity, query }      = require('../common/models')
-    , { journals }           = require('../common/database')
+    , { journals }           = require('./database')
 
 const GetByID    = async function(_id)
 {

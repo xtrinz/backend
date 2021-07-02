@@ -1,5 +1,5 @@
 const { ObjectId }           = require('mongodb')
-    , { users }              = require('../common/database')
+    , { users }              = require('./database')
     , { Err_, code, reason } = require('../common/error')
 
 const Insert     = async function (user_id, addr)
