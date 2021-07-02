@@ -3,6 +3,12 @@ const { states, alerts, query } = require('../common/models')
     , { Socket }                = require('../driver/socket')
     , Emitter                   = require('events')
     , emitter                   = new Emitter()
+    , db                        =
+    {
+        user                    : require('../archive/user')
+      , socket                  : require('../archive/socket')
+    }
+    , { Err_, code, reason }    = require('../common/error')
 
 const Connect = async function(socket_)
 {
@@ -13,7 +19,7 @@ const Connect = async function(socket_)
 
     user.Data.SockID.push(socket_.id)
     user.Data.IsLive = true    
-    await user.Save()
+    await db.user.Save(user.Data)
 
     const socket = new Socket()
     await socket.Insert(user, socket_.id)
@@ -33,17 +39,20 @@ const Disconnect = async function(socket_)
 {
   try
   {
-  
-    const socket = new Socket()
-        , sckt   = await socket.Get(socket_.id)
+
+    const sckt   = await db.socket.Get(socket_.id)
         , user   = new User()
-    await user.Get(sckt._id, query.ByID)
+
+    user.Data = await db.user.Get(sckt._id, query.ByID)
+    if(!user.Data) Err_(code.NOT_FOUND, reason.UserNotFound)
 
     user.Data.SockID.pop(socket_.id)
     if(user.Data.SockID.length === 0)
-    user.Data.IsLive = false    
-    await user.Save()
+      user.Data.IsLive = false    
 
+    await db.user.Save(user.Data)
+
+    const socket = new Socket()
     await socket.Remove(user, socket_.id)
 
     console.info('client-disconnected'
