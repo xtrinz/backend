@@ -31,7 +31,7 @@ let RegisterNew = function(name)
         {
             Code       : code.OK
           , Status     : status.Success
-          , Text       : text.OTPSendToMobNo.format(
+          , Text       : text.OTPSendToMobileNo.format(
                           user.MobileNo.substr(
                           user.MobileNo.length - 4))
           , Data       : {}
@@ -233,7 +233,7 @@ let PasswordGenOTP = function(name)
     }
 }
 
-let PasswordConfirmMobNo = function(name) 
+let PasswordConfirmMobileNo = function(name) 
 {
   this.ID     = name
   this.Data   = function()
@@ -408,7 +408,7 @@ module.exports =
     , Connect
     , Login
     , PasswordGenOTP
-    , PasswordConfirmMobNo
+    , PasswordConfirmMobileNo
     , PasswordSet
     , ProfileGet
     , ProfileEdit

@@ -1,6 +1,6 @@
 const { states, alerts, query } = require('../common/models')
-    , { User }                  = require('../objects/user')
-    , { Socket }                = require('../objects/socket')
+    , { User }                  = require('../driver/user')
+    , { Socket }                = require('../driver/socket')
     , Emitter                   = require('events')
     , emitter                   = new Emitter()
 

@@ -10,7 +10,7 @@ function OneTimePasswd(data)
 {
   this.Data =
   {
-      MobNo     : data.MobNo
+      MobileNo     : data.MobileNo
     , EmailID   : data.MailID
     , Body      : data.Body
     , OtpLen    : 6
@@ -35,9 +35,9 @@ function OneTimePasswd(data)
   
   this.SMS = async function(retries = 3)
   {
-    if (retries <= 0 || !this.Data.MobNo) 
+    if (retries <= 0 || !this.Data.MobileNo) 
     {
-      if (!this.Data.MobNo) {console.log('no-mobile-no', this.Data)}
+      if (!this.Data.MobileNo) {console.log('no-mobile-no', this.Data)}
       return false
     }
     
@@ -45,7 +45,7 @@ function OneTimePasswd(data)
     {
         body  : this.Data.Body.format(this.Otp)
       , from  : process.env.MOB_NO
-      , to    : this.Data.MobNo
+      , to    : this.Data.MobileNo
     }
 
     try { await twilio.messages.create(msg) }
@@ -111,7 +111,7 @@ function OneTimePasswd(data)
   { 
     console.log('####OTP-blocked-for-testing-purpose###')
 
-    console.log('send-otp', { MobileNo : this.Data.MobNo, Email : this.Data.EmailID, Options: opts})
+    console.log('send-otp', { MobileNo : this.Data.MobileNo, Email : this.Data.EmailID, Options: opts})
     this.GenOtp(this.Data.OtpLen)
     /*//
     switch (opts)
@@ -123,7 +123,7 @@ function OneTimePasswd(data)
 
     let   salt = this.Data.OtpLen
         , hash = await bcrypt.hash(this.Otp, salt)
-    console.log('otp-send', { MobileNo : this.Data.MobNo, Email : this.Data.EmailID})
+    console.log('otp-send', { MobileNo : this.Data.MobileNo, Email : this.Data.EmailID})
     return hash
   }
 }

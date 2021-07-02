@@ -1,7 +1,8 @@
 const { code, text, status } = require('../common/error')
     , router 	               = require('express').Router()
-    , { Product }            = require('../objects/product')
-    , { Store }              = require('../objects/store')
+    , { Product }            = require('../driver/product')
+    , { Store }              = require('../driver/store')
+    , db                     = require('../archive/product')
 
 router.post('/add', async (req, res, next) => {
   try
@@ -24,8 +25,7 @@ router.get('/list', async (req, res, next) =>
 {
   try
   {
-    const product = new Product() 
-        , data    = await product.ReadAll(req.query.StoreID)
+    const data = await db.ReadAll(req.query.StoreID)
     
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -56,7 +56,6 @@ router.post('/modify', async (req, res, next) => {
     let store   = new Store()
     await store.Authz(req.body.StoreID, req.body.User._id)
 
-    console.log(req.body)
     let product = new Product()
     await product.Modify(req.body)
     
@@ -76,8 +75,7 @@ router.delete('/remove', async (req, res, next) =>
     let store   = new Store()
     await store.Authz(req.body.StoreID, req.body.User._id)
 
-    const entry = new Product()
-    await entry.Remove(req.body)
+    await db.Remove(req.body)
     
     return res.status(code.OK).json({
       Status  : status.Success,

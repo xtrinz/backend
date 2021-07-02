@@ -10,7 +10,7 @@ module.exports =
 	{
 		  ByID						: 'ByID'
 		, ByMail 					: 'ByMail'
-		, ByMobNo 					: 'ByMobNo'
+		, ByMobileNo 					: 'ByMobileNo'
 		, Custom 					: 'Custom'
 		, ByUserID					: 'ByUserID'
 	},

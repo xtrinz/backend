@@ -27,6 +27,7 @@ function TestRig()
                 let resp = await Rest(data.Request)
                 , sts = await compare.DeepEqual(resp, data.Response, data.Skip)
                 if(sts) { return { Status: true, Data: resp } }
+                //console.log(data.Response.Data, resp.Data)
                 console.log(prints.Failed, '\n\nExpected : ', data.Response, '\nReceived : ', resp)
                 return { Status: false, Data: resp }
             case Type.Event:

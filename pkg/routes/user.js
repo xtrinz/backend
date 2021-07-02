@@ -1,6 +1,6 @@
 const { code, status, text }  = require('../common/error')
     , router                  = require('express').Router()
-    , { User }                = require('../objects/user')
+    , { User }                = require('../driver/user')
     , { task }                = require('../common/models')
 
 router.post('/register', async (req, res, next) => 
@@ -13,12 +13,12 @@ router.post('/register', async (req, res, next) =>
       case task.New:
         user = new User(req.body.MobileNo, req.body.Mode)
         await user.New()
-        text_ = text.OTPSendToMobNo.format(req.body.MobileNo.slice(-4))
+        text_ = text.OTPSendToMobileNo.format(req.body.MobileNo.slice(-4))
         break
 
       case task.ReadOTP:
         user  = new User()
-        const token = await user.ConfirmMobNo(req.body)
+        const token = await user.ConfirmMobileNo(req.body)
         text_ = text.OTPConfirmed
         data_ = { Token : token }
         break
@@ -103,7 +103,7 @@ router.get('/profile', async (req, res, next) => {
     const data = 
     {
         Name      : user.Data.Name
-      , MobileNo  : user.Data.MobNo
+      , MobileNo  : user.Data.MobileNo
       , Email     : user.Data.Email
       , Mode      : user.Data.Mode
     }

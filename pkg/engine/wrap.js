@@ -1,7 +1,7 @@
 const   otp 				 	 = require('../common/otp')
 	  , { Err_ , code, reason }  = require('../common/error')
 	  , { message, gw }          = require('../common/models')
-	  , { Journal } 		 	 = require('../objects/journal')
+	  , { Journal } 		 	 = require('../driver/journal')
 
 // Notify | UpdateState | Payout | OTP
 
@@ -13,7 +13,7 @@ const PayOut	 = async function(ctxt)
 
 const ConfirmOTP = async function(o1, o2)
 {
-	const otp_ 	  = new otp.OneTimePasswd({MobNo: '', Body: ''})
+	const otp_ 	  = new otp.OneTimePasswd({MobileNo: '', Body: ''})
 		, status_ = await otp_.Confirm(o1, o2)
 	if  (!status_)  Err_(code.BAD_REQUEST, reason.OtpRejected)
 }
@@ -21,7 +21,7 @@ const ConfirmOTP = async function(o1, o2)
 const SendOTP 	 = async function(mobile_no)
 {
 	let otp_sms = new otp.OneTimePasswd(
-		{ MobNo : 	mobile_no, 
+		{ MobileNo : 	mobile_no, 
 		  Body  : 	message.ForPkg })
 		, hash 		= await otp_sms.Send(gw.SMS)
 	return hash
@@ -55,7 +55,7 @@ const ResetAgent =
 const SetAgent   = function(agent_)
 {
 	return {  _id 	: agent_._id  , SockID   : agent_.SockID
-		, Name	: agent_.Name , MobileNo : agent_.MobNo  }
+		, Name	: agent_.Name , MobileNo : agent_.MobileNo  }
 }
 
 module.exports =

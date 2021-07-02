@@ -48,7 +48,7 @@ let RegisterNew = function(user_, store_)
         {
               Code              : code.OK
             , Status            : status.Success
-            , Text              : text.OTPSendToMobNo.format(
+            , Text              : text.OTPSendToMobileNo.format(
                                     store.MobileNo.substr(
                                     store.MobileNo.length - 4))
             , Data              : { StoreID: '' }
@@ -177,6 +177,7 @@ let Read =   function(user_, store_)
         {
             StoreID      : store.ID
           , Name         : store.Name
+          , State        : store.State
           , Image        : store.Image
           , Type         : store.Type
           , Certs        : store.Certs

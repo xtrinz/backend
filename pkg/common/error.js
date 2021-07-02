@@ -26,7 +26,7 @@ module.exports =
     , UserNotFound 			        : 'User not found'
     , UserFound 			          : 'User exists'
     , IncorrectCredentials      : 'Incorrect username or password'
-    , MobNoNotConfirmed         : 'Mobile number not confirmed'
+    , MobileNoNotConfirmed         : 'Mobile number not confirmed'
     , IncompleteRegistration    : 'Registration has not completed'
     , PasswdResetNotPermited    : 'Password reset not permited'
     , ProfileUpdated            : 'Profile updated'      
@@ -65,10 +65,11 @@ module.exports =
     , AgentNotFound             : 'Agent not found'
     , RegIncomplete             : 'Registration in progress'
     , APIError                  : 'API Error'
+    , CartFlagged               : 'Cart has unavailable items'
 	},
   text:
   {
-      OTPSendToMobNo            : 'OTP has been send to number ending with {0}'
+      OTPSendToMobileNo            : 'OTP has been send to number ending with {0}'
     , OTPSend                   : 'OTP Send'
     , OTPSendVia                : 'OTP send via {0}'
     , OTPConfirmed              : 'OTP confirmed'

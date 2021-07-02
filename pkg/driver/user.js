@@ -11,7 +11,7 @@ function User(mob_no, user_mode)
 {
     this.Data =
     {
-        MobNo      : mob_no
+        MobileNo      : mob_no
       , Mode       : user_mode              // User/ Agent / Admin / Owner
       , _id        : ''
       , Otp        : ''
@@ -53,7 +53,7 @@ function User(mob_no, user_mode)
         switch (qType)
         {
             case query.ByID    : query_ = { _id: ObjectId(param) } ; break;
-            case query.ByMobNo : query_ = { MobNo: param }         ; break;
+            case query.ByMobileNo : query_ = { MobileNo: param }         ; break;
             case query.ByMail  : query_ = { Email: param }         ; break;
         }
         let user = await users.findOne(query_)
@@ -139,12 +139,12 @@ function User(mob_no, user_mode)
 
     this.New      = async function ()
     {
-        let user = await this.Get(this.Data.MobNo, query.ByMobNo)
+        let user = await this.Get(this.Data.MobileNo, query.ByMobileNo)
         if (user && user.State === states.Registered)
         Err_(code.BAD_REQUEST, reason.UserFound)
 
         const otp_sms = new otp.OneTimePasswd({
-                        MobNo: 	this.Data.MobNo, 
+                        MobileNo: 	this.Data.MobileNo, 
                         Body: 	message.OnAuth })
             , hash    = await otp_sms.Send(gw.SMS)
 
@@ -155,13 +155,13 @@ function User(mob_no, user_mode)
         console.log('user-created', { User: this.Data})
     }
 
-    this.ConfirmMobNo   = async function (data)
+    this.ConfirmMobileNo   = async function (data)
     {
-        let user     = await this.Get(data.MobileNo, query.ByMobNo)
+        let user     = await this.Get(data.MobileNo, query.ByMobileNo)
         if (!user || user.State === states.Registered)
            Err_(code.BAD_REQUEST, reason.UserNotFound)
 
-        const otp_   = new otp.OneTimePasswd({MobNo: '', Body: ''})
+        const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
             , status = await otp_.Confirm(this.Data.Otp, data.OTP)
 
         if (!status) Err_(code.BAD_REQUEST, reason.OtpRejected)
@@ -178,7 +178,7 @@ function User(mob_no, user_mode)
     this.Register   = async function (data)
     {
         if (this.Data.State !== states.MobConfirmed)
-        Err_(code.BAD_REQUEST, reason.MobNoNotConfirmed)
+        Err_(code.BAD_REQUEST, reason.MobileNoNotConfirmed)
 
         const cart       = new Cart(this.Data._id)
         this.Data.CartID = await cart.Create()
@@ -199,7 +199,7 @@ function User(mob_no, user_mode)
     this.Login   = async function (data)
     {
         let param, qType
-        if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobNo }
+        if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobileNo }
         else               { param = data.Email;    qType = query.ByMail  }
 
         let user = await this.Get(param, qType)
@@ -218,7 +218,7 @@ function User(mob_no, user_mode)
     {
 
         let param, qType, via
-        if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobNo; via = gw.SMS }
+        if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobileNo; via = gw.SMS }
         else               { param = data.Email;    qType = query.ByMail;  via = gw.MAIL }
 
         let user = await this.Get(param, qType)
@@ -226,7 +226,7 @@ function User(mob_no, user_mode)
         Err_(code.BAD_REQUEST, reason.UserNotFound)
 
         const otp_  = new otp.OneTimePasswd({
-                        MobNo:  user.MobNo,
+                        MobileNo:  user.MobileNo,
                         Email:  user.Email,
                         Body:   message.ResetPass })
         const hash  = await otp_.Send(via) 
@@ -247,14 +247,14 @@ function User(mob_no, user_mode)
     this.AuthzEditPassword   = async function (data)
     {
         let param, qType
-        if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobNo }
+        if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobileNo }
         else               { param = data.Email;    qType = query.ByMail  }
 
         let user = await this.Get(param, qType)
         if (!user || user.State !== states.Registered)
         Err_(code.BAD_REQUEST, reason.UserNotFound)
 
-        const otp_   = new otp.OneTimePasswd({MobNo: this.Data.MobNo, Body: ''})
+        const otp_   = new otp.OneTimePasswd({MobileNo: this.Data.MobileNo, Body: ''})
             , status = await otp_.Confirm(this.Data.Otp, data.OTP)
         if (!this.Data.ResetPasswd || !status)
         Err_(code.BAD_REQUEST, reason.OtpRejected)

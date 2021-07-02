@@ -1,7 +1,7 @@
 const   { Emit } 			 	   = require('./events')
 	  , { Err_ , code, reason }    = require('../common/error')
 	  , { states , alerts, query } = require('../common/models')
-	  , { User } 			 	   = require('../objects/user')
+	  , { User } 			 	   = require('../driver/user')
 	  , { PayOut , SendOTP, Save, SetAgent
 		, ConfirmOTP, ResetAgent } = require('./wrap')
 
@@ -128,7 +128,7 @@ const AssignedByAdmin		= async function(ctxt)
 	console.log('agent-assignment-by-admin', ctxt.Data)
 
 	const agent   = new User()
-	const agent_  = await agent.Get(ctxt.Data.Agent.MobileNo, query.ByMobNo)
+	const agent_  = await agent.Get(ctxt.Data.Agent.MobileNo, query.ByMobileNo)
 	if(!agent_) Err_(code.NOT_FOUND, reason.AgentNotFound)
 	ctxt.Data.Agents = []
 	ctxt.Data.Agent  = SetAgent(agent_)
@@ -137,7 +137,7 @@ const AssignedByAdmin		= async function(ctxt)
 	await Emit(alerts.AgentReady, ctxt)
 
 	// To Authz@Shop
-	ctxt.Data.Agent.Otp = await SendOTP(agent_.MobNo)
+	ctxt.Data.Agent.Otp = await SendOTP(agent_.MobileNo)
 
 	await Save(ctxt, states.TransitAccepted)
 	console.log('agent-assigned-by-admin', ctxt.Data)
