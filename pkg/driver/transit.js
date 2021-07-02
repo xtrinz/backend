@@ -1,8 +1,9 @@
 const { ObjectID, ObjectId } 	= require('mongodb')
-    , { transits, users } 		= require('../common/database')
+    , { users } 		        = require('../archive/database')
     , { Err_, code, reason }    = require('../common/error')
     , { states, event, query }  = require('../common/models')
     , { Engine }                = require('../engine/engine')
+    , db                        = require('../archive/transit')
 
 function Transit (journal)
 {
@@ -51,51 +52,6 @@ function Transit (journal)
       , ETD   		    : 0                             // Estimated Time of Delivery
     }
 
-    this.Get = async function(param, qType)
-    {
-        console.log('find-transit', { Param: param, QType: qType})
-        let query_
-        switch (qType)
-        {
-            case query.ByID   : query_ = { _id: ObjectId(param) } ; break;
-            case query.Custom : query_ = param                    ; break;
-        }
-        let transit = await transits.findOne(query_)
-        if (!transit)
-        {
-          console.log('transit-not-found', query_)
-          return
-        }
-        this.Data = transit
-        console.log('transit-found', { Transits: transit })
-        return transit
-    }
-
-    // Time spend(in min) since order placement
-    this.Delay      = function()                            
-    {
-        const   now    = Date.now()
-              , millis = now - this.Data.OrderedAt
-              , delay  = Math.floor(millis / (1000*60))
-        console.log('time elapsed in min', {Delay : delay})
-        return delay
-    }
-
-    this.Save       = async function()
-    {
-        console.log('save-transit', { Data: this.Data })
-        const key  = { _id    : this.Data._id }
-            , act  = { $set   : this.Data     }
-            , opt  = { upsert : true          }
-            , resp = await transits.updateOne(key, act, opt)
-        if (!resp.result.ok)
-        {
-            console.log('transit-save-failed', { Data: this.Data, Result: resp.result})
-            Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
-        }
-        console.log('transit-saved', { Data: this.Data })
-    }
- 
     this.Init       = async function()
     {
         // Get Src & Dest Contexts & Update SockIDs
@@ -121,7 +77,7 @@ function Transit (journal)
         this.Data.Store.SockID  = sckts
         this.Data._id           = new ObjectID()
         this.Data.OrderedAt     = Date.now()
-        await this.Save()
+        await db.Save(this.Data)
 
         let engine = new Engine()
         await engine.Transition(this)
@@ -130,22 +86,21 @@ function Transit (journal)
 
     this.AuthzAgent       = async function(transit_id, user_id)
     {
-        const tranist_ = await this.Get(transit_id, query.ByID)
-        if (!tranist_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+        this.Data = await db.Get(transit_id, query.ByID)
+        if (!this.Data) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
-        if (this.Data.Agent._id !== '')
+        if(this.Data.Agent._id !== '' &&
+          (String(this.Data.Agent._id) === String(user_id)))
         {
-            if(String(this.Data.Agent._id) === String(user_id))
-            {
-                console.log('agent-authorized', this.Data.Agent)
-                return
-            }            
+            console.log('agent-authorized', this.Data.Agent)
+            return
         }
-        for(let i =0; i < this.Data.Agents.length; i++)
+        for (let i = 0; i < this.Data.Agents.length; i++)
         {
-            if(String(this.Data.Agents[i]._id) === String(user_id))
+            let agent = this.Data.Agents[i]
+            if(String(agent._id) === String(user_id))
             {
-                console.log('agent-authorized', this.Data.Agents[i])
+                console.log('agent-authorized', {Agent : agent })
                 return
             }
         }

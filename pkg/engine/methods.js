@@ -1,9 +1,14 @@
 const   { Emit } 			 	   = require('./events')
 	  , { Err_ , code, reason }    = require('../common/error')
 	  , { states , alerts, query } = require('../common/models')
-	  , { User } 			 	   = require('../objects/user')
+	  , { User } 			 	   = require('../driver/user')
 	  , { PayOut , SendOTP, Save, SetAgent
 		, ConfirmOTP, ResetAgent } = require('./wrap')
+	  , db 						   =
+	  {
+		    user 				   : require('../archive/user')
+		  
+	  }
 
 // Notify | UpdateState | Payout | OTP
 const InitiatedByUser		= async function(ctxt)
@@ -49,8 +54,7 @@ const AcceptedByStore			=  async function(ctxt)
 	console.log('process-order-acceptance', ctxt.Data)
 	await Emit(alerts.Accepted, ctxt)	// To User: Emit irrespective of it turns to hold
 
-	const agent  = new User()
-	const agents = await agent.NearbyAgents(
+	const agents = await db.user.NearbyAgents(
 			ctxt.Data.Store.Longitude,
 			ctxt.Data.Store.Latitude)
 	if(!agents)
@@ -128,7 +132,7 @@ const AssignedByAdmin		= async function(ctxt)
 	console.log('agent-assignment-by-admin', ctxt.Data)
 
 	const agent   = new User()
-	const agent_  = await agent.Get(ctxt.Data.Agent.MobileNo, query.ByMobNo)
+	const agent_  = await agent.Get(ctxt.Data.Agent.MobileNo, query.ByMobileNo)
 	if(!agent_) Err_(code.NOT_FOUND, reason.AgentNotFound)
 	ctxt.Data.Agents = []
 	ctxt.Data.Agent  = SetAgent(agent_)
@@ -137,7 +141,7 @@ const AssignedByAdmin		= async function(ctxt)
 	await Emit(alerts.AgentReady, ctxt)
 
 	// To Authz@Shop
-	ctxt.Data.Agent.Otp = await SendOTP(agent_.MobNo)
+	ctxt.Data.Agent.Otp = await SendOTP(agent_.MobileNo)
 
 	await Save(ctxt, states.TransitAccepted)
 	console.log('agent-assigned-by-admin', ctxt.Data)
@@ -173,8 +177,8 @@ const RejectedByAgent		= async function(ctxt)
 	switch(ctxt.Data.State)
 	{
 	case states.TransitAccepted:
-		const agent  = new User()
-		const agents = await agent.NearbyAgents(
+
+		const agents = await db.user.NearbyAgents(
 				ctxt.Data.Store.Longitude,
 				ctxt.Data.Store.Latitude)
 		if(!agents)

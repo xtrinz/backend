@@ -1,7 +1,7 @@
 const router 	               = require('express').Router()
     , { code, text, status } = require('../common/error')
     , { task }               = require('../common/models')
-    , { Store }              = require('../objects/store')
+    , { Store }              = require('../driver/store')
 
 router.post('/register', async (req, res, next) =>
 {
@@ -15,14 +15,14 @@ router.post('/register', async (req, res, next) =>
         case task.New:
             store = new Store(req.body)
             let id = await store.New(req.body)
-            text_ = text.OTPSendToMobNo.format(
+            text_ = text.OTPSendToMobileNo.format(
                     store.Data.MobileNo.slice(-4))
             data_ = { StoreID : id }
             break
 
         case task.ReadOTP:
             store = new Store()
-            await store.ConfirmMobNo(req.body)
+            await store.ConfirmMobileNo(req.body)
             text_ = text.OTPConfirmed
             break
         
@@ -61,9 +61,8 @@ router.get('/list', async (req, res, next) =>
 {
     try 
     {
-      let store         = new Store()
-      req.query.UserID  = req.body.User._id
-      const data        = await store.ListStores(req.query)
+      let store  = new Store()
+      const data = await store.ListStores(req.body.User)
       
       return res.status(code.OK).json({
         Status  : status.Success,

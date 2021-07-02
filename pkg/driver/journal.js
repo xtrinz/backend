@@ -1,12 +1,16 @@
-const { User }                           = require('./user')
-    , { Cart }                           = require('./cart')
-    , { Store }                          = require('./store')
-    , { ObjectID, ObjectId }             = require('mongodb')
-    , test                               = require('../common/test')
-    , { Err_, code, reason }             = require('../common/error')
-    , { states, channel, entity, query } = require('../common/models')
-    , { Stripe }                         = require('../common/stripe')
-    , { journals }                       = require('../common/database')
+const { Cart }     = require('./cart')
+    , { ObjectID } = require('mongodb')
+    , test         = require('../common/test')
+    , { Stripe }   = require('../infra/stripe')
+    , db           =
+    {
+        cart       : require('../archive/cart')
+      , user       : require('../archive/user')
+      , store      : require('../archive/store')
+      , journal    : require('../archive/journal')
+    }
+    , { Err_, code, reason }     = require('../common/error')
+    , { states, channel, query } = require('../common/models')
 
 function Journal()
 {
@@ -29,10 +33,7 @@ function Journal()
         , Location        : {}
         , Address         : {}
       }
-      , Agents            : []
-      /**
-       * { ID: , Earnings: { FirstMile | SecondMile | Penalty | ReasonForPenalty |  }}
-       */
+      , Agents            : [] // { ID: , Earnings: { FirstMile | SecondMile | Penalty | ReasonForPenalty |  }}
       , Order             :
       {
           Products        : [] // ProductID, Name, Price, Image, Quantity
@@ -61,36 +62,6 @@ function Journal()
       }
     }
 
-    this.GetByID    = async function(_id)
-    {
-       console.log('find-journal-by-id', { ID: _id })
-       const query = { _id: ObjectId(_id) }
-       let journal = await journals.findOne(query)
-       if (!journal)
-       {
-         console.log('journal-not-found', { ID: query})
-         return
-       }
-       this.Data = journal
-       console.log('journal-found', { Cart: journal})
-       return journal
-    }
-
-    this.Save       = async function()
-    {
-        console.log('save-journal', this.Data)
-        const query = { _id    : this.Data._id }
-            , act   = { $set   : this.Data     }
-            , opt   = { upsert : true          }
-        const resp  = await journals.updateOne(query, act, opt)
-        if (!resp.result.ok)
-        {
-            console.log('journal-save-failed', { Data: this.Data, Result: resp.result})
-            Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
-        }
-        console.log('journal-saved', this.Data)
-    }
-
     this.New    = async function(data)
     {
       // Set User
@@ -98,7 +69,7 @@ function Journal()
       {                 
           ID        : data.User._id
         , Name      : data.User.Name
-        , MobileNo  : data.User.MobNo
+        , MobileNo  : data.User.MobileNo
         , Longitude : data.Longitude
         , Latitude  : data.Latitude
         , Address   : data.Address
@@ -108,14 +79,22 @@ function Journal()
       let cart_           = new Cart()
       const cart_data     = await cart_.Read(data.User._id)
 
-      if(!cart_data.Products.length) Err_(code.BAD_REQUEST, reason.NoProductsFound)
+      if(!cart_data.Products.length)
+      Err_(code.BAD_REQUEST, reason.NoProductsFound)
 
-      if(cart_.Data.JournalID) { await this.GetByID(cart_.Data.JournalID) }
+      if(cart_data.Flagged)
+      Err_(code.BAD_REQUEST, reason.CartFlagged)
+
+      if(cart_data.JournalID) { this.Data = await db.journal.GetByID(cart_data.JournalID) }
+
+      delete cart_data.Flagged
+      delete cart_data.JournalID
+
       this.Data.Order     = { ...cart_data }
+      delete this.Data.Order.StoreID
 
       // Set Seller
-      const store_  = new Store()
-          , store   = await store_.Get(cart_.Data.Products[0].StoreID, query.ByID)
+      const store   = await db.store.Get(cart_data.StoreID, query.ByID)
       if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
       this.Data.Seller    = 
       {                 
@@ -142,7 +121,7 @@ function Journal()
           ChannelParams : intent
         , Amount        : this.Data.Order.Bill.NetPrice
       }
-      await this.Save()
+      await db.journal.Save(this.Data)
 
       test.Set('JournalID', this.Data._id) // #101
 
@@ -173,15 +152,15 @@ function Journal()
         journal_id  = test.Get('JournalID')
       }
 
-      let journal = await this.GetByID(journal_id)
-      if (!journal) Err_(code.BAD_REQUEST, reason.JournalNotFound)
+      this.Data = await db.journal.GetByID(journal_id)
+      if (!this.Data) Err_(code.BAD_REQUEST, reason.JournalNotFound)
 
       this.Data.Payment.TimeStamp = Date.now()
       switch (event_.type)
       {
       case states.StripeSucess:
         let cart_ = new Cart()
-        await cart_.Flush(journal.Buyer.ID)
+        await cart_.Flush(this.Data.Buyer.ID)
         this.Data.Payment.Status = states.Success
         this.Data.Transit.Status = states.Initiated
         break
@@ -193,57 +172,10 @@ function Journal()
       return event_.type
     }
 
-    this.List = function(data)
-    {
-      switch(data.Entity)
-      {
-            case entity.User:
-            let user    = new User()
-            const user_ = user.GetByID(data.UserID)
-            if (!user_) Err_(code.NOT_FOUND, reason.UserNotFound)
-
-            const data_ = {}
-            /* const query =
-            { 
-                Buyer :  { UserID : user._id }
-              , Payment: { Status : states.Success } 
-            }
-            , proj  = 
-            {
-                _id      : 1
-              , Seller   : { ID : 1 , Name : 1 }
-              , Bill     : 1
-              , Products : 1
-              , Transit  : { ID : 1 , Status : 1, ClosingState: 1 }
-            }
-            const data_   = this.Get(query, proj) */
-            return data_
-
-            case entity.Store:
-            let store    = new Store()
-            const store_ = store.GetByIDAndMgmtID(data.UserID, data.StoreID)
-            if (!store_) Err_(code.NOT_FOUND, reason.StoreNotFound)
-            break
-      }
-    }
-
-    this.Read = function(data)
-    {
-      let data_
-      switch(data.Entity)
-      {
-            case entity.User:
-            return data_
-
-            case entity.Store:
-            return data_      
-      }
-    }
-
     this.PayOut = async function (ctxt)
     {
-      let journal = await this.GetByID(ctxt.Data.JournalID)
-      if (!journal) Err_(code.BAD_REQUEST, reason.JournalNotFound)
+      this.Data = await db.journal.GetByID(ctxt.Data.JournalID)
+      if (!this.Data) Err_(code.BAD_REQUEST, reason.JournalNotFound)
 
       switch (ctxt.Data.State)
       {
@@ -258,7 +190,7 @@ function Journal()
       }
       this.Data.Transit.Status        = states.Closed
       this.Data.Transit.ClosingState  = ctxt.Data.State
-      await this.Save()
+      await db.journal.Save(this.Data)
     }
 }
 

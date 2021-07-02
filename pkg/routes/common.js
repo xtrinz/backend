@@ -1,6 +1,9 @@
-const { Store }              = require('../objects/store')
-    , router                 = require('express').Router()
-    , { text, code, status } = require('../common/error') 
+const router                 = require('express').Router()
+    , { text, code, status } = require('../common/error')
+    , db                     =
+    {
+      store                  : require('../archive/store')
+    }
 
 router.get('/feed', async (req, res, next) => {
   try
@@ -10,8 +13,7 @@ router.get('/feed', async (req, res, next) => {
     const   PageNo  = parseInt(in_.PageNo)
           , Lon     = parseFloat(in_.Longitude)
           , Lat     = parseFloat(in_.Lattitude)
-          , stores_ = new Store()
-          , data    = await stores_.ListNearby(PageNo, Lon, Lat)
+          , data    = await db.store.ListNearby(PageNo, Lon, Lat)
 
     if(!data.length && PageNo === 1) 
     { text_ = text.NoDataFound}

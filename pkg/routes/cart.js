@@ -1,6 +1,7 @@
 const { ObjectId }           = require('mongodb')
     , { code, text, status } = require('../common/error')
-    , {Cart, CartEntry}      = require('../objects/cart')
+    , {Cart, CartEntry}      = require('../driver/cart')
+    , { Address }            = require('../driver/address')
     , router 	               = require('express').Router()
 
 // Insert product
@@ -23,8 +24,14 @@ router.get('/list', async (req, res, next) =>
 {
   try
   {
+    const address = new Address()
+    const addr    = await address.Read({
+        UserID    : req.body.User._id
+      , AddressID : req.body.AddressID
+    })
+
     const cart = new Cart()
-    const data = await cart.Read(req.body.User._id)
+    const data = await cart.Read(req.body.User._id, addr)
     
     return res.status(code.OK).json({
       Status  : status.Success,
