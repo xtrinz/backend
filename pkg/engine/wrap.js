@@ -2,6 +2,7 @@ const   otp 				 	 = require('../common/otp')
 	  , { Err_ , code, reason }  = require('../common/error')
 	  , { message, gw }          = require('../common/models')
 	  , { Journal } 		 	 = require('../driver/journal')
+	  , db 						 = require('../archive/transit')
 
 // Notify | UpdateState | Payout | OTP
 
@@ -33,7 +34,7 @@ const Save = async function(ctxt, state_)
 	ctxt.Data.State  = state_
 	ctxt.Data.Event  = ''
 	ctxt.Data.StateHistory.push(state_) 
-	await ctxt.Save()
+	await db.Save(ctxt.Data)
 }
 
 const PingAdmins = async function(st, ctxt)

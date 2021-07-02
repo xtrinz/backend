@@ -5,6 +5,7 @@ const { ObjectId } 				                  = require('mongodb')
     , { Store }                             = require('../driver/store')
     , { alerts, event, query, task, mode }  = require('../common/models')
     , { Err_, code, status, reason }        = require('../common/error')
+    , db                                    = require('../archive/transit')
 
 router.post('/user/cancel', async (req, res, next) =>
 {
@@ -16,8 +17,8 @@ router.post('/user/cancel', async (req, res, next) =>
               'User._id' : ObjectId(req.body.User._id),
               _id  : ObjectId(req.body.TransitID)
           }
-          , trans_ = await trans.Get(query_, query.Custom)
-        if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+        trans.Data = await db.Get(query_, query.Custom)
+        if (!trans.Data) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
         trans.Data.Event = event.CancellationByUser
         let engine       = new Engine()
@@ -37,8 +38,8 @@ router.post('/store', async (req, res, next) =>
     {
         const query_ = { _id   : ObjectId(req.body.TransitID) }
         let trans  = new Transit()
-        let trans_ = await trans.Get(query_, query.Custom)
-        if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+        trans.Data = await db.Get(query_, query.Custom)
+        if (!trans.Data) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
         let event_, text_, store = new Store()
         await store.Authz(trans.Data.Store._id, req.body.User._id)
@@ -129,14 +130,14 @@ router.post('/admin', async (req, res, next) =>
 {
     try
     {
-        if(req.body.User._id !== mode.Admin)
-        if (!trans_) Err_(code.BAD_REQUEST, reason.Unauthorized)
+        if(req.body.User.Mode !== mode.Admin)
+        Err_(code.BAD_REQUEST, reason.Unauthorized)
         
         const query_ = { _id   : ObjectId(req.body.TransitID) }
         let trans  = new Transit()
-        let trans_ = await trans.Get(query_, query.Custom)
-        if (!trans_) Err_(code.BAD_REQUEST, reason.TransitNotFound)
-
+        trans.Data = await db.Get(query_, query.Custom)
+        if (!trans.Data) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+        
         let event_, text_
         switch(req.body.Task)
         {

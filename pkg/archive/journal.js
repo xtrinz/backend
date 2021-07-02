@@ -1,8 +1,11 @@
-const { User }               = require('./user')
-    , { Store }              = require('./store')
+const db                     =
+    {
+        user                 : require('./user')
+      , store                : require('./store')
+    }
     , { ObjectId }           = require('mongodb')
     , { Err_, code, reason } = require('../common/error')
-    , { entity }             = require('../common/models')
+    , { entity, query }      = require('../common/models')
     , { journals }           = require('../common/database')
 
 const GetByID    = async function(_id)
@@ -46,8 +49,8 @@ const List = function(data)
   switch(data.Entity)
   {
         case entity.User:
-        let user    = new User()
-        const user_ = user.GetByID(data.UserID)
+
+        const user_ = db.user.Get(data.UserID, query.ByID)
         if (!user_) Err_(code.NOT_FOUND, reason.UserNotFound)
 
         const data_ = {}
@@ -68,8 +71,22 @@ const List = function(data)
         return data_
 
         case entity.Store:
-        let store    = new Store()
-        const store_ = store.GetByIDAndMgmtID(data.UserID, data.StoreID)
+
+        const key =
+        { 
+          $or :
+          [ 
+            { 
+                  AdminID : data.UserID
+                , StoreID : data.StoreID
+            },
+            { 
+                StoreID              : data.StoreID
+              , 'StaffList.Approved' : { $elemMatch: { $eq: String(data.UserID) } }
+            }
+          ]
+        }
+        const store_ = db.store.Get(key, query.Custom)
         if (!store_) Err_(code.NOT_FOUND, reason.StoreNotFound)
         break
   }
