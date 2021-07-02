@@ -1,11 +1,11 @@
-const { users }                            = require('../common/database')
-    , { states, query, mode, message, gw } = require('../common/models')
-    , { Err_, code, reason}                = require('../common/error')
-    , otp                                  = require('../common/otp')
-    , jwt                                  = require('../common/jwt')
-    , { ObjectID, ObjectId }               = require('mongodb')
-    , { Cart }                             = require('./cart')
-    , bcrypt                               = require('bcryptjs')
+const { states, query, message, gw } = require('../common/models')
+    , { Err_, code, reason}          = require('../common/error')
+    , otp                            = require('../common/otp')
+    , jwt                            = require('../common/jwt')
+    , { ObjectID }                   = require('mongodb')
+    , { Cart }                       = require('./cart')
+    , bcrypt                         = require('bcryptjs')
+    , db                             = require('../archive/user')
 
 function User(mob_no, user_mode)
 {
@@ -31,94 +31,6 @@ function User(mob_no, user_mode)
       , ResetPasswd: false
       , IsLive     : false
     }
-    this.Save       = async function()
-    {
-        console.log('save-user', this.Data)
-        const query = { _id : this.Data._id }
-            , act   = { $set : this.Data }
-            , opt   = { upsert : true }
-        const resp  = await users.updateOne(query, act, opt)
-        if (!resp.result.ok)
-        {
-            console.log('user-save-failed', { Data: this.Data, Result: resp.result})
-            Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
-        }
-        console.log('user-saved', this.Data)
-    }
-
-    this.Get = async function(param, qType)
-    {
-        console.log('find-user', { Param: param, QType: qType})
-        let query_
-        switch (qType)
-        {
-            case query.ByID    : query_ = { _id: ObjectId(param) } ; break;
-            case query.ByMobileNo : query_ = { MobileNo: param }         ; break;
-            case query.ByMail  : query_ = { Email: param }         ; break;
-        }
-        let user = await users.findOne(query_)
-        if (!user)
-        {
-          console.log('user-not-found', query_)
-          return
-        }
-        this.Data = user
-        console.log('user-found', { User: user })
-        return user
-    }
-
-    this.NearbyAgents = async function(ln, lt)
-    {
-        console.log('list-nearby-live-agents', {Location: [ln, lt]})
-        /* Agent { _id, Name, SocketID }, count <=10,
-           Nearest, Live, Radius < 5km             */
-        // TODO Not participted in any activities currelty           
-        const cnt     = 10
-            , maxDist = 5000
-            , proj    = { _id: 1, Name: 1, SockID: 1 }
-            , query   =
-            { 
-/*              Location  :
-                {
-                $near :
-                {
-                  $geometry    : { type: 'Point', coordinates: [ln, lt] }
-                , $maxDistance : maxDist
-                }
-                }*/
-                  IsLive  : true
-                , Mode    : mode.Agent
-            }
-        const agents = await users.find(query).project(proj).limit(cnt).toArray()
-        if (!agents.length)
-        {
-            console.log('no-agents-found',{ Location: [ln, lt]})
-            return
-        }
-        console.log('agents-found', { Agents: agents})
-        return agents
-    }
-
-    this.NearbyAdmins = async function(ln, lt)
-    {
-        console.log('list-nearby-admins', {Location: [ln, lt]})
-        /* Admin { _id, Name, SocketID }, count <=5,
-           Nearest, Radius < 5km             */
-        // TODO Not participted in any activities currelty
-        const cnt     = 5
-            , proj    = { _id: 1, Name: 1, SockID: 1 }
-            , query   =
-            { 
-              /*Location  :
-                {
-                    $near : { $geometry    : { type: 'Point', coordinates: [ln, lt] } }
-                }*/
-                 Mode    : mode.Admin
-            }
-        const admins = await users.find(query).project(proj).limit(cnt).toArray()
-        console.log('admins-filtered', { Admin: admins})
-        return admins
-    }
 
     this.Auth   = async function (token)
     {
@@ -128,8 +40,8 @@ function User(mob_no, user_mode)
         const res   = await jwt.Verify(token)
         if (!res || !res._id) Err_(code.BAD_REQUEST, reason.UserNotFound)
 
-        const user = await this.Get(res._id, query.ByID)
-        if (!user)
+        this.Data = await db.Get(res._id, query.ByID)
+        if (!this.Data)
         {
             console.log('user-not-found', {UserID: res._id})
             Err_(code.BAD_REQUEST, reason.UserNotFound)
@@ -139,7 +51,7 @@ function User(mob_no, user_mode)
 
     this.New      = async function ()
     {
-        let user = await this.Get(this.Data.MobileNo, query.ByMobileNo)
+        let user = await db.Get(this.Data.MobileNo, query.ByMobileNo)
         if (user && user.State === states.Registered)
         Err_(code.BAD_REQUEST, reason.UserFound)
 
@@ -151,14 +63,14 @@ function User(mob_no, user_mode)
         if(!user) { this.Data._id = new ObjectID() }
         this.Data.Otp             = hash
         this.Data.State           = states.New
-        await this.Save()
+        await db.Save(this.Data)
         console.log('user-created', { User: this.Data})
     }
 
     this.ConfirmMobileNo   = async function (data)
     {
-        let user     = await this.Get(data.MobileNo, query.ByMobileNo)
-        if (!user || user.State === states.Registered)
+        this.Data = await db.Get(data.MobileNo, query.ByMobileNo)
+        if (!this.Data || this.Data.State === states.Registered)
            Err_(code.BAD_REQUEST, reason.UserNotFound)
 
         const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
@@ -168,8 +80,8 @@ function User(mob_no, user_mode)
 
         this.Data.State = states.MobConfirmed
         this.Data.Otp   = ''
-        await this.Save()
-        console.log('user-mobile-number-confirmed', { User: this.Data})
+        await db.Save(this.Data)
+        console.log('user-mobile-number-confirmed', { User: this.Data })
         
         const token = await jwt.Sign({ _id: this.Data._id })
         return token
@@ -187,13 +99,11 @@ function User(mob_no, user_mode)
         this.Data.Email  = data.Email        
         this.Data.State  = states.Registered
 
-        await this.Save()
+        await db.Save(this.Data)
         console.log('user-registered', 
-            {
-                  UserID  : this.Data._id
-                , Name    : data.Name
-                , Email   : data.Email
-            })
+        {  UserID  : this.Data._id 
+         , Name    : data.Name       
+         , Email   : data.Email    })
     }
 
     this.Login   = async function (data)
@@ -202,15 +112,15 @@ function User(mob_no, user_mode)
         if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobileNo }
         else               { param = data.Email;    qType = query.ByMail  }
 
-        let user = await this.Get(param, qType)
-        if (!user || user.State !== states.Registered)
+        this.Data = await db.Get(param, qType)
+        if (!this.Data || this.Data.State !== states.Registered)
         Err_(code.BAD_REQUEST, reason.UserNotFound)
 
-        let status = await bcrypt.compare(data.Password, user.Passwd) // (data, hash) keep sign in order
+        let status = await bcrypt.compare(data.Password, this.Data.Passwd) // (data, hash) keep sign in order
         if (!status) Err_(code.BAD_REQUEST, reason.IncorrectCredentials)
 
-        console.log('user-loggedin', {Name: user.Name, UserID: user._id})        
-        const token = await jwt.Sign({ _id: user._id })
+        console.log('user-loggedin', {Name: this.Data.Name, UserID: this.Data._id})        
+        const token = await jwt.Sign({ _id: this.Data._id })
         return token
     }
 
@@ -218,29 +128,28 @@ function User(mob_no, user_mode)
     {
 
         let param, qType, via
-        if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobileNo; via = gw.SMS }
-        else               { param = data.Email;    qType = query.ByMail;  via = gw.MAIL }
+        if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobileNo; via = gw.SMS  }
+        else               { param = data.Email;    qType = query.ByMail;     via = gw.MAIL }
 
-        let user = await this.Get(param, qType)
-        if (!user || user.State !== states.Registered)
+        this.Data = await db.Get(param, qType)
+        if (!this.Data || this.Data.State !== states.Registered)
         Err_(code.BAD_REQUEST, reason.UserNotFound)
 
         const otp_  = new otp.OneTimePasswd({
-                        MobileNo:  user.MobileNo,
-                        Email:  user.Email,
-                        Body:   message.ResetPass })
+                        MobileNo :  this.Data.MobileNo,
+                        Email    :  this.Data.Email,
+                        Body     :  message.ResetPass })
         const hash  = await otp_.Send(via) 
         
         this.Data.Otp         = hash
         this.Data.ResetPasswd = true
-        await this.Save()
+        await db.Save(this.Data)
 
-        console.log('user-password-flag-set', 
-            { 
-                UserID  : user._id,
-                MobileNo: data.MobileNo,
-                Email   : data.Email
-            })
+        console.log('user-password-flag-set',
+        {     UserID   : this.Data._id 
+            , MobileNo : data.MobileNo       
+            , Email    : data.Email    }) 
+
         return via
     }
 
@@ -250,17 +159,18 @@ function User(mob_no, user_mode)
         if (data.MobileNo) { param = data.MobileNo; qType = query.ByMobileNo }
         else               { param = data.Email;    qType = query.ByMail  }
 
-        let user = await this.Get(param, qType)
-        if (!user || user.State !== states.Registered)
+        this.Data = await db.Get(param, qType)
+        if (!this.Data || this.Data.State !== states.Registered)
         Err_(code.BAD_REQUEST, reason.UserNotFound)
 
         const otp_   = new otp.OneTimePasswd({MobileNo: this.Data.MobileNo, Body: ''})
             , status = await otp_.Confirm(this.Data.Otp, data.OTP)
+
         if (!this.Data.ResetPasswd || !status)
         Err_(code.BAD_REQUEST, reason.OtpRejected)
 
         this.Data.Otp = ''
-        await this.Save()
+        await db.Save(this.Data)
 
         console.log('authorized-edit-password', {User: this.Data})
         const token = await jwt.Sign({ _id: this.Data._id })
@@ -269,23 +179,22 @@ function User(mob_no, user_mode)
 
     this.UpdatePasswd   = async function (passwd)
     {
-        if ( this.Data.State !== states.Registered ||
-            !this.Data.ResetPasswd)
+        if ( this.Data.State !== states.Registered || !this.Data.ResetPasswd)
         {
-            let reason_ = reason.IncompleteRegistration
-            if(!this.Data.ResetPasswd) { reason_ = reason.PasswdResetNotPermited }
+            let reason_ = (!this.Data.ResetPasswd)? reason.PasswdResetNotPermited : reason.IncompleteRegistration
             Err_(code.BAD_REQUEST, reason_)
         }
         this.Data.Passwd      = await bcrypt.hash(passwd, 5) // salt =5
         this.Data.ResetPasswd = false
-        await this.Save()
+
+        await db.Save(this.Data)
         console.log('password-updated', {User: this.Data})
     }
 
     this.EditProfile   = async function (data)
     {
         if ( this.Data.State !== states.Registered)
-            Err_(code.BAD_REQUEST, reason.IncompleteRegistration)
+        Err_(code.BAD_REQUEST, reason.IncompleteRegistration)
 
         if(data.Password)
         {                                        // (data, hash) keep sign in order
@@ -295,7 +204,7 @@ function User(mob_no, user_mode)
         }
         if(data.Name ) { this.Data.Name  = data.Name  }
         if(data.Email) { this.Data.Email = data.Email }
-        await this.Save()
+        await db.Save(this.Data)
         console.log('profile-updated', {User: this.Data})
     }
 

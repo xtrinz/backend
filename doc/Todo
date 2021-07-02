@@ -265,3 +265,5 @@ let CostPerKM      = EffortFeePerKM + PetrolFeePerKM
 ----------------------------------------------------------
 limit result of all get queries
 and set limits for address/ stores ...
+----------------------------------------------------------
+// Remove sockId on relieve staff

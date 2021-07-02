@@ -4,6 +4,11 @@ const   { Emit } 			 	   = require('./events')
 	  , { User } 			 	   = require('../driver/user')
 	  , { PayOut , SendOTP, Save, SetAgent
 		, ConfirmOTP, ResetAgent } = require('./wrap')
+	  , db 						   =
+	  {
+		    user 				   : require('../archive/user')
+		  
+	  }
 
 // Notify | UpdateState | Payout | OTP
 const InitiatedByUser		= async function(ctxt)
@@ -49,8 +54,7 @@ const AcceptedByStore			=  async function(ctxt)
 	console.log('process-order-acceptance', ctxt.Data)
 	await Emit(alerts.Accepted, ctxt)	// To User: Emit irrespective of it turns to hold
 
-	const agent  = new User()
-	const agents = await agent.NearbyAgents(
+	const agents = await db.user.NearbyAgents(
 			ctxt.Data.Store.Longitude,
 			ctxt.Data.Store.Latitude)
 	if(!agents)
@@ -173,8 +177,8 @@ const RejectedByAgent		= async function(ctxt)
 	switch(ctxt.Data.State)
 	{
 	case states.TransitAccepted:
-		const agent  = new User()
-		const agents = await agent.NearbyAgents(
+
+		const agents = await db.user.NearbyAgents(
 				ctxt.Data.Store.Longitude,
 				ctxt.Data.Store.Latitude)
 		if(!agents)

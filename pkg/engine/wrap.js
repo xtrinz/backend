@@ -2,7 +2,11 @@ const   otp 				 	 = require('../common/otp')
 	  , { Err_ , code, reason }  = require('../common/error')
 	  , { message, gw }          = require('../common/models')
 	  , { Journal } 		 	 = require('../driver/journal')
-	  , db 						 = require('../archive/transit')
+	  , db 						 = 
+	  {
+			  transit 			 : require('../archive/transit')
+			, user 				 : require('../archive/user')
+	  }
 
 // Notify | UpdateState | Payout | OTP
 
@@ -34,14 +38,14 @@ const Save = async function(ctxt, state_)
 	ctxt.Data.State  = state_
 	ctxt.Data.Event  = ''
 	ctxt.Data.StateHistory.push(state_) 
-	await db.Save(ctxt.Data)
+	await db.transit.Save(ctxt.Data)
 }
 
 const PingAdmins = async function(st, ctxt)
 {
     console.log('ping-admins', {State: st, Ctxt: ctxt})
-    const admin   = new User()
-    const admins  = await admin.NearbyAdmins(
+
+	const admins  = await db.user.NearbyAdmins(
           ctxt.Data.Store.Longitude
         , ctxt.Data.Store.Latitude)
     ctxt.Data.Admins = admins
