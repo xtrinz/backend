@@ -1,12 +1,12 @@
 const db                     =
     {
-        user                 : require('./user')
-      , store                : require('./store')
+        user                 : require('../user/archive')
+      , store                : require('../store/archive')
     }
     , { ObjectId }           = require('mongodb')
-    , { Err_, code, reason } = require('../common/error')
-    , { entity, query }      = require('../common/models')
-    , { journals }           = require('./database')
+    , { Err_, code, reason } = require('../../common/error')
+    , { entity, query }      = require('../../common/models')
+    , { journals }           = require('../../common/database')
 
 const GetByID    = async function(_id)
 {

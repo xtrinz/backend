@@ -1,6 +1,6 @@
 const compare                = require('./compare')
     , { Rest, Socket, Type, Method } = require('./medium')
-    , db                     = require('../../pkg/archive/database')
+    , db                     = require('../../pkg/common/database')
 
 const prints = 
 {

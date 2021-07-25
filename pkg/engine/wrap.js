@@ -1,11 +1,11 @@
 const   otp 				 	 = require('../infra/otp')
 	  , { Err_ , code, reason }  = require('../common/error')
 	  , { message, gw }          = require('../common/models')
-	  , { Journal } 		 	 = require('../driver/journal')
+	  , { Journal } 		 	 = require('../config/journal/driver')
 	  , db 						 = 
 	  {
-			  transit 			 : require('../archive/transit')
-			, user 				 : require('../archive/user')
+			  transit 			 : require('../config/transit/archive')
+			, user 				 : require('../config/user/archive')
 	  }
 
 // Notify | UpdateState | Payout | OTP

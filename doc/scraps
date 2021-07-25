@@ -1,0 +1,41 @@
+Paytm Status:
+
+setup ngrok
+
+postman 
+ - init did not work = signature failure
+ - fetch payment methods worked
+
+native-api-set
+ - init worked
+ - process did not work
+   error:
+   "Payment failed due to a technical error. Please try after some time."
+
+1) user will have a call back URL pointing to merchant server,
+   which will be used to ensure that server got acknowledged the
+   transaction or it has to acknowledge the trasaction using
+   status APIs. [ubu]
+
+MID can be shared, but not MID-KEY
+
+
+
+
+
+let data =
+{
+    JournalID     : '072015'
+  , NetPrice      : 1.00
+  , User          :
+  {
+      ID          : 'User1'
+    , Email       : '123@gmail.com'
+    , Name        : 'User-1'
+    , MobileNo    : '+910987654321'
+    , Address     : { PostalCode : 123456 }
+  }
+}
+
+let pay = new PayTM()
+pay.CreateToken(data)

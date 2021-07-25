@@ -1,12 +1,12 @@
 const   { Emit } 			 	   = require('./events')
 	  , { Err_ , code, reason }    = require('../common/error')
 	  , { states , alerts, query } = require('../common/models')
-	  , { User } 			 	   = require('../driver/user')
+	  , { User } 			 	   = require('../config/user/driver')
 	  , { PayOut , SendOTP, Save, SetAgent
 		, ConfirmOTP, ResetAgent } = require('./wrap')
 	  , db 						   =
 	  {
-		    user 				   : require('../archive/user')
+		    user 				   : require('../config/user/archive')
 		  
 	  }
 

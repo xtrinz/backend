@@ -1,7 +1,7 @@
 const { Err, Err_, code, status, reason } = require('./error')
     , { states }                          = require('./models')
-    , { client }                          = require('../archive/database')
-    , { User }                            = require('../driver/user')
+    , { client }                          = require('./database')
+    , { User }                            = require('../config/user/driver')
 
 let   Server, io
 const SetServer = (server, io_) => { Server = server; io = io_ }

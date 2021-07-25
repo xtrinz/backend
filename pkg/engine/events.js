@@ -1,12 +1,12 @@
 const { states, alerts, query } = require('../common/models')
-    , { User }                  = require('../driver/user')
-    , { Socket }                = require('../driver/socket')
+    , { User }                  = require('../config/user/driver')
+    , { Socket }                = require('../config/socket/driver')
     , Emitter                   = require('events')
     , emitter                   = new Emitter()
     , db                        =
     {
-        user                    : require('../archive/user')
-      , socket                  : require('../archive/socket')
+        user                    : require('../config/user/archive')
+      , socket                  : require('../config/socket/archive')
     }
     , { Err_, code, reason }    = require('../common/error')
 

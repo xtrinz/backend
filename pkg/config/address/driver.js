@@ -1,6 +1,6 @@
 const { ObjectId
     , ObjectID } = require('mongodb')
-    , db         = require('../archive/address')
+    , db         = require('../address/archive')
 
 function Address(data)
 {

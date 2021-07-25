@@ -1,6 +1,26 @@
 const Org          = process.env.ORGANISATION
 module.exports =
 {
+	paytm: 
+	{
+		  WEBSTAGING				: 'WEBSTAGING'
+		, DEFAULT					: 'DEFAULT'
+
+		, Success 					: 'S'
+		, Order 					: 'ORDER_{0}'
+		, Refund 					: 'REFUND_{0}'
+
+		, TxnSuccess 				: 'TXN_SUCCESS'
+		, TxnFailure				: 'TXN_FAILURE'
+		, RefundPending 			: 'PENDING'
+		, RefundFailure 			: 'TXN_FAILURE'
+
+		, Type 						:
+		{
+			REFUND					: 'REFUND'
+		}
+		, ReadTimeout 				: 80000
+	},
 	tags:
 	{
 		  HOME 						: 'HOME'
@@ -32,6 +52,7 @@ module.exports =
 		, Register 					: 'Register'
 		, GenOTP 					: 'Generate_OTP'
 		, ConfirmOTP 				: 'Confirm_OTP'
+		, SetPayoutGW				: 'Set_Payout_GW'
 		, SetPassword				: 'Set_Password'
 		, EditPasswd 				: 'Edit_Password'
 		, EditProfile 				: 'Edit_Profile'

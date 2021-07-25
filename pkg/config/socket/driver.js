@@ -1,7 +1,7 @@
 const db                     =
     {
-          socket             : require('../archive/socket')
-        , transit            : require('../archive/transit')
+          socket             : require('../socket/archive')
+        , transit            : require('../transit/archive')
     }
 
 function Socket()
