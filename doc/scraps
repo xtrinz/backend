@@ -18,3 +18,24 @@ native-api-set
    status APIs. [ubu]
 
 MID can be shared, but not MID-KEY
+
+
+
+
+
+let data =
+{
+    JournalID     : '072015'
+  , NetPrice      : 1.00
+  , User          :
+  {
+      ID          : 'User1'
+    , Email       : '123@gmail.com'
+    , Name        : 'User-1'
+    , MobileNo    : '+910987654321'
+    , Address     : { PostalCode : 123456 }
+  }
+}
+
+let pay = new PayTM()
+pay.CreateToken(data)
