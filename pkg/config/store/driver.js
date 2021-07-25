@@ -1,12 +1,12 @@
 const { ObjectID, ObjectId }        = require('mongodb')
-    , otp                           = require('../infra/otp')
-    , { Err_, code, reason}         = require('../common/error')
+    , otp                           = require('../../infra/otp')
+    , { Err_, code, reason}         = require('../../common/error')
     , { states, mode
-      , query, task, message, gw }  = require('../common/models')
+      , query, task, message, gw }  = require('../../common/models')
     , db                            = 
     {
-         store  : require('../archive/store')
-        , user  : require('../archive/user')
+         store  : require('../store/archive')
+        , user  : require('../user/archive')
     }
 
 function Store(data)

@@ -1,7 +1,7 @@
 const { ObjectId }           = require('mongodb')
-    , { Err_, code, reason } = require('../common/error')
-    , { query }              = require('../common/models')
-    , { products }           = require('./database')
+    , { Err_, code, reason } = require('../../common/error')
+    , { query }              = require('../../common/models')
+    , { products }           = require('../../common/database')
 
 const Save      = async function(data)
 {

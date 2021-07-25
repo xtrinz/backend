@@ -1,9 +1,9 @@
 const { ObjectID, ObjectId } 	= require('mongodb')
-    , { users } 		        = require('../archive/database')
-    , { Err_, code, reason }    = require('../common/error')
-    , { states, event, query }  = require('../common/models')
-    , { Engine }                = require('../engine/engine')
-    , db                        = require('../archive/transit')
+    , { users } 		        = require('../../common/database')
+    , { Err_, code, reason }    = require('../../common/error')
+    , { states, event, query }  = require('../../common/models')
+    , { Engine }                = require('../../engine/engine')
+    , db                        = require('../transit/archive')
 
 function Transit (journal)
 {

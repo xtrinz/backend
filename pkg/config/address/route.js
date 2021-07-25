@@ -1,6 +1,6 @@
-const { Address }            = require('../driver/address')
+const { Address }            = require('../address/driver')
     , router 	               = require('express').Router()
-    , { code, status, text } = require('../common/error')
+    , { code, status, text } = require('../../common/error')
 
 // Add address
 router.post('/add', async (req, res, next) => {

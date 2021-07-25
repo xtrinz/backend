@@ -1,8 +1,8 @@
 const router                 = require('express').Router()
-    , { text, code, status } = require('../common/error')
+    , { text, code, status } = require('../../common/error')
     , db                     =
     {
-      store                  : require('../archive/store')
+      store                  : require('../store/archive')
     }
 
 router.get('/feed', async (req, res, next) => {

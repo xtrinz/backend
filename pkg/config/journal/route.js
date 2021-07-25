@@ -1,9 +1,9 @@
-const { code, text, status } = require('../common/error')
-    , { states }             = require('../common/models')
+const { code, text, status } = require('../../common/error')
+    , { states }             = require('../../common/models')
     , router 	               = require('express').Router()
-    , { Journal }            = require('../driver/journal')
-    , { Transit }            = require('../driver/transit')
-    , db                     = require('../archive/journal')
+    , { Journal }            = require('../journal/driver')
+    , { Transit }            = require('../transit/driver')
+    , db                     = require('../journal/archive')
 
 // Stripe confirmation webhook
 router.post('/confirm', async (req, res, next) =>

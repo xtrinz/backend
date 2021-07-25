@@ -1,8 +1,8 @@
-const { code, text, status } = require('../common/error')
+const { code, text, status } = require('../../common/error')
     , router 	               = require('express').Router()
-    , { Product }            = require('../driver/product')
-    , { Store }              = require('../driver/store')
-    , db                     = require('../archive/product')
+    , { Product }            = require('../product/driver')
+    , { Store }              = require('../store/driver')
+    , db                     = require('../product/archive')
 
 router.post('/add', async (req, res, next) => {
   try

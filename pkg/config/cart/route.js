@@ -1,7 +1,7 @@
 const { ObjectId }           = require('mongodb')
-    , { code, text, status } = require('../common/error')
-    , {Cart, CartEntry}      = require('../driver/cart')
-    , { Address }            = require('../driver/address')
+    , { code, text, status } = require('../../common/error')
+    , {Cart, CartEntry}      = require('../cart/driver')
+    , { Address }            = require('../address/driver')
     , router 	               = require('express').Router()
 
 // Insert product

@@ -1,11 +1,11 @@
-const { states, query, message, gw } = require('../common/models')
-    , { Err_, code, reason}          = require('../common/error')
-    , otp                            = require('../infra/otp')
-    , jwt                            = require('../infra/jwt')
+const { states, query, message, gw } = require('../../common/models')
+    , { Err_, code, reason}          = require('../../common/error')
+    , otp                            = require('../../infra/otp')
+    , jwt                            = require('../../infra/jwt')
     , { ObjectID }                   = require('mongodb')
-    , { Cart }                       = require('./cart')
+    , { Cart }                       = require('../cart/driver')
     , bcrypt                         = require('bcryptjs')
-    , db                             = require('../archive/user')
+    , db                             = require('../user/archive')
 
 function User(mob_no, user_mode)
 {

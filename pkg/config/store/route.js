@@ -1,7 +1,7 @@
 const router 	               = require('express').Router()
-    , { code, text, status } = require('../common/error')
-    , { task }               = require('../common/models')
-    , { Store }              = require('../driver/store')
+    , { code, text, status } = require('../../common/error')
+    , { task }               = require('../../common/models')
+    , { Store }              = require('../store/driver')
 
 router.post('/register', async (req, res, next) =>
 {
