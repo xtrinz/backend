@@ -12,6 +12,7 @@ const status   =
     {
         Success 					        : 'Success'
       , Failed 			              : 'Failed'
+      , Pending                   : 'Pending'
     }
     , Err_     = (code, reason) => { throw new Error_(code, status.Failed, reason) }
 
@@ -66,6 +67,10 @@ module.exports =
     , RegIncomplete             : 'Registration in progress'
     , APIError                  : 'API Error'
     , CartFlagged               : 'Cart has unavailable items'
+    , TokenCreationFailed       : 'Payment token creation failed'
+    , StatusRetrievalFailed     : 'Payment status retrieval failed'
+    , RefundFailed              : 'Refund initiation failed'
+    , RefundStatusRetrievalFailed: 'Refund status retrieval failed'
 	},
   text:
   {
@@ -92,6 +97,7 @@ module.exports =
     , Relieved                  : 'Relieved'
     , TestNotEnabled            : 'Test disabled'
     , PaymentInitiated          : 'Payment initiated'
+    , PayoutGWSet               : 'Payment Gateway Configured'
   },
   code:
   {

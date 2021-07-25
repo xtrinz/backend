@@ -267,3 +267,26 @@ limit result of all get queries
 and set limits for address/ stores ...
 ----------------------------------------------------------
 // Remove sockId on relieve staff
+----------------------------------------------------------
+AUTHENTICATION FLOW ONNU CHANGE CHEYTHKK 
+
+CASE1: - ------(USER ALREADY EXIST)---  USER SENT PHONE NUMBER --- >  SERVER SENT OTP ---> USER SENT OTP BACK ---> SERVER SEND TOKEN ---> LOGIN SUCCESS
+CASE2: -------(NEW USER) ------- USER SENT PHONE NUMBER --- >  SERVER SENT OTP ---> USER SENT OTP BACK ----> SERVER SENT SUCCESS MESSAGE --> USER SENT NAME AND EMAIL --> SERVER SEND TOKEN -- > REGISTRATION SUCCESS
+
+EEE FLOW ANU ORUVIDHAM ELLA ECOM APP ONLY COMPANIESUM FOLLOW CHEYYANE
+PROS;- SEPARATE LOGIN ROUTE AVASHYAM VARILLA
+
+----------------------------------------------------------------
+
+PayTM SDK: Bug : ln 112:113					
+/home/ubuntu/code1/node_modules/paytm-pg-node-sdk/dist/com/paytm/pg/process/Request.js:112
+                    var error = res.statusCode + ": " + res.statusMessage;
+                                    ^
+TypeError: Cannot read property 'statusCode' of undefined		
+
+----------------------------------------------------------------
+
+kafka event
+- statistics [ all states of transits active/live/finished/failed, build statistics out of events ]
+- record user actions and generate and track history
+- incorporate dynamcity for user home page by monitoring user actions

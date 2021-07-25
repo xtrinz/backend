@@ -25,7 +25,13 @@ router.post('/register', async (req, res, next) =>
             await store.ConfirmMobileNo(req.body)
             text_ = text.OTPConfirmed
             break
-        
+
+        case task.SetPayoutGW:
+          store = new Store()
+          await store.SetPayoutGW(req.body)
+          text_ = text.PayoutGWSet
+          break
+            
         case task.Approve:
             store  = new Store()
             await store.Approve(req.body)

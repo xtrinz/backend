@@ -140,6 +140,12 @@ function Store(data)
         // TODO Send an event to Admin
     }
     
+    this.SetPayoutGW    = async function(data)
+    {
+        // Create cutomer
+        // Create Account
+    }
+
     this.Approve   = async function (data)
     {
         console.log('store-approval', {Store: data})
