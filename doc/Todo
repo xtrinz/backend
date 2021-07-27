@@ -290,3 +290,8 @@ kafka event
 - statistics [ all states of transits active/live/finished/failed, build statistics out of events ]
 - record user actions and generate and track history
 - incorporate dynamcity for user home page by monitoring user actions
+
+----------------------------------------------------------------
+
+Use direct socket emit function instead of bypassing throught JS emitter,
+that will conjust the channel as users grows

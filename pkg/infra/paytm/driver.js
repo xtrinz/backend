@@ -1,8 +1,8 @@
 require('../../cmd/settings')
 
 const paytm                          = require('paytm-pg-node-sdk')
-    , { paytm: pgw }                 = require('../common/models')
-    , { Err_, code, reason, status } = require('../common/error')
+    , { paytm: pgw }                 = require('../../common/models')
+    , { Err_, code, reason, status } = require('../../common/error')
 
     , env                    = (process.env.PAYTM_ENV === pgw.DEFAULT)?
                                 paytm.LibraryConstants.PRODUCTION_ENVIRONMENT :

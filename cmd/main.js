@@ -11,7 +11,7 @@ const express  = require('express')
     , address  = require( '../pkg/config/address/route' )
     , journal  = require( '../pkg/config/journal/route' )
     , transit  = require( '../pkg/config/transit/route' )
-    , common   = require( '../pkg/config/generic/route' )
+    , common   = require( '../pkg/config/generic/index' )
 
 app.use(express.urlencoded({ extended: true  }))
 const stripe_ = function (req, res, buf)
