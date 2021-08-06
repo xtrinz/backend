@@ -295,3 +295,21 @@ kafka event
 
 Use direct socket emit function instead of bypassing throught JS emitter,
 that will conjust the channel as users grows
+
+----------------------------------------------------------------
+
+JUST A TO DO -- PROFILE PUT REQUEST
+REQUEST BODY  ----  NAME, EMAIL, PHONE NUMBER
+
+IF PHONE NUMBER OR EMAIL DIFFERS FROM ALREADY EXISTED ONE THEN SEND OTP  AND MENTION ABOUT OTP REQUIRED STATUS IN RESPONSE (Text field)
+
+RESPONSE TEXT SHOULD BE SOMETHING LIKE (either one)
+     1 . Phone auth required
+     2. phone and email auth required
+     3. name changed successfully
+
+THEN A PROVISION FOR VERIFYING OTP
+
+----------------------------------------------------------------
+
+Add check to frobid addition of product from a different store.

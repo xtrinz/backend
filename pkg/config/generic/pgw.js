@@ -1,6 +1,5 @@
 const { code, status } = require('../../common/error')
-    , { states }       = require('../../common/models')
-    , router 	       = require('express').Router()
+    , router 	         = require('express').Router()
     , { Journal }      = require('../journal/driver')
     , { Transit }      = require('../transit/driver')
     , db               = require('../journal/archive')
@@ -10,15 +9,14 @@ router.post('/payment', async (req, res, next) =>
 {
   try
   {
-    let   journal = new Journal()
-    const status_ = await journal.UpdateStatus(req)
-    if (status_ === states.StripeSucess)
+    let   journal    = new Journal()
+    const transit_id = await journal.MarkPayment(req)
+    
+    if(transit_id)
     {
       let transit = new Transit(journal.Data)
-      await transit.Init()
-      journal.Data.Transit.ID = transit.Data._id
+      await transit.Init(transit_id)
     }
-    await db.Save(journal.Data)
 
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -34,7 +32,7 @@ router.post('/refund', async (req, res, next) =>
   try
   {
     let   journal = new Journal()
-    const status_ = await journal.UpdateStatus(req)
+    const status_ = await journal.MarkRefund(req)
     /*if (status_ === states.StripeSucess)
     {
       let transit = new Transit(journal.Data)

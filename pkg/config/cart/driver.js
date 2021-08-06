@@ -1,7 +1,6 @@
 const { ObjectID, ObjectId }  = require('mongodb')
     , { Err_, code , reason } = require('../../common/error')
     , { query }               = require('../../common/models')
-    , tally                   = require('../../common/tally')
     , db                      = require('../cart/archive')
 
 function Cart(user_id)
@@ -32,27 +31,17 @@ function Cart(user_id)
         return this.Data._id
    }
 
-   this.Read        = async function (user_id, addr)
+   this.Read        = async function (user_id)
    {
       console.log('read-cart', { UserID : user_id })
-
       const items = await db.Read(user_id)
       let data    =
       {
-          Address       : addr
-        , Flagged       : items.Flagged
+          Flagged       : items.Flagged
         , Products      : items.Products //{ProductID,Name,Price,Image,CategoryID,Quantity,Available,Flagged}
         , JournalID     : items.JournalID
         , StoreID       : items.StoreID
-        , Bill          : 
-        {               
-            Total       : 0
-          , TransitCost : 0
-          , Tax         : 0
-          , NetPrice    : 0
-        }               
       }
-      //await tally.SetBill(data, items.StoreID)
       return data
    }
 

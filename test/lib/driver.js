@@ -27,7 +27,9 @@ function TestRig()
                 let resp = await Rest(data.Request)
                 , sts = await compare.DeepEqual(resp, data.Response, data.Skip)
                 if(sts) { return { Status: true, Data: resp } }
-                //console.log(data.Response.Data, resp.Data)
+
+                // console.log(data.Request.Body, data.Response.Data, resp.Data)
+                
                 console.log(prints.Failed, '\n\nExpected : ', data.Response, '\nReceived : ', resp)
                 return { Status: false, Data: resp }
             case Type.Event:
@@ -68,7 +70,7 @@ function TestRig()
                 for(let step_=0; step_ < test_case.Steps.length; step_++)
                 {                        
                     let step      = test_case.Steps[step_]
-                    let step_data = step.Data()
+                    let step_data = await step.Data()
                     console.log(prints.Step.format(('000' + (net_step_cnt + 1)).substr(-2), step_data.Describe))
                     let res  = await this.Exec(step_data)
                     if (step.PostSet) { await step.PostSet(res.Data) }

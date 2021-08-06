@@ -1,7 +1,9 @@
 const { Client }             = require('../infra/rest')
     , { Err_, code, reason } = require('./error')
-    , Distance = async function(data)
+
+const Distance = async function(data)
 {
+    return 5 // Set it once APIs are ready
     let in_     =
     {
           Domain  : 'maps.googleapis.com'
@@ -15,7 +17,6 @@ const { Client }             = require('../infra/rest')
         , req   = new Client(in_)
         , res   = await req.Fetch()
     if(res.Code !== 200) Err_(code.NOT_FOUND, reason.APIError)
-    return 19.2 // Set it once APIs are ready
 }
 module.exports =
 {

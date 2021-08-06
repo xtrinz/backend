@@ -2,7 +2,8 @@ const { Method, Type }        = require('../../lib/medium')
     , data                    = require('../data/data')
     , { read }                = require('../../lib/driver')
     , { code, status, text }  = require('../../../pkg/common/error')
-    , { alerts, task }        = require('../../../pkg/common/models')
+    , { alerts, task, paytm } = require('../../../pkg/common/models')
+    , PaytmChecksum           = require('paytmchecksum')
 
 let Checkout = function(user_, addr_, cart_) 
 {
@@ -22,35 +23,28 @@ let Checkout = function(user_, addr_, cart_)
       , Request           :
       {                     
           Method          : Method.POST
-        , Path            : '/journal/create'
+        , Path            : '/checkout'
         , Body            : 
         {                     
             Longitude     : addr.Longitude
           , Latitude      : addr.Latitude
-          , Address       : addr.Address
+          , AddressID     : addr.ID
         }                     
         , Header          : { Authorization: 'Bearer ' + user.Token }
       }                       
-      , Skip              : [ 'Stripe' ]                    
+      , Skip              : [ 'Data' ]                    
       , Response          :
       {                       
           Code            : code.OK
         , Status          : status.Success
         , Text            : text.PaymentInitiated
         , Data            :
-        {                       
-          Sheet           :
-          {                     
-            Products      : cart.Products
-          , Bill          : 
-            {                 
-              Total       : cart.Bill.Total
-            , TransitCost : cart.Bill.TransitCost
-            , Tax         : cart.Bill.Tax
-            , NetPrice    : cart.Bill.NetPrice
-            }               
-          }                 
-          , Stripe        : {}
+        {
+              Token       : ''
+            , OrderID     : ''
+            , Amount      : ''
+            , MID         : ''
+            , CallBackURL : ''
         }
       }
     }
@@ -59,6 +53,7 @@ let Checkout = function(user_, addr_, cart_)
   this.PostSet        = async function(res_)
   {
     let cart        = data.Get(data.Obj.Cart, this.CartID)
+    // Clear Cart
     cart.Products     = [] // { ProductID, Name, Image, Price, Quantity } 
     cart.Bill         = 
     {                 
@@ -67,14 +62,26 @@ let Checkout = function(user_, addr_, cart_)
         , Tax         : 0
         , NetPrice    : 0
     }
+    cart.Paytm        = 
+    {
+        Token         : res_.Data.Token
+      , OrderID       : res_.Data.ID
+      , MID           : res_.Data.MID
+      , Amount        : res_.Data.Amount
+      , CallBackURL   : res_.Data.CallBackURL
+    }
+    console.log(res_, cart)
     data.Set(data.Obj.Cart, this.CartID, cart)
   }
 }
 
-let ConfirmPayment = function() 
+let ConfirmPayment = function(cart_) 
 {
-  this.Data      = function()
+  this.CartID    = cart_
+  this.Data      = async function()
   {
+    let cart        = data.Get(data.Obj.Cart, this.CartID)
+
     let templ =
     {
         Type     : Type.Rest
@@ -82,8 +89,18 @@ let ConfirmPayment = function()
       , Request  :
       {              
           Method : Method.POST
-        , Path   : '/journal/confirm'
-        , Body   : {/* Masked Sign Verification for test */}
+        , Path   : '/paytm/payment'
+        , Body   : 
+        {
+            ORDERID      : cart.Paytm.OrderID
+          , TXNID        : cart.Paytm.OrderID
+          , TXNDATE      : String(Date.now())
+          , STATUS       : paytm.TxnSuccess
+          , BANKTXNID    : cart.Paytm.OrderID
+          , MID          : cart.Paytm.MID
+          , TXNAMOUNT    : cart.Paytm.Amount
+          , CHECKSUMHASH : '--pre-set--'
+        }
         , Header : {}
       }              
       , Response :
@@ -94,6 +111,16 @@ let ConfirmPayment = function()
         , Data   : {}
       }
     }
+    delete templ.Request.Body.CHECKSUMHASH
+
+    console.log(process.env.PAYTM_KEY, "##########", templ.Request.Body)
+    // Set order ID and paytm checksum
+    var paytmChecksum = await PaytmChecksum.generateSignature(templ.Request.Body, process.env.PAYTM_MID);
+
+    console.log(paytmChecksum, "##########")
+
+    templ.Request.Body.CHECKSUMHASH = paytmChecksum
+
     return templ
   }
 }

@@ -1,44 +1,28 @@
-require('../../cmd/settings')
-
 const paytm                          = require('paytm-pg-node-sdk')
     , { paytm: pgw }                 = require('../../common/models')
     , { Err_, code, reason, status } = require('../../common/error')
 
-    , env                    = (process.env.PAYTM_ENV === pgw.DEFAULT)?
-                                paytm.LibraryConstants.PRODUCTION_ENVIRONMENT :
-                                paytm.LibraryConstants.STAGING_ENVIRONMENT
-    , website                = (process.env.PAYTM_ENV === pgw.DEFAULT)?
-                                pgw.WEBSTAGING :
-                                pgw.DEFAULT
-
-paytm.MerchantProperties.setCallbackUrl(process.env.PAYTM_CB_URL)
-paytm.MerchantProperties.initialize(env, process.env.PAYTM_MID, process.env.PAYTM_KEY, website )
-
-// paytm.Config.logName  = '[PAYTM]'
-// paytm.Config.logLevel = paytm.LoggingUtil.LogLevel.INFO
-// paytm.Config.logfile  = '/path/log/file.log'
-
 function PayTM()
 {
-    this.CreateToken = async function(data)
+    this.CreateToken = async function(j_id, price, user_)
     {
         /**
          * Input : JournalID | NetPrice | User.Address/Email/Name/MobileNo
          */
-        console.log('paytm-create-token', { Input : data })
+        console.log('paytm-create-token', { JournalID : j_id, Price: price, User: user_ })
 
         const channelId = paytm.EChannelId.WEB
-            , orderId   = pgw.Order.format(String(data.JournalID))
-            , amnt      = data.NetPrice.toString()
+            , orderId   = pgw.Order.format(String(j_id))
+            , amnt      = price.toFixed(2).toString()
 
             , txnAmount = paytm.Money.constructWithCurrencyAndValue(paytm.EnumCurrency.INR, amnt)
 
-            , user      = new paytm.UserInfo(String(data.User.ID))
-              user.setAddress   (JSON.stringify(data.User.Address))
-              user.setEmail     (data.User.Email)
-              user.setFirstName (data.User.Name)
-              user.setMobile    (data.User.MobileNo)
-              user.setPincode   (data.User.Address.PostalCode.toString())
+            , user      = new paytm.UserInfo(String(user_.ID))
+              user.setAddress   (JSON.stringify(user_.Address))
+              user.setEmail     (user_.Email)
+              user.setFirstName (user_.Name)
+              user.setMobile    (user_.MobileNo)
+              user.setPincode   (user_.Address.PostalCode) //.toString())
 
         let payment = new paytm.PaymentDetailBuilder(channelId, orderId, txnAmount, user)
           , req     = payment.build()
@@ -47,7 +31,7 @@ function PayTM()
         try { resp = await paytm.Payment.createTxnToken(req) }
         catch (err)
         {
-            console.log('paytm-sdk-exepction-token-creation-failed', { Error : err, Input: data })
+            console.log('paytm-sdk-exepction-token-creation-failed', { Error : err, JournalID : j_id, Price: price, User: user_ })
             Err_(code.INTERNAL_SERVER, reason.TokenCreationFailed)
         }
 
@@ -58,16 +42,25 @@ function PayTM()
   
         if(sts !== pgw.Success)
         {
-            console.log('paytm-token-creation-failed', { Response : resp })
+            console.log('paytm-token-creation-failed', { Response : resp.responseObject.body, Request: req })
             Err_(code.INTERNAL_SERVER, reason.TokenCreationFailed)
         }
         const txnToken = body.getTxnToken()
-        console.log('paytm-token-created', { Input : data, Resp : body })
+        console.log('paytm-token-created', { JournalID : j_id, Price: price, User: user_, Resp : body })
 
-        return txnToken
+        const txn_i =
+        {
+            ID           : orderId
+          , Token        : txnToken
+          , Amount       : amnt
+          , MID          : process.env.PAYTM_MID
+          , CallBackURL  : process.env.PAYTM_CB_URL
+        }
+
+        return txn_i
     }
 
-    this.PaymentStatus = function(data)
+    this.PaymentStatus = async function(data)
     {
         console.log('paytm-check-payment-status', { Input : data })
 
@@ -98,7 +91,7 @@ function PayTM()
         return ret        
     }
 
-    this.Refund     = function(data)
+    this.Refund     = async function(data)
     {
         console.log('paytm-refund', { Input : data })
 
@@ -136,7 +129,7 @@ function PayTM()
         return paytmRefundId
     }
 
-    this.RefundStatus = function(data)
+    this.RefundStatus = async function(data)
     {
         console.log('paytm-check-refund-status', { Input : data })
 

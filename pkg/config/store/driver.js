@@ -76,6 +76,22 @@ function Store(data)
         console.log('store-read', { Store : data })
         return data
     }
+
+    this.GetLoc = async function(store_id)
+    {
+        console.log('get-store-location', { StoreID: store_id })
+
+        this.Data = await db.store.Get(store_id, query.ByID)
+        if (!this.Data) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+        let data =
+        {
+            Longitude : this.Data.Location.coordinates[0]
+          , Latitude  : this.Data.Location.coordinates[1]
+        }
+
+        console.log('store-location-found', { StoreID: store_id, Loc : data })
+        return data
+    }
     
     // Authz usr for product mgmt
     this.Authz      = async function(StoreID, UserID) 
