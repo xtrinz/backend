@@ -1,4 +1,4 @@
-const Org          = process.env.ORGANISATION
+const Org          = process.env.ORG
 module.exports =
 {
 	paytm: 
