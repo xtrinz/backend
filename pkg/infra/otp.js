@@ -44,7 +44,7 @@ function OneTimePasswd(data)
     const msg =
     {
         body  : this.Data.Body.format(this.Otp)
-      , from  : process.env.MOB_NO
+      , from  : process.env.TWILIO_SMS_NO
       , to    : this.Data.MobileNo
     }
 
@@ -77,7 +77,7 @@ function OneTimePasswd(data)
 
     let email =
     {
-        from    : process.env.EMAIL
+        from    : process.env.TWILIO_EMAIL
       , to      : this.Data.EmailID
       , subject : this.Data.Body
       , html    : this.Data.Body.format(this.Otp)
@@ -86,7 +86,7 @@ function OneTimePasswd(data)
     const svc = nodemailer.createTransport(
     {
       service: 'gmail', // ?less secure of gmail enabled. catche access enabled
-      auth: { user: process.env.EMAIL, pass: process.env.EMAIL_PASS }
+      auth: { user: process.env.TWILIO_EMAIL, pass: process.env.TWILIO_EMAIL_PASS }
     })
     try { await svc.sendMail(email) }
     catch(err) 
