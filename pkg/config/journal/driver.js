@@ -50,7 +50,7 @@ function Journal()
       }
       , Payment           :
       {
-          Channel         : channel.Stripe
+          Channel         : channel.Paytm
         , TransactionID   : ''
         , ChannelParams   : {}
         , Amount          : ''
