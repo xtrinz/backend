@@ -1,7 +1,9 @@
 const checksum               = require("paytmchecksum")
     , { Err_, code, reason } = require('../../../common/error')
-	, { paytm: pgw }         = require('../../../common/models')
+	, { paytm: pgw, states } = require('../../../common/models')
 	, journal				 = require('../../../config/journal/archive')
+	, { Cart } 				 = require('../../../config/cart/driver')
+	, { ObjectID }			 = require('mongodb')
 
 function Payment(data)
 {
@@ -27,7 +29,7 @@ function Payment(data)
             console.log('payment-ind-unmatched-signature', { Body : body, Hash: this.Data.Checksum })
             Err_(code.BAD_REQUEST, reason.InvalidChecksum)
         }
-        console.log('payment-ind-unmatched-signature', { Req : body })
+        console.log('payment-ind-signature-matched', { Req : body })
 	}
 
 	this.Authorize 	  = async function()
@@ -70,7 +72,7 @@ function Payment(data)
 		  break
 		}
 
-		await journal.Save(j_rcd)
+		await journal.Save(rcd)
 		return rcd.Transit.ID
 	}
 }

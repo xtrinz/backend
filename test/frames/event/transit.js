@@ -70,7 +70,6 @@ let Checkout = function(user_, addr_, cart_)
       , Amount        : res_.Data.Amount
       , CallBackURL   : res_.Data.CallBackURL
     }
-    console.log(res_, cart)
     data.Set(data.Obj.Cart, this.CartID, cart)
   }
 }
@@ -111,14 +110,9 @@ let ConfirmPayment = function(cart_)
         , Data   : {}
       }
     }
+
     delete templ.Request.Body.CHECKSUMHASH
-
-    console.log(process.env.PAYTM_KEY, "##########", templ.Request.Body)
-    // Set order ID and paytm checksum
-    var paytmChecksum = await PaytmChecksum.generateSignature(templ.Request.Body, process.env.PAYTM_MID);
-
-    console.log(paytmChecksum, "##########")
-
+    var paytmChecksum = await PaytmChecksum.generateSignature(templ.Request.Body, process.env.PAYTM_KEY)
     templ.Request.Body.CHECKSUMHASH = paytmChecksum
 
     return templ

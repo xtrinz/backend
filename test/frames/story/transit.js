@@ -11,7 +11,7 @@ const Std = function(user_, addr_, agent_, owner_, staff_)
     [
           new event.Checkout       (user_, addr_, cart_)
         , new event.ConfirmPayment (cart_)
-/*        , new event.NewOrder       (owner_)
+        , new event.NewOrder       (owner_)
         , new event.NewOrder       (staff_)
         , new event.NewOrder       (user_)
 
@@ -31,7 +31,7 @@ const Std = function(user_, addr_, agent_, owner_, staff_)
         , new event.AgentComplete (agent_)
         , new event.Delivered     (user_)
         , new event.Delivered     (owner_)
-        , new event.Delivered     (staff_)*/
+        , new event.Delivered     (staff_)
     ]
     steps.forEach((step) => tc.AddStep(step))
     return tc

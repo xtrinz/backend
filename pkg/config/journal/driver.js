@@ -179,6 +179,8 @@ function Journal()
       let j_rcd  = await ind.Authorize(req.body)
         , t_id   = await ind.Store(j_rcd)
 
+       this.Data = j_rcd
+
       console.log('payment-status-marked', { Journal : j_rcd })
       return t_id
     }

@@ -48,7 +48,7 @@ const { Test, TestSuite } = require('./lib/driver')
     , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
     ,    cart.story.Std(user_3_buyer.Name, product_1.Name, addr_1_user_3.Address.Name, store_1.Name)
     , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_2_staff.Name)
-//    ,    user.story.Disconnect(user_1_owner.Name, user_2_staff.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+    ,    user.story.Disconnect(user_1_owner.Name, user_2_staff.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
   ]
   cases.forEach((test)=> suite_1.AddCase(test))
 
