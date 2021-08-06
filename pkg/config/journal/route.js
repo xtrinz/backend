@@ -1,55 +1,6 @@
-const { code, text, status } = require('../../common/error')
-    , { states }             = require('../../common/models')
-    , router 	               = require('express').Router()
-    , { Journal }            = require('../journal/driver')
-    , { Transit }            = require('../transit/driver')
-    , db                     = require('../journal/archive')
-
-// Stripe confirmation webhook
-router.post('/confirm', async (req, res, next) =>
-{
-  try
-  {
-    let   journal = new Journal()
-    const status_ = await journal.UpdateStatus(req)
-    if (status_ === states.StripeSucess)
-    {
-      let transit = new Transit(journal.Data)
-      await transit.Init()
-      journal.Data.Transit.ID = transit.Data._id
-    }
-    await db.Save(journal.Data)
-
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : '',
-      Data    : {}
-    })
-  } catch (err) 
-  {
-    console.log('confirmation-failed', { Err: err } )
-    return res.status(code.BAD_REQUEST).json({
-      Status  : status.Failed,
-      Text    : '',
-      Data    : {}
-    })
-  }
-})
-
-router.post('/create', async (req, res, next) =>
-{
-  try
-  {
-    const journal = new Journal() 
-        , data    = await journal.New(req.body)
-
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.PaymentInitiated,
-      Data    : data
-    })
-  } catch (err) { next(err) }
-})
+const { code, status } = require('../../common/error')
+    , router 	         = require('express').Router()
+    , db               = require('../journal/archive')
 
 // List Journals (user/shop)
 router.get('/list', async (req, res, next) =>

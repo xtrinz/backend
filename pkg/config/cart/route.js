@@ -1,8 +1,10 @@
 const { ObjectId }           = require('mongodb')
     , { code, text, status } = require('../../common/error')
     , {Cart, CartEntry}      = require('../cart/driver')
+    , { Store }              = require('../store/driver')
     , { Address }            = require('../address/driver')
     , router 	               = require('express').Router()
+    , tally                  = require('../../common/tally')
 
 // Insert product
 router.post('/insert', async (req, res, next) => {
@@ -30,9 +32,18 @@ router.get('/list', async (req, res, next) =>
       , AddressID : req.body.AddressID
     })
 
-    const cart = new Cart()
-    const data = await cart.Read(req.body.User._id, addr)
-    
+    const data    = await (new Cart()).Read(req.body.User._id)
+     data.Address = addr
+
+    const src_loc = await (new Store()).GetLoc(data.StoreID)
+        , dest_loc= 
+        {
+            Lattitude : data.Address.Lattitude
+          , Longitude : data.Address.Longitude
+        }
+
+    await tally.SetBill(data, src_loc, dest_loc)
+    delete data.Address
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : '',

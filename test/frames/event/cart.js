@@ -43,14 +43,18 @@ let Insert = function(user_, cart_, product_)
   }
 }
 
-let List = function(user_, cart_) 
+let List = function(user_, cart_, addr_, store_) 
 {
   this.UserID  	 = user_
   this.CartID  	 = cart_
-  this.Data     = function()
+  this.AddressID = addr_
+  this.StoreID   = store_
+  this.Data      = function()
   {
     let user    = data.Get(data.Obj.User,    this.UserID)
     let cart    = data.Get(data.Obj.Cart,    this.CartID)
+    let addr    = data.Get(data.Obj.Address, this.AddressID)
+    let store   = data.Get(data.Obj.Store,   this.StoreID)
     // TODO set custom product qnty
     let templ   =
     {
@@ -60,7 +64,7 @@ let List = function(user_, cart_)
       {
             Method            : Method.GET
           , Path              : '/cart/list'
-          , Body              : {}
+          , Body              : { AddressID : addr.ID }
           , Header            : { Authorization: 'Bearer ' + user.Token }
       }
       , Response              :
@@ -71,6 +75,9 @@ let List = function(user_, cart_)
           , Data              : 
           {
                 Products      : cart.Products
+              , Flagged       : false
+              , JournalID     : ''
+              , StoreID       : store.ID
               , Bill          : 
               {
                   Total       : cart.Bill.Total

@@ -1,9 +1,12 @@
-const { ObjectID, ObjectId } 	= require('mongodb')
-    , { users } 		        = require('../../common/database')
+const {  ObjectId } 	        = require('mongodb')
     , { Err_, code, reason }    = require('../../common/error')
     , { states, event, query }  = require('../../common/models')
     , { Engine }                = require('../../engine/engine')
-    , db                        = require('../transit/archive')
+    , db                        =
+    {
+          transit               : require('../transit/archive')
+        , user                  : require('../user/archive')
+    }
 
 function Transit (journal)
 {
@@ -46,38 +49,19 @@ function Transit (journal)
       , Return 	        : ''                            // Machine's prev-state for fallbacks
       , State 		    : states.None                   // Machine init state
       , IsLive          : true                          // Is it ongoing transit
-      , Event 		    : event.InitiationByUser  // Machine init event
+      , Event 		    : event.InitiationByUser        // Machine init event
       , MaxWT           : 35                            // Maximum Waiting Time (35min)
       , OrderedAt 	    : ''                            // Millis / https://currentmillis.com/
       , ETD   		    : 0                             // Estimated Time of Delivery
     }
 
-    this.Init       = async function()
+    this.Init       = async function(_id)
     {
-        // Get Src & Dest Contexts & Update SockIDs
-        const query_user = { _id: ObjectId(this.Data.User._id), IsLive: true }
-        let       user   = await users.findOne(query_user)
-        if(!user) console.log('user-not-found', query_user)
-        if (user)  this.Data.User.SockID = user.SockID
 
-        const query_store = 
-        { 
-            $or : 
-            [
-                { 'StoreList.Owned'    : { $elemMatch: { $eq: String(this.Data.Store._id) } }, IsLive: true }
-            , { 'StoreList.Accepted' : { $elemMatch: { $eq: String(this.Data.Store._id) } }, IsLive: true }
-            ] 
-        }
-        , proj   = { SockID: 1 }
-        let users_ = await users.find(query_store).project(proj).toArray()
-        if (!users_.length) { console.log('no-users-found', query_store['$or']) }
-    
-        let sckts = []
-        users_.forEach((u) => { sckts.push(...u.SockID)})
-        this.Data.Store.SockID  = sckts
-        this.Data._id           = new ObjectID()
-        this.Data.OrderedAt     = Date.now()
-        await db.Save(this.Data)
+        this.Data.User.SockID  = await db.user.GetUserSockID(this.Data.User._id)
+        this.Data.Store.SockID = await db.user.ListStoreMgrSockets(this.Data.Store._id)
+        this.Data._id          = _id
+        this.Data.OrderedAt    = Date.now()
 
         let engine = new Engine()
         await engine.Transition(this)
@@ -86,11 +70,10 @@ function Transit (journal)
 
     this.AuthzAgent       = async function(transit_id, user_id)
     {
-        this.Data = await db.Get(transit_id, query.ByID)
+        this.Data = await db.transit.Get(transit_id, query.ByID)
         if (!this.Data) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
-        if(this.Data.Agent._id !== '' &&
-          (String(this.Data.Agent._id) === String(user_id)))
+        if(this.Data.Agent && (String(this.Data.Agent._id) === String(user_id)))
         {
             console.log('agent-authorized', this.Data.Agent)
             return

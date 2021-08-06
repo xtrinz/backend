@@ -71,6 +71,8 @@ module.exports =
     , StatusRetrievalFailed     : 'Payment status retrieval failed'
     , RefundFailed              : 'Refund initiation failed'
     , RefundStatusRetrievalFailed: 'Refund status retrieval failed'
+    , InvalidMid                : 'Invalid MID'
+    , InvalidChecksum           : 'Invalid Checksum'
 	},
   text:
   {

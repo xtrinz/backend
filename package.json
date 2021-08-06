@@ -4,7 +4,7 @@
   "description": "A transit mgmt sw",
   "main": "cmd/main.js",
   "scripts": {
-    "start": "node cmd/main.js",
+    "start": "nodemon cmd/main.js",
     "test": "echo \"Project X\n---------\" && node test/main.js",
     "clean": "rm -rf node_modules && rm package-lock.json",
     "cdeps": "echo \"Circular Deps\n\" && node aid/cdeps.js"

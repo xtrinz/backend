@@ -24,9 +24,9 @@ const Get = async function(param, qType)
     let query_
     switch (qType)
     {
-        case query.ByID    : query_ = { _id: ObjectId(param) } ; break;
-        case query.ByMobileNo : query_ = { MobileNo: param }         ; break;
-        case query.ByMail  : query_ = { Email: param }         ; break;
+        case query.ByID       : query_ = { _id: ObjectId(param) } ; break;
+        case query.ByMobileNo : query_ = { MobileNo: param }      ; break;
+        case query.ByMail     : query_ = { Email: param }         ; break;
     }
     let user = await users.findOne(query_)
     if (!user)
@@ -120,11 +120,54 @@ const GetMany = async function(id_lst, proj)
     return resp
 }
 
+const ListStoreMgrSockets = async function(store_id)
+{
+    console.log('list-store-managers-socket-ids', { StoreID: store_id })
+    const query = 
+        { 
+            $or : 
+            [
+                { 'StoreList.Owned'    : { $elemMatch: { $eq: String(store_id) } }, IsLive: true }
+            , { 'StoreList.Accepted' : { $elemMatch: { $eq: String(store_id) } }, IsLive: true }
+            ] 
+        }
+        , proj   = { SockID: 1 }
+
+    let users_ = await users.find(query).project(proj).toArray()
+    if (!users_.length)
+    { 
+        console.log('no-users-found', query) 
+    }
+
+    const  sckts = [] 
+    users_.forEach((u) => { sckts.push(...u.SockID) })
+
+    return sckts
+}
+
+const GetUserSockID = async function(user_id)
+{
+    console.log('get-user-sock-id', { UserID: user_id })
+
+    const query = { _id: ObjectId(user_id), IsLive: true }
+
+    let user = await users.findOne(query)
+    if(!user)
+    {
+        console.log('user-not-found', query)
+        return []
+    }
+    console.log('user-found', { User : user })
+    return user.SockID
+}
+
 module.exports =
 {
-      Save         : Save
-    , Get          : Get
-    , NearbyAgents : NearbyAgents
-    , NearbyAdmins : NearbyAdmins
-    , GetMany      : GetMany
+      Save                : Save
+    , Get                 : Get
+    , NearbyAgents        : NearbyAgents
+    , NearbyAdmins        : NearbyAdmins
+    , GetMany             : GetMany
+    , ListStoreMgrSockets : ListStoreMgrSockets
+    , GetUserSockID       : GetUserSockID
 }

@@ -9,9 +9,16 @@ let Cart = function(user)
   this.Bill         = 
   {                 
         Total       : 0
-      , TransitCost : 0
-      , Tax         : 0
+      , TransitCost : 25
+      , Tax         : 4.5
       , NetPrice    : 0
+  }
+  this.Paytm        = 
+  {
+      Token       : ''
+    , OrderID     : ''
+    , MID         : ''
+    , CallBackURL : ''
   }
 
   this.AddProduct = function(product_)
@@ -23,6 +30,9 @@ let Cart = function(user)
       , Name      : product.Name
       , Price     : product.Price
       , Image     : product.Image
+      , Available : product.Available
+      , Flagged   : product.Flagged
+      , CategoryID: product.CategoryID
       , Quantity  : product.Quantity
     }
 

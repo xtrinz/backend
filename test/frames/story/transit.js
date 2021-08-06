@@ -10,7 +10,7 @@ const Std = function(user_, addr_, agent_, owner_, staff_)
     let steps =
     [
           new event.Checkout       (user_, addr_, cart_)
-        , new event.ConfirmPayment ()
+        , new event.ConfirmPayment (cart_)
         , new event.NewOrder       (owner_)
         , new event.NewOrder       (staff_)
         , new event.NewOrder       (user_)
@@ -167,7 +167,7 @@ const CancellationByStoreAfterTransitAcceptance = function(user_, addr_, agent_,
         tc      = AddUser(tc, agent_)
     let steps =
     [
-          new event.Checkout        (user_, addr_, cart_)
+/*          new event.Checkout        (user_, addr_, cart_)
         , new event.ConfirmPayment  ()
         , new event.NewOrder        (owner_)
         , new event.NewOrder        (staff_)
@@ -184,7 +184,7 @@ const CancellationByStoreAfterTransitAcceptance = function(user_, addr_, agent_,
 
         , new event.RejectedByStore (staff_)
         , new event.Rejected        (user_ )
-        , new event.Rejected        (agent_)
+        , new event.Rejected        (agent_)*/
     ]
     steps.forEach((step) => tc.AddStep(step))
     return tc

@@ -105,7 +105,7 @@ const Insert     = async function (cart_id, data)
   const resp1 = await carts.findOne(key1)
   if(resp1)
   {
-    console.log('product-exists-in-cart', { Key: key })
+    console.log('product-exists-in-cart', { Key: key1 })
     Err_(code.CONFLICT, reason.ProductExists)
   }
   data._id   = ObjectId(data.ProductID)

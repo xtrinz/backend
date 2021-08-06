@@ -1,16 +1,19 @@
-const { Cart }     = require('../cart/driver')
-    , { ObjectID } = require('mongodb')
-    , test         = require('../../common/test')
-    , { Stripe }   = require('../../infra/stripe')
+const { ObjectID } = require('mongodb')
     , db           =
     {
         cart       : require('../cart/archive')
       , user       : require('../user/archive')
       , store      : require('../store/archive')
       , journal    : require('../journal/archive')
+      , addr       : require('../address/archive')
     }
     , { Err_, code, reason }     = require('../../common/error')
     , { states, channel, query } = require('../../common/models')
+    , { Refund }   = require('../../infra/paytm/ind/refund')
+    , { Payment }  = require('../../infra/paytm/ind/payment')
+    , { PayTM }    = require('../../infra/paytm/driver')
+    , { Store }    = require('../../config/store/driver')
+    , tally        = require('../../common/tally')
 
 function Journal()
 {
@@ -47,7 +50,7 @@ function Journal()
       }
       , Payment           :
       {
-          Channel         : channel.Stripe
+          Channel         : channel.Paytm
         , TransactionID   : ''
         , ChannelParams   : {}
         , Amount          : ''
@@ -62,39 +65,23 @@ function Journal()
       }
     }
 
-    this.New    = async function(data)
-    {
-      // Set User
+    this.SetBuyer = async function(user, addr_id)
+    {      
+      const addr = await db.addr.Read(user._id, addr_id)
       this.Data.Buyer     = 
       {                 
-          ID        : data.User._id
-        , Name      : data.User.Name
-        , MobileNo  : data.User.MobileNo
-        , Longitude : data.Longitude
-        , Latitude  : data.Latitude
-        , Address   : data.Address
+          ID        : user._id
+        , Name      : user.Name
+        , MobileNo  : user.MobileNo
+        , Longitude : addr.Longitude
+        , Latitude  : addr.Latitude
+        , Address   : addr.Address
       }
+    }
 
-      // Set Cart
-      let cart_           = new Cart()
-      const cart_data     = await cart_.Read(data.User._id)
-
-      if(!cart_data.Products.length)
-      Err_(code.BAD_REQUEST, reason.NoProductsFound)
-
-      if(cart_data.Flagged)
-      Err_(code.BAD_REQUEST, reason.CartFlagged)
-
-      if(cart_data.JournalID) { this.Data = await db.journal.GetByID(cart_data.JournalID) }
-
-      delete cart_data.Flagged
-      delete cart_data.JournalID
-
-      this.Data.Order     = { ...cart_data }
-      delete this.Data.Order.StoreID
-
-      // Set Seller
-      const store   = await db.store.Get(cart_data.StoreID, query.ByID)
+    this.SetSeller = async function(store_id)
+    {
+      const store   = await db.store.Get(store_id, query.ByID)
       if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
       this.Data.Seller    = 
       {                 
@@ -104,72 +91,114 @@ function Journal()
         , Longitude : store.Location.coordinates[0]
         , Latitude  : store.Location.coordinates[1]
         , Address   : store.Address
-      }                 
-
-      // Set ID & Date
-      this.Data._id       = (this.Data._id) ? this.Data._id  : new ObjectID()
-      this.Data.Date      = (this.Data.Date)? this.Data.Date : Date.now()
-
-      // Set Payment
-      const intent_     = new Stripe({
-          Amount        : this.Data.Order.Bill.NetPrice
-        , JournalID     : this.Data._id
-      })
-      const intent      = await intent_.CreateIntent()
-      this.Data.Payment = 
-      { 
-          ChannelParams : intent
-        , Amount        : this.Data.Order.Bill.NetPrice
       }
-      await db.journal.Save(this.Data)
-
-      test.Set('JournalID', this.Data._id) // #101
-
-      const data_ =
-      {
-          Sheet   : { ...this.Data.Order }
-        , Stripe  : { ...intent          }
-      }
-
-      console.log('checkout-initiated', {Data : data_}, data_.Sheet)
-      return data_
     }
 
-    this.UpdateStatus = async function(req)
+    this.SetOrder = async function(user_id, dest)
     {
-      const sign    = req.headers['stripe-signature']
-          , stripe_ = new Stripe()
+      const items = await db.cart.Read(user_id)
 
-      let   event_ = {}, journal_id
-      if(!test.IsEnabled)
+      if(!items.Products.length)
+      Err_(code.BAD_REQUEST, reason.NoProductsFound)
+
+      if(items.Flagged)
+      Err_(code.BAD_REQUEST, reason.CartFlagged)
+
+      if(items.JournalID)
+      this.Data._id = items.JournalID
+
+      this.Data.Order    =
       {
-        event_     = await stripe_.MatchEventSign(req.RawBody, sign)
-        journal_id = event_.data.object.metadata.JournalID
+          Products      : items.Products //{ProductID,Name,Price,Image,CategoryID,Quantity,Available,Flagged}
+        , JournalID     : items.JournalID
+        , StoreID       : items.StoreID               
       }
-      else
-      {
-        event_.type = states.StripeSucess
-        journal_id  = test.Get('JournalID')
-      }
+ 
+      const src_loc  = await (new Store()).GetLoc(items.StoreID)
+          , dest_loc =
+          {
+              Lattitude : dest.Lattitude
+            , Longitude : dest.Longitude
+          }
 
-      this.Data = await db.journal.GetByID(journal_id)
-      if (!this.Data) Err_(code.BAD_REQUEST, reason.JournalNotFound)
+      await tally.SetBill(this.Data.Order, src_loc, dest_loc)
 
-      this.Data.Payment.TimeStamp = Date.now()
-      switch (event_.type)
-      {
-      case states.StripeSucess:
-        let cart_ = new Cart()
-        await cart_.Flush(this.Data.Buyer.ID)
-        this.Data.Payment.Status = states.Success
-        this.Data.Transit.Status = states.Initiated
-        break
+      delete this.Data.Address
 
-      case states.StripeFailed:
-        this.Data.Payment.Status = states.Failed
-        break
-      }
-      return event_.type
+      return items.StoreID
+    }
+
+    this.SetPayment = async function(j_id, price, user)
+    {
+        const paytm_      = new PayTM()
+            , txn_i       = await paytm_.CreateToken(j_id, price, user)
+        this.Data.Payment =
+        {
+            Channel       : channel.Paytm
+          , TransactionID : txn_i.ID
+          , Amount        : txn_i.Amount
+          , Status        : states.TokenGenerated
+          , TimeStamp     : ''      // Webhook entry time
+        }
+        return txn_i
+    }
+
+    this.New    = async function(data)
+    {
+      // Set Buyer
+      await this.SetBuyer(data.User, data.AddressID)
+
+      // Set Order
+      let store_id = await this.SetOrder(data.User._id, this.Data.Buyer)
+
+      // Set Seller
+      await this.SetSeller(store_id)
+
+      // Set ID & Date
+      this.Data._id  = (this.Data._id) ? this.Data._id  : new ObjectID()
+      this.Data.Date = Date.now()
+
+      // Set Payment
+      const details_ = await this.SetPayment(this.Data._id, 
+                       this.Data.Order.Bill.NetPrice, this.Data.Buyer)
+
+      await db.journal.Save(this.Data)
+
+      console.log('checkout-initiated', {Data : details_ })
+      return details_
+    }
+
+    this.MarkPayment = async function(req)
+    {
+      console.log('mark-payment-status', { Body: req.body })
+
+      const ind = new Payment(req.body)
+
+      await ind.CheckSign(req.body)
+
+      let j_rcd  = await ind.Authorize(req.body)
+        , t_id   = await ind.Store(j_rcd)
+
+       this.Data = j_rcd
+
+      console.log('payment-status-marked', { Journal : j_rcd })
+      return t_id
+    }
+
+    this.MarkRefund = async function(req)
+    {
+      console.log('mark-refund-status', { Body: req.body })
+
+      const ind = new Refund(req.body, req.head.signature)
+
+      await ind.CheckSign(req.body)
+      
+      let j_rcd = await ind.Authorize(req.body)
+
+      await ind.Store(j_rcd)
+
+      console.log('refund-status-marked', { Journal : j_rcd })
+      return t_id
     }
 
     this.PayOut = async function (ctxt)

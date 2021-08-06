@@ -74,7 +74,8 @@ module.exports =
 	},
 	channel:
 	{
-		  Stripe 					: 'Stripe'
+		    Stripe 					: 'Stripe'
+		  , Paytm 					: 'Paytm'
 	},
 	states:
 	{
@@ -92,6 +93,7 @@ module.exports =
 		, Success 					: 'Success'
 		, Failed 			        : 'Failed'
         , Initiated                 : 'Initiated'
+		, TokenGenerated 			: 'TokenGenerated'
 
 
 		, None 						: 'None'						// None
