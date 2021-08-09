@@ -309,7 +309,3 @@ RESPONSE TEXT SHOULD BE SOMETHING LIKE (either one)
      3. name changed successfully
 
 THEN A PROVISION FOR VERIFYING OTP
-
-----------------------------------------------------------------
-
-Add check to frobid addition of product from a different store.

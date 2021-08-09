@@ -39,6 +39,15 @@ const { Test, TestSuite } = require('./lib/driver')
     , product_1     = new product.data.Product ()
     , addr_1_user_3 = new address.data.Address ()
     
+
+    , user_4_owner  = new    user.data.User    ('User')
+    , user_5_staff  = new    user.data.User    ('User')
+    , user_6_buyer  = new    user.data.User    ('User')
+    , agent_2       = new    user.data.User    ('Agent')
+    , store_2       = new   store.data.Store   ()
+    , product_2     = new product.data.Product ()
+    , addr_1_user_6 = new address.data.Address ()
+
   var suite_1 = new TestSuite('End to End Process')
   let cases =
   [
@@ -144,6 +153,25 @@ const { Test, TestSuite } = require('./lib/driver')
   ]
   cases.forEach((test)=> suite_8.AddCase(test))
 
+  var suite_9 = new TestSuite('Multi Store Purchase Error')
+  cases =
+  [
+         user.story.Std(admin_1.Name )
+
+    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_2_staff.Name, store_1.Name )
+    , product.story.Std(user_2_staff.Name, store_1.Name, product_1.Name )
+
+    ,   store.story.Std(admin_1.Name, user_4_owner.Name, user_5_staff.Name, store_2.Name )
+    , product.story.Std(user_5_staff.Name, store_2.Name, product_2.Name )
+
+    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
+    ,    cart.story.Std(user_3_buyer.Name, product_1.Name, addr_1_user_3.Address.Name, store_1.Name)
+
+    ,    cart.story.Std(user_3_buyer.Name, product_2.Name, addr_1_user_3.Address.Name, store_2.Name)
+/*    , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_2_staff.Name)
+    ,    user.story.Disconnect(user_1_owner.Name, user_2_staff.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+  */]
+    cases.forEach((test)=> suite_9.AddCase(test))
 
     Test.AddTestSuite(suite_1)
 //  Test.AddTestSuite(suite_2)
