@@ -169,14 +169,40 @@ const UnsetStoreSockID  = async function(str_stores, sock_id)
     console.log('removed-socket-id-from-store', { StoreIDList: str_stores, SockID: sock_id })
 }
 
+const UnsetAllStaffSockID  = async function(store_id, sock_ids)
+{
+    if(!sock_ids.length)
+    {
+        console.log('empty-store-id-list',
+        {    StoreID : store_id
+           , SockIDs  : sock_ids })
+        return
+    }
+    const key3  = { 'Store._id' : ObjectId(store_id), IsLive : true }
+        , act3  = { $pullAll    : { 'Store.SockID' : sock_ids } }
+        , resp3 = await transits.updateMany(key3, act3)
+    if (!resp3.result.ok)
+    {
+        console.log('pop-socket-id-failed',
+        { 
+            Key     : key3, 
+            Value   : act3,
+            Result  : resp3.result
+        })
+        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
+    }
+    console.log('removed-staff-socket-ids', { StoreID: store_id, SockIDs: sock_ids })
+}
+
 module.exports =
 {
-      Get              : Get
-    , Save             : Save
-    , SetAgentSockID   : SetAgentSockID
-    , SetUserSockID    : SetUserSockID
-    , SetStoreSockID   : SetStoreSockID
-    , UnsetAgentSockID : UnsetAgentSockID
-    , UnsetUserSockID  : UnsetUserSockID
-    , UnsetStoreSockID : UnsetStoreSockID
+      Get                 : Get
+    , Save                : Save
+    , SetAgentSockID      : SetAgentSockID
+    , SetUserSockID       : SetUserSockID
+    , SetStoreSockID      : SetStoreSockID
+    , UnsetAgentSockID    : UnsetAgentSockID
+    , UnsetUserSockID     : UnsetUserSockID
+    , UnsetStoreSockID    : UnsetStoreSockID
+    , UnsetAllStaffSockID : UnsetAllStaffSockID
 }

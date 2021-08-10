@@ -5,8 +5,9 @@ const { ObjectID, ObjectId }        = require('mongodb')
       , query, task, message, gw }  = require('../../common/models')
     , db                            = 
     {
-         store  : require('../store/archive')
-        , user  : require('../user/archive')
+          store   : require('../store/archive')
+        , user    : require('../user/archive')
+        , transit : require('../transit/archive')
     }
 
 function Store(data)
@@ -258,7 +259,10 @@ function Store(data)
             Err_(code.BAD_REQUEST, reason.NoContextFound)    
         staff.StoreList.Accepted.pop(String(this.Data._id))
         this.Data.StaffList.Approved.pop(String(staff._id))
-    
+        
+        console.log('rm-sock-id-from-transit-rcd-on-relieve', { In: data})
+        await db.transit.UnsetAllStaffSockID(data.StoreID, staff.SockID)
+
         await db.user.Save(staff)
         await db.store.Save(this.Data)
         console.log('staff-relieved', { Store: this.Data, Staff: staff})
@@ -283,6 +287,9 @@ function Store(data)
             Err_(code.BAD_REQUEST, reason.NoContextFound)
         staff.StoreList.Pending.pop(String(this.Data._id))
         this.Data.StaffList.Pending.pop(String(staff._id))
+
+        console.log('rm-sock-id-from-transit-rcd-on-revoke', { In: data})
+        await db.transit.UnsetAllStaffSockID(data.StoreID, staff.SockID)
 
         await db.user.Save(staff)
         await db.store.Save(this.Data)
