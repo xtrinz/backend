@@ -10,21 +10,16 @@ const Auth = async function (req, res, next)
 {
   try 
   {
-    if(req.originalUrl.startsWith('/journal/confirm'))
-      next()
-    else
-    {
-      const user    = new User()
-      const token   = req.headers['authorization']
-      await user.Auth(token)
+    const user    = new User()
+    const token   = req.headers['authorization']
+    await user.Auth(token)
 
-      if (user.Data.State !== states.Registered)
-      Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+    if (user.Data.State !== states.Registered)
+    Err_(code.UNAUTHORIZED, reason.RegIncomplete)
 
-      if(!req.body) req.body = {}
-      req.body.User = user.Data
-      next()
-    }
+    if(!req.body) req.body = {}
+    req.body.User = user.Data
+    next()
   } catch (err) { next(err) }
 }
 

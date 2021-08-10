@@ -48,17 +48,11 @@ const server_ = () => console.log('server-started', {Port : port})
     , io            = require('socket.io')(server)
     , event         = require('../pkg/engine/events')
       adptr.SetServer(server, io)
+      event.SetChannel(io)
 
 io.on('connection', async (socket) =>
 {
     await event.Connect(socket)
     const disc_ = async ()=> await event.Disconnect(socket)
     socket.on('disconnect', disc_)
-})
-
-event.Channel.on('SendEvent', async (data)=>
-{
-  console.info('Sending-event', data)
-  try        { await io.to(data.To).emit('Event', data.Msg) } 
-  catch(err) { console.log('emission-error', { Err: err, Data: data} )     }
 })
