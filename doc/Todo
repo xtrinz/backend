@@ -1,19 +1,3 @@
-where to stand
-peak hour
-disaster mgmt
-drone delivery
-chat placement
-automated stores
-------------------------------------------------------
-https://www.mongodb.com/try/download/compass
-sudo iptables -A INPUT -p tcp --dport 27017 -j ACCEPT
-sudo su
-iptables-save > /etc/iptables/rules.v4
-exit
-------------------------------------------------------
-0. We sprout at fire, we won't fade in sunlight
-1. How to hold people without hurting their dreams
-
 ------------------------------------------------------
 Make the following logic of agent selection
 	1. Data driven
@@ -23,7 +7,7 @@ Make the following logic of agent selection
 		1) No of Agents : <= 10 [Limit]
 		2) Nearest free / near-to-free agents
 ------------------------------------------------------
-1. add UserMode(Customer,Agent,Seller,Admin),IsLive&SockID to User [agent record]
+1. add UserMode(Customer,Agent,Seller,Admin),IsLive&SockID to User [agent record], limit one mode with one mob_no
 2. Use only 'Name' for Users (no first or last)
 3. And ask ubaid can we convert all jsons to camecase format (firstname-> Name)
 ------------------------------------------------------
@@ -249,19 +233,6 @@ curl http://maps.googleapis.com/maps/api/distancematrix/json?origins=41.43206,-8
 ----------------------------------------------------------
 /home/ubuntu/code1/pkg/common/map.js
 :18    return 19.2 // Set it once APIs are ready
-----------------------------------------------------------
-// TODO Create a Context for below parameters and load it from DB on server start
-let EffortFeePerKM = 3      // in rs
-  , PetrolFeePerKM = 2      // in rs
-  , FeePerKg       = .01    // in rs
-  , FeePerMCube    = 1      // in rs
-let TypeVSMargin   =        // in %
-{
-      Food         : { Business : 10, Agent : 5, Net: 15 }
-    , Electronics  : { Business : 15, Agent : 5, Net: 20 }
-    , Cloth        : { Business : 20, Agent : 5, Net: 25 }
-}
-let CostPerKM      = EffortFeePerKM + PetrolFeePerKM
 ----------------------------------------------------------
 limit result of all get queries
 and set limits for address/ stores ...

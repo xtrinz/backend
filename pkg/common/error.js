@@ -62,6 +62,7 @@ module.exports =
     , Unauthorized              : 'Unauthorized'
     , NoContextFound            : 'No context found'
     , AddressNotFound           : 'Address not found'
+    , AddressLimitExceeded      : 'Address limit exceeded'
     , NoAddressFound            : 'No address found'
     , NoSocketFound             : 'No socket found'
     , AgentNotFound             : 'Agent not found'

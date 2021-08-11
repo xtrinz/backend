@@ -233,6 +233,9 @@ function Store(data)
         {
             staff.StoreList.Accepted.push(String(this.Data._id))
             this.Data.StaffList.Approved.push(String(staff._id))
+
+            console.log('rm-sock-id-from-transit-rcd-on-relieve', { In: data})
+            await db.transit.SetAllStaffSockID(data.StoreID, staff.SockID)
         }
         await db.user.Save(staff)
         await db.store.Save(this.Data)

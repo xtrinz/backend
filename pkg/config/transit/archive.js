@@ -105,6 +105,32 @@ const SetStoreSockID  = async function(str_stores, sock_id)
     console.log('set-socket-id-to-store-transit-context', { StoreIDList: str_stores, SockID: sock_id })
 }
 
+const SetAllStaffSockID  = async function(store_id, sock_ids)
+{
+    if(!sock_ids.length)
+    {
+        console.log('empty-store-id-list',
+        {    StoreID : store_id
+           , SockIDs  : sock_ids })
+        return
+    }
+    const key3  = { 'Store._id' : ObjectId(store_id), IsLive : true }
+        , act3  = { $push    : { 'Store.SockID' : { $each : sock_ids } } }
+        , resp3 = await transits.updateMany(key3, act3)
+    if (!resp3.result.ok)
+    {
+        console.log('push-socket-id-to-transit-rcds-failed',
+        { 
+            Key     : key3, 
+            Value   : act3,
+            Result  : resp3.result
+        })
+        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
+    }
+    console.log('inserted-staff-socket-ids', { StoreID: store_id, SockIDs: sock_ids })
+}
+
+
 const UnsetAgentSockID  = async function(user_id, sock_id)
 {
 
@@ -204,5 +230,6 @@ module.exports =
     , UnsetAgentSockID    : UnsetAgentSockID
     , UnsetUserSockID     : UnsetUserSockID
     , UnsetStoreSockID    : UnsetStoreSockID
+    , SetAllStaffSockID   : SetAllStaffSockID
     , UnsetAllStaffSockID : UnsetAllStaffSockID
 }

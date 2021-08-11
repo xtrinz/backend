@@ -7,7 +7,8 @@ router.post('/add', async (req, res, next) => {
   try
   {
     const entry = new Address(req.body)
-        , Id    = await entry.Insert(req.body.User._id)
+        , Id    = await entry.Insert(req.body.User._id
+                        , req.body.User.AddressList)
     
     return res.status(code.OK).json({
       Status  : status.Success,
