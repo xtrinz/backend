@@ -1,7 +1,7 @@
 const { ObjectId }            = require('mongodb')
     , { carts }               = require('../../common/database')
     , { Err_, code , reason } = require('../../common/error')
-    , { query }               = require('../../common/models')
+    , { query, limits }       = require('../../common/models')
     , prod                    = require('../product/archive')
 
 const Save       = async function(data)
@@ -127,7 +127,8 @@ const Insert     = async function (cart_id, data)
   data._id   = ObjectId(data.ProductID)
 
   const key  = { _id : ObjectId(cart_id)}
-      , opts = { $push: { Products: data } }
+      , opts = { $push: { Products: { $each: [ data ], $slice: limits.ProductCount }  } } 
+      // TODO This shitf array on over flow, correct it with better methods 
       , resp = await carts.updateOne(key, opts)
   if (resp.modifiedCount !== 1) 
   {

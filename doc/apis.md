@@ -44,3 +44,10 @@ transit user    cancel
         store   reject / accept / despatch          
         agent   reject / ignore / accept / complete             30
         admin   accept / assign / terminate        
+
+
+
+Limits:
+
+Max Address Count       : 16
+Max Product Count       : 64                    // Catch it from user app itself

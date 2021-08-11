@@ -1,6 +1,7 @@
 const { ObjectId
     , ObjectID } = require('mongodb')
     , db         = require('../address/archive')
+    , { limits } = require('../../common/models')
 
 function Address(data)
 {
@@ -34,7 +35,7 @@ function Address(data)
 
         console.log('insert-address', { Address: this.Data })
 
-        if(addrs.length > 15)
+        if(addrs.length > limits.AddressCount)
         {
             console.log('address-max-count-exceeded', { Addresses: addrs } )
             Err_(code.INTERNAL_SERVER, reason.AddressLimitExceeded)

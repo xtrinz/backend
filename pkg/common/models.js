@@ -1,6 +1,11 @@
 const Org          = process.env.ORG
 module.exports =
 {
+	limits:
+	{
+		  AddressCount 				: 16
+		, ProductCount 				: 64
+	},
 	paytm: 
 	{
 		  WEBSTAGING				: 'WEBSTAGING'
