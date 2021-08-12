@@ -1,7 +1,7 @@
 const { ObjectId }            = require('mongodb')
     , { carts }               = require('../../common/database')
     , { Err_, code , reason } = require('../../common/error')
-    , { query }               = require('../../common/models')
+    , { query, limits }       = require('../../common/models')
     , prod                    = require('../product/archive')
 
 const Save       = async function(data)
@@ -97,11 +97,27 @@ const Delete      = async function (user_id)
 
 const Insert     = async function (cart_id, data)
 {
-  const key1  =
-  { 
-    _id            : ObjectId(cart_id),
-    'Products._id' : ObjectId(data.ProductID)
+  const key2  =
+    { 
+      _id                : ObjectId(cart_id),
+      $and               :
+      [
+        { 'Products.StoreID' : { $exists: true }},
+        { 'Products.StoreID' : { $not : { $eq : data.StoreID } } }
+      ]
+    } // To Avoid multiple shop entry
+  const resp2 = await carts.findOne(key2)
+  if(resp2)
+  {
+    console.log('product-from-different-store', { Key: key2, Resp: resp2 })
+    Err_(code.CONFLICT, reason.MutiStoreNotSupported)
   }
+
+  const key1  =
+    { 
+      _id                : ObjectId(cart_id),
+      'Products._id'     : ObjectId(data.ProductID)
+    }
   const resp1 = await carts.findOne(key1)
   if(resp1)
   {
@@ -111,7 +127,8 @@ const Insert     = async function (cart_id, data)
   data._id   = ObjectId(data.ProductID)
 
   const key  = { _id : ObjectId(cart_id)}
-      , opts = { $push: { Products: data } }
+      , opts = { $push: { Products: { $each: [ data ], $slice: limits.ProductCount }  } } 
+      // TODO This shitf array on over flow, correct it with better methods 
       , resp = await carts.updateOne(key, opts)
   if (resp.modifiedCount !== 1) 
   {

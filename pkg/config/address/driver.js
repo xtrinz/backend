@@ -1,6 +1,7 @@
 const { ObjectId
     , ObjectID } = require('mongodb')
     , db         = require('../address/archive')
+    , { limits } = require('../../common/models')
 
 function Address(data)
 {
@@ -28,11 +29,17 @@ function Address(data)
         }
     }
 
-    this.Insert     = async function (user_id)
+    this.Insert     = async function (user_id, addrs)
     {
         this.Data._id = new ObjectID()
 
         console.log('insert-address', { Address: this.Data })
+
+        if(addrs.length > limits.AddressCount)
+        {
+            console.log('address-max-count-exceeded', { Addresses: addrs } )
+            Err_(code.INTERNAL_SERVER, reason.AddressLimitExceeded)
+        }
 
         if(this.Data.IsDefault)
         { await db.ResetDefault(user_id) }

@@ -1,3 +1,5 @@
+// require('../../cmd/settings')
+
 const { Client }             = require('../infra/rest')
     , { Err_, code, reason } = require('./error')
 
@@ -17,7 +19,19 @@ const Distance = async function(data)
         , req   = new Client(in_)
         , res   = await req.Fetch()
     if(res.Code !== 200) Err_(code.NOT_FOUND, reason.APIError)
+    console.log('result : ', res)
 }
+
+let cord =
+{
+      SrcLt  : 11.060447
+    , SrcLn  : 75.935870
+    , DestLt : 11.045950
+    , DestLn : 75.940163
+}
+
+//Distance(cord)
+
 module.exports =
 {
     Distance     : Distance

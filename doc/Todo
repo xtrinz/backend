@@ -1,19 +1,3 @@
-where to stand
-peak hour
-disaster mgmt
-drone delivery
-chat placement
-automated stores
-------------------------------------------------------
-https://www.mongodb.com/try/download/compass
-sudo iptables -A INPUT -p tcp --dport 27017 -j ACCEPT
-sudo su
-iptables-save > /etc/iptables/rules.v4
-exit
-------------------------------------------------------
-0. We sprout at fire, we won't fade in sunlight
-1. How to hold people without hurting their dreams
-
 ------------------------------------------------------
 Make the following logic of agent selection
 	1. Data driven
@@ -23,7 +7,7 @@ Make the following logic of agent selection
 		1) No of Agents : <= 10 [Limit]
 		2) Nearest free / near-to-free agents
 ------------------------------------------------------
-1. add UserMode(Customer,Agent,Seller,Admin),IsLive&SockID to User [agent record]
+1. add UserMode(Customer,Agent,Seller,Admin),IsLive&SockID to User [agent record], limit one mode with one mob_no
 2. Use only 'Name' for Users (no first or last)
 3. And ask ubaid can we convert all jsons to camecase format (firstname-> Name)
 ------------------------------------------------------
@@ -250,66 +234,5 @@ curl http://maps.googleapis.com/maps/api/distancematrix/json?origins=41.43206,-8
 /home/ubuntu/code1/pkg/common/map.js
 :18    return 19.2 // Set it once APIs are ready
 ----------------------------------------------------------
-// TODO Create a Context for below parameters and load it from DB on server start
-let EffortFeePerKM = 3      // in rs
-  , PetrolFeePerKM = 2      // in rs
-  , FeePerKg       = .01    // in rs
-  , FeePerMCube    = 1      // in rs
-let TypeVSMargin   =        // in %
-{
-      Food         : { Business : 10, Agent : 5, Net: 15 }
-    , Electronics  : { Business : 15, Agent : 5, Net: 20 }
-    , Cloth        : { Business : 20, Agent : 5, Net: 25 }
-}
-let CostPerKM      = EffortFeePerKM + PetrolFeePerKM
-----------------------------------------------------------
 limit result of all get queries
 and set limits for address/ stores ...
-----------------------------------------------------------
-// Remove sockId on relieve staff
-----------------------------------------------------------
-AUTHENTICATION FLOW ONNU CHANGE CHEYTHKK 
-
-CASE1: - ------(USER ALREADY EXIST)---  USER SENT PHONE NUMBER --- >  SERVER SENT OTP ---> USER SENT OTP BACK ---> SERVER SEND TOKEN ---> LOGIN SUCCESS
-CASE2: -------(NEW USER) ------- USER SENT PHONE NUMBER --- >  SERVER SENT OTP ---> USER SENT OTP BACK ----> SERVER SENT SUCCESS MESSAGE --> USER SENT NAME AND EMAIL --> SERVER SEND TOKEN -- > REGISTRATION SUCCESS
-
-EEE FLOW ANU ORUVIDHAM ELLA ECOM APP ONLY COMPANIESUM FOLLOW CHEYYANE
-PROS;- SEPARATE LOGIN ROUTE AVASHYAM VARILLA
-
-----------------------------------------------------------------
-
-PayTM SDK: Bug : ln 112:113					
-/home/ubuntu/code1/node_modules/paytm-pg-node-sdk/dist/com/paytm/pg/process/Request.js:112
-                    var error = res.statusCode + ": " + res.statusMessage;
-                                    ^
-TypeError: Cannot read property 'statusCode' of undefined		
-
-----------------------------------------------------------------
-
-kafka event
-- statistics [ all states of transits active/live/finished/failed, build statistics out of events ]
-- record user actions and generate and track history
-- incorporate dynamcity for user home page by monitoring user actions
-
-----------------------------------------------------------------
-
-Use direct socket emit function instead of bypassing throught JS emitter,
-that will conjust the channel as users grows
-
-----------------------------------------------------------------
-
-JUST A TO DO -- PROFILE PUT REQUEST
-REQUEST BODY  ----  NAME, EMAIL, PHONE NUMBER
-
-IF PHONE NUMBER OR EMAIL DIFFERS FROM ALREADY EXISTED ONE THEN SEND OTP  AND MENTION ABOUT OTP REQUIRED STATUS IN RESPONSE (Text field)
-
-RESPONSE TEXT SHOULD BE SOMETHING LIKE (either one)
-     1 . Phone auth required
-     2. phone and email auth required
-     3. name changed successfully
-
-THEN A PROVISION FOR VERIFYING OTP
-
-----------------------------------------------------------------
-
-Add check to frobid addition of product from a different store.

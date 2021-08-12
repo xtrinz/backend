@@ -1,14 +1,16 @@
 const { states, alerts, query } = require('../common/models')
     , { User }                  = require('../config/user/driver')
     , { Socket }                = require('../config/socket/driver')
-    , Emitter                   = require('events')
-    , emitter                   = new Emitter()
     , db                        =
     {
         user                    : require('../config/user/archive')
       , socket                  : require('../config/socket/archive')
     }
     , { Err_, code, reason }    = require('../common/error')
+
+let Channel 
+
+const SetChannel = (io_) => { Channel = io_ }
 
 const Connect = async function(socket_)
 {
@@ -116,15 +118,15 @@ const Emit = async function(alert, ctxt)
   }
   console.log('emit-message', Ind)
 
-  try         { await emitter.emit('SendEvent', Ind)     } 
-  catch(err)  { console.log('emission-failed', err, Ind) }
+  try         { await Channel.to(Ind.To).emit('Event', Ind.Msg) } 
+  catch(err)  { console.log('emission-failed', err, Ind)        }
 
 }
 
 module.exports =
 {
       Emit        :   Emit
-    , Channel     :   emitter
     , Connect     :   Connect
     , Disconnect  :   Disconnect
+    , SetChannel  :   SetChannel
 }
