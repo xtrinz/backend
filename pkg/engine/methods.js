@@ -2,7 +2,7 @@ const   { Emit } 			 	   = require('./events')
 	  , { Err_ , code, reason }    = require('../common/error')
 	  , { states , alerts, query } = require('../common/models')
 	  , { User } 			 	   = require('../config/user/driver')
-	  , { PayOut , SendOTP, Save, SetAgent
+	  , { PayOut , SendOTP, Save, SetAgent, PingAdmins
 		, ConfirmOTP, ResetAgent } = require('./wrap')
 	  , db 						   =
 	  {
@@ -46,6 +46,9 @@ const RejectedByStore		= async function(ctxt)
 
 const TimeoutByStore		= async function(ctxt)
 {
+	// TODO Trigger a timer from InitByUser
+	// Set voice alerts thrice
+	// on no action from store auto reject the order
 	await Save(ctxt, states.TransitAcceptanceTimeout)
 }
 
@@ -187,7 +190,8 @@ const RejectedByAgent		= async function(ctxt)
 			await PingAdmins(states.TransitAbandoned, ctxt)
 			return
 		}
-		// ? TODO Resolve the loop
+		// ? TODO Resolve the loop, 'auto cancel' on ultra delay
+		// add faul rate idx for agent, record reasons as feedback
 		await Emit(alerts.NewTransit, ctxt)
 			ctxt.Data.Agents = agents
 			ctxt.Data.Agent  = ResetAgent

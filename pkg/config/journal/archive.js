@@ -18,6 +18,20 @@ const GetByID    = async function(_id)
     return journal
 }
 
+const Get    = async function(query, proj)
+{
+    console.log('find-journal-by-custom-query', { Query : query, Projection : proj })
+
+    const journal = await journals.findOne(query, proj)
+    if (!journal)
+    {
+      console.log('journal-not-found-by-custom-query', { Query : query, Projection : proj })
+      Err_(code.INTERNAL_SERVER, reason.JournalNotFound)
+    }
+    console.log('journal-found-by-custom-query', { Journal : journal })
+    return journal
+}
+
 const Save       = async function(data)
 {
     console.log('save-journal', { Journal : data })
@@ -42,4 +56,5 @@ module.exports =
 {
     GetByID : GetByID
   , Save    : Save
+  , Get     : Get
 }

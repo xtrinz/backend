@@ -8,7 +8,7 @@ const { ObjectID } = require('mongodb')
       , addr       : require('../address/archive')
     }
     , { Err_, code, reason }     = require('../../common/error')
-    , { states, channel, query } = require('../../common/models')
+    , { states, channel, query, source } = require('../../common/models')
     , { Refund }   = require('../../infra/paytm/ind/refund')
     , { Payment }  = require('../../infra/paytm/ind/payment')
     , { PayTM }    = require('../../infra/paytm/driver')
@@ -26,20 +26,22 @@ function Journal()
       {
           ID              : ''
         , Name            : ''
-        , Location        : {}
+        , Longitude       : 0
+        , Latitude        : 0
         , Address         : {}
       }
       , Seller            :
       {
           ID              : ''
         , Name            : ''
-        , Location        : {}
+        , Longitude       : 0
+        , Latitude        : 0
         , Address         : {}
       }
       , Agents            : [] // { ID: , Earnings: { FirstMile | SecondMile | Penalty | ReasonForPenalty |  }}
       , Order             :
       {
-          Products        : [] // ProductID, Name, Price, Image, Quantity
+          Products        : [] // ProductID, Name, Price, Image, CategoryID, Quantity, Available, Flagged 
         , Bill            : 
         {
             Total         : 0
@@ -88,6 +90,7 @@ function Journal()
           ID        : store._id
         , Name      : store.Name
         , MobileNo  : store.MobileNo
+        , Image     : store.Image
         , Longitude : store.Location.coordinates[0]
         , Latitude  : store.Location.coordinates[1]
         , Address   : store.Address
@@ -222,31 +225,33 @@ function Journal()
       await db.journal.Save(this.Data)
     }
 
-    this.Read = function(data)
+    this.Read = async function(data, user)
     {
-      switch(data.Entity)
+      console.log('read-journal', { Input: data, UserID: user._id })
+      switch(data.Origin)
       {
-            case entity.User:
+        case source.User :
 
-              const user_ = db.user.Get(data.UserID, query.ByID)
-              if (!user_) Err_(code.NOT_FOUND, reason.UserNotFound)
-
-              const data_ = {}
-              /* const query =
+          const query =
               { 
-                  Buyer :  { UserID : user._id }
-                , Payment: { Status : states.Success } 
+                  _id     : ObjectId(data.JournalID)
+                , Buyer   : { ID : user._id }
               }
               , proj  = 
               {
-                  _id      : 1
-                , Seller   : { ID : 1 , Name : 1 }
-                , Bill     : 1
-                , Products : 1
-                , Transit  : { ID : 1 , Status : 1, ClosingState: 1 }
+                  _id     : 1
+                , Buyer   : { Address : 1 }
+                , Seller  : { ID : 1 , Name : 1, Address : 1, Image: 1 }
+                , Order   : { Products : 1, Bill : 1 }
+                , Payment : { Channel : 1, Amount : 1, Status: 1, TimeStamp: 1 }
+                , Transit : { ID : 1 , Status : 1, ClosingState: 1 }
               }
-              const data_   = this.Get(query, proj) */
-              return data_
+              , data_ = await db.journal.Get(query, proj)
+
+          delete data_._id
+          data_.JournalID = data.JournalID
+
+          return data_
       }
     }
 
