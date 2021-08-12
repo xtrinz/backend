@@ -1,8 +1,8 @@
-const { User }     = require('./user')
-    , { Store }    = require('./store')
-    , { Product }  = require('./product')
-    , { Address }  = require('./address')
-    , { Cart }     = require('./cart')
+const { User }     = require('./user/data')
+    , { Store }    = require('./store/data')
+    , { Product }  = require('./product/data')
+    , { Address }  = require('./address/data')
+    , { Cart }     = require('./cart/data')
 
 const obj =
 {

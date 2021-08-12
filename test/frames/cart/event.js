@@ -1,4 +1,4 @@
-const data                   = require('../data/data')
+const data                   = require('../data')
     , { Method, Type }       = require('../../lib/medium')
     , { code, status, text } = require('../../../pkg/common/error')
 

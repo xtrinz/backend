@@ -1,5 +1,5 @@
 const { Method, Type }        = require('../../lib/medium')
-    , data                    = require('../data/data')
+    , data                    = require('../data')
     , { read }                = require('../../lib/driver')
     , { code, status, text }  = require('../../../pkg/common/error')
     , { alerts, task, paytm } = require('../../../pkg/common/models')

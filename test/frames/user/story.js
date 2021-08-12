@@ -1,4 +1,4 @@
-const event         = require('../event/user')
+const event         = require('./event')
     , { TestCase }  = require('../../lib/driver')
 
 const Std = function(user_)

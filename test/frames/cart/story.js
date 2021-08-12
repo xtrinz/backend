@@ -1,4 +1,4 @@
-const event        = require('../event/cart')
+const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
 
     , Std = function(user_, product_, addr_, store_)

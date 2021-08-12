@@ -2,32 +2,32 @@
 const { Test, TestSuite } = require('./lib/driver')
     , user      =
     {
-        data  : require('./frames/data/user')
-      , story : require('./frames/story/user')
+        data  : require('./frames/user/data')
+      , story : require('./frames/user/story')
     }
     , store     =
     {
-        data  : require('./frames/data/store')
-      , story : require('./frames/story/store')
+        data  : require('./frames/store/data')
+      , story : require('./frames/store/story')
     }
     , product   =
     {
-        data  : require('./frames/data/product')
-      , story : require('./frames/story/product')        
+        data  : require('./frames/product/data')
+      , story : require('./frames/product/story')        
     }
     , address   =
     {
-        data  : require('./frames/data/address')
-      , story : require('./frames/story/address')        
+        data  : require('./frames/address/data')
+      , story : require('./frames/address/story')        
     }
     , cart      =
     {
-        data  : require('./frames/data/cart')
-      , story : require('./frames/story/cart')        
+        data  : require('./frames/cart/data')
+      , story : require('./frames/cart/story')        
     }
     , transit   =
     {
-        story : require('./frames/story/transit')        
+        story : require('./frames/transit/story')        
     }
 
   let admin_1       = new    user.data.User    ('Admin')

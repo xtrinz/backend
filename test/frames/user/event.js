@@ -2,7 +2,7 @@ const { task }               = require('../../../pkg/common/models')
     , { code, status, text } = require('../../../pkg/common/error')
     , { Method, Type }       = require('../../lib/medium')
     , { read }               = require('../../lib/driver')
-    , data                   = require('../data/data')
+    , data                   = require('../data')
 
 let RegisterNew = function(name) 
 {
