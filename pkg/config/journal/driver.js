@@ -221,6 +221,42 @@ function Journal()
       this.Data.Transit.ClosingState  = ctxt.Data.State
       await db.journal.Save(this.Data)
     }
+
+    this.Read = function(data)
+    {
+      switch(data.Entity)
+      {
+            case entity.User:
+
+              const user_ = db.user.Get(data.UserID, query.ByID)
+              if (!user_) Err_(code.NOT_FOUND, reason.UserNotFound)
+
+              const data_ = {}
+              /* const query =
+              { 
+                  Buyer :  { UserID : user._id }
+                , Payment: { Status : states.Success } 
+              }
+              , proj  = 
+              {
+                  _id      : 1
+                , Seller   : { ID : 1 , Name : 1 }
+                , Bill     : 1
+                , Products : 1
+                , Transit  : { ID : 1 , Status : 1, ClosingState: 1 }
+              }
+              const data_   = this.Get(query, proj) */
+              return data_
+      }
+    }
+
+    this.List = function(data)
+    {
+      switch(data.Entity)
+      {
+            case entity.User:
+      }
+    }
 }
 
 module.exports =
