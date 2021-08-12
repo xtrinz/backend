@@ -29,6 +29,11 @@ const { Test, TestSuite } = require('./lib/driver')
     {
         story : require('./frames/transit/story')        
     }
+    , journal   =
+    {
+          // data : require('./frames/journal/data')
+          journal : require('./frames/journal/story')        
+    }
 
   let admin_1       = new    user.data.User    ('Admin')
     , user_1_owner  = new    user.data.User    ('User')
