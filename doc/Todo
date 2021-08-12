@@ -1,52 +1,11 @@
-------------------------------------------------------
-Make the following logic of agent selection
-	1. Data driven
-	2. Dynamic
-
-	Logic : Filter agents for first mile
-		1) No of Agents : <= 10 [Limit]
-		2) Nearest free / near-to-free agents
-------------------------------------------------------
 1. add UserMode(Customer,Agent,Seller,Admin),IsLive&SockID to User [agent record], limit one mode with one mob_no
-2. Use only 'Name' for Users (no first or last)
-3. And ask ubaid can we convert all jsons to camecase format (firstname-> Name)
 ------------------------------------------------------
-
-	TransitAcceptedByAgent
-	// Insert Agent Data to Ctxt from API
-------------------------------------------------------
-# Pending Work
-1. Token Secuirity
-2. ssl
-3. shop apis - validation
-4. delivery boy apis 
-5. transaction real time event handling
-6. DOCUMENTATION UPDATION PENDING
-------------------------------------------------------
-TransitCompletedByAgent
-[ Rating/ Issue Reporting] [TODO Set an API to handle issue reporting]
+TransitCompletedByAgent [ Rating/ Issue Reporting] [TODO Set an API to handle issue reporting ]
 ----------------------------------------------------------
 Create a transit history array with {Time: enitity:action}
 ----------------------------------------------------------
-otp verification apis
-----------------------------------------------------------
-add timestamp in jwt, and set time check in auth route
-----------------------------------------------------------
-within auth middlewarre find some way to attach 'user._id' with 'req'
-----------------------------------------------------------
 add item count in api itself
 ----------------------------------------------------------
-api to ask otp again
-
-sms/email
-user{profile/reg/login}/cart/shop
-
-product/addr/payment/transit
-----------------------------------------------------------
-add logic for multiple admin
-----------------------------------------------------------
-    productvariations: product1.productvariations,
-    producttype: product1.producttype,
     gstcategory: product1.gstcategory,
     warrentycard: product1.warrentycard,
     extradiscount: product1.extradiscount,
@@ -66,20 +25,9 @@ need to store history of action of users [eg: accepted invitaion/ denied...]
 ----------------------------------------------------------
 when a product get deleted what to do for its associated journals
 ----------------------------------------------------------
-Calculate rest of the Bill attrs and shipmeent cost
-----------------------------------------------------------
-### do not create a new stripe intent, if already one exist, just update the price
-### and no new journal also 
-----------------------------------------------------------
-[TODO set a retry tirggering API from admin]
-----------------------------------------------------------
 check if one of the socket id is not present at the time of emission, how system crashes
 ----------------------------------------------------------
 for duplicate notifications reject the same in frond end
-----------------------------------------------------------
-when listing of tranist occures, list available tranits also for agents
-----------------------------------------------------------
-ctxt.User.SockID, // SET ADMIN
 ----------------------------------------------------------
 if (ctxt.Delay() > ctxt.MaxWT)
 {
@@ -109,42 +57,11 @@ case states.TransitAccepted:
 	1) How to cutoff if a agent intentionally delays an order with repeatetion accept/reapeat
 	2) How to handle if accept /reject loop grows beyond a expected time */
 ----------------------------------------------------------
-/user/register
-	Need to add a check for req.body.Task at input validator for catching below scenario
-      default:
-        console.log('register-user-unkown-task', req.body)
-----------------------------------------------------------
-firewall-cmd --runtime-to-permanent
-----------------------------------------------------------
-avoid printing password has in user doc, or find some other means
-that does not make this vulnearable
-{ Passwd: '$2a$05$ZzrqNnTgwv3r8E6/imY9x./.NRoY8a3pmpgBAOruiKlVvcUnpmXZy' }
-----------------------------------------------------------
-we must be able to forcefully update application
-----------------------------------------------------------
-store:
-// TODO Delete & Edit APIs
-// List orders...
-----------------------------------------------------------
-result: { ok: 1, nModified: 0, n: 0 }
-----------------------------------------------------------
-put a check to avoid adding products from multiple stores
-----------------------------------------------------------
 // TODO { Add Journal ID to the cart & remove it only after payment success }
 ----------------------------------------------------------
-      if(cart_.Data.JournalID)
-      {
-        // Modify intent instead of creating one
-      }
-	// no new stripe intent in case of abortion in middle
-// Flow, if not intent exists(no previous payment attempts)
-----------------------------------------------------------
-Enable OTP
+Check paytm token are stored at server or not
 ----------------------------------------------------------
 	// Fraud Alert if for incorrect OTP
-----------------------------------------------------------
-Must Have:
-	// TODO: Set a API to resent OTP, if agent some how misses the first
 ----------------------------------------------------------
 TransitIgnoredByAgent
 // This event can come from mutiple agent.
@@ -192,47 +109,33 @@ const TransitRejectedByAgent		= async function(ctxt)
 	await Save(ctxt, states.TransitRejected)
 }
 ----------------------------------------------------------
-/*                Location  :
-                {
-                $near :
-                {
-                  $geometry    : { type: "Point", coordinates: [ln, lt] }
-                , $maxDistance : maxDist
-                }
-                }
-                , IsLive  : true*/
-
-----------------------------------------------------------
-    this.Init       = async function()
-    {
-        // Get Src & Dest Contexts & Update SockIDs
-        this.Data._id       = new ObjectID()
-        let engine = new Engine()
-        await engine.Transition(this)
-        console.log('transit-initialised', { Data: this.Data })
-    }
-----------------------------------------------------------
 at read_otp : there is a race condition
-----------------------------------------------------------
-what if same product get inserted twice into a users cart,
-will it duplicate entry? 
-----------------------------------------------------------
 limit devices / socket connections
-----------------------------------------------------------
-for immediate connectivity triggern a rest request after socket connection
-----------------------------------------------------------
 lock cart checkout once the payment initated
-----------------------------------------------------------
 Beware do not modify current and previous state before payout
 ----------------------------------------------------------
-issue special token for Partially registered users
-----------------------------------------------------------
-send token in cookies
-----------------------------------------------------------
-curl http://maps.googleapis.com/maps/api/distancematrix/json?origins=41.43206,-81.38992|-33.86748,151.20699
-----------------------------------------------------------
-/home/ubuntu/code1/pkg/common/map.js
-:18    return 19.2 // Set it once APIs are ready
-----------------------------------------------------------
-limit result of all get queries
-and set limits for address/ stores ...
+01 journal read											21/08/12
+02 ground one mob no for one mode [ for now ]
+03 journal	list	agetn/store/user/admin
+04 product list limit
+05 product add  variant
+06 store   list limit
+07 store   edit
+08 store   delete
+09 staff   list limit
+10 search & product filtering with tree tags
+11 set token in cookies
+12 root admin + sub admin logics
+13 https
+14 input validator (Task as mdatory field)
+15 bug : for immediate connectivity trigger a rest request after socket connection
+16 socket limit connections
+17 db geo indexing, filtering enahcement
+18 generic api for otp resend in all scenarios [user{profile/reg/login}/cart/shop | product/addr/payment/transit]
+19 google map distance
+20 provision for forceful app update
+21 IMPORTANT: remove printing user password hashes from logs
+22 reinforce bill
+23 no deletion of records, only unlisting of the data [ if it has used at someother critical point ]
+24 jwt - set timestamp and expire the token - why sperate token for partially registered user
+25 load pricing context from db on system start and set an api to update it (on db + on cache)
