@@ -8,11 +8,11 @@ const event        = require('./event')
     const steps =
     [
           new event.Insert (user_, cart_, product_)      
-    /*    , new event.List   (user_, cart_, addr_, store_)
+        , new event.List   (user_, cart_, addr_, store_)
         , new event.Update (user_, product_)
         , new event.Remove (user_, product_)
         , new event.Insert (user_, cart_, product_)
-    */]
+    ]
     steps.forEach((step) => tc.AddStep(step))
     return tc
 }
