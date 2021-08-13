@@ -31,8 +31,8 @@ const { Test, TestSuite } = require('./lib/driver')
     }
     , journal   =
     {
-          // data : require('./frames/journal/data')
-          journal : require('./frames/journal/story')        
+        data    : require('./frames/journal/data')
+      , story   : require('./frames/journal/story')        
     }
 
   let admin_1       = new    user.data.User    ('Admin')
@@ -44,6 +44,7 @@ const { Test, TestSuite } = require('./lib/driver')
     , product_1     = new product.data.Product ()
     , addr_1_user_3 = new address.data.Address ()
     
+    new journal.data.Journal (user_3_buyer, addr_1_user_3, store_1, cart.data.Cart.Carts[user_3_buyer.Name])
 
     , user_4_owner  = new    user.data.User    ('User')
     , user_5_staff  = new    user.data.User    ('User')
@@ -62,6 +63,9 @@ const { Test, TestSuite } = require('./lib/driver')
     , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
     ,    cart.story.Std(user_3_buyer.Name, product_1.Name, addr_1_user_3.Address.Name, store_1.Name)
     , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_2_staff.Name)
+    
+    , journal.story.Std(user_3_buyer.Name)
+
     ,    user.story.Disconnect(user_1_owner.Name, user_2_staff.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
   ]
   cases.forEach((test)=> suite_1.AddCase(test))

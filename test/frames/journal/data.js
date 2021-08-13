@@ -1,22 +1,20 @@
-let Journal = function()
+let Journal = function(user, address, store, cart)
 {
   Journal.Count++
 
-  this.ID           = ''
-  this.StoreID      = ''
-  this.Name         = 'Journal{0}'.format(Journal.Count)
-  this.Image        = 'image.{0}.com'.format(this.Name.toLowerCase())
-  this.Price        = Journal.Count * 10
-  this.Quantity     = Journal.Count * 2
-  this.Available    = Journal.Count * 2
-  this.Flagged      = false
-  this.Description  = '{0} Description'.format(this.Name)
+  this.JournalID  = ''
+  this.Buyer      = { Address: address.Address }
+  this.Seller     = { ID : store.ID , Name : store.Name, Address : store.Address, Image: store.Image }
+  this.Order      = { Products : cart.Products, Bill : cart.Bill }
+  this.Payment    = { Channel : 'Paytm', Amount : cart.Bill.NetPrice.toString(), Status: 'Success', TimeStamp: '' }
+  this.Transit    = { ID : user.TransitID , Status : 'Closed', ClosingState: 'TranistCompleted' }
 
-  Journal.Products[this.Name] = this
+  Journal.Journals[user.Name]  = this
+  Journal.Journals[store.Name] = this
 }
 
 Journal.Count      = 0
-Journal.Products   = {}
+Journal.Journals   = {}
 
 module.exports =
 {

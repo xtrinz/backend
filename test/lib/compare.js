@@ -13,7 +13,11 @@ const DeepEqual = function (obj, alt, skip)
           , val2        = alt[key]
           , areObjects  = isObject(val1) && isObject(val2);
       if( areObjects && !DeepEqual(val1, val2, skip) || 
-          !areObjects && val1 !== val2 ) { return false }
+          !areObjects && val1 !== val2 ) 
+        {
+              // console.log('#######', val1, val2) 
+              return false 
+        }
     }
     return true  
 }

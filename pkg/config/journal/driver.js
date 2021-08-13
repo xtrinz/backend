@@ -1,4 +1,4 @@
-const { ObjectID } = require('mongodb')
+const { ObjectID, ObjectId } = require('mongodb')
     , db           =
     {
         cart       : require('../cart/archive')
@@ -235,16 +235,28 @@ function Journal()
           const query =
               { 
                   _id     : ObjectId(data.JournalID)
-                , Buyer   : { ID : user._id }
+                , 'Buyer.ID' : ObjectId(user._id)
               }
               , proj  = 
               {
-                  _id     : 1
-                , Buyer   : { Address : 1 }
-                , Seller  : { ID : 1 , Name : 1, Address : 1, Image: 1 }
-                , Order   : { Products : 1, Bill : 1 }
-                , Payment : { Channel : 1, Amount : 1, Status: 1, TimeStamp: 1 }
-                , Transit : { ID : 1 , Status : 1, ClosingState: 1 }
+                projection : 
+                {
+                    _id     : 1
+                  , 'Buyer.Address' : 1
+                  , 'Seller.ID' : 1
+                  , 'Seller.Name' : 1
+                  , 'Seller.Address' : 1
+                  , 'Seller.Image' : 1
+                  , 'Order.Products' : 1
+                  , 'Order.Bill' : 1
+                  , 'Payment.Channel' : 1
+                  , 'Payment.Amount' : 1
+                  , 'Payment.Status' : 1
+                  , 'Payment.TimeStamp' : 1
+                  , 'Transit.ID' : 1 
+                  , 'Transit.Status' : 1
+                  , 'Transit.ClosingState' : 1
+                }
               }
               , data_ = await db.journal.Get(query, proj)
 
