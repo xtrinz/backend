@@ -1,5 +1,5 @@
 const { Method, Type }       = require('../../lib/medium')
-    , data                   = require('../data/data')
+    , data                   = require('../data')
     , { code, status, text } = require('../../../pkg/common/error')
 
 let Add = function(user_, addr_) 

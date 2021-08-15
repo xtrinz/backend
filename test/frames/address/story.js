@@ -1,6 +1,6 @@
-const event        = require('../event/address')
+const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
-    , { AddUser }  = require('./user')
+    , { AddUser }  = require('../user/story')
 
 const Std = function(addr_, user_)
 {

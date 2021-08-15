@@ -1,5 +1,5 @@
 const { Method, Type }        = require('../../lib/medium')
-    , data                    = require('../data/data')
+    , data                    = require('../data')
     , { read }                = require('../../lib/driver')
     , { code, status, text }  = require('../../../pkg/common/error')
     , { alerts, task, paytm } = require('../../../pkg/common/models')
@@ -14,7 +14,6 @@ let Checkout = function(user_, addr_, cart_)
   {
     let user     = data.Get(data.Obj.User,    this.UserID)
     let addr     = data.Get(data.Obj.Address, this.AddressID)
-    let cart     = data.Get(data.Obj.Cart,    this.CartID)
 
     let templ =
     {

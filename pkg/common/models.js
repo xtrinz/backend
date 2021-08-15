@@ -45,6 +45,13 @@ module.exports =
 		, Agent 					: 'Agent'
 		, Admin 					: 'Admin'
 	},
+	source:
+	{
+		  User 						: 'User'
+		, Agent 					: 'Agent'
+		, Admin 					: 'Admin'
+		, Store						: 'Store'
+	},
 	type:
 	{
 		  FORWARD 					: 'FORWARD'

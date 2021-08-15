@@ -1,4 +1,4 @@
-const { ObjectID } = require('mongodb')
+const { ObjectID, ObjectId } = require('mongodb')
     , db           =
     {
         cart       : require('../cart/archive')
@@ -8,7 +8,7 @@ const { ObjectID } = require('mongodb')
       , addr       : require('../address/archive')
     }
     , { Err_, code, reason }     = require('../../common/error')
-    , { states, channel, query } = require('../../common/models')
+    , { states, channel, query, source } = require('../../common/models')
     , { Refund }   = require('../../infra/paytm/ind/refund')
     , { Payment }  = require('../../infra/paytm/ind/payment')
     , { PayTM }    = require('../../infra/paytm/driver')
@@ -26,20 +26,22 @@ function Journal()
       {
           ID              : ''
         , Name            : ''
-        , Location        : {}
+        , Longitude       : 0
+        , Latitude        : 0
         , Address         : {}
       }
       , Seller            :
       {
           ID              : ''
         , Name            : ''
-        , Location        : {}
+        , Longitude       : 0
+        , Latitude        : 0
         , Address         : {}
       }
       , Agents            : [] // { ID: , Earnings: { FirstMile | SecondMile | Penalty | ReasonForPenalty |  }}
       , Order             :
       {
-          Products        : [] // ProductID, Name, Price, Image, Quantity
+          Products        : [] // ProductID, Name, Price, Image, CategoryID, Quantity, Available, Flagged 
         , Bill            : 
         {
             Total         : 0
@@ -88,6 +90,7 @@ function Journal()
           ID        : store._id
         , Name      : store.Name
         , MobileNo  : store.MobileNo
+        , Image     : store.Image
         , Longitude : store.Location.coordinates[0]
         , Latitude  : store.Location.coordinates[1]
         , Address   : store.Address
@@ -220,6 +223,56 @@ function Journal()
       this.Data.Transit.Status        = states.Closed
       this.Data.Transit.ClosingState  = ctxt.Data.State
       await db.journal.Save(this.Data)
+    }
+
+    this.Read = async function(data, user)
+    {
+      console.log('read-journal', { Input: data, UserID: user._id })
+      switch(data.Origin)
+      {
+        case source.User :
+
+          const query =
+              { 
+                  _id     : ObjectId(data.JournalID)
+                , 'Buyer.ID' : ObjectId(user._id)
+              }
+              , proj  = 
+              {
+                projection : 
+                {
+                    _id     : 1
+                  , 'Buyer.Address' : 1
+                  , 'Seller.ID' : 1
+                  , 'Seller.Name' : 1
+                  , 'Seller.Address' : 1
+                  , 'Seller.Image' : 1
+                  , 'Order.Products' : 1
+                  , 'Order.Bill' : 1
+                  , 'Payment.Channel' : 1
+                  , 'Payment.Amount' : 1
+                  , 'Payment.Status' : 1
+                  , 'Payment.TimeStamp' : 1
+                  , 'Transit.ID' : 1 
+                  , 'Transit.Status' : 1
+                  , 'Transit.ClosingState' : 1
+                }
+              }
+              , data_ = await db.journal.Get(query, proj)
+
+          delete data_._id
+          data_.JournalID = data.JournalID
+
+          return data_
+      }
+    }
+
+    this.List = function(data)
+    {
+      switch(data.Entity)
+      {
+            case entity.User:
+      }
     }
 }
 

@@ -1,6 +1,6 @@
-const event        = require('../event/transit')
+const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
-    , { AddUser }  = require('./user')
+    , { AddUser }  = require('../user/story')
 
 const Std = function(user_, addr_, agent_, owner_, staff_)
 {

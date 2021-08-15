@@ -1,8 +1,9 @@
-const { User }     = require('./user')
-    , { Store }    = require('./store')
-    , { Product }  = require('./product')
-    , { Address }  = require('./address')
-    , { Cart }     = require('./cart')
+const { User }     = require('./user/data')
+    , { Store }    = require('./store/data')
+    , { Product }  = require('./product/data')
+    , { Address }  = require('./address/data')
+    , { Cart }     = require('./cart/data')
+    , { Journal }  = require('./journal/data')
 
 const obj =
 {
@@ -11,6 +12,7 @@ const obj =
     , Store   : 'Store'
     , Address : 'Address'
     , Cart    : 'Cart'
+    , Journal : 'Journal'
 }
 
 
@@ -23,6 +25,7 @@ const Get = function(enty, id)
     case obj.Product : return Product.Products  [id]
     case obj.Address : return Address.Addresses [id]
     case obj.Cart    : return    Cart.Carts     [id]
+    case obj.Journal : return Journal.Journals  [id]
     }
 }
 
@@ -35,6 +38,7 @@ const Set = function(enty, id, data)
     case obj.Product : Product.Products  [id] = data; break
     case obj.Address : Address.Addresses [id] = data; break
     case obj.Cart    :    Cart.Carts     [id] = data; break
+    case obj.Journal : Journal.Journals  [id] = data; break
     }
 }
 

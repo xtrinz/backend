@@ -1,4 +1,4 @@
-const { Cart } = require('./cart')
+const { Cart } = require('../cart/data')
 
 let User = function(mode)
 {

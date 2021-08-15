@@ -1,6 +1,6 @@
-const event        = require('../event/store')
+const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
-    , { AddUser }  = require('./user')
+    , { AddUser }  = require('../user/story')
 
 const Std = function(admin_, owner_, staff_, store_)
 {
