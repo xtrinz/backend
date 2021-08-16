@@ -38,6 +38,12 @@ function Journal()
         , Latitude        : 0
         , Address         : {}
       }
+      , Agent             :
+      {
+          ID              : ''
+        , Name            : ''
+        , MobileNo        : ''
+      }
       , Agents            : [] // { ID: , Earnings: { FirstMile | SecondMile | Penalty | ReasonForPenalty |  }}
       , Order             :
       {
@@ -212,6 +218,10 @@ function Journal()
       switch (ctxt.Data.State)
       {
         case states.TranistCompleted :
+          this.Data.Payout =
+          {
+            
+          }
         break
         case states.CargoCancelled   :
         break
@@ -219,6 +229,12 @@ function Journal()
         break
         case states.TransitRejected  :
         break
+      }
+      this.Data.Agent                 =
+      {
+            ID        : ctxt.Agent._id
+          , Name      : ctxt.Agent.Name
+          , MobileNo  : ctxt.Agent.MobileNo
       }
       this.Data.Transit.Status        = states.Closed
       this.Data.Transit.ClosingState  = ctxt.Data.State
@@ -264,6 +280,40 @@ function Journal()
           data_.JournalID = data.JournalID
 
           return data_
+          case source.Agent :
+
+            const query =
+                { 
+                    _id     : ObjectId(data.JournalID)
+                  , 'Agent.ID' : ObjectId(user._id)
+                }
+                , proj  = 
+                {
+                  projection : 
+                  {
+                      _id     : 1
+                    , 'Buyer.Address' : 1
+                    , 'Seller.ID' : 1
+                    , 'Seller.Name' : 1
+                    , 'Seller.Address' : 1
+                    , 'Seller.Image' : 1
+                    , 'Order.Products' : 1
+                    , 'Order.Bill' : 1
+                    , 'Payment.Channel' : 1
+                    , 'Payment.Amount' : 1
+                    , 'Payment.Status' : 1
+                    , 'Payment.TimeStamp' : 1
+                    , 'Transit.ID' : 1 
+                    , 'Transit.Status' : 1
+                    , 'Transit.ClosingState' : 1
+                  }
+                }
+                , data_ = await db.journal.Get(query, proj)
+  
+            delete data_._id
+            data_.JournalID = data.JournalID
+  
+            return data_
       }
     }
 

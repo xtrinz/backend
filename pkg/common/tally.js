@@ -53,4 +53,39 @@ const SetBill      = async function(data, src_loc, dest_loc)
                        + data.Bill.Tax
 }
 
-module.exports = { SetBill : SetBill }
+const SetAccount = async function(data)
+{
+  
+  data.Account =
+  {
+        In :
+      {
+          Dynamic : { Payment : { Buyer : 0 } }
+        , Static  : { Penalty : { Buyer : 0, Store : 0, Agent : 0 } }
+      }
+      , Out :
+      {
+          Dynamic : { Refund  : { Buyer : 0 } }
+        , Static  : { Payout  : { Store : 0, Agent : 0 } }
+      }
+  }
+
+//  // Product Price
+//  data.Products.forEach((prod) => 
+//  { data.Bill.Total += ( prod.Price * prod.Quantity ) })
+//
+//  // Charge Tax
+//  data.Bill.Tax = .18 * data.Bill.TransitCost
+//                // + 0
+//
+//  // Net Price
+//  data.Bill.NetPrice = data.Bill.TransitCost
+//                     + data.Bill.Total
+//                     + data.Bill.Tax
+}
+
+module.exports = 
+{ 
+       SetBill : SetBill
+  , SetAccount : SetAccount
+}
