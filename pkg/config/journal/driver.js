@@ -228,6 +228,12 @@ function Journal()
           , Name      : ctxt.Agent.Name
           , MobileNo  : ctxt.Agent.MobileNo
       }
+      this.Data.Agent                 =
+      {
+            ID        : ctxt.Agent._id
+          , Name      : ctxt.Agent.Name
+          , MobileNo  : ctxt.Agent.MobileNo
+      }
       this.Data.Transit.Status        = states.Closed
       this.Data.Transit.ClosingState  = ctxt.Data.State
       await db.journal.Save(this.Data)
