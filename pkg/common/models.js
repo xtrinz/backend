@@ -110,10 +110,10 @@ module.exports =
 
 		, None 						: 'None'						// None
 		, CargoInitiated 			: 'CargoInitiated'				// Payment had succeeded
-		, CargoCancelled 			: 'CargoCancelled'				// Order canceled by user
+		, CargoCancelled 			: 'CargoCancelled'				// Order canceled by user 									#Exit By User
 
-		, OrderRejected 			: 'OrderRejected' 				// Order rejected by the shop
-		, OrderTimeExceeded 		: 'OrderTimeExceeded'			// Order acceptance time limit for shop has been exceeded
+		, OrderRejected 			: 'OrderRejected' 				// Order rejected by the shop 								#Exit By Store
+		, OrderTimeExceeded 		: 'OrderTimeExceeded'			// Order acceptance time limit for shop has been exceeded	#Exit By User
 		, OrderAccepted 			: 'OrderAccepted'				// Order accpeted by shop
 		, OrderOnHold 				: 'OrderOnHold'					// Order on hold due to no nearby live agents
 		, OrderIgnored 				: 'OrderIgnored'
@@ -126,9 +126,9 @@ module.exports =
 		, TransitAbandoned			: 'TransitAbandoned'
 		, TransitRejected 			: 'TransitRejected'				// Agent droped/rejected the transit after acceptance
 		, TransitEnroute 			: 'TransitEnroute'				// The package is on the way.[state in hold, not decided]
-		, TransitOnDrift 			: 'TransitOnDrift'				// Agent need help on the way of delivery
-		, TransitTerminated 		: 'TransitTerminated'
-		, TranistCompleted 			: 'TranistCompleted'			// The package delivered
+		, TransitOnDrift 			: 'TransitOnDrift'				// Agent needs help on the way of delivery
+		, TransitTerminated 		: 'TransitTerminated'			// 															#Exit By Store
+		, TranistCompleted 			: 'TranistCompleted'			// The package delivered									#End
 	},
 	delay:
 	{
