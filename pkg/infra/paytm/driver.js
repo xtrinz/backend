@@ -97,9 +97,9 @@ function PayTM()
 
         const orderId      = pgw.Order.format(String(data.JournalID))
             , refId        = pgw.Refund.format(String(data.JournalID))
-            , txnId        = data.TxnId
+            , txnId        = data.ChannelRefID
             , txnType      = pgw.Type.REFUND
-            , refundAmount = data.Amount.toString()
+            , refundAmount = data.Amount.toFixed(2).toString()
 
         let refund       = new paytm.RefundDetailBuilder(orderId, refId, txnId, txnType, refundAmount)
           , refundDetail = refund.setReadTimeout(pgw.ReadTimeout).build()
@@ -119,14 +119,20 @@ function PayTM()
   
         if(sts !== pgw.RefundPending)
         {
-            console.log('paytm-token-creation-failed', { Response : resp })
+            console.log('paytm-token-creation-failed', { Response : resp, Body: body, Info: info, Sts: sts })
             Err_(code.INTERNAL_SERVER, reason.RefundFailed)
         }
 
-        const paytmRefundId = body.getRefundId()
+        const txn_i =
+        {
+            ID     : refId
+          , TxnID  : body.getRefundId()
+          , Amount : refundAmount 
+          , State  : pgw.RefundPending
+        }
 
-        console.log('paytm-refund-initiated', { Input : data, Response : resp })
-        return paytmRefundId
+        console.log('paytm-refund-initiated', { Input : data, Response : resp, TxnInfo: txn_i })
+        return txn_i
     }
 
     this.RefundStatus = async function(data)

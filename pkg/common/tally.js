@@ -79,7 +79,7 @@ const SettleAccounts = async function(data, state)
   {
     case states.TranistCompleted : // Alpha-Done
 
-      this.Account.Out.Static.Payout  =
+      data.Account.Out.Static.Payout  =
       { 
           Store    : data.Order.Bill.Total
         , Agent    : .75 * data.Order.Bill.TransitCost
@@ -93,9 +93,9 @@ const SettleAccounts = async function(data, state)
       switch(state.Previous)
       {
         case states.CargoInitiated:
-          this.Account.In.Static.Penalty.Buyer
-          this.Account.Out.Dynamic.Refund.Buyer
-          this.Account.Out.Static.Payout  =
+          data.Account.In.Static.Penalty.Buyer
+          data.Account.Out.Dynamic.Refund.Buyer
+          data.Account.Out.Static.Payout  =
           { 
               Store    : data.Order.Bill.Total
             , Agent    : .75 * data.Order.Bill.TransitCost
@@ -105,12 +105,12 @@ const SettleAccounts = async function(data, state)
     
           break
         case states.OrderAccepted:
-          this.Account.In.Static.Penalty.Buyer  = 0 // Set penalty
-          this.Account.Out.Dynamic.Refund.Buyer = 
+          data.Account.In.Static.Penalty.Buyer  = 0 // Set penalty
+          data.Account.Out.Dynamic.Refund.Buyer = 
                   data.Order.Bill.TransitCost
                 + data.Order.Bill.Tax
                 + data.Order.Bill.Total // - penalty
-          this.Account.Out.Static.Payout        =
+          data.Account.Out.Static.Payout        =
           {
               Store    : 0       // Analyse effort of store
             , Agent    : 0
@@ -119,12 +119,12 @@ const SettleAccounts = async function(data, state)
           }
           break
         case states.TransitAccepted:
-          this.Account.In.Static.Penalty.Buyer  = 0 // Set penalty
-          this.Account.Out.Dynamic.Refund.Buyer = 
+          data.Account.In.Static.Penalty.Buyer  = 0 // Set penalty
+          data.Account.Out.Dynamic.Refund.Buyer = 
                   data.Order.Bill.TransitCost
                 + data.Order.Bill.Tax
                 + data.Order.Bill.Total // - penalty
-          this.Account.Out.Static.Payout        =
+          data.Account.Out.Static.Payout        =
           {
               Store    : 0       // Analyse effort of store
             , Agent    : 000 * 0
@@ -137,14 +137,14 @@ const SettleAccounts = async function(data, state)
     break
     case states.OrderRejected    :
 
-      this.Account.In.Static.Penalty.Store  = 0 // Set penalty
+      data.Account.In.Static.Penalty.Store  = 0 // Set penalty
 
-      this.Account.Out.Dynamic.Refund.Buyer =
+      data.Account.Out.Dynamic.Refund.Buyer =
               data.Order.Bill.TransitCost
             + data.Order.Bill.Tax
             + data.Order.Bill.Total // + penalty / coupen
 
-      this.Account.Out.Static.Payout        =
+      data.Account.Out.Static.Payout        =
       {
           Store    : 0
         , Agent    : 0
@@ -159,7 +159,7 @@ const SettleAccounts = async function(data, state)
         case states.TransitAbandoned:
           // Deliver eeteduthavan pattillann paranju & next filering failed
 
-          this.Account.In.Static.Penalty =
+          data.Account.In.Static.Penalty =
                 { 
                       Buyer    : 0
                     , Store    : 0
@@ -167,12 +167,12 @@ const SettleAccounts = async function(data, state)
                     , Business : 0
                 } 
 
-          this.Account.Out.Dynamic.Refund.Buyer = 
+          data.Account.Out.Dynamic.Refund.Buyer = 
                   data.Order.Bill.TransitCost
                 + data.Order.Bill.Tax
                 + data.Order.Bill.Total // + add compensation
 
-          this.Account.Out.Static.Payout        =
+          data.Account.Out.Static.Payout        =
           {
               Store    : 000 * 0 //
             , Agent    : 0
@@ -184,19 +184,19 @@ const SettleAccounts = async function(data, state)
         case states.OrderOnHold: 
         // Aarum live alla delivery cheyyan, filtering itself failed
 
-        this.Account.In.Static.Penalty =
+        data.Account.In.Static.Penalty =
               { 
                     Buyer    : 0
                   , Store    : 0
                   , Agent    : 0
                   , Business : 0 // Set Penalty
               } 
-        this.Account.Out.Dynamic.Refund.Buyer = 
+        data.Account.Out.Dynamic.Refund.Buyer = 
                 data.Order.Bill.TransitCost
               + data.Order.Bill.Tax
               + data.Order.Bill.Total // + coupen/ compensation
 
-        this.Account.Out.Static.Payout        =
+        data.Account.Out.Static.Payout        =
             {
                 Store    : 000
               , Agent    : 0
@@ -207,7 +207,7 @@ const SettleAccounts = async function(data, state)
           break
         case states.TransitOnHold: // Pillar live nd, but aarum interested alla
 
-        this.Account.In.Static.Penalty =
+        data.Account.In.Static.Penalty =
               { 
                     Buyer    : 0
                   , Store    : 0
@@ -215,12 +215,12 @@ const SettleAccounts = async function(data, state)
                   , Business : 000 // Set Penatly
               } 
 
-        this.Account.Out.Dynamic.Refund.Buyer = 
+        data.Account.Out.Dynamic.Refund.Buyer = 
                 data.Order.Bill.TransitCost
               + data.Order.Bill.Tax
               + data.Order.Bill.Total // + coupen or compensation
 
-        this.Account.Out.Static.Payout        =
+        data.Account.Out.Static.Payout        =
         {
             Store    : 000      //
           , Agent    : 0

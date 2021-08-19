@@ -17,11 +17,15 @@ native-api-set
    transaction or it has to acknowledge the trasaction using
    status APIs. [ubu]
 
+01. Store context of multiple agents in context [ For now do for one ]
+
 MID can be shared, but not MID-KEY
 
 
 
+require('../../../cmd/settings')
 
+node pkg/infra/paytm/driver.js
 
 let data =
 {
@@ -38,7 +42,15 @@ let data =
 }
 
 let pay = new PayTM()
-pay.CreateToken(data)
+//pay.CreateToken(data)
 
+data =
+{
+    JournalID     : '60fe6ffbfc97c213300e3850'
+  , Amount        : 1.00
+  , ChannelRefID  : '20210726111212800110168291702867345'
+}
 
-01. Store context of multiple agents in context [ For now do for one ]
+// pay.Refund(data)
+// pay.RefundStatus(data)
+pay.PaymentStatus(data)
