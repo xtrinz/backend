@@ -38,6 +38,12 @@ function Journal()
         , Latitude        : 0
         , Address         : {}
       }
+      , Agent             :
+      {
+          ID              : ''
+        , Name            : ''
+        , MobileNo        : ''
+      }
       , Agents            : [] // { ID: , Earnings: { FirstMile | SecondMile | Penalty | ReasonForPenalty |  }}
       , Order             :
       {
@@ -139,6 +145,7 @@ function Journal()
         {
             Channel       : channel.Paytm
           , TransactionID : txn_i.ID
+          , ChannelRefID  : ''
           , Amount        : txn_i.Amount
           , Status        : states.TokenGenerated
           , TimeStamp     : ''      // Webhook entry time
@@ -204,21 +211,50 @@ function Journal()
       return t_id
     }
 
+    this.SetRefund = async function(refuntAmount)
+    {
+      console.log('init-refund', { Journal : this.Data })
+      // TODO add agent info, if terminated by admin/store
+      const refunt_     =
+      {
+          JournalID    : this.Data._id
+        , ChannelRefID : this.Data.Payment.ChannelRefID
+        , Amount       : refuntAmount
+      }
+      const paytm_      = new PayTM()
+          , txn_i       = await paytm_.Refund(refunt_)
+      this.Data.Refund  =
+      {
+          TransactionID : txn_i.ID
+        , ChannelRefID  : txn_i.TxnID
+        , Amount        : txn_i.Amount
+        , Status        : txn_i.State
+        , TimeStamp     : ''      // Webhook entry time
+      }
+      console.log('refund-initiated', { Refund : this.Data.Refund })
+    }
+
     this.PayOut = async function (ctxt)
     {
       this.Data = await db.journal.GetByID(ctxt.Data.JournalID)
       if (!this.Data) Err_(code.BAD_REQUEST, reason.JournalNotFound)
 
-      switch (ctxt.Data.State)
+      const state =
       {
-        case states.TranistCompleted :
-        break
-        case states.CargoCancelled   :
-        break
-        case states.OrderRejected    :
-        break
-        case states.TransitRejected  :
-        break
+          Current   : ctxt.Data.State
+        , Previous  : ctxt.Data.Return
+      }
+      await tally.SettleAccounts(this.Data, state)
+      
+      const refuntAmount = this.Data.Account.Out.Dynamic.Refund.Buyer
+        if (refuntAmount > 0)
+        this.SetRefund(refuntAmount)
+
+      this.Data.Agent =
+      {
+            ID        : ctxt.Data.Agent._id
+          , Name      : ctxt.Data.Agent.Name
+          , MobileNo  : ctxt.Data.Agent.MobileNo
       }
       this.Data.Transit.Status        = states.Closed
       this.Data.Transit.ClosingState  = ctxt.Data.State
@@ -232,29 +268,22 @@ function Journal()
       {
         case source.User :
 
-          const query =
+          let query =
               { 
-                  _id     : ObjectId(data.JournalID)
+                  _id        : ObjectId(data.JournalID)
                 , 'Buyer.ID' : ObjectId(user._id)
               }
               , proj  = 
               {
                 projection : 
                 {
-                    _id     : 1
-                  , 'Buyer.Address' : 1
-                  , 'Seller.ID' : 1
-                  , 'Seller.Name' : 1
-                  , 'Seller.Address' : 1
-                  , 'Seller.Image' : 1
-                  , 'Order.Products' : 1
-                  , 'Order.Bill' : 1
-                  , 'Payment.Channel' : 1
-                  , 'Payment.Amount' : 1
-                  , 'Payment.Status' : 1
-                  , 'Payment.TimeStamp' : 1
-                  , 'Transit.ID' : 1 
-                  , 'Transit.Status' : 1
+                     _id                   : 1  , 'Buyer.Address'     : 1
+                  , 'Seller.ID'            : 1  , 'Seller.Name'       : 1
+                  , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
+                  , 'Order.Products'       : 1  , 'Order.Bill'        : 1
+                  , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
+                  , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
+                  , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
                   , 'Transit.ClosingState' : 1
                 }
               }
@@ -264,6 +293,33 @@ function Journal()
           data_.JournalID = data.JournalID
 
           return data_
+          case source.Agent :
+
+                query =
+                { 
+                    _id        : ObjectId(data.JournalID)
+                  , 'Agent.ID' : ObjectId(user._id)
+                }
+                proj  = 
+                {
+                  projection : 
+                  {
+                       _id                   : 1  , 'Buyer.Address'     : 1
+                    , 'Seller.ID'            : 1  , 'Seller.Name'       : 1
+                    , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
+                    , 'Order.Products'       : 1  , 'Order.Bill'        : 1
+                    , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
+                    , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
+                    , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
+                    , 'Transit.ClosingState' : 1
+                  }
+                }
+                , data_ = await db.journal.Get(query, proj)
+  
+            delete data_._id
+            data_.JournalID = data.JournalID
+  
+            return data_
       }
     }
 

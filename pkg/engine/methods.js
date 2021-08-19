@@ -192,6 +192,8 @@ const RejectedByAgent		= async function(ctxt)
 		}
 		// ? TODO Resolve the loop, 'auto cancel' on ultra delay
 		// add faul rate idx for agent, record reasons as feedback
+		// TODO Create new state, Check delay, if it had grown high assign to admin
+		// Then give admin an api to filter near by agents to that perticular store
 		await Emit(alerts.NewTransit, ctxt)
 			ctxt.Data.Agents = agents
 			ctxt.Data.Agent  = ResetAgent

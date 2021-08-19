@@ -54,7 +54,10 @@ function Payment(data)
 
 	this.Store 	  = async function(rcd)
 	{
-		rcd.Payment.TimeStamp = Date.now()
+
+		rcd.Payment.TimeStamp 	 = this.Data.TXNDATE
+		rcd.Payment.ChannelRefID = this.Data.TXNID
+
 		switch (this.Data.Status)
 		{
 		case pgw.TxnSuccess:
