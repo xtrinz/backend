@@ -1,13 +1,12 @@
-const { ObjectID, ObjectId }        = require('mongodb')
-    , otp                           = require('../../infra/otp')
-    , { Err_, code, reason}         = require('../../common/error')
+const { ObjectID }           = require('mongodb')
+    , otp                    = require('../../infra/otp')
+    , { Err_, code, reason}  = require('../../common/error')
     , { states, mode
-      , query, task, message, gw }  = require('../../common/models')
-    , db                            = 
+      , query, message, gw } = require('../../common/models')
+    , db                     = 
     {
           store   : require('../store/archive')
         , user    : require('../user/archive')
-        , transit : require('../transit/archive')
     }
 
 function Store(data)
@@ -181,143 +180,6 @@ function Store(data)
         this.Data.State      = states.Registered
         await db.store.Save(this.Data)
         console.log('store-approved', {Store: this.Data})
-    }
-    
-    this.AddStaff   = async function (data)
-    {
-        console.log('add-staff', { In: data})
-
-        const key   = { _id: ObjectId(data.StoreID), AdminID: data.User._id }
-        this.Data = await db.store.Get(key, query.Custom)
-        if (!this.Data || this.Data.State !== states.Registered)
-        {
-            let     reason_   = reason.StoreNotFound
-            if(this.Data) reason_ = reason.UnapprovedStore
-            Err_(code.BAD_REQUEST, reason_)
-        }
-        const staff  = await db.user.Get(data.MobileNo, query.ByMobileNo)
-        if (!staff) Err_(code.BAD_REQUEST, reason.StaffNotFound)
-        if (staff.StoreList.Accepted.includes(String(this.Data._id)) ||
-            this.Data.StaffList.Approved.includes(String(staff._id)) )
-            Err_( code.BAD_REQUEST, reason.StaffExists)
-    
-        staff.StoreList.Pending.push(String(this.Data._id))
-        await db.user.Save(staff)
-        this.Data.StaffList.Pending.push(String(staff._id))
-        await db.store.Save(this.Data)
-    
-        console.log('staff-invitation-send', {Store: this.Data})
-    }
-    
-    this.SetStaffReplay   = async function (data)
-    {
-        console.log('set-staff-replay', {In: data})
-
-        this.Data = await db.store.Get(data.StoreID, query.ByID)
-        if (!this.Data || this.Data.State !== states.Registered)
-        {
-            let     reason_   = reason.StoreNotFound
-            if(this.Data) reason_ = reason.UnapprovedStore
-            Err_(code.BAD_REQUEST, reason_)
-        }
-        const staff  = await db.user.Get(data.User._id, query.ByID)
-        if (!staff) Err_(code.BAD_REQUEST, reason.StaffNotFound)
-    
-        if( !staff.StoreList.Pending.includes(String(this.Data._id)) ||
-            !this.Data.StaffList.Pending.includes(String(staff._id)) )
-            Err_(code.BAD_REQUEST, reason.NoContextFound)
-            staff.StoreList.Pending.pop(String(this.Data._id))
-        this.Data.StaffList.Pending.pop(String(staff._id))
-    
-        if (data.Task == task.Accept)
-        {
-            staff.StoreList.Accepted.push(String(this.Data._id))
-            this.Data.StaffList.Approved.push(String(staff._id))
-
-            console.log('rm-sock-id-from-transit-rcd-on-relieve', { In: data})
-            await db.transit.SetAllStaffSockID(data.StoreID, staff.SockID)
-        }
-        await db.user.Save(staff)
-        await db.store.Save(this.Data)
-        console.log('staff-response-set', {Store: this.Data, Staff: staff})
-    }
-    
-    this.RelieveStaff   = async function (data)
-    {
-        console.log('relieve-staff', {In: data})
-
-        const key = { _id: ObjectId(data.StoreID), AdminID: data.User._id }
-        this.Data = await db.store.Get(key, query.Custom)
-        if (!this.Data || this.Data.State !== states.Registered)
-        {
-            let     reason_   = reason.StoreNotFound
-            if(this.Data) reason_ = reason.UnapprovedStore
-            Err_(code.BAD_REQUEST, reason_)
-        }
-        const staff = await db.user.Get(data.MobileNo, query.ByMobileNo)
-        if (!staff) Err_( code.BAD_REQUEST, reason.StaffNotFound)
-    
-        if( !staff.StoreList.Accepted.includes(String(this.Data._id)) ||
-            !this.Data.StaffList.Approved.includes(String(staff._id)) )
-            Err_(code.BAD_REQUEST, reason.NoContextFound)    
-        staff.StoreList.Accepted.pop(String(this.Data._id))
-        this.Data.StaffList.Approved.pop(String(staff._id))
-        
-        console.log('rm-sock-id-from-transit-rcd-on-relieve', { In: data})
-        await db.transit.UnsetAllStaffSockID(data.StoreID, staff.SockID)
-
-        await db.user.Save(staff)
-        await db.store.Save(this.Data)
-        console.log('staff-relieved', { Store: this.Data, Staff: staff})
-    }
-    
-    this.RevokeStaffReq   = async function (data)
-    {
-        console.log('revoke-staff', { In: data})
-
-        const key = { _id: ObjectId(data.StoreID), AdminID: data.User._id }
-        this.Data = await db.store.Get(key, query.Custom)
-        if (!this.Data || this.Data.State !== states.Registered)
-        {
-            let reason_ = (this.Data)? reason.UnapprovedStore : reason.StoreNotFound
-            Err_(code.BAD_REQUEST, reason_)
-        }
-        const staff = await db.user.Get(data.MobileNo, query.ByMobileNo)
-        if (!staff) Err_(code.BAD_REQUEST, reason.StaffNotFound )
-    
-        if( !staff.StoreList.Pending.includes(String(this.Data._id)) ||
-            !this.Data.StaffList.Pending.includes(String(staff._id)) )
-            Err_(code.BAD_REQUEST, reason.NoContextFound)
-        staff.StoreList.Pending.pop(String(this.Data._id))
-        this.Data.StaffList.Pending.pop(String(staff._id))
-
-        console.log('rm-sock-id-from-transit-rcd-on-revoke', { In: data})
-        await db.transit.UnsetAllStaffSockID(data.StoreID, staff.SockID)
-
-        await db.user.Save(staff)
-        await db.store.Save(this.Data)
-        console.log('staff-revoked', {Store: this.Data, Staff: staff })
-    }
-    
-    this.ListStaff  = async function (in_)
-    {
-        console.log('list-staff', { In: in_ })
-
-        const key = { _id : ObjectId(in_.StoreID), AdminID : ObjectId(in_.UserID) }
-        this.Data = await db.store.Get(key, query.Custom)
-        if (!this.Data || this.Data.State !== states.Registered)
-        {
-            console.log('store-not-found-at-list-staff', { Store: in_ })
-            let reason_ = (this.Data)? reason.UnapprovedStore : reason.StoreNotFound
-            Err_(code.BAD_REQUEST, reason_)
-        }
-        let data   = {}
-        const proj = { Name : 1, MobileNo : 1 }
-        data.Approved = await db.user.GetMany(this.Data.StaffList.Approved, proj)
-        data.Pending  = await db.user.GetMany(this.Data.StaffList.Pending , proj)
-
-        console.log('staff-list', { Staffs : data })
-        return data
     }
     
     this.ListStores  = async function (user)
