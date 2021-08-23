@@ -32,6 +32,20 @@ const Get    = async function(query, proj)
     return journal
 }
 
+const GetMany    = async function(query, proj)
+{
+    console.log('list-journals', { Query : query, Projection : proj })
+
+    const journals = await journals.find(query).project(proj).toArray()
+    if (!journals)
+    {
+      console.log('no-journal-found', { Query : query, Projection : proj })
+      Err_(code.INTERNAL_SERVER, reason.JournalNotFound)
+    }
+    console.log('journals-found', { Journals : journals })
+    return journals
+}
+
 const Save       = async function(data)
 {
     console.log('save-journal', { Journal : data })
@@ -57,4 +71,5 @@ module.exports =
     GetByID : GetByID
   , Save    : Save
   , Get     : Get
+  , GetMany : GetMany
 }

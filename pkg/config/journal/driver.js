@@ -438,9 +438,181 @@ function Journal()
 
     this.List = function(data)
     {
-      switch(data.Entity)
+      console.log('list-journal', { Input: data, UserID: user._id })
+      let query_, proj, penalty, income
+      switch(data.Origin)
       {
-            case entity.User:
+        case source.User :
+
+          query_ =
+          { 
+            'Buyer.ID' : ObjectId(user._id)
+          }
+          , proj  = 
+          {
+            projection : 
+            {
+                  _id                   : 1  , 'Date'              : 1  
+              , 'Buyer.Address'        : 1
+              , 'Agent.Name'           : 1  , 'Agent.MobileNo'    : 1
+              , 'Seller.ID'            : 1  , 'Seller.Name'       : 1
+              , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
+              , 'Order.Products'       : 1  , 'Order.Bill'        : 1
+              , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
+              , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
+              , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
+              , 'Transit.ClosingState' : 1
+            }
+          }
+          , data_ = await db.journal.GetMany(query_, proj)
+
+          data_.forEach((node)=>
+          {
+            delete node._id
+            node.JournalID = data.JournalID
+          })
+          return data_
+
+        case source.Agent :
+
+          query_ =
+          {
+            'Agent.ID' : ObjectId(user._id)
+          }
+          proj  = 
+          {
+            projection : 
+            {
+                  _id                   : 1  , 'Date'              : 1
+
+              , 'Seller.Name'          : 1
+              , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
+              , 'Seller.Longitude'     : 1  , 'Seller.Latitude'   : 1
+
+              , 'Buyer.Name'           : 1
+              , 'Buyer.Address'        : 1
+              , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'    : 1
+
+              , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
+              , 'Transit.ClosingState' : 1
+
+              , 'Account.In.Static.Penalty.Agent' : 1
+              , 'Account.Out.Static.Payout.Agent' : 1
+            }
+          }
+          data_ = await db.journal.GetMany(query_, proj)
+
+          data_.forEach((node)=>
+          {
+            delete node._id
+            node.JournalID = data.JournalID
+            penalty   = node.Account.In.Static.Penalty.Agent
+            income    = node.Account.Out.Static.Payout.Agent
+
+            delete node.Account
+            node.Penalty = penalty
+            node.Income  = income      
+          })
+          return data_
+
+        case source.Store :
+          
+          let store = await db.store.Get(data.StoreID, query.ByID)
+          if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+
+          if(!store.StaffList.Approved.includes(String(user._id)) && 
+              (String(store.AdminID) !== String(user._id)))
+          {
+              console.log('authorisation-failed', { AdminID: store.AdminID, User: user })
+              Err_(code.BAD_REQUEST, reason.Unauthorized)
+          }
+
+          query_ =
+          {
+            'Seller.ID' : ObjectId(data.StoreID)
+          }
+          proj  = 
+          {
+            projection : 
+            {
+                  _id                   : 1  , 'Date'              : 1
+              , 'Buyer.Name'           : 1
+              , 'Agent.Name'           : 1  , 'Agent.MobileNo'    : 1
+              , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
+              , 'Transit.ClosingState' : 1
+              , 'Order.Products'       : 1  , 'Order.Bill.Total'  : 1
+              , 'Account.In.Static.Penalty.Store' : 1
+              , 'Account.Out.Static.Payout.Store' : 1
+            }
+          }
+          data_ = await db.journal.GetMany(query_, proj)
+
+          data_.forEach((node)=>
+          {
+            delete node._id
+            node.JournalID = data.JournalID
+            penalty   = node.Account.In.Static.Penalty.Store
+            income    = node.Account.Out.Static.Payout.Store
+  
+            delete node.Account
+            node.Penalty = penalty
+            node.Income  = income      
+          })
+            return data_
+
+        case source.Admin :
+
+          if(user.Mode !== mode.Admin)
+          Err_(code.BAD_REQUEST, reason.Unauthorized)
+
+          query_ =
+          { '$or': // TODO $lookup cross transit status
+            [
+                {  'Admin.ID' : user._id }
+              , { 'Admins.ID' : user._id }
+            ]
+          }
+          proj  = 
+          {
+            projection : 
+            {
+                  _id                   : 1  , 'Date'            : 1
+              
+              , 'Buyer.Name'           : 1
+              , 'Buyer.Address'        : 1
+              , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'  : 1
+
+              , 'Seller.ID'            : 1  , 'Seller.Name'     : 1
+              , 'Seller.Address'       : 1  , 'Seller.Image'    : 1
+              , 'Seller.Longitude'     : 1  , 'Seller.Latitude' : 1
+              
+              , 'Agent.Name'           : 1  , 'Agent.MobileNo'  : 1
+
+              , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
+              , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
+
+              , 'Transit.ID'           : 1  , 'Transit.Status'  : 1
+              , 'Transit.ClosingState' : 1
+
+              , 'Order.Products'       : 1  , 'Order.Bill'      : 1
+              , 'Account.In.Static.Penalty'        : 1
+              , 'Account.Out.Dynamic.Refund.Buyer' : 1
+            }
+          }
+          data_ = await db.journal.GetMany(query_, proj)
+
+          data_.forEach((node)=>
+          {
+              delete node._id
+              node.JournalID = data.JournalID
+              penalty        = node.Account.In.Static.Penalty
+              income         = node.Account.Out.Dynamic.Refund.Buyer
+      
+              delete node.Account
+              node.Penalty   = penalty
+              node.Refund    = income
+          })
+          return data_
       }
     }
 }
