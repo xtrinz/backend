@@ -36,14 +36,14 @@ const GetMany    = async function(query, proj)
 {
     console.log('list-journals', { Query : query, Projection : proj })
 
-    const journals = await journals.find(query).project(proj).toArray()
-    if (!journals)
+    const resp = await journals.find(query, proj).toArray()
+    if (!resp)
     {
       console.log('no-journal-found', { Query : query, Projection : proj })
       Err_(code.INTERNAL_SERVER, reason.JournalNotFound)
     }
-    console.log('journals-found', { Journals : journals })
-    return journals
+    console.log('journals-found', { Journals : resp })
+    return resp
 }
 
 const Save       = async function(data)

@@ -436,7 +436,7 @@ function Journal()
       }
     }
 
-    this.List = function(data)
+    this.List = async function(data, user)
     {
       console.log('list-journal', { Input: data, UserID: user._id })
       let query_, proj, penalty, income
@@ -466,11 +466,11 @@ function Journal()
           }
           , data_ = await db.journal.GetMany(query_, proj)
 
-          data_.forEach((node)=>
+          for(let idx = 0; idx < data_.length; idx++)
           {
-            delete node._id
-            node.JournalID = data.JournalID
-          })
+            data_[idx].JournalID = data_[idx]._id
+            delete data_[idx]._id
+          }
           return data_
 
         case source.Agent :
@@ -502,17 +502,17 @@ function Journal()
           }
           data_ = await db.journal.GetMany(query_, proj)
 
-          data_.forEach((node)=>
+          for(let idx = 0; idx < data_.length; idx++)
           {
-            delete node._id
-            node.JournalID = data.JournalID
-            penalty   = node.Account.In.Static.Penalty.Agent
-            income    = node.Account.Out.Static.Payout.Agent
+            data_[idx].JournalID = data_[idx]._id
+            delete data_[idx]._id
+            penalty   = data_[idx].Account.In.Static.Penalty.Agent
+            income    = data_[idx].Account.Out.Static.Payout.Agent
 
-            delete node.Account
-            node.Penalty = penalty
-            node.Income  = income      
-          })
+            delete data_[idx].Account
+            data_[idx].Penalty = penalty
+            data_[idx].Income  = income      
+          }
           return data_
 
         case source.Store :
@@ -547,17 +547,17 @@ function Journal()
           }
           data_ = await db.journal.GetMany(query_, proj)
 
-          data_.forEach((node)=>
+          for(let idx = 0; idx < data_.length; idx++)
           {
-            delete node._id
-            node.JournalID = data.JournalID
-            penalty   = node.Account.In.Static.Penalty.Store
-            income    = node.Account.Out.Static.Payout.Store
+            data_[idx].JournalID = data_[idx]._id
+            delete data_[idx]._id
+            penalty   = data_[idx].Account.In.Static.Penalty.Store
+            income    = data_[idx].Account.Out.Static.Payout.Store
   
-            delete node.Account
-            node.Penalty = penalty
-            node.Income  = income      
-          })
+            delete data_[idx].Account
+            data_[idx].Penalty = penalty
+            data_[idx].Income  = income      
+          }
             return data_
 
         case source.Admin :
@@ -601,17 +601,17 @@ function Journal()
           }
           data_ = await db.journal.GetMany(query_, proj)
 
-          data_.forEach((node)=>
+          for(let idx = 0; idx < data_.length; idx++)
           {
-              delete node._id
-              node.JournalID = data.JournalID
-              penalty        = node.Account.In.Static.Penalty
-              income         = node.Account.Out.Dynamic.Refund.Buyer
+              data_[idx].JournalID = data_[idx]._id
+              delete data_[idx]._id
+              penalty        = data_[idx].Account.In.Static.Penalty
+              income         = data_[idx].Account.Out.Dynamic.Refund.Buyer
       
-              delete node.Account
-              node.Penalty   = penalty
-              node.Refund    = income
-          })
+              delete data_[idx].Account
+              data_[idx].Penalty   = penalty
+              data_[idx].Refund    = income
+          }
           return data_
       }
     }
