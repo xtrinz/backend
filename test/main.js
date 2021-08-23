@@ -43,9 +43,9 @@ const { Test, TestSuite } = require('./lib/driver')
     , product_1     = new product.data.Product ()
     , addr_1_user_3 = new address.data.Address ()
     
-    new journal.data.Journal (user_3_buyer, addr_1_user_3, store_1, cart.data.Cart.Carts[user_3_buyer.Name])
+    new journal.data.Journal (user_3_buyer, addr_1_user_3, store_1, cart.data.Cart.Carts[user_3_buyer.Name], agent_1)
 
-    , user_4_owner  = new    user.data.User    ('User')
+  let user_4_owner  = new    user.data.User    ('User')
     , user_6_buyer  = new    user.data.User    ('User')
     , agent_2       = new    user.data.User    ('Agent')
     , store_2       = new   store.data.Store   ()
@@ -62,7 +62,7 @@ const { Test, TestSuite } = require('./lib/driver')
     ,    cart.story.Std(user_3_buyer.Name, product_1.Name, addr_1_user_3.Address.Name, store_1.Name)
     , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
     
-    , journal.story.Std(user_3_buyer.Name)
+    , journal.story.Std(user_3_buyer.Name, user_1_owner.Name, agent_1.Name, admin_1.Name)
 
     ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
   ]
