@@ -7,8 +7,14 @@ const { ObjectID, ObjectId } = require('mongodb')
       , journal    : require('../journal/archive')
       , addr       : require('../address/archive')
     }
-    , { Err_, code, reason }     = require('../../common/error')
-    , { states, channel, query, source } = require('../../common/models')
+    , { Err_
+      , code
+      , reason }   = require('../../common/error')
+    , { states
+      , channel
+      , query
+      , source
+      , mode }     = require('../../common/models')
     , { Refund }   = require('../../infra/paytm/ind/refund')
     , { Payment }  = require('../../infra/paytm/ind/payment')
     , { PayTM }    = require('../../infra/paytm/driver')
@@ -264,11 +270,12 @@ function Journal()
     this.Read = async function(data, user)
     {
       console.log('read-journal', { Input: data, UserID: user._id })
+      let query_, proj, penalty, income
       switch(data.Origin)
       {
         case source.User :
 
-          let query =
+              query_ =
               { 
                   _id        : ObjectId(data.JournalID)
                 , 'Buyer.ID' : ObjectId(user._id)
@@ -277,7 +284,9 @@ function Journal()
               {
                 projection : 
                 {
-                     _id                   : 1  , 'Buyer.Address'     : 1
+                     _id                   : 1  , 'Date'              : 1  
+                  , 'Buyer.Address'        : 1
+                  , 'Agent.Name'           : 1  , 'Agent.MobileNo'    : 1
                   , 'Seller.ID'            : 1  , 'Seller.Name'       : 1
                   , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
                   , 'Order.Products'       : 1  , 'Order.Bill'        : 1
@@ -287,7 +296,7 @@ function Journal()
                   , 'Transit.ClosingState' : 1
                 }
               }
-              , data_ = await db.journal.Get(query, proj)
+              , data_ = await db.journal.Get(query_, proj)
 
           delete data_._id
           data_.JournalID = data.JournalID
@@ -295,7 +304,7 @@ function Journal()
           return data_
           case source.Agent :
 
-                query =
+                query_ =
                 { 
                     _id        : ObjectId(data.JournalID)
                   , 'Agent.ID' : ObjectId(user._id)
@@ -304,22 +313,126 @@ function Journal()
                 {
                   projection : 
                   {
-                       _id                   : 1  , 'Buyer.Address'     : 1
-                    , 'Seller.ID'            : 1  , 'Seller.Name'       : 1
+                       _id                   : 1  , 'Date'              : 1
+
+                    , 'Seller.Name'          : 1
                     , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
-                    , 'Order.Products'       : 1  , 'Order.Bill'        : 1
-                    , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
-                    , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
+                    , 'Seller.Longitude'     : 1  , 'Seller.Latitude'   : 1
+
+                    , 'Buyer.Name'           : 1
+                    , 'Buyer.Address'        : 1
+                    , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'    : 1
+
                     , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
                     , 'Transit.ClosingState' : 1
+
+                    , 'Account.In.Static.Penalty.Agent' : 1
+                    , 'Account.Out.Static.Payout.Agent' : 1
                   }
                 }
-                , data_ = await db.journal.Get(query, proj)
-  
+                data_ = await db.journal.Get(query_, proj)
+
             delete data_._id
             data_.JournalID = data.JournalID
-  
+            penalty   = data_.Account.In.Static.Penalty.Agent
+            income    = data_.Account.Out.Static.Payout.Agent
+
+            delete data_.Account
+            data_.Penalty = penalty
+            data_.Income  = income
             return data_
+
+            case source.Store :
+              
+              let store = await db.store.Get(data.StoreID, query.ByID)
+              if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+
+              if(!store.StaffList.Approved.includes(String(user._id)) && 
+                  (String(store.AdminID) !== String(user._id)))
+              {
+                  console.log('authorisation-failed', { AdminID: store.AdminID, User: user })
+                  Err_(code.BAD_REQUEST, reason.Unauthorized)
+              }
+
+              query_ =
+              {
+                  _id         : ObjectId(data.JournalID)
+                , 'Seller.ID' : ObjectId(data.StoreID)
+              }
+              proj  = 
+              {
+                projection : 
+                {
+                     _id                   : 1  , 'Date'              : 1
+                  , 'Buyer.Name'           : 1
+                  , 'Agent.Name'           : 1  , 'Agent.MobileNo'    : 1
+                  , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
+                  , 'Transit.ClosingState' : 1
+                  , 'Order.Products'       : 1  , 'Order.Bill.Total'  : 1
+                  , 'Account.In.Static.Penalty.Store' : 1
+                  , 'Account.Out.Static.Payout.Store' : 1
+                }
+              }
+              data_ = await db.journal.Get(query_, proj)
+
+          delete data_._id
+          data_.JournalID = data.JournalID
+          penalty   = data_.Account.In.Static.Penalty.Store
+          income    = data_.Account.Out.Static.Payout.Store
+
+          delete data_.Account
+          data_.Penalty = penalty
+          data_.Income  = income
+          return data_
+
+          case source.Admin :
+
+            if(user.Mode !== mode.Admin)
+            Err_(code.BAD_REQUEST, reason.Unauthorized)
+
+            query_ =
+            {
+                _id         : ObjectId(data.JournalID)
+            }
+            proj  = 
+            {
+              projection : 
+              {
+                   _id                   : 1  , 'Date'            : 1
+                
+                , 'Buyer.Name'           : 1
+                , 'Buyer.Address'        : 1
+                , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'  : 1
+
+                , 'Seller.ID'            : 1  , 'Seller.Name'     : 1
+                , 'Seller.Address'       : 1  , 'Seller.Image'    : 1
+                , 'Seller.Longitude'     : 1  , 'Seller.Latitude' : 1
+                
+                , 'Agent.Name'           : 1  , 'Agent.MobileNo'  : 1
+
+                , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
+                , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
+
+                , 'Transit.ID'           : 1  , 'Transit.Status'  : 1
+                , 'Transit.ClosingState' : 1
+
+                , 'Order.Products'       : 1  , 'Order.Bill'      : 1
+                , 'Account.In.Static.Penalty'        : 1
+                , 'Account.Out.Dynamic.Refund.Buyer' : 1
+              }
+            }
+            data_ = await db.journal.Get(query_, proj)
+
+        delete data_._id
+        data_.JournalID = data.JournalID
+        penalty   = data_.Account.In.Static.Penalty
+        income    = data_.Account.Out.Dynamic.Refund.Buyer
+
+        delete data_.Account
+        data_.Penalty   = penalty
+        data_.Refund    = income
+        return data_
+
       }
     }
 
