@@ -1,4 +1,3 @@
-01 journal read											21_08_13    21_08_23
 02 ground one mob no for one mode [ for now ]           21_08_23    
 03 journal	list	agetn/store/user/admin
 04 product list limit
@@ -37,7 +36,7 @@
 38 TransitIgnoredByAgent - on admin lock, if waiting time exceeds limits, tigger another handler to auto cancel
 39 Add Journal ID to the cart & remove it only after payment success - limit number of checkouts in given span of time [This will be a good algorithm ]
 40 Clear quoted TODOs
-41 journal	list	agetn/store/user                       21_08_23      21_08_23
+
 
 * Beware do not modify current and previous state before payout
 * for duplicate notifications reject the same in frond end

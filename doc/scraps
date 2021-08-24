@@ -64,3 +64,11 @@ Todo:
 
 Fix Dates in Journal List/View
 Consier Store as entity and create seperate token for it
+In Page & Limit - Page > 0
+user $inc to modify product count
+https://docs.mongodb.com/manual/tutorial/optimize-query-performance-with-indexes-and-projections/#limit-the-number-of-query-results-to-reduce-network-demand
+
+
+Completed
+01 journal read											          21_08_13    21_08_23
+02 journal	list	agetn/store/user            21_08_23    21_08_23

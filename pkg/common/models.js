@@ -1,10 +1,14 @@
 const Org          = process.env.ORG
 module.exports =
 {
+	dbset:
+	{
+		  Limit						: 15
+	},
 	limits:
 	{
-		  AddressCount 				: 16
-		, ProductCount 				: 64
+		  AddressCount 				: 16			// Max allowed address count / user
+		, ProductCount 				:128			// Max count for cart elements
 	},
 	paytm: 
 	{

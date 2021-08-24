@@ -65,6 +65,29 @@ const ReadAll         = async function (store_id)
     return products_
 }
 
+const DecProdCount         = async function (prod)
+{
+    console.log('decrement-product-count', { Products: prod })
+    let qry_ = []
+    prod.forEach((item)=>
+    {
+        qry_.push(
+        { updateOne :
+            {
+               "filter": { _id: ObjectId(item.ProductID) },
+               "update": { $inc : { Quantity: (-1 * item.Quantity) } }
+            }
+        })
+    })
+    const resp = await products.bulkWrite(qry_)
+    if (!resp.result.ok)
+    {
+        console.log('product-count-decrement-failed', { Query : qry_ })
+        return
+    }
+    console.log('product-count-decremented', { Products : qry_[0].updateOne })
+}
+
 const Remove      = async function (data)
 {
     const query = 
@@ -83,8 +106,9 @@ const Remove      = async function (data)
 
 module.exports = 
 {
-      Save    : Save
-    , Get     : Get
-    , ReadAll : ReadAll
-    , Remove  : Remove
+      Save         : Save
+    , Get          : Get
+    , ReadAll      : ReadAll
+    , DecProdCount : DecProdCount
+    , Remove       : Remove
 }

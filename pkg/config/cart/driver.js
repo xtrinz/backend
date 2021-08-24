@@ -1,7 +1,11 @@
 const { ObjectID, ObjectId }  = require('mongodb')
     , { Err_, code , reason } = require('../../common/error')
     , { query }               = require('../../common/models')
-    , db                      = require('../cart/archive')
+    , db                      = 
+    {
+          cart                : require('../cart/archive')
+        , product             : require('../product/archive')          
+    }
 
 function Cart(user_id)
 {
@@ -18,7 +22,7 @@ function Cart(user_id)
    {
         console.log('create-cart', { Cart: this.Data })
         
-        const resp = await db.Get(this.Data.UserID
+        const resp = await db.cart.Get(this.Data.UserID
                                 , query.ByUserID )
         if(resp)
         {
@@ -27,14 +31,14 @@ function Cart(user_id)
         }
 
         this.Data._id = new ObjectID()
-        await db.Save(this.Data)
+        await db.cart.Save(this.Data)
         return this.Data._id
    }
 
    this.Read        = async function (user_id)
    {
       console.log('read-cart', { UserID : user_id })
-      const items = await db.Read(user_id)
+      const items = await db.cart.Read(user_id)
       let data    =
       {
           Flagged       : items.Flagged
@@ -48,20 +52,31 @@ function Cart(user_id)
    this.Delete      = async function (user_id)
    {
       console.log('delete-cart', { UserID: user_id })
-      db.Delete(user_id)
+      db.cart.Delete(user_id)
    }
 
    this.Flush       = async function(user_id)
    {
       console.log('flush-cart', { UserID : user_id })
 
-      let cart       = await db.Get(user_id, query.ByUserID)
+      let cart       = await db.cart.Get(user_id, query.ByUserID)
       if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)
+
+      let items = []
+      cart.Products.forEach((prod)=>
+      {
+          items.push(
+          {
+              ProductID : prod.ProductID
+            , Quantity  : prod.Quantity
+          })
+      })
+      await db.product.DecProdCount(items)
 
       cart.JournalID   = ''
       cart.Products    = []
       
-      await db.Save(cart)
+      await db.cart.Save(cart)
    }
 }
 
@@ -84,7 +99,7 @@ function CartEntry(data)
 
     this.Data._id = ObjectId(this.Data.ProductID)
 
-    await db.Insert(cart_id, this.Data)
+    await db.cart.Insert(cart_id, this.Data)
   }
 
   this.Update     = async function (cart_id, product_id, qnty)
@@ -94,7 +109,7 @@ function CartEntry(data)
       , ProductID : product_id
       , Quantity  : qnty })
 
-    await db.Update(cart_id, product_id, qnty)
+    await db.cart.Update(cart_id, product_id, qnty)
   }
 
   this.Remove  = async function (cart_id, product_id)
@@ -103,7 +118,7 @@ function CartEntry(data)
         CartID    : cart_id
       , ProductID : product_id })
 
-    await db.Remove(cart_id, product_id)
+    await db.cart.Remove(cart_id, product_id)
   }
 }
 
