@@ -125,11 +125,8 @@ const ListStoreMgrSockets = async function(store_id)
     console.log('list-store-managers-socket-ids', { StoreID: store_id })
     const query = 
         { 
-            $or : 
-            [
-                { 'StoreList.Owned'    : { $elemMatch: { $eq: String(store_id) } }, IsLive: true }
-            , { 'StoreList.Accepted' : { $elemMatch: { $eq: String(store_id) } }, IsLive: true }
-            ] 
+              'StoreList.Owned' : { $elemMatch: { $eq: String(store_id) } }
+            , IsLive            : true
         }
         , proj   = { SockID: 1 }
 

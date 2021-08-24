@@ -78,4 +78,19 @@ router.get('/list', async (req, res, next) =>
     } catch (err) { next(err) }
 })
 
+router.put('/edit', async (req, res, next) =>
+{
+  try 
+  {
+    let  store = new Store()
+    // TODO await store.Edit(req.body)
+
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : text.ProfileUpdated,
+      Data    : {}
+    })
+  } catch (err) { next(err) }
+})
+
 module.exports = router

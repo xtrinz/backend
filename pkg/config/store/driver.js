@@ -38,11 +38,6 @@ function Store(data)
             , Country     : data.Address.Country
         }
         , State           : states.New
-        , StaffList       :
-        {
-              Approved    : []
-            , Pending     : []
-        }
     }
 
     this.Read = async function(store_id, user_id)
@@ -99,8 +94,7 @@ function Store(data)
         this.Data = await db.store.Get(StoreID, query.ByID)
         if (!this.Data) Err_(code.BAD_REQUEST, reason.StoreNotFound)
     
-        if(!this.Data.StaffList.Approved.includes(String(UserID)) && 
-            (String(this.Data.AdminID) !== String(UserID)))
+        if(String(this.Data.AdminID) !== String(UserID))
             Err_(code.BAD_REQUEST, reason.Unauthorized)
     }
     
@@ -185,15 +179,11 @@ function Store(data)
     this.ListStores  = async function (user)
     {
         console.log('list-store', {User : user})
-        let data = { Owned : [], Accepted : [], Pending  : [] }
         let proj =
         {   _id   : 1, Name  : 1, Type : 1
           , Image : 1, State : 1           }
-        let stores    = user.StoreList
-        data.Owned    = await db.store.GetMany(stores.Owned    , proj)
-        delete proj.State
-        data.Accepted = await db.store.GetMany(stores.Accepted , proj)
-        data.Pending  = await db.store.GetMany(stores.Pending  , proj)
+        let stores = user.StoreList
+        const data = await db.store.GetMany(stores.Owned , proj)
         console.log('store-list', {Store: data})
         return data
     }    

@@ -26,7 +26,7 @@ function Socket()
         await db.transit.SetUserSockID(user.Data._id, sock_id)
 
         console.log('sock-id-to-store-transit-rcd', opt)
-        let str_stores = [ ...user.Data.StoreList.Owned, ...user.Data.StoreList.Accepted ]
+        let str_stores = user.Data.StoreList.Owned
         await db.transit.SetStoreSockID(str_stores, sock_id)
 
         console.log('user-sock-id-set', opt)
@@ -46,7 +46,7 @@ function Socket()
         await db.transit.UnsetUserSockID(user.Data._id, sock_id)
 
         console.log('sock-id-from-store-transit-rcd', opt)
-        let str_stores = [ ...user.Data.StoreList.Owned, ...user.Data.StoreList.Accepted ]
+        let str_stores = user.Data.StoreList.Owned
         await db.transit.UnsetStoreSockID(str_stores, sock_id)
 
         console.log('user-sock-id-poped', opt)

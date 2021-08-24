@@ -6,7 +6,6 @@
 06 store   list limit
 07 store   edit
 08 store   delete
-09 staff   list limit
 10 search & product filtering with tree tags
 11 set token in cookies
 12 root admin + sub admin logics
@@ -38,6 +37,7 @@
 38 TransitIgnoredByAgent - on admin lock, if waiting time exceeds limits, tigger another handler to auto cancel
 39 Add Journal ID to the cart & remove it only after payment success - limit number of checkouts in given span of time [This will be a good algorithm ]
 40 Clear quoted TODOs
+41 journal	list	agetn/store/user                       21_08_23      21_08_23
 
 * Beware do not modify current and previous state before payout
 * for duplicate notifications reject the same in frond end

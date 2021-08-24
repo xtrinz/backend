@@ -226,18 +226,13 @@ let List = function(user_, store_)
         , Status        : status.Success
         , Text          : ''
         , Data          :
-        {
-          Owned :
-            [{
-                StoreID : store.ID
-              , Name    : store.Name
-              , Image   : store.Image
-              , Type    : store.Type
-              , State   : store.State
-            }]
-          , Accepted : []
-          , Pending  : []
-        }
+          [{
+              StoreID : store.ID
+            , Name    : store.Name
+            , Image   : store.Image
+            , Type    : store.Type
+            , State   : store.State
+          }]
       }
     }
     return templ

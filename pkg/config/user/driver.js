@@ -24,9 +24,7 @@ function User(mob_no, user_mode)
       , AddressList: []
       , StoreList  : 
       {
-          Owned    : []    // Created By User
-        , Accepted : []    // Managed By User
-        , Pending  : []    // Invitation Received for management
+          Owned    : []
       }  
       , ResetPasswd: false
       , IsLive     : false

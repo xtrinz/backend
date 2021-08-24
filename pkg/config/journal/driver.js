@@ -347,8 +347,7 @@ function Journal()
               let store = await db.store.Get(data.StoreID, query.ByID)
               if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
 
-              if(!store.StaffList.Approved.includes(String(user._id)) && 
-                  (String(store.AdminID) !== String(user._id)))
+              if(String(store.AdminID) !== String(user._id))
               {
                   console.log('authorisation-failed', { AdminID: store.AdminID, User: user })
                   Err_(code.BAD_REQUEST, reason.Unauthorized)
@@ -520,8 +519,7 @@ function Journal()
           let store = await db.store.Get(data.StoreID, query.ByID)
           if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
 
-          if(!store.StaffList.Approved.includes(String(user._id)) && 
-              (String(store.AdminID) !== String(user._id)))
+          if(String(store.AdminID) !== String(user._id))
           {
               console.log('authorisation-failed', { AdminID: store.AdminID, User: user })
               Err_(code.BAD_REQUEST, reason.Unauthorized)
