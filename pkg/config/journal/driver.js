@@ -438,7 +438,7 @@ function Journal()
     this.List = async function(data, user)
     {
       console.log('list-journal', { Input: data, UserID: user._id })
-      let query_, proj, penalty, income
+      let query_, proj, penalty, income, data_, cond_
       switch(data.Origin)
       {
         case source.User :
@@ -447,7 +447,7 @@ function Journal()
           { 
             'Buyer.ID' : ObjectId(user._id)
           }
-          , proj  = 
+          proj   = 
           {
             projection : 
             {
@@ -463,7 +463,12 @@ function Journal()
               , 'Transit.ClosingState' : 1
             }
           }
-          , data_ = await db.journal.GetMany(query_, proj)
+          cond_   =
+          {
+              Page  : parseInt(data.Page)
+            , Limit : parseInt(data.Limit)
+          }          
+          data_   = await db.journal.GetMany(query_, proj, cond_)
 
           for(let idx = 0; idx < data_.length; idx++)
           {
@@ -499,7 +504,12 @@ function Journal()
               , 'Account.Out.Static.Payout.Agent' : 1
             }
           }
-          data_ = await db.journal.GetMany(query_, proj)
+          cond_   =
+          {
+              Page  : parseInt(data.Page)
+            , Limit : parseInt(data.Limit)
+          }          
+          data_ = await db.journal.GetMany(query_, proj, cond_)
 
           for(let idx = 0; idx < data_.length; idx++)
           {
@@ -543,7 +553,12 @@ function Journal()
               , 'Account.Out.Static.Payout.Store' : 1
             }
           }
-          data_ = await db.journal.GetMany(query_, proj)
+          cond_   =
+          {
+              Page  : parseInt(data.Page)
+            , Limit : parseInt(data.Limit)
+          }          
+          data_ = await db.journal.GetMany(query_, proj, cond_)
 
           for(let idx = 0; idx < data_.length; idx++)
           {
@@ -597,7 +612,12 @@ function Journal()
               , 'Account.Out.Dynamic.Refund.Buyer' : 1
             }
           }
-          data_ = await db.journal.GetMany(query_, proj)
+          cond_   =
+          {
+              Page  : parseInt(data.Page)
+            , Limit : parseInt(data.Limit)
+          }             
+          data_ = await db.journal.GetMany(query_, proj, cond_)
 
           for(let idx = 0; idx < data_.length; idx++)
           {

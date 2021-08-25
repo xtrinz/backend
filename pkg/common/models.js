@@ -3,7 +3,7 @@ module.exports =
 {
 	dbset:
 	{
-		  Limit						: 15
+		  Limit						: 16
 	},
 	limits:
 	{

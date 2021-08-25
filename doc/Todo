@@ -1,8 +1,6 @@
 02 ground one mob no for one mode [ for now ]           21_08_23    
-03 journal	list	agetn/store/user/admin
-04 product list limit
+03 journal	list admin
 05 product add  variant
-06 store   list limit
 07 store   edit
 08 store   delete
 10 search & product filtering with tree tags
@@ -28,7 +26,6 @@
 30 gstcategory | warrentycard | extradiscount | productdescription | productdetails
 31 User registration has to set manual [capcha/passwd-retry(latency/blocking)]
 32 User/Shop can be targeted with flood of approval requests.
-33 Limit staff count / store - a staff can part of how many stores | convert approved/pending/accepted lists in to map
 34 check if one of the socket id is not present at the time of emission, how system crashes
 35 at read_otp : there is a race condition
 36 limit devices / socket connections

@@ -402,6 +402,8 @@ let List = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
             {
                 Origin     : src_
               , StoreID    : store.ID
+              , Page       : 1
+              , Limit      : 8
             }
             , Header       : { Authorization: 'Bearer ' + token }
         }

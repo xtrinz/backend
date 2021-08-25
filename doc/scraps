@@ -72,3 +72,21 @@ https://docs.mongodb.com/manual/tutorial/optimize-query-performance-with-indexes
 Completed
 01 journal read											          21_08_13    21_08_23
 02 journal	list	agetn/store/user            21_08_23    21_08_23
+06 store   list limit                         reimplement
+04 product list limit
+---
+
+.skip(skip).limit(nPerPage).toArray()
+
+dbset.Limit
+
+"mongodb": "^3.6.3"
+
+npm notice
+npm notice New minor version of npm available! 7.6.3 -> 7.21.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v7.21.0
+npm notice Run npm install -g npm@7.21.0 to update!
+npm notice
+
+
+Page/Limit

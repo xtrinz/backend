@@ -128,7 +128,9 @@ let List = function(user_, store_, product_)
         , Body              : {}
         , Query             : 
         {
-            StoreID         : store.ID
+              StoreID       : store.ID
+            , Page          : 1
+            , Limit         : 8
         }
         , Header            : { Authorization: 'Bearer ' + user.Token }
       }

@@ -1,6 +1,6 @@
 const { ObjectId }           = require('mongodb')
     , { Err_, code, reason } = require('../../common/error')
-    , { query }              = require('../../common/models')
+    , { query, dbset }       = require('../../common/models')
     , { products }           = require('../../common/database')
 
 const Save      = async function(data)
@@ -44,9 +44,11 @@ const Get        = async function(param, qType)
 }
 
 
-const ReadAll         = async function (store_id)
+const ReadAll         = async function (data)
 {
-    console.log('find-all-product-by-store-id', { StoreID: store_id })    
+    data.Page  = parseInt(data.Page)
+    data.Limit = parseInt(data.Limit)
+    console.log('find-all-product-by-store-id', { Data: data })    
     const project   =
         {
             _id         : 1, StoreID    : 1,
@@ -54,8 +56,14 @@ const ReadAll         = async function (store_id)
             Price       : 1, Quantity   : 1,
             Description : 1, CategoryID : 1 
         }
-        , query     = { StoreID: ObjectId(store_id) }
-        , products_ = await products.find(query).project(project).toArray()
+        , query     = { StoreID: ObjectId(data.StoreID) }
+        , skip      = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
+        , lmt       = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
+        , products_ = await products.find(query)
+                                    .project(project)
+                                    .skip(skip)
+                                    .limit(lmt)
+                                    .toArray()
     if (!products_.length)
     {
         console.log('no-product-found', { Query : query, Project: project })
