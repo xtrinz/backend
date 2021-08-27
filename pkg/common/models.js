@@ -48,6 +48,7 @@ module.exports =
 		  User 						: 'User'
 		, Agent 					: 'Agent'
 		, Admin 					: 'Admin'
+		, Store 					: 'Store'
 	},
 	source:
 	{
@@ -101,6 +102,7 @@ module.exports =
 		, None 						: 'None'
         , New 						: 'New'
         , MobConfirmed              : 'MobileNumberConfirmed'
+		, EntityCreated 			: 'EntityCreated'	
         , Registered                : 'Registered'
 
 		, StripeSucess 				: "payment_intent.succeeded"

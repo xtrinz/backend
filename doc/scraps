@@ -74,6 +74,8 @@ Completed
 02 journal	list	agetn/store/user            21_08_23    21_08_23
 06 store   list limit                         reimplement
 04 product list limit
+26 add UserMode(Customer,Agent,Seller,Admin) User record, limit one mode with one mob_no [dup]
+34 check if one of the socket id is not present at the time of emission, how system crashes
 ---
 
 .skip(skip).limit(nPerPage).toArray()
