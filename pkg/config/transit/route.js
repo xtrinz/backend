@@ -1,13 +1,12 @@
-const { ObjectId } 				                  = require('mongodb')
-    , router                                = require('express').Router()
-    , { Transit }                           = require('../transit/driver')
-    , { Engine }                            = require('../../engine/engine')
-    , { Store }                             = require('../store/driver')
-    , { alerts, event, query, task, mode }  = require('../../common/models')
-    , { Err_, code, status, reason }        = require('../../common/error')
-    , db                                    = require('../transit/archive')
+const { ObjectId } 				            = require('mongodb')
+    , router                          = require('express').Router()
+    , { Transit }                     = require('../transit/driver')
+    , { Engine }                      = require('../../engine/engine')
+    , { alerts, event, query, task }  = require('../../common/models')
+    , { Err_, code, status, reason }  = require('../../common/error')
+    , db                              = require('../transit/archive')
 
-router.post('/user/cancel', async (req, res, next) =>
+router.post('/user', async (req, res, next) =>
 {
     try
     {
@@ -17,16 +16,25 @@ router.post('/user/cancel', async (req, res, next) =>
               'User._id' : ObjectId(req.body.User._id),
               _id  : ObjectId(req.body.TransitID)
           }
+          , text_ , event_
         trans.Data = await db.Get(query_, query.Custom)
         if (!trans.Data) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
-        trans.Data.Event = event.CancellationByUser
+        switch(req.body.Task)
+        {
+          case task.Cancel:
+            event_ = event.CancellationByUser
+            text_  = alerts.Cancelled
+            break
+        }
+
+        trans.Data.Event = event_
         let engine       = new Engine()
         await engine.Transition(trans)
 
         return res.status(code.OK).json({
             Status  : status.Success,
-            Text    : alerts.Cancelled,
+            Text    : text_,
             Data    : {}
         })
     } catch (err) { next(err) }
@@ -41,9 +49,7 @@ router.post('/store', async (req, res, next) =>
         trans.Data = await db.Get(query_, query.Custom)
         if (!trans.Data) Err_(code.BAD_REQUEST, reason.TransitNotFound)
 
-        let event_, text_, store = new Store()
-        await store.Authz(trans.Data.Store._id, req.body.User._id)
-        
+        let event_, text_
         switch(req.body.Task)
         {
           case task.Reject:
@@ -130,8 +136,6 @@ router.post('/admin', async (req, res, next) =>
 {
     try
     {
-        if(req.body.User.Mode !== mode.Admin)
-        Err_(code.BAD_REQUEST, reason.Unauthorized)
         
         const query_ = { _id   : ObjectId(req.body.TransitID) }
         let trans  = new Transit()

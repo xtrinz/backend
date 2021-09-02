@@ -79,17 +79,9 @@ const SetUserSockID  = async function(user_id, sock_id)
     console.log('socket-user-id-set', { UserID: user_id, SockID: sock_id })
 }
 
-const SetStoreSockID  = async function(str_stores, sock_id)
+const SetStoreSockID  = async function(store_id, sock_id)
 {
-    if(!str_stores.length)
-    {
-        console.log('empty-store-id-list',
-        {    IDList    : str_stores
-           , SockID    : sock_id })
-        return
-    }
-    str_stores = str_stores.map(ObjectId)
-    const key3  = { 'Store._id' : { $in: str_stores }, IsLive : true }
+    const key3  = { 'Store._id' : ObjectId(store_id), IsLive : true }
         , act3  = { $push      : { 'Store.SockID' : sock_id } }
         , resp3 = await transits.updateMany(key3, act3)
     if (!resp3.result.ok)
@@ -102,24 +94,17 @@ const SetStoreSockID  = async function(str_stores, sock_id)
         })
         Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
     }
-    console.log('set-socket-id-to-store-transit-context', { StoreIDList: str_stores, SockID: sock_id })
+    console.log('set-socket-id-to-store-transit-context', { StoreID: store_id, SockID: sock_id })
 }
 
-const SetAllStaffSockID  = async function(store_id, sock_ids)
+const SetAdminSockID  = async function(admin_id, sock_id)
 {
-    if(!sock_ids.length)
-    {
-        console.log('empty-store-id-list',
-        {    StoreID : store_id
-           , SockIDs  : sock_ids })
-        return
-    }
-    const key3  = { 'Store._id' : ObjectId(store_id), IsLive : true }
-        , act3  = { $push    : { 'Store.SockID' : { $each : sock_ids } } }
+    const key3  = { 'Admin._id' : ObjectId(admin_id), IsLive : true }
+        , act3  = { $push      : { 'Admin.SockID' : sock_id } }
         , resp3 = await transits.updateMany(key3, act3)
     if (!resp3.result.ok)
     {
-        console.log('push-socket-id-to-transit-rcds-failed',
+        console.log('set-socket-id-failed',
         { 
             Key     : key3, 
             Value   : act3,
@@ -127,13 +112,11 @@ const SetAllStaffSockID  = async function(store_id, sock_ids)
         })
         Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
     }
-    console.log('inserted-staff-socket-ids', { StoreID: store_id, SockIDs: sock_ids })
+    console.log('set-socket-id-to-admin-transit-context', { StoreID: admin_id, SockID: sock_id })
 }
-
 
 const UnsetAgentSockID  = async function(user_id, sock_id)
 {
-
     console.log('pop-socket-id', { UserID: user_id, SockID: sock_id })
     const key1  = { 'Agent._id' : ObjectId(user_id), IsLive : true }
         , act1  = { $pull       : { 'Agent.SockID' : sock_id } }
@@ -169,17 +152,9 @@ const UnsetUserSockID  = async function(user_id, sock_id)
     console.log('socket-user-id-removed', { UserID: user_id, SockID: sock_id })
 }
 
-const UnsetStoreSockID  = async function(str_stores, sock_id)
+const UnsetStoreSockID  = async function(store_id, sock_id)
 {
-    if(!str_stores.length)
-    {
-        console.log('empty-store-id-list',
-        {    StoreIDList : str_stores
-           , SockID      : sock_id })
-        return
-    }
-    str_stores = str_stores.map(ObjectId)
-    const key3  = { 'Store._id' : { $in: str_stores }, IsLive : true }
+    const key3  = { 'Store._id' : ObjectId(store_id), IsLive : true }
         , act3  = { $pull       : { 'Store.SockID' : sock_id } }
         , resp3 = await transits.updateMany(key3, act3)
     if (!resp3.result.ok)
@@ -192,20 +167,13 @@ const UnsetStoreSockID  = async function(str_stores, sock_id)
         })
         Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
     }
-    console.log('removed-socket-id-from-store', { StoreIDList: str_stores, SockID: sock_id })
+    console.log('removed-socket-id-from-store', { StoreID: store_id, SockID: sock_id })
 }
 
-const UnsetAllStaffSockID  = async function(store_id, sock_ids)
+const UnsetAdminSockID  = async function(admin_id, sock_id)
 {
-    if(!sock_ids.length)
-    {
-        console.log('empty-store-id-list',
-        {    StoreID : store_id
-           , SockIDs  : sock_ids })
-        return
-    }
-    const key3  = { 'Store._id' : ObjectId(store_id), IsLive : true }
-        , act3  = { $pullAll    : { 'Store.SockID' : sock_ids } }
+    const key3  = { 'Admin._id' : ObjectId(admin_id), IsLive : true }
+        , act3  = { $pull       : { 'Admin.SockID' : sock_id } }
         , resp3 = await transits.updateMany(key3, act3)
     if (!resp3.result.ok)
     {
@@ -217,7 +185,7 @@ const UnsetAllStaffSockID  = async function(store_id, sock_ids)
         })
         Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
     }
-    console.log('removed-staff-socket-ids', { StoreID: store_id, SockIDs: sock_ids })
+    console.log('removed-socket-id-from-store', { AdminID: admin_id, SockID: sock_id })
 }
 
 module.exports =
@@ -227,9 +195,9 @@ module.exports =
     , SetAgentSockID      : SetAgentSockID
     , SetUserSockID       : SetUserSockID
     , SetStoreSockID      : SetStoreSockID
+    , SetAdminSockID      : SetAdminSockID
     , UnsetAgentSockID    : UnsetAgentSockID
     , UnsetUserSockID     : UnsetUserSockID
     , UnsetStoreSockID    : UnsetStoreSockID
-    , SetAllStaffSockID   : SetAllStaffSockID
-    , UnsetAllStaffSockID : UnsetAllStaffSockID
+    , UnsetAdminSockID    : UnsetAdminSockID
 }

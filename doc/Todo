@@ -1,44 +1,39 @@
-01 journal read											21/08/13
-02 ground one mob no for one mode [ for now ]
-03 journal	list	agetn/store/user/admin
-04 product list limit
-05 product add  variant
-06 store   list limit
-07 store   edit
-08 store   delete
-09 staff   list limit
-10 search & product filtering with tree tags
+01 ground one mob no for one mode [ for now ]           21_08_23    
+02 journal	list admin
+03 product add  variant
+04 store   edit
+05 store   delete
+
 11 set token in cookies
-12 root admin + sub admin logics
 13 https
 14 input validator (Task as mdatory field)
-15 bug : for immediate connectivity trigger a rest request after socket connection
 16 socket limit connections
+
 17 db geo indexing, filtering enahcement
 18 generic api for otp resend in all scenarios [user{profile/reg/login}/cart/shop | product/addr/payment/transit]
 19 google map distance
-20 provision for forceful app update
+
+20 search & product filtering with tree tags
 21 IMPORTANT: remove printing user password hashes from logs
 22 reinforce bill
+
 23 no deletion of records, only unlisting of the data [ if it has used at someother critical point ] [ when a product get deleted what to do for its associated journals ]
 24 jwt - set timestamp and expire the token - why sperate token for partially registered user
 25 load pricing context from db on system start and set an api to update it (on db + on cache)
-26 add UserMode(Customer,Agent,Seller,Admin) User record, limit one mode with one mob_no
+
 27 Check if paytm keeps a context of token, is there a way to reuse it - how to handle double checkout in current scenario
 28 TransitCompletedByAgent [ Rating / Issue Reporting ] [TODO Set an API to handle issue reporting ]
 29 Modify a transit history array with {Time: enitity:action }
-30 gstcategory | warrentycard | extradiscount | productdescription | productdetails
-31 User registration has to set manual [capcha/passwd-retry(latency/blocking)]
-32 User/Shop can be targeted with flood of approval requests.
-33 Limit staff count / store - a staff can part of how many stores | convert approved/pending/accepted lists in to map
-34 check if one of the socket id is not present at the time of emission, how system crashes
+
+31 User registration has to set manual [capcha/passwd-retry(latency/blocking)] && User/Shop can be targeted with flood of approval requests.
+
 35 at read_otp : there is a race condition
 36 limit devices / socket connections
-37 lock cart checkout once the payment initated
+37 - lock cart checkout once the payment initated 
+   - Add Journal ID to the cart & remove it only after payment success - limit number of checkouts in given span of time [This will be a good algorithm ]
 38 TransitIgnoredByAgent - on admin lock, if waiting time exceeds limits, tigger another handler to auto cancel
-39 Add Journal ID to the cart & remove it only after payment success - limit number of checkouts in given span of time [This will be a good algorithm ]
 40 Clear quoted TODOs
+12 root admin + sub admin logics
+15 bug : for immediate connectivity trigger a rest request after socket connection
 
-* Beware do not modify current and previous state before payout
-* for duplicate notifications reject the same in frond end
 * need to store history of action of users [eg: accepted invitaion/ denied...]

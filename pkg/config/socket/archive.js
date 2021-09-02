@@ -2,9 +2,9 @@ const { ObjectId }           = require('mongodb')
     , { sockets }            = require('../../common/database')
     , { Err_, code, reason } = require('../../common/error')
 
-const Insert = async function(user_id, sock_id) 
+const Insert = async function(_id, mode_, sock_id) 
 {
-    const rcd_  = { _id: ObjectId(user_id), SockID: sock_id }
+    const rcd_  = { _id: ObjectId(_id), Mode: mode_, SockID: sock_id }
     , resp  = await sockets.insertOne(rcd_)
     if (resp.insertedCount !== 1)
     {
@@ -24,9 +24,9 @@ const Get     = async function (sock_id)
     return resp
 }
 
-const Remove = async function(user_id) 
+const Remove = async function(_id, mode_, sock_id) 
 {
-    const query = { _id: ObjectId(user_id) }
+    const query = { _id: ObjectId(_id), Mode: mode_, SockID: sock_id }
         , resp  = await sockets.deleteOne(query)
     if (resp.deletedCount !== 1) 
     {

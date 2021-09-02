@@ -1,7 +1,7 @@
 const { ObjectId }          = require('mongodb')
     , { stores }            = require('../../common/database')
     , { Err_, code, reason} = require('../../common/error')
-    , { query }             = require('../../common/models')
+    , { query, dbset }      = require('../../common/models')
 
 const Save       = async function(data)
 {
@@ -44,56 +44,48 @@ const Get = async function(param, qType)
     return store
 }
 
-const ListNearby = async function(PageNo, Lon, Lat)
+const List = async function(data, proj)
 {
-    const nPerPage = 30
-        , skip     = PageNo > 0 ? (PageNo - 1) * nPerPage : 0
-        , query    = { Location: { $near: { $geometry: { type: 'Point', coordinates: [Lon, Lat] } } } }
+    data.Limit  = data.Limit.loc()
+    data.Page   = data.Page.loc()
+    const query = data.Query
+        , skip  = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
+        , lmt   = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
 
-    const data     = await stores.find(query).skip(skip).limit(nPerPage).toArray()
-    if (!data.length && pageno == 1)
+    const data_ = await stores.find(query, proj)
+                              .skip(skip)
+                              .limit(lmt)
+                              .toArray()
+    if (!data_.length && data.Page === 1)
     {
         console.log('no-near-by-stores', { Query : query })
-        return data
+        return data_
     }
 
-    console.log('near-by-stores', { Stores: data })
-    return data
+    console.log('near-by-stores', { Stores: data_ })
+    return data_
 }
 
-const GetMany = async function(id_lst, proj)
+const GetStoreSockID = async function(store_id)
 {
-    if(!id_lst.length)
+    console.log('get-store-sock-id', { StoreID: store_id })
+
+    const query = { _id: ObjectId(store_id), IsLive: true }
+
+    let store = await stores.findOne(query)
+    if(!store)
     {
-        console.log('empty-store-id-list',
-        {     IDList       : id_lst
-           , Projection    : proj })
+        console.log('store-not-found', query)
         return []
     }
-
-    id_lst = id_lst.map(ObjectId)
-    const key  = { '_id' : { $in: id_lst } }
-        , resp = await stores.find(key).project(proj).toArray()
-
-    if (!resp.length && id_lst.length)
-    {
-        console.log('find-stores-failed',
-        { 
-            Key        : key, 
-            Projection : proj,
-            Result     : resp.result
-        })
-        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
-    }
-    resp.forEach((res) => { res.StoreID = res._id; delete res._id })
-    console.log('store-list', { Stores: resp })
-    return resp
+    console.log('store-found', { User : store })
+    return store.SockID
 }
 
 module.exports =
 {
-      Save       : Save
-    , Get        : Get
-    , ListNearby : ListNearby
-    , GetMany    : GetMany
+      Save           : Save
+    , Get            : Get
+    , List           : List
+    , GetStoreSockID : GetStoreSockID
 }

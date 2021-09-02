@@ -63,3 +63,32 @@ pay.PaymentStatus(data)
 Todo:
 
 Fix Dates in Journal List/View
+Consier Store as entity and create seperate token for it
+In Page & Limit - Page > 0
+user $inc to modify product count
+https://docs.mongodb.com/manual/tutorial/optimize-query-performance-with-indexes-and-projections/#limit-the-number-of-query-results-to-reduce-network-demand
+
+
+Completed
+01 journal read											          21_08_13    21_08_23
+02 journal	list	agetn/store/user            21_08_23    21_08_23
+06 store   list limit                         reimplement
+04 product list limit
+26 add UserMode(Customer,Agent,Seller,Admin) User record, limit one mode with one mob_no [dup]
+34 check if one of the socket id is not present at the time of emission, how system crashes
+---
+
+.skip(skip).limit(nPerPage).toArray()
+
+dbset.Limit
+
+"mongodb": "^3.6.3"
+
+npm notice
+npm notice New minor version of npm available! 7.6.3 -> 7.21.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v7.21.0
+npm notice Run npm install -g npm@7.21.0 to update!
+npm notice
+
+
+Page/Limit

@@ -7,9 +7,6 @@ const { code, text, status } = require('../../common/error')
 router.post('/add', async (req, res, next) => {
   try
   {
-    let store   = new Store()
-    await store.Authz(req.body.StoreID, req.body.User._id)
-
     let product = new Product(req.body)
     await product.Add()
     
@@ -25,7 +22,7 @@ router.get('/list', async (req, res, next) =>
 {
   try
   {
-    const data = await db.ReadAll(req.query.StoreID)
+    const data = await db.ReadAll(req.query)
     
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -53,9 +50,6 @@ router.get('/view', async (req, res, next) =>
 router.post('/modify', async (req, res, next) => {
   try
   {
-    let store   = new Store()
-    await store.Authz(req.body.StoreID, req.body.User._id)
-
     let product = new Product()
     await product.Modify(req.body)
     
@@ -72,9 +66,6 @@ router.delete('/remove', async (req, res, next) =>
 {
   try
   {
-    let store   = new Store()
-    await store.Authz(req.body.StoreID, req.body.User._id)
-
     await db.Remove(req.body)
     
     return res.status(code.OK).json({

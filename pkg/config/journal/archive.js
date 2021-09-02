@@ -1,6 +1,7 @@
 const { ObjectId }           = require('mongodb')
     , { Err_, code, reason } = require('../../common/error')
     , { journals }           = require('../../common/database')
+    , { dbset }              = require('../../common/models')
 
 const GetByID    = async function(_id)
 {
@@ -32,6 +33,25 @@ const Get    = async function(query, proj)
     return journal
 }
 
+const GetMany    = async function(query, proj, cond_)
+{
+    console.log('list-journals', { Query : query, Projection : proj })
+
+    const skip = (cond_.Page > 0)? (cond_.Page - 1) * cond_.Limit : 0
+        , lmt  = (cond_.Limit > dbset.Limit)? dbset.Limit : cond_.Limit 
+        , resp = await journals.find(query, proj)
+                               .skip(skip)
+                               .limit(lmt)
+                               .toArray()
+    if (!resp)
+    {
+      console.log('no-journal-found', { Query : query, Projection : proj })
+      Err_(code.INTERNAL_SERVER, reason.JournalNotFound)
+    }
+    console.log('journals-found', { Journals : resp })
+    return resp
+}
+
 const Save       = async function(data)
 {
     console.log('save-journal', { Journal : data })
@@ -57,4 +77,5 @@ module.exports =
     GetByID : GetByID
   , Save    : Save
   , Get     : Get
+  , GetMany : GetMany
 }

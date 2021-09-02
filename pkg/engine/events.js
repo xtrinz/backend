@@ -1,12 +1,13 @@
-const { states, alerts, query } = require('../common/models')
-    , { User }                  = require('../config/user/driver')
+const { states, alerts, query, mode } = require('../common/models')
     , { Socket }                = require('../config/socket/driver')
     , db                        =
     {
         user                    : require('../config/user/archive')
+      , store                   : require('../config/store/archive')        
       , socket                  : require('../config/socket/archive')
     }
     , { Err_, code, reason }    = require('../common/error')
+    , jwt                       = require('../infra/jwt')
 
 let Channel 
 
@@ -16,18 +17,48 @@ const Connect = async function(socket_)
 {
   try
   {
-    const user  = new User()
-    await user.Auth(String(socket_.handshake.auth.Token))
+    const token   = String(socket_.handshake.auth.Token)
+        , resp    = await jwt.Verify(token)
 
-    user.Data.SockID.push(socket_.id)
-    user.Data.IsLive = true    
-    await db.user.Save(user.Data)
+    let data
+    switch(resp.Mode)
+    {
+      case mode.Store:
 
+        data = await db.store.Get(resp._id, query.ByID)
+        if (!data)
+        {
+            console.log('store-not-found', { StoreID: resp._id })
+            Err_(code.BAD_REQUEST, reason.InvalidToken)
+        }
+        data.SockID.push(socket_.id)
+        data.IsLive = true    
+        await db.store.Save(data)
+        break
+
+      case mode.User:
+      case mode.Agent:
+      case mode.Admin:
+
+        data = await db.user.Get(resp._id, query.ByID)
+        if (!data)
+        {
+            console.log('user-not-found', { UserID: resp._id })
+            Err_(code.BAD_REQUEST, reason.InvalidToken)
+        }
+        data.SockID.push(socket_.id)
+        data.IsLive = true    
+        await db.user.Save(data)
+        break
+      default:
+        console.log('connection-failed-invalid-mode', { Token : resp })
+        Err_(code.BAD_REQUEST, reason.InvalidToken)        
+        break
+    }
     const socket = new Socket()
-    await socket.Insert(user, socket_.id)
+    await socket.Insert(data, resp.Mode, socket_.id)
 
-    console.info('client-connected'
-    , { User : user.Data, SockID : socket_.id })
+    console.info('client-connected', { Client : data, SockID : socket_.id })
 
   } catch(err) 
   {
@@ -41,25 +72,51 @@ const Disconnect = async function(socket_)
 {
   try
   {
-
     const sckt   = await db.socket.Get(socket_.id)
-        , user   = new User()
+    let data
+    switch(sckt.Mode)
+    {
+      case mode.Store:
 
-    user.Data = await db.user.Get(sckt._id, query.ByID)
-    if(!user.Data) Err_(code.NOT_FOUND, reason.UserNotFound)
+        data = await db.store.Get(sckt._id, query.ByID)
+        if (!data)
+        {
+            console.log('store-not-found', { StoreID: sckt._id })
+            Err_(code.BAD_REQUEST, reason.InvalidToken)
+        }
+        data.SockID.pop(socket_.id)
+        if(data.SockID.length === 0)
+          data.IsLive = false    
+  
+        await db.store.Save(data)
+        break
 
-    user.Data.SockID.pop(socket_.id)
-    if(user.Data.SockID.length === 0)
-      user.Data.IsLive = false    
+      case mode.User:
+      case mode.Agent:
+      case mode.Admin:
 
-    await db.user.Save(user.Data)
+        data = await db.user.Get(sckt._id, query.ByID)
+        if (!data)
+        {
+            console.log('user-not-found', { UserID: sckt._id })
+            Err_(code.BAD_REQUEST, reason.InvalidToken)
+        }
+        data.SockID.pop(socket_.id)
+        if(data.SockID.length === 0)
+          data.IsLive = false    
+ 
+        await db.user.Save(data)
+        break
+      default:
+        console.log('disconnection-failed-invalid-mode', { Data : sckt })
+        Err_(code.BAD_REQUEST, reason.InvalidToken)        
+        break        
+    }
 
     const socket = new Socket()
-    await socket.Remove(user, socket_.id)
+    await socket.Remove(data, sckt.Mode, socket_.id)
 
-    console.info('client-disconnected'
-    , { SockID : socket_.id , User   : user.Data })
-
+    console.info('client-disconnected', { Client : data, SockID : socket_.id })
   }
   catch(err)
   { console.log('client-disconnection-failed', {Err : err }) }

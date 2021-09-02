@@ -75,6 +75,9 @@ module.exports =
     , RefundStatusRetrievalFailed: 'Refund status retrieval failed'
     , InvalidMid                : 'Invalid MID'
     , InvalidChecksum           : 'Invalid Checksum'
+    , InvalidToken              : 'Invalid Token'
+    , ResourceNotFound          : 'Resource Not Found'
+    , PermissionDenied          : 'Permission Denied'
 	},
   text:
   {

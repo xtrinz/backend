@@ -1,13 +1,14 @@
 const { ObjectID }           = require('mongodb')
     , otp                    = require('../../infra/otp')
     , { Err_, code, reason}  = require('../../common/error')
-    , { states, mode
+    , { states, mode, qtype
       , query, message, gw } = require('../../common/models')
     , db                     = 
     {
           store   : require('../store/archive')
         , user    : require('../user/archive')
     }
+    , jwt                    = require('../../infra/jwt')
 
 function Store(data)
 {
@@ -15,7 +16,6 @@ function Store(data)
     this.Data             =
     {
           _id             : ''
-        , AdminID         : data.User._id
         , Email           : data.Email
         , Image           : data.Image
         , Certs           : data.Certs
@@ -23,10 +23,11 @@ function Store(data)
 
         , Name            : data.Name
         , MobileNo        : data.MobileNo
+        , SockID          : []
         , Location        :
         {
               type        : 'Point'
-            , coordinates : [data.Longitude, data.Latitude]
+            , coordinates : [data.Longitude.loc(), data.Latitude.loc()]
         }
         , Address         :
         {
@@ -38,40 +39,48 @@ function Store(data)
             , Country     : data.Address.Country
         }
         , State           : states.New
-        , StaffList       :
-        {
-              Approved    : []
-            , Pending     : []
-        }
     }
 
-    this.Read = async function(store_id, user_id)
+    this.Read = async function(in_)
     {
-        console.log('read-store', { StoreID: store_id, UserID: user_id })
-    
-        this.Data = await db.store.Get(store_id, query.ByID)
-        if (!this.Data) Err_(code.BAD_REQUEST, reason.StoreNotFound)
-    
-        let data =
+        console.log('read-store', { In: in_ })
+        let data
+        switch(in_.Mode)
         {
-            StoreID   : this.Data._id
-          , Email     : this.Data.Email
-          , State     : this.Data.State
-          , Image     : this.Data.Image
-          , Certs     : this.Data.Certs
-          , Type      : this.Data.Type
-          , Name      : this.Data.Name
-          , MobileNo  : this.Data.MobileNo
-          , Longitude : this.Data.Location.coordinates[0]
-          , Latitude  : this.Data.Location.coordinates[1]
-          , Address   : this.Data.Address
-        }
-        if (String(this.Data.AdminID) !== String(user_id))
-        {
-            if (data.State !== states.Registered)
-            Err_(code.FORBIDDEN, reason.PermissionDenied)
+          case mode.Store:
+          case mode.AdminID:
+            data =
+            {
+                StoreID   : in_.Store._id
+              , Email     : in_.Store.Email
+              , State     : in_.Store.State
+              , Image     : in_.Store.Image
+              , Certs     : in_.Store.Certs
+              , Type      : in_.Store.Type
+              , Name      : in_.Store.Name
+              , MobileNo  : in_.Store.MobileNo
+              , Longitude : in_.Store.Location.coordinates[0]
+              , Latitude  : in_.Store.Location.coordinates[1]
+              , Address   : in_.Store.Address
+            }
+            break
+          case mode.User:
 
-            delete data.State
+            this.Data = await db.store.Get(in_.ID, query.ByID)
+            if (!this.Data) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+            
+            if (this.Data.State !== states.Registered)
+            Err_(code.FORBIDDEN, reason.PermissionDenied)
+            data =
+            {
+                StoreID   : this.Data._id
+              , Name      : this.Data.Name
+              , Image     : this.Data.Image
+              , Certs     : this.Data.Certs
+              , Type      : this.Data.Type
+              , Address   : this.Data.Address
+            }
+            break
         }
         console.log('store-read', { Store : data })
         return data
@@ -93,25 +102,38 @@ function Store(data)
         return data
     }
     
+    this.Auth   = async function (token)
+    {
+        if (!token) Err_(code.BAD_REQUEST, reason.TokenMissing)
+
+        token       = token.slice(7) // cut 'Bearer <token>'
+        const res   = await jwt.Verify(token)
+        if (!res || !res._id) Err_(code.BAD_REQUEST, reason.UserNotFound)
+
+        if(res.Mode !== mode.Store)
+        Err_(code.BAD_REQUEST, reason.InvalidToken)
+
+        this.Data = await db.store.Get(res._id, query.ByID)
+        if (!this.Data)
+        {
+            console.log('store-not-found', {UserID: res._id})
+            Err_(code.BAD_REQUEST, reason.InvalidToken)
+        }
+        console.log('store-authenticated', {User: this.Data})
+    }
+
     // Authz usr for product mgmt
     this.Authz      = async function(StoreID, UserID) 
     {
         this.Data = await db.store.Get(StoreID, query.ByID)
         if (!this.Data) Err_(code.BAD_REQUEST, reason.StoreNotFound)
     
-        if(!this.Data.StaffList.Approved.includes(String(UserID)) && 
-            (String(this.Data.AdminID) !== String(UserID)))
+        if(String(this.Data.AdminID) !== String(UserID))
             Err_(code.BAD_REQUEST, reason.Unauthorized)
     }
     
     this.New      = async function ()
-    {
-        // Check admin have shop with same name
-        const key1 = { AdminID  : this.Data.AdminID, Name : this.Data.Name }
-            , res1 = await db.store.Get(key1, query.Custom)
-        if (res1 && res1.State === states.Registered)
-        Err_(code.BAD_REQUEST, reason.StoreExists)
-    
+    {    
         // Check the mobile number already used
         const key2 = { MobileNo : this.Data.MobileNo }
             , res2 = await db.store.Get(key2, query.Custom)
@@ -124,21 +146,17 @@ function Store(data)
             , hash    = await otp_sms.Send(gw.SMS)
     
         if(!this.Data._id) { this.Data._id = new ObjectID() }
+        this.Data.MobileNo   = this.Data.MobileNo
         this.Data.Otp        = hash
         this.Data.State      = states.New
         await db.store.Save(this.Data)
     
-        const user  = await db.user.Get(this.Data.AdminID, query.ByID)
-        if (!user) Err_(code.BAD_REQUEST, reason.AdminNotFound)
-        user.StoreList.Owned.push(String(this.Data._id))
-        await db.user.Save(user)
         console.log('new-store-created', {Store: this.Data})
-        return this.Data._id
     }
     
     this.ConfirmMobileNo   = async function(data)
     {
-        const key = { AdminID: data.User._id, MobileNo : data.MobileNo }
+        const key = { MobileNo : data.MobileNo }
         this.Data = await db.store.Get(key, query.Custom)
         if (!this.Data || this.Data.State === states.Registered)
         {
@@ -154,26 +172,21 @@ function Store(data)
         await db.store.Save(this.Data)
         console.log('store-mobile-number-confirmed', {Store: this.Data})
         // TODO Send an event to Admin
-    }
-    
-    this.SetPayoutGW    = async function(data)
-    {
-        // Create cutomer
-        // Create Account
+        const token = await jwt.Sign({ _id: this.Data._id, Mode: mode.Store })
+        return token        
     }
 
     this.Approve   = async function (data)
     {
         console.log('store-approval', {Store: data})
 
-        const admin = await db.user.Get(data.User._id, query.ByID)
-        if (!admin || admin.Mode !== mode.Admin)
+        if (data.User.Mode !== mode.Admin)
         Err_(code.BAD_REQUEST, reason.PermissionDenied)
     
         this.Data = await db.store.Get(data.StoreID, query.ByID)
         if (!this.Data || this.Data.State !== states.MobConfirmed)
         {
-                    let reason_ = reason.StoreNotFound
+                      let reason_ = reason.StoreNotFound
             if(this.Data) reason_ = reason.BadState
             Err_(code.BAD_REQUEST, reason_)
         }
@@ -182,19 +195,73 @@ function Store(data)
         console.log('store-approved', {Store: this.Data})
     }
     
-    this.ListStores  = async function (user)
+    this.List  = async function (in_, mode_)
     {
-        console.log('list-store', {User : user})
-        let data = { Owned : [], Accepted : [], Pending  : [] }
-        let proj =
-        {   _id   : 1, Name  : 1, Type : 1
-          , Image : 1, State : 1           }
-        let stores    = user.StoreList
-        data.Owned    = await db.store.GetMany(stores.Owned    , proj)
-        delete proj.State
-        data.Accepted = await db.store.GetMany(stores.Accepted , proj)
-        data.Pending  = await db.store.GetMany(stores.Pending  , proj)
-        console.log('store-list', {Store: data})
+        console.log('list-store', { In : in_ })
+        let data, proj
+        switch(mode_)
+        {
+          case mode.User:
+            proj    = { projection: { _id   : 1, Name  : 1, Type : 1, Image : 1 } }
+            in_.Query   =
+            { 
+                Location: 
+                { 
+                    $near : { $geometry: 
+                        { 
+                              type          : 'Point'
+                            , coordinates   : [ in_.Longitude.loc(), in_.Latitude.loc() ] 
+                        } }
+                } 
+            }
+            data = await db.store.List(in_, proj)
+            for(let idx = 0; idx < data.length; idx++)
+            {
+                data[idx].StoreID = data[idx]._id
+                delete data[idx]._id    
+            }
+            break
+          case mode.Admin:
+            proj =
+            { _id   : 1, Name  : 1, Type : 1
+            , Image : 1, State : 1           }
+            switch(in_.Type)
+            {
+                case qtype.NearList:
+                in_.Query = 
+                { 
+                    Location: 
+                    { 
+                        $near : { $geometry: 
+                            { 
+                                  type          : 'Point'
+                                , coordinates   : [ in_.Longitude.loc(), in_.Latitude.loc() ] 
+                            } }
+                    } 
+                }
+                break
+                case qtype.Pending:
+                in_.Query = { State : states.MobConfirmed }
+                break
+                case qtype.NearPending:
+                in_.Query = 
+                { 
+                    Location  :
+                    { 
+                        $near : { $geometry: 
+                            { 
+                                  type          : 'Point'
+                                , coordinates   : [ in_.Longitude.loc(), in_.Latitude.loc() ] 
+                            } } 
+                    },
+                    State     : states.MobConfirmed
+                }
+                break
+            }
+            data = await db.store.List(query_, proj)
+            break
+        }
+        console.log('store-list', { Stores : data, Mode: mode_ })
         return data
     }    
 }

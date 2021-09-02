@@ -120,31 +120,6 @@ const GetMany = async function(id_lst, proj)
     return resp
 }
 
-const ListStoreMgrSockets = async function(store_id)
-{
-    console.log('list-store-managers-socket-ids', { StoreID: store_id })
-    const query = 
-        { 
-            $or : 
-            [
-                { 'StoreList.Owned'    : { $elemMatch: { $eq: String(store_id) } }, IsLive: true }
-            , { 'StoreList.Accepted' : { $elemMatch: { $eq: String(store_id) } }, IsLive: true }
-            ] 
-        }
-        , proj   = { SockID: 1 }
-
-    let users_ = await users.find(query).project(proj).toArray()
-    if (!users_.length)
-    { 
-        console.log('no-users-found', query) 
-    }
-
-    const  sckts = [] 
-    users_.forEach((u) => { sckts.push(...u.SockID) })
-
-    return sckts
-}
-
 const GetUserSockID = async function(user_id)
 {
     console.log('get-user-sock-id', { UserID: user_id })
@@ -168,6 +143,5 @@ module.exports =
     , NearbyAgents        : NearbyAgents
     , NearbyAdmins        : NearbyAdmins
     , GetMany             : GetMany
-    , ListStoreMgrSockets : ListStoreMgrSockets
     , GetUserSockID       : GetUserSockID
 }

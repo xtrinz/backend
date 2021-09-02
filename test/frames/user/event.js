@@ -204,7 +204,7 @@ let PasswordGenOTP = function(name)
         , Request      :
         {              
             Method     : Method.POST
-          , Path       : '/user/passwd/reset'
+          , Path       : '/user/passwd'
           , Body       : 
           {              
               MobileNo : user.MobileNo
@@ -246,7 +246,7 @@ let PasswordConfirmMobileNo = function(name)
       , Request      :
       {               
           Method     : Method.POST
-        , Path       : '/user/passwd/reset'
+        , Path       : '/user/passwd'
         , Body       : 
         {            
             Task     : task.ConfirmOTP
@@ -281,7 +281,7 @@ let PasswordSet = function(name)
       , Request         :
       {
           Method        : Method.POST
-        , Path          : '/user/passwd/reset'
+        , Path          : '/user/passwd'
         , Body          : 
         {
             Task        : task.SetPassword

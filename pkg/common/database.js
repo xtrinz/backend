@@ -23,6 +23,8 @@ const database  = client.db(process.env.DB_NAME)
     , journals 	= database.collection('journal')
     , transits 	= database.collection('transit')
 
+    stores.createIndex({ Location: "2dsphere" })
+
 module.exports  =
 {
     client

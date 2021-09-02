@@ -1,3 +1,5 @@
+const { mode } = require('../../common/models')
+
 const db                     =
     {
           socket             : require('../socket/archive')
@@ -11,44 +13,61 @@ function Socket()
           _id    : ''
         , SockID : ''
     }
-
-    this.Insert     = async function (user, sock_id)
+    this.Insert     = async function (data, mode_, sock_id)
     {
-        const opt = { UserID: user.Data._id, SockID: sock_id }
+        const opt = { Client: data, Mode: mode_, SockID: sock_id }
 
         console.log('insert-sock-id', opt)
-        await db.socket.Insert(user.Data._id, sock_id)
+        await db.socket.Insert(data._id, mode_, sock_id)
 
-        console.log('sock-id-to-agent-transit-rcd', opt)
-        await db.transit.SetAgentSockID(user.Data._id, sock_id)
-
-        console.log('sock-id-to-user-transit-rcd', opt)
-        await db.transit.SetUserSockID(user.Data._id, sock_id)
-
-        console.log('sock-id-to-store-transit-rcd', opt)
-        let str_stores = [ ...user.Data.StoreList.Owned, ...user.Data.StoreList.Accepted ]
-        await db.transit.SetStoreSockID(str_stores, sock_id)
-
+        switch(mode_)
+        {
+        case mode.Store:
+            console.log('sock-id-to-store-transit-rcd', opt)
+            await db.transit.SetStoreSockID(data._id, sock_id)
+            break
+        case mode.Agent:
+            console.log('sock-id-to-agent-transit-rcd', opt)
+            await db.transit.SetAgentSockID(data._id, sock_id)
+            break
+        case mode.Admin:
+            console.log('sock-id-to-admin-transit-rcd', opt)
+            await db.transit.SetAdminSockID(data._id, sock_id)            
+            break
+        case mode.User:
+            console.log('sock-id-to-user-transit-rcd', opt)
+            await db.transit.SetUserSockID(data._id, sock_id)
+            break
+        }
         console.log('user-sock-id-set', opt)
     }
 
-    this.Remove     = async function (user, sock_id)
+    this.Remove     = async function (data, mode_, sock_id)
     {
-        const opt = { UserID: user.Data._id, SockID: sock_id }
+        const opt = { Client: data, Mode: mode_, SockID: sock_id }
 
         console.log('remove-sock-id', opt)
-        await db.socket.Remove(user.Data._id)
+        await db.socket.Remove(data._id, mode_, sock_id)
 
-        console.log('sock-id-from-agent-transit-rcd', opt)
-        await db.transit.UnsetAgentSockID(user.Data._id, sock_id)
-
-        console.log('sock-id-from-user-transit-rcd', opt)
-        await db.transit.UnsetUserSockID(user.Data._id, sock_id)
-
-        console.log('sock-id-from-store-transit-rcd', opt)
-        let str_stores = [ ...user.Data.StoreList.Owned, ...user.Data.StoreList.Accepted ]
-        await db.transit.UnsetStoreSockID(str_stores, sock_id)
-
+        switch(mode_)
+        {
+        case mode.Store:
+            console.log('sock-id-from-store-transit-rcd', opt)
+            await db.transit.UnsetStoreSockID(data._id, sock_id)
+            break
+        case mode.Agent:
+            console.log('sock-id-from-agent-transit-rcd', opt)
+            await db.transit.UnsetAgentSockID(data._id, sock_id)
+            break
+        case mode.Admin:
+            console.log('sock-id-from-admin-transit-rcd', opt)
+            await db.transit.UnsetAdminSockID(data._id, sock_id)            
+            break
+        case mode.User:
+            console.log('sock-id-from-user-transit-rcd', opt)
+            await db.transit.UnsetUserSockID(data._id, sock_id)
+            break
+        }
         console.log('user-sock-id-poped', opt)
     }
 }
