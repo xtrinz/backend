@@ -1,5 +1,5 @@
 const { Err, Err_, code, status, reason } = require('./error')
-    , { states, mode }                    = require('./models')
+    , { states, mode, query }             = require('./models')
     , { client }                          = require('./database')
     , db                                  =
     {
@@ -7,44 +7,59 @@ const { Err, Err_, code, status, reason } = require('./error')
       , user                              : require('../config/user/archive')
     }
     , jwt                                 = require('../infra/jwt')
+    , rbac                                = require('../common/rbac')
 
 let   Server, io
 const SetServer = (server, io_) => { Server = server; io = io_ }
 
-const Auth = async function (req, res, next)
+const Authnz = async function (req, res, next)
 {
   try 
-  {
+  {    
+
+    const objs      = req.url.path()
+        , acc_ctrlr = new rbac.Controller()
+        , task_     = (req.body && req.body.Task)? req.body.Task: 'None'
+        , mode_     = acc_ctrlr.HasAccess(objs[0], objs[1], req.method, task_)
+
+    if(!mode_[mode.Enabled]) 
+    {
+      next()
+      return
+    }
+
     const token   = req.headers['authorization']
         , resp    = await jwt.Verify(token)
 
-    if(!req.body) req.body = {}
+    if(!req.body) req.body   = {}
+    if(!req.query) req.query = {}
 
     switch(resp.Mode)
     {
       case mode.Store:
 
-        let store = await db.store.Get(res._id, query.ByID)
+        let store = await db.store.Get(resp._id, query.ByID)
         if (!store)
         {
-            console.log('store-not-found', { StoreID: res._id })
+            console.log('store-not-found', { StoreID: resp._id })
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
 
         if (store.State !== states.Registered)
         Err_(code.UNAUTHORIZED, reason.RegIncomplete)
 
-        req.body.Store = store
-        req.body.Mode  = store.Mode
+        req.body.Store    = store
+        req.query.StoreID = store._id        
+        req.body.Mode     = resp.Mode
 
         console.log('store-authenticated', { Store: store })
       break
       default:
 
-        let user = await db.user.Get(res._id, query.ByID)
+        let user = await db.user.Get(resp._id, query.ByID)
         if (!user)
         {
-            console.log('user-not-found', { UserID: res._id })
+            console.log('user-not-found', { UserID: resp._id })
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
 
@@ -58,7 +73,16 @@ const Auth = async function (req, res, next)
       break
     }
  
-    next()
+    if(mode_[req.body.Mode])  
+      next()
+    else
+    {
+      console.log('operation-not-permited', 
+      {   Body         : req.body
+        , Query        : req.body
+        , AllowedModes : mode_ })                     
+      Err_(code.BAD_REQUEST, reason.PermissionDenied)    
+    }
   } catch (err) { next(err) }
 }
 
@@ -128,7 +152,7 @@ const ErrorHandler = function(err, req, res, next)
 
 module.exports =
 {
-    Auth          : Auth
+    Authnz        : Authnz
   , SetServer     : SetServer
   , Forbidden     : Forbidden
   , GracefulExit  : GracefulExit

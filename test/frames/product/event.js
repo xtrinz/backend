@@ -32,7 +32,7 @@ let Add = function(staff_, store_, product_)
                 , Description   : product.Description
                 , CategoryID    : product.CategoryID
             }
-            , Header            : { Authorization: 'Bearer ' + staff.Token }
+            , Header            : { Authorization: 'Bearer ' + store.Token }
         }
         , Skip                  : [ 'ProductID' ]
         , Response              :
@@ -177,7 +177,6 @@ let Modify = function(staff_, store_, product_)
           , Body              : 
           {
                 ProductID     : product.ID
-              , StoreID       : store.ID
               , Name          : product.Name
               , Image         : product.Image
               , Price         : 200
@@ -185,7 +184,7 @@ let Modify = function(staff_, store_, product_)
               , Description   : product.Description
               , CategoryID    : product.CategoryID
           }
-          , Header            : { Authorization: 'Bearer ' + staff.Token }
+          , Header            : { Authorization: 'Bearer ' + store.Token }
       }
       , Response              :
       {
@@ -220,9 +219,8 @@ let Remove = function(staff_, store_, product_)
           , Body              : 
           {
                 ProductID     : product.ID
-              , StoreID       : store.ID
           }
-          , Header            : { Authorization: 'Bearer ' + staff.Token }
+          , Header            : { Authorization: 'Bearer ' + store.Token }
       }
       , Response              :
       {

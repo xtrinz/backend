@@ -19,7 +19,7 @@
     "express-validator": "^6.10.0",
     "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
-    "mongodb": "^5.0.0",
+    "mongodb": "^3.6.3",
     "nodemailer": "^6.4.17",
     "paytm-pg-node-sdk": "^1.0.4",
     "paytmchecksum": "^1.5.0",

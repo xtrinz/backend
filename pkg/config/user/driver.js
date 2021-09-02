@@ -34,7 +34,7 @@ function User(mob_no, user_mode)
     {
         if (!token) Err_(code.BAD_REQUEST, reason.TokenMissing)
 
-        token       = token.slice(7) // cut 'Bearer <token>'
+        //token       = token.slice(7) // cut 'Bearer <token>'
         const res   = await jwt.Verify(token)
         if (!res || !res._id) Err_(code.BAD_REQUEST, reason.UserNotFound)
 
@@ -68,20 +68,27 @@ function User(mob_no, user_mode)
     this.ConfirmMobileNo   = async function (data)
     {
         this.Data = await db.Get(data.MobileNo, query.ByMobileNo)
-        if (!this.Data || this.Data.State === states.Registered)
-           Err_(code.BAD_REQUEST, reason.UserNotFound)
+        if (!this.Data) Err_(code.BAD_REQUEST, reason.UserNotFound)
 
         const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
             , status = await otp_.Confirm(this.Data.Otp, data.OTP)
 
         if (!status) Err_(code.BAD_REQUEST, reason.OtpRejected)
 
+        const token = await jwt.Sign({
+            _id   : this.Data._id
+          , Mode  : this.Data.Mode })
+
+        if (this.Data.State === states.Registered)
+        {
+            console.log('user-exists-logging-in', { User: this.Data })            
+            return token
+        }
         this.Data.State = states.MobConfirmed
         this.Data.Otp   = ''
         await db.Save(this.Data)
         console.log('user-mobile-number-confirmed', { User: this.Data })
         
-        const token = await jwt.Sign({ _id: this.Data._id, Mode: this.Data.Mode })
         return token
     }
 
@@ -118,7 +125,7 @@ function User(mob_no, user_mode)
         if (!status) Err_(code.BAD_REQUEST, reason.IncorrectCredentials)
 
         console.log('user-loggedin', {Name: this.Data.Name, UserID: this.Data._id})        
-        const token = await jwt.Sign({ _id: this.Data._id })
+        const token = await jwt.Sign({ _id: this.Data._id, Mode: this.Data.Mode })
         return token
     }
 
@@ -171,7 +178,7 @@ function User(mob_no, user_mode)
         await db.Save(this.Data)
 
         console.log('authorized-edit-password', {User: this.Data})
-        const token = await jwt.Sign({ _id: this.Data._id })
+        const token = await jwt.Sign({ _id: this.Data._id, Mode: this.Data.Mode })
         return token
     }
 

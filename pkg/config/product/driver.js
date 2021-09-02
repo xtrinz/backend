@@ -9,8 +9,7 @@ function Product(data)
    this.Data =
    {
             _id       : ''
-        , StoreID     : ObjectId(data.StoreID)
-        , CreatedBy   : ObjectId(data.User._id)
+        , StoreID     : ObjectId(data.Store._id)
         , Name        : data.Name
         , Image       : data.Image
         , Price       : data.Price
@@ -47,7 +46,6 @@ function Product(data)
         const product = await db.Get(product_id, query.ByID)
         if (!product) Err_(code.BAD_REQUEST, reason.ProductNotFound)
 
-        delete product.CreatedBy
         return product
     }
 

@@ -1,6 +1,6 @@
 const router 	               = require('express').Router()
     , { code, text, status } = require('../../common/error')
-    , { task }               = require('../../common/models')
+    , { task, mode }         = require('../../common/models')
     , { Store }              = require('../store/driver')
 
 router.post('/register', async (req, res, next) =>
@@ -44,10 +44,29 @@ router.post('/register', async (req, res, next) =>
 router.get('/view', async (req, res, next) => {
     try 
     {
-      let  store  = new Store()
-      const id_   = req.query.StoreID
-          , mode_ = req.body.Mode
-          , data  = await store.Read(id_, mode_)
+      console.log('######', req.query, req.body)
+      const store = new Store()
+      let in_
+      switch(req.body.Mode)
+      {
+        case mode.Store:
+          in_ =
+          {
+              ID    : req.body.Store._id
+            , Mode  : req.body.Mode
+            , Store : req.body.Store
+          }
+          break
+        default:
+          in_ =
+          {
+              ID    : req.query.StoreID
+            , Mode  : req.body.Mode
+            , Store : {}
+          }          
+          break
+      }
+      const data  = await store.Read(in_)
 
       return res.status(code.OK).json({
         Status  : status.Success,
@@ -61,6 +80,7 @@ router.get('/list', async (req, res, next) =>
 {
     try 
     {
+      console.log('######', req.query)
       const store = new Store()
           , data  = await store.List(req.query, req.body.Mode)
       

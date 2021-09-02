@@ -76,6 +76,8 @@ module.exports =
     , InvalidMid                : 'Invalid MID'
     , InvalidChecksum           : 'Invalid Checksum'
     , InvalidToken              : 'Invalid Token'
+    , ResourceNotFound          : 'Resource Not Found'
+    , PermissionDenied          : 'Permission Denied'
 	},
   text:
   {

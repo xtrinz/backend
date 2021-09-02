@@ -13,7 +13,6 @@ const { ObjectID, ObjectId } = require('mongodb')
     , { states
       , channel
       , query
-      , source
       , mode }     = require('../../common/models')
     , { Refund }   = require('../../infra/paytm/ind/refund')
     , { Payment }  = require('../../infra/paytm/ind/payment')
@@ -87,8 +86,8 @@ function Journal()
           ID        : user._id
         , Name      : user.Name
         , MobileNo  : user.MobileNo
-        , Longitude : addr.Longitude
-        , Latitude  : addr.Latitude
+        , Longitude : addr.Longitude.loc()
+        , Latitude  : addr.Latitude.loc()
         , Address   : addr.Address
       }
     }
@@ -267,18 +266,18 @@ function Journal()
       await db.journal.Save(this.Data)
     }
 
-    this.Read = async function(data, user)
+    this.Read = async function(data, in_, mode_)
     {
-      console.log('read-journal', { Input: data, UserID: user._id })
+      console.log('read-journal', { Input: data, Client: in_ })
       let query_, proj, penalty, income
-      switch(data.Origin)
+      switch(mode_)
       {
-        case source.User :
+        case mode.User :
 
               query_ =
               { 
                   _id        : ObjectId(data.JournalID)
-                , 'Buyer.ID' : ObjectId(user._id)
+                , 'Buyer.ID' : ObjectId(in_._id)
               }
               , proj  = 
               {
@@ -302,12 +301,12 @@ function Journal()
           data_.JournalID = data.JournalID
 
           return data_
-          case source.Agent :
+          case mode.Agent :
 
                 query_ =
                 { 
                     _id        : ObjectId(data.JournalID)
-                  , 'Agent.ID' : ObjectId(user._id)
+                  , 'Agent.ID' : ObjectId(in_._id)
                 }
                 proj  = 
                 {
@@ -340,23 +339,22 @@ function Journal()
             delete data_.Account
             data_.Penalty = penalty
             data_.Income  = income
+
+            data_.Buyer.Longitude   = data_.Buyer.Longitude.toFixed(5)
+            data_.Buyer.Latitude    = data_.Buyer.Latitude.toFixed(5)
+            data_.Seller.Longitude  = data_.Seller.Longitude.toFixed(5)
+            data_.Seller.Latitude   = data_.Seller.Latitude.toFixed(5)
             return data_
 
-            case source.Store :
+            case mode.Store :
               
-              let store = await db.store.Get(data.StoreID, query.ByID)
+              let store = await db.store.Get(in_._id, query.ByID)
               if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
-
-              if(String(store.AdminID) !== String(user._id))
-              {
-                  console.log('authorisation-failed', { AdminID: store.AdminID, User: user })
-                  Err_(code.BAD_REQUEST, reason.Unauthorized)
-              }
 
               query_ =
               {
                   _id         : ObjectId(data.JournalID)
-                , 'Seller.ID' : ObjectId(data.StoreID)
+                , 'Seller.ID' : ObjectId(in_._id)
               }
               proj  = 
               {
@@ -384,11 +382,7 @@ function Journal()
           data_.Income  = income
           return data_
 
-          case source.Admin :
-
-            if(user.Mode !== mode.Admin)
-            Err_(code.BAD_REQUEST, reason.Unauthorized)
-
+          case mode.Admin :
             query_ =
             {
                 _id         : ObjectId(data.JournalID)
@@ -430,22 +424,28 @@ function Journal()
         delete data_.Account
         data_.Penalty   = penalty
         data_.Refund    = income
+
+        data_.Buyer.Longitude   = data_.Buyer.Longitude.toFixed(5)
+        data_.Buyer.Latitude    = data_.Buyer.Latitude.toFixed(5)
+        data_.Seller.Longitude  = data_.Seller.Longitude.toFixed(5)
+        data_.Seller.Latitude   = data_.Seller.Latitude.toFixed(5)
+        
         return data_
 
       }
     }
 
-    this.List = async function(data, user)
+    this.List = async function(data, in_, mode_)
     {
-      console.log('list-journal', { Input: data, UserID: user._id })
+      console.log('list-journal', { Input: data, Client: in_ })
       let query_, proj, penalty, income, data_, cond_
-      switch(data.Origin)
+      switch(mode_)
       {
-        case source.User :
+        case mode.User :
 
           query_ =
           { 
-            'Buyer.ID' : ObjectId(user._id)
+            'Buyer.ID' : ObjectId(in_._id)
           }
           proj   = 
           {
@@ -465,8 +465,8 @@ function Journal()
           }
           cond_   =
           {
-              Page  : parseInt(data.Page)
-            , Limit : parseInt(data.Limit)
+              Page  : data.Page.loc()
+            , Limit : data.Limit.loc()
           }          
           data_   = await db.journal.GetMany(query_, proj, cond_)
 
@@ -477,11 +477,11 @@ function Journal()
           }
           return data_
 
-        case source.Agent :
+        case mode.Agent :
 
           query_ =
           {
-            'Agent.ID' : ObjectId(user._id)
+            'Agent.ID' : ObjectId(in_._id)
           }
           proj  = 
           {
@@ -506,8 +506,8 @@ function Journal()
           }
           cond_   =
           {
-              Page  : parseInt(data.Page)
-            , Limit : parseInt(data.Limit)
+              Page  : data.Page.loc()
+            , Limit : data.Limit.loc()
           }          
           data_ = await db.journal.GetMany(query_, proj, cond_)
 
@@ -520,24 +520,23 @@ function Journal()
 
             delete data_[idx].Account
             data_[idx].Penalty = penalty
-            data_[idx].Income  = income      
+            data_[idx].Income  = income
+
+            data_[idx].Buyer.Longitude  = data_[idx].Buyer.Longitude.toFixed(5)
+            data_[idx].Buyer.Latitude   = data_[idx].Buyer.Latitude.toFixed(5)
+            data_[idx].Seller.Longitude = data_[idx].Seller.Longitude.toFixed(5)
+            data_[idx].Seller.Latitude  = data_[idx].Seller.Latitude.toFixed(5)                  
           }
           return data_
 
-        case source.Store :
+        case mode.Store :
           
-          let store = await db.store.Get(data.StoreID, query.ByID)
+          let store = await db.store.Get(in_._id, query.ByID)
           if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
-
-          if(String(store.AdminID) !== String(user._id))
-          {
-              console.log('authorisation-failed', { AdminID: store.AdminID, User: user })
-              Err_(code.BAD_REQUEST, reason.Unauthorized)
-          }
 
           query_ =
           {
-            'Seller.ID' : ObjectId(data.StoreID)
+            'Seller.ID' : ObjectId(in_._id)
           }
           proj  = 
           {
@@ -555,8 +554,8 @@ function Journal()
           }
           cond_   =
           {
-              Page  : parseInt(data.Page)
-            , Limit : parseInt(data.Limit)
+              Page  : data.Page.loc()
+            , Limit : data.Limit.loc()
           }          
           data_ = await db.journal.GetMany(query_, proj, cond_)
 
@@ -569,20 +568,17 @@ function Journal()
   
             delete data_[idx].Account
             data_[idx].Penalty = penalty
-            data_[idx].Income  = income      
+            data_[idx].Income  = income 
           }
             return data_
 
-        case source.Admin :
-
-          if(user.Mode !== mode.Admin)
-          Err_(code.BAD_REQUEST, reason.Unauthorized)
+        case mode.Admin :
 
           query_ =
           { '$or': // TODO $lookup cross transit status
             [
-                {  'Admin.ID' : user._id }
-              , { 'Admins.ID' : user._id }
+                {  'Admin.ID' : in_._id }
+              , { 'Admins.ID' : in_._id }
             ]
           }
           proj  = 
@@ -614,8 +610,8 @@ function Journal()
           }
           cond_   =
           {
-              Page  : parseInt(data.Page)
-            , Limit : parseInt(data.Limit)
+              Page  : data.Page.loc()
+            , Limit : data.Limit.loc()
           }             
           data_ = await db.journal.GetMany(query_, proj, cond_)
 
@@ -629,6 +625,11 @@ function Journal()
               delete data_[idx].Account
               data_[idx].Penalty   = penalty
               data_[idx].Refund    = income
+
+              data_[idx].Buyer.Longitude  = data_[idx].Buyer.Longitude.toFixed(5)
+              data_[idx].Buyer.Latitude   = data_[idx].Buyer.Latitude.toFixed(5)
+              data_[idx].Seller.Longitude = data_[idx].Seller.Longitude.toFixed(5)
+              data_[idx].Seller.Latitude  = data_[idx].Seller.Latitude.toFixed(5)    
           }
           return data_
       }

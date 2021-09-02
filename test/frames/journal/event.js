@@ -1,13 +1,13 @@
 const { Method, Type } = require('../../lib/medium')
     , { code, status } = require('../../../pkg/common/error')
-    , { mode, source } = require('../../../pkg/common/models')
+    , { mode }         = require('../../../pkg/common/models')
     , data             = require('../data')
 
-let View = function(journal_, user_, owner_, agent_, cart_, admin_, mode_) 
+let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_) 
 {
     this.JournalID = journal_
     this.UserID    = user_
-    this.OwnerID   = owner_
+    this.StoreID   = store_
     this.AgentID   = agent_
     this.CartID    = cart_
     this.AdminID   = admin_
@@ -17,7 +17,6 @@ let View = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
     {
       let journal = data.Get(data.Obj.Journal , this.JournalID)
       let user    = data.Get(data.Obj.User    , this.UserID)
-      let owner   = data.Get(data.Obj.User    , this.OwnerID) 
       let admin   = data.Get(data.Obj.User    , this.AdminID)      
       let agent   = data.Get(data.Obj.User    , this.AgentID)
       let cart    = data.Get(data.Obj.Cart    , this.CartID)
@@ -29,9 +28,8 @@ let View = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
   
         switch (this.Mode)
         {
-            case source.User :
+            case mode.User :
             token = user.Token
-            src_  = source.User
             data_ = 
             {
                 JournalID       : cart.Paytm.OrderID.slice(6)
@@ -69,9 +67,8 @@ let View = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
               }
             }
             break;
-            case source.Agent:
+            case mode.Agent:
               token = agent.Token
-              src_  = source.Agent
               data_ = 
               {
                   JournalID       : cart.Paytm.OrderID.slice(6)
@@ -103,7 +100,6 @@ let View = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
             break;
             case mode.Admin:
               token = admin.Token
-              src_  = source.Admin
               data_ = 
               {
                   JournalID       : cart.Paytm.OrderID.slice(6)
@@ -151,9 +147,8 @@ let View = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
                 }
               }
             break;
-            case source.Store :
-            token = owner.Token
-            src_  = source.Store
+            case mode.Store :
+            token = store.Token
             data_ = 
             {
                 JournalID       : cart.Paytm.OrderID.slice(6)
@@ -192,9 +187,7 @@ let View = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
             , Body         : {}
             , Query        : 
             {
-                Origin     : src_
-              , JournalID  : cart.Paytm.OrderID.slice(6)
-              , StoreID    : store.ID
+                JournalID  : cart.Paytm.OrderID.slice(6)
             }
             , Header       : { Authorization: 'Bearer ' + token }
         }
@@ -211,11 +204,11 @@ let View = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
   }
 }
 
-let List = function(journal_, user_, owner_, agent_, cart_, admin_, mode_) 
+let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_) 
 {
     this.JournalID = journal_
     this.UserID    = user_
-    this.OwnerID   = owner_
+    this.StoreID   = store_
     this.AgentID   = agent_
     this.CartID    = cart_
     this.AdminID   = admin_
@@ -225,21 +218,19 @@ let List = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
     {
       let journal = data.Get(data.Obj.Journal , this.JournalID)
       let user    = data.Get(data.Obj.User    , this.UserID)
-      let owner   = data.Get(data.Obj.User    , this.OwnerID) 
       let admin   = data.Get(data.Obj.User    , this.AdminID)      
       let agent   = data.Get(data.Obj.User    , this.AgentID)
       let cart    = data.Get(data.Obj.Cart    , this.CartID)
       let store   = data.Get(data.Obj.Store   , journal.Seller.Name)
-        , data_, src_, token
+        , data_, token
 
       journal.Transit = { ID : user.TransitID }
       data.Set(data.Obj.Journal , this.JournalID, journal)
   
         switch (this.Mode)
         {
-            case source.User :
+            case mode.User :
             token = user.Token
-            src_  = source.User
             data_ = 
             {
                 JournalID       : cart.Paytm.OrderID.slice(6)
@@ -277,9 +268,8 @@ let List = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
               }
             }
             break;
-            case source.Agent:
+            case mode.Agent:
               token = agent.Token
-              src_  = source.Agent
               data_ = 
               {
                   JournalID       : cart.Paytm.OrderID.slice(6)
@@ -311,7 +301,6 @@ let List = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
             break;
             case mode.Admin:
               token = admin.Token
-              src_  = source.Admin
               data_ = 
               {
                   JournalID       : cart.Paytm.OrderID.slice(6)
@@ -359,9 +348,8 @@ let List = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
                 }
               }
             break;
-            case source.Store :
-            token = owner.Token
-            src_  = source.Store
+            case mode.Store :
+            token = store.Token
             data_ = 
             {
                 JournalID       : cart.Paytm.OrderID.slice(6)
@@ -400,9 +388,7 @@ let List = function(journal_, user_, owner_, agent_, cart_, admin_, mode_)
             , Body         : {}
             , Query        : 
             {
-                Origin     : src_
-              , StoreID    : store.ID
-              , Page       : 1
+                Page       : 1
               , Limit      : 8
             }
             , Header       : { Authorization: 'Bearer ' + token }

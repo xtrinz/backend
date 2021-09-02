@@ -1,7 +1,7 @@
 const { ObjectId }          = require('mongodb')
     , { stores }            = require('../../common/database')
     , { Err_, code, reason} = require('../../common/error')
-    , { query }             = require('../../common/models')
+    , { query, dbset }      = require('../../common/models')
 
 const Save       = async function(data)
 {
@@ -44,29 +44,48 @@ const Get = async function(param, qType)
     return store
 }
 
-const Nearby = async function(data, proj)
+const List = async function(data, proj)
 {
-    const query = { Location: { $near: { $geometry: { type: 'Point', coordinates: [Lon, Lat] } } } }
+    data.Limit  = data.Limit.loc()
+    data.Page   = data.Page.loc()
+    const query = data.Query
         , skip  = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
         , lmt   = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
 
-    const data     = await stores.find(query, proj)
-                                 .skip(skip)
-                                 .limit(lmt)
-                                 .toArray()
-    if (!data.length && data.Page == 1)
+    const data_ = await stores.find(query, proj)
+                              .skip(skip)
+                              .limit(lmt)
+                              .toArray()
+    if (!data_.length && data.Page === 1)
     {
         console.log('no-near-by-stores', { Query : query })
-        return data
+        return data_
     }
 
-    console.log('near-by-stores', { Stores: data })
-    return data
+    console.log('near-by-stores', { Stores: data_ })
+    return data_
+}
+
+const GetStoreSockID = async function(store_id)
+{
+    console.log('get-store-sock-id', { StoreID: store_id })
+
+    const query = { _id: ObjectId(store_id), IsLive: true }
+
+    let store = await stores.findOne(query)
+    if(!store)
+    {
+        console.log('store-not-found', query)
+        return []
+    }
+    console.log('store-found', { User : store })
+    return store.SockID
 }
 
 module.exports =
 {
-      Save   : Save
-    , Get    : Get
-    , Nearby : Nearby
+      Save           : Save
+    , Get            : Get
+    , List           : List
+    , GetStoreSockID : GetStoreSockID
 }

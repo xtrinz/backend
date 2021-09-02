@@ -1,4 +1,5 @@
 const { code, status } = require('../../common/error')
+    ,  { mode }        = require('../../common/models')
     , router 	         = require('express').Router()
     , { Journal }      = require('./driver')
 
@@ -7,9 +8,9 @@ router.get('/list', async (req, res, next) =>
 {
   try
   {
-    const journal = new Journal()
-        , data    = await journal.List(req.query
-                          , req.body.User)
+    const in_     = (req.body.Mode === mode.Store)? req.body.Store: req.body.User
+        , journal = new Journal()
+        , data    = await journal.List(req.query, in_, req.body.Mode)
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : '',
@@ -23,9 +24,9 @@ router.get('/view', async (req, res, next) =>
 {
   try
   {
-    const journal = new Journal()
-        , data    = await journal.Read(req.query
-                              , req.body.User)
+    const in_     = (req.body.Mode === mode.Store)? req.body.Store: req.body.User    
+        , journal = new Journal()
+        , data    = await journal.Read(req.query, in_, req.body.Mode)
 
     return res.status(code.OK).json({
       Status  : status.Success,

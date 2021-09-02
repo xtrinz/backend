@@ -118,19 +118,29 @@ let ConfirmPayment = function(cart_)
   }
 }
 
-let NewOrder = function(name) 
+let NewOrder = function(name, mode_) 
 {
     this.ID     = name
+    this.Mode   = mode_
     this.Data   = function()
     {
-      let user  = data.Get(data.Obj.User, this.ID)
+      let in_
+      switch (this.Mode) {
+        case data.Obj.User:
+          in_  = data.Get(data.Obj.User, this.ID)          
+          break;
+        case data.Obj.Store:
+          in_  = data.Get(data.Obj.Store, this.ID)          
+          break;
+      }
+
       let templ =      
       {
           Type          : Type.Event
-        , Describe      : 'Transit Alert New_Order ' + user.Name
+        , Describe      : 'Transit Alert New_Order ' + in_.Name
         , Method        : Method.EVENT
         , Authorization : {}
-        , Socket        : user.Socket
+        , Socket        : in_.Socket
         , Skip          : [ 'TransitID' ]
         , Event         : 
         {
@@ -142,9 +152,21 @@ let NewOrder = function(name)
     }
     this.PostSet        = async function(res_)
     {
-      let user        = data.Get(data.Obj.User, this.ID)
-      user.TransitID  = res_.Data.TransitID
-      data.Set(data.Obj.User, this.ID, user)
+      let in_
+      switch (this.Mode) {
+        case data.Obj.User:
+          in_  = data.Get(data.Obj.User, this.ID)
+          in_.TransitID  = res_.Data.TransitID
+          data.Set(data.Obj.User, this.ID, in_)
+          break;
+
+        case data.Obj.Store:
+          in_  = data.Get(data.Obj.Store, this.ID)          
+          in_.TransitID  = res_.Data.TransitID
+          data.Set(data.Obj.Store, this.ID, in_)
+          break;
+      }      
+
     }
 }
 
@@ -161,11 +183,11 @@ let CancelByUser = function(user_)
       , Request             :
       {
             Method          : Method.POST
-          , Path            : '/transit/user/cancel'
+          , Path            : '/transit/user'
           , Body            : 
           {
                 TransitID   : user.TransitID
-              , Task        : task.Accept
+              , Task        : task.Cancel
           }
           , Header          : { Authorization: 'Bearer ' + user.Token }
       }
@@ -204,12 +226,12 @@ let Cancelled = function(user_)
   }
 }
 
-let RejectedByStore = function(staff_) 
+let RejectedByStore = function(store_) 
 {
-  this.StaffID   = staff_
+  this.StoreID   = store_
   this.Data      = function()
   {
-    let staff = data.Get(data.Obj.User, this.StaffID)
+    let staff = data.Get(data.Obj.Store, this.StoreID)
     let templ =
     {
         Type                : Type.Rest
@@ -260,12 +282,12 @@ let Rejected = function(user_)
   }
 }
 
-let StoreAccept = function(staff_) 
+let StoreAccept = function(store_) 
 {
-  this.StaffID   = staff_
+  this.StoreID   = store_
   this.Data      = function()
   {
-    let staff = data.Get(data.Obj.User, this.StaffID)
+    let staff = data.Get(data.Obj.Store, this.StoreID)
     let templ =
     {
         Type                : Type.Rest
@@ -405,10 +427,10 @@ let NoAgents = function(admin_)
 }
 
 
-let AgentAccept =  function(agent_, staff_) 
+let AgentAccept =  function(agent_, store_) 
 {
   this.AgentID   = agent_
-  this.StaffID   = staff_  
+  this.StoreID   = store_  
   this.Data      = function()
   {
     let agent = data.Get(data.Obj.User, this.AgentID)
@@ -441,42 +463,51 @@ let AgentAccept =  function(agent_, staff_)
   this.PostSet = async function(res_)
   {
     let resp  = await read()
-      , user  = data.Get(data.Obj.User, this.StaffID)
+      , user  = data.Get(data.Obj.Store, this.StoreID)
     user.OTP  = resp.Data.OTP
-    data.Set(data.Obj.User, this.StaffID, user)
+    data.Set(data.Obj.Store, this.StoreID, user)
   }
 }
 
-let AgentReady = function(user_) 
+let AgentReady = function(name_, mode_) 
 {
-  this.UserID  = user_
+  this.ID      = name_
+  this.Mode    = mode_
   this.Data    = function()
   {
-    let user   = data.Get(data.Obj.User, this.UserID)
+    let in_
+    switch (this.Mode) {
+      case data.Obj.User:
+        in_  = data.Get(data.Obj.User, this.ID)          
+        break;
+      case data.Obj.Store:
+        in_  = data.Get(data.Obj.Store, this.ID)          
+        break;
+    }
     let templ  =      
     {
         Type          : Type.Event
-      , Describe      : 'Transit Alert AgentReady ' + user.Name
+      , Describe      : 'Transit Alert AgentReady ' + in_.Name
       , Method        : Method.EVENT
       , Authorization : {}
-      , Socket        : user.Socket
+      , Socket        : in_.Socket
       , Event         : 
       {
           Type : alerts.AgentReady
-        , Data : { TransitID : user.TransitID }
+        , Data : { TransitID : in_.TransitID }
       }
     }
     return templ
   }
 }
 
-let StoreDespatch = function(staff_, agent_) 
+let StoreDespatch = function(store_, agent_) 
 {
-  this.StaffID   = staff_
+  this.StoreID   = store_
   this.AgentID   = agent_
   this.Data      = function()
   {
-    let staff = data.Get(data.Obj.User, this.StaffID)
+    let staff = data.Get(data.Obj.Store, this.StoreID)
     let templ =
     {
         Type             : Type.Rest
@@ -570,23 +601,32 @@ let AgentComplete = function(agent_)
   }
 }
 
-let Delivered = function(user_) 
+let Delivered = function(name_, mode_) 
 {
-  this.UserID  = user_
+  this.ID  = name_
+  this.Mode = mode_
   this.Data    = function()
   {
-    let user   = data.Get(data.Obj.User, this.UserID)
+    let in_
+    switch (this.Mode) {
+      case data.Obj.User:
+        in_  = data.Get(data.Obj.User, this.ID)          
+        break;
+      case data.Obj.Store:
+        in_  = data.Get(data.Obj.Store, this.ID)          
+        break;
+    }
     let templ  =      
     {
         Type          : Type.Event
-      , Describe      : 'Transit Alert Delivered ' + user.Name
+      , Describe      : 'Transit Alert Delivered ' + in_.Name
       , Method        : Method.EVENT
       , Authorization : {}
-      , Socket        : user.Socket
+      , Socket        : in_.Socket
       , Event         : 
       {
           Type : alerts.Delivered
-        , Data : { TransitID : user.TransitID }
+        , Data : { TransitID : in_.TransitID }
       }
     }
     return templ

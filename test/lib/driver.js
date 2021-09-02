@@ -56,9 +56,10 @@ function TestRig()
     {
         for(let suite_ =0; suite_ < this.TestSuites.length; suite_++)
         {
-            await new Promise((resolve) => setTimeout(resolve, 5000));
+            await new Promise((resolve) => setTimeout(resolve, 2));
             db.database.dropDatabase()
-            await new Promise((resolve) => setTimeout(resolve, 5000));
+            db.stores.createIndex({ Location: "2dsphere" })
+            await new Promise((resolve) => setTimeout(resolve, 2));
             
             let suite = this.TestSuites[suite_], failed = false
             let net_step_cnt = 0

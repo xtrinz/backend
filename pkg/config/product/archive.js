@@ -46,8 +46,8 @@ const Get        = async function(param, qType)
 
 const ReadAll         = async function (data)
 {
-    data.Page  = parseInt(data.Page)
-    data.Limit = parseInt(data.Limit)
+    data.Page  = data.Page.loc()
+    data.Limit = data.Limit.loc()
     console.log('find-all-product-by-store-id', { Data: data })    
     const project   =
         {
@@ -100,7 +100,7 @@ const Remove      = async function (data)
 {
     const query = 
     {
-        StoreID : ObjectId(data.StoreID), 
+        StoreID : ObjectId(data.Store._id), 
         _id     : ObjectId(data.ProductID)
     }
     const resp  = await products.deleteOne(query);

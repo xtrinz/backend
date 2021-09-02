@@ -1,8 +1,9 @@
 const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
     , { AddUser }  = require('../user/story')
+    , { Obj }      = require('../data')
 
-const Std = function(user_, addr_, agent_, owner_, staff_)
+const Std = function(user_, addr_, agent_, store_)
 {
     let cart_   = user_
     let tc      = new TestCase('Transit Process')
@@ -11,30 +12,30 @@ const Std = function(user_, addr_, agent_, owner_, staff_)
     [
           new event.Checkout       (user_, addr_, cart_)
         , new event.ConfirmPayment (cart_)
-        , new event.NewOrder       (owner_)
-        , new event.NewOrder       (user_)
+        , new event.NewOrder       (store_, Obj.Store)
+        , new event.NewOrder       (user_, Obj.User)
 
-        , new event.StoreAccept   (staff_)
+        , new event.StoreAccept   (store_)
         , new event.NewTransit    (agent_)
         , new event.Accepted      (user_ )
         
-        , new event.AgentAccept   (agent_, staff_)
-        , new event.AgentReady    (user_)
-        , new event.AgentReady    (owner_)
+        , new event.AgentAccept   (agent_, store_)
+        , new event.AgentReady    (user_, Obj.User)
+        , new event.AgentReady    (store_, Obj.Store)
         
-        , new event.StoreDespatch (staff_, agent_)
+        , new event.StoreDespatch (store_, agent_)
         , new event.EnRoute       (user_)        
         , new event.EnRoute       (agent_)
 
         , new event.AgentComplete (agent_)
-        , new event.Delivered     (user_)
-        , new event.Delivered     (owner_)
+        , new event.Delivered     (user_, Obj.User)
+        , new event.Delivered     (store_, Obj.Store)
     ]
     steps.forEach((step) => tc.AddStep(step))
     return tc
 }
 
-const CancelByUser = function(user_, addr_, agent_, owner_, staff_)
+const CancelByUser = function(user_, addr_, agent_, store_)
 {
     let cart_   = user_
     let tc      = new TestCase('Cancellation By User After Init')
@@ -43,17 +44,17 @@ const CancelByUser = function(user_, addr_, agent_, owner_, staff_)
     [
           new event.Checkout       (user_, addr_, cart_)
         , new event.ConfirmPayment ()
-        , new event.NewOrder       (owner_)
+        , new event.NewOrder       (store_)
         , new event.NewOrder       (user_)
 
         , new event.CancelByUser   (user_ )
-        , new event.Cancelled      (owner_)
+        , new event.Cancelled      (store_)
     ]
     steps.forEach((step) => tc.AddStep(step))
     return tc
 }
 
-const CancelByUserAfterAceptance = function(user_, addr_, agent_, owner_, staff_)
+const CancelByUserAfterAceptance = function(user_, addr_, agent_, store_)
 {
     let cart_   = user_
     let tc      = new TestCase('Cancellation By User After Store Accepted The Order')
@@ -62,22 +63,22 @@ const CancelByUserAfterAceptance = function(user_, addr_, agent_, owner_, staff_
     [
           new event.Checkout       (user_, addr_, cart_)
         , new event.ConfirmPayment ()
-        , new event.NewOrder       (owner_)
+        , new event.NewOrder       (store_)
         , new event.NewOrder       (user_)
         
-        , new event.StoreAccept   (staff_)
+        , new event.StoreAccept   (store_)
         , new event.NewTransit    (agent_)
         , new event.Accepted      (user_ )
 
         , new event.CancelByUser   (user_ )
-        , new event.Cancelled      (owner_)
+        , new event.Cancelled      (store_)
         , new event.Cancelled      (agent_)
     ]
     steps.forEach((step) => tc.AddStep(step))
     return tc
 }
 
-const CancelByUserAfterTransitAceptance = function(user_, addr_, agent_, owner_, staff_)
+const CancelByUserAfterTransitAceptance = function(user_, addr_, agent_, store_)
 {
     let cart_   = user_
     let tc      = new TestCase('Cancellation By User After Agent Accepted The Transit')
@@ -86,26 +87,26 @@ const CancelByUserAfterTransitAceptance = function(user_, addr_, agent_, owner_,
     [
           new event.Checkout       (user_, addr_, cart_)
         , new event.ConfirmPayment ()
-        , new event.NewOrder       (owner_)
+        , new event.NewOrder       (store_)
         , new event.NewOrder       (user_)
         
-        , new event.StoreAccept   (staff_)
+        , new event.StoreAccept   (store_)
         , new event.NewTransit    (agent_)
         , new event.Accepted      (user_ )
 
-        , new event.AgentAccept   (agent_, staff_)
+        , new event.AgentAccept   (agent_, store_)
         , new event.AgentReady    (user_)
-        , new event.AgentReady    (owner_)
+        , new event.AgentReady    (store_)
 
         , new event.CancelByUser   (user_ )
         , new event.Cancelled      (agent_)
-        , new event.Cancelled      (owner_)
+        , new event.Cancelled      (store_)
     ]
     steps.forEach((step) => tc.AddStep(step))
     return tc
 }
 
-const CancellationByStoreAfterInit = function(user_, addr_, agent_, owner_, staff_)
+const CancellationByStoreAfterInit = function(user_, addr_, agent_, store_)
 {
     let cart_   = user_
     let tc      = new TestCase('Cancelled By Store After Init')
@@ -114,17 +115,17 @@ const CancellationByStoreAfterInit = function(user_, addr_, agent_, owner_, staf
     [
           new event.Checkout        (user_, addr_, cart_)
         , new event.ConfirmPayment  ()
-        , new event.NewOrder        (owner_)
+        , new event.NewOrder        (store_)
         , new event.NewOrder        (user_)
 
-        , new event.RejectedByStore (staff_)
+        , new event.RejectedByStore (store_)
         , new event.Rejected        (user_ )
     ]
     steps.forEach((step) => tc.AddStep(step))
     return tc
 }
 
-const CancellationByStoreAfterOrderAcceptance = function(user_, addr_, agent_, owner_, staff_)
+const CancellationByStoreAfterOrderAcceptance = function(user_, addr_, agent_, store_)
 {
     let cart_   = user_
     let tc      = new TestCase('Cancelled By Store After Accepting the order')
@@ -133,14 +134,14 @@ const CancellationByStoreAfterOrderAcceptance = function(user_, addr_, agent_, o
     [
           new event.Checkout        (user_, addr_, cart_)
         , new event.ConfirmPayment  ()
-        , new event.NewOrder        (owner_)
+        , new event.NewOrder        (store_)
         , new event.NewOrder        (user_)
 
-        , new event.StoreAccept   (staff_)
+        , new event.StoreAccept   (store_)
         , new event.NewTransit    (agent_)
         , new event.Accepted      (user_ )
 
-        , new event.RejectedByStore (staff_)
+        , new event.RejectedByStore (store_)
         , new event.Rejected        (user_ )
         , new event.Rejected        (agent_)
     ]
@@ -148,7 +149,7 @@ const CancellationByStoreAfterOrderAcceptance = function(user_, addr_, agent_, o
     return tc
 }
 
-const CancellationByStoreAfterTransitAcceptance = function(user_, addr_, agent_, owner_, staff_)
+const CancellationByStoreAfterTransitAcceptance = function(user_, addr_, agent_, store_)
 {
     let cart_   = user_
     let tc      = new TestCase('Cancelled By Store After Accepting the Transit')
@@ -157,18 +158,18 @@ const CancellationByStoreAfterTransitAcceptance = function(user_, addr_, agent_,
     [
 /*          new event.Checkout        (user_, addr_, cart_)
         , new event.ConfirmPayment  ()
-        , new event.NewOrder        (owner_)
+        , new event.NewOrder        (store_)
         , new event.NewOrder        (user_)
 
-        , new event.StoreAccept   (staff_)
+        , new event.StoreAccept   (store_)
         , new event.NewTransit    (agent_)
         , new event.Accepted      (user_ )
         
-        , new event.AgentAccept   (agent_, staff_)
+        , new event.AgentAccept   (agent_, store_)
         , new event.AgentReady    (user_)
-        , new event.AgentReady    (owner_)
+        , new event.AgentReady    (store_)
 
-        , new event.RejectedByStore (staff_)
+        , new event.RejectedByStore (store_)
         , new event.Rejected        (user_ )
         , new event.Rejected        (agent_)*/
     ]
@@ -176,7 +177,7 @@ const CancellationByStoreAfterTransitAcceptance = function(user_, addr_, agent_,
     return tc
 }
 
-const IgnoredByLastAgent = function(user_, addr_, agent_, owner_, staff_, admin_)
+const IgnoredByLastAgent = function(user_, addr_, agent_, store_, admin_)
 {
     let cart_   = user_
     let tc      = new TestCase('Ignored by last agent')
@@ -185,10 +186,10 @@ const IgnoredByLastAgent = function(user_, addr_, agent_, owner_, staff_, admin_
     [
           new event.Checkout       (user_, addr_, cart_)
         , new event.ConfirmPayment ()
-        , new event.NewOrder       (owner_)
+        , new event.NewOrder       (store_)
         , new event.NewOrder       (user_)
 
-        , new event.StoreAccept    (staff_)
+        , new event.StoreAccept    (store_)
         , new event.NewTransit     (agent_)
         , new event.Accepted       (user_ )
 

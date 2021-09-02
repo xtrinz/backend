@@ -20,7 +20,7 @@ router.post('/register', async (req, res, next) =>
         user  = new User()
         const token = await user.ConfirmMobileNo(req.body)
         text_ = text.OTPConfirmed
-        data_ = { Token : token }
+        data_ = { Token : token }   // Work in progress, keep this one itself as loggin
         break
 
       case task.Register:
@@ -56,7 +56,7 @@ router.post( '/login', async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-router.post( '/passwd/reset', async (req, res, next) =>
+router.post( '/passwd', async (req, res, next) =>
 {
   try
   {

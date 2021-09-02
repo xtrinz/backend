@@ -1,5 +1,6 @@
-const jwt        = require('jsonwebtoken')
-    , jwt_secret = process.env.JWT_AUTH_TOKEN
+const jwt                     = require('jsonwebtoken')
+    , jwt_secret              = process.env.JWT_AUTH_TOKEN
+    , { Err_, code, reason }  = require('../common/error')
 
     , Sign       = async function(data)
     {
@@ -14,7 +15,7 @@ const jwt        = require('jsonwebtoken')
         const res = await jwt.verify(token, jwt_secret)
 
         if (!res || !res._id || !res.Mode) 
-        Err_(code.BAD_REQUEST, reason.UserNotFound)
+        Err_(code.BAD_REQUEST, reason.InvalidToken)
         return res
     }
 

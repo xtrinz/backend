@@ -3,15 +3,14 @@ const { Method, Type }       = require('../../lib/medium')
     , { read }               = require('../../lib/driver')
     , { code, status, text } = require('../../../pkg/common/error')
     , { task }               = require('../../../pkg/common/models')
+    , jwt                    = require('../../../pkg/infra/jwt')
 
-let RegisterNew = function(user_, store_) 
+let RegisterNew = function(store_) 
 {
-    this.UserID   = user_
     this.StoreID  = store_
     this.Data     = function()
     {
-      let store  = data.Get(data.Obj.Store, this.StoreID)
-      let user   = data.Get(data.Obj.User, this.UserID)      
+      let store = data.Get(data.Obj.Store, this.StoreID)
       let templ =
       {
           Type                  : Type.Rest
@@ -41,9 +40,8 @@ let RegisterNew = function(user_, store_)
                   , Country     : store.Address.Country
               }
             }
-            , Header            : { Authorization : 'Bearer ' + user.Token }
+            , Header            : {}
         }
-        , Skip                  : [ 'StoreID' ]
         , Response              :
         {
               Code              : code.OK
@@ -51,7 +49,7 @@ let RegisterNew = function(user_, store_)
             , Text              : text.OTPSendToMobileNo.format(
                                     store.MobileNo.substr(
                                     store.MobileNo.length - 4))
-            , Data              : { StoreID: '' }
+            , Data              : {}
         }
       }
       return templ
@@ -62,7 +60,6 @@ let RegisterNew = function(user_, store_)
       let resp  = await read()
         , store = data.Get(data.Obj.Store, this.StoreID)
       store.OTP = resp.Data.OTP
-      store.ID  = res_.Data.StoreID
       data.Set(data.Obj.Store, this.StoreID, store)
     }
 }
@@ -91,17 +88,26 @@ let RegisterReadOTP = function(user_, store_)
           }
           , Header     : { Authorization: 'Bearer ' + user.Token }
         }
+        , Skip         : [ 'Token' ]
         , Response     :
         {
             Code       : code.OK
           , Status     : status.Success
           , Text       : text.OTPConfirmed
-          , Data       : {}
+          , Data       : { Token : '' }
         }
 
     } 
     return templ
   }
+  this.PostSet        = async function(res_)
+  {
+    let store = data.Get(data.Obj.Store, this.StoreID)
+      data_ = await jwt.Verify('Bearer ' + res_.Data.Token)
+      store.ID    = data_._id
+      store.Token = res_.Data.Token
+    data.Set(data.Obj.Store, this.StoreID, store)
+  }  
 }
 
 let RegisterApprove =  function(admin_, store_) 
@@ -159,14 +165,8 @@ let Read =   function(user_, store_)
           Method        : Method.GET
         , Path          : '/store/view'
         , Body          : {}
-        , Query         : 
-        {
-          StoreID       : store.ID
-        }
-        , Header        :
-        {
-          Authorization : 'Bearer ' + user.Token
-        }
+        , Query         : { StoreID     : store.ID }
+        , Header        : { Authorization : 'Bearer ' + user.Token }
       }
       , Response         :
       {
@@ -177,14 +177,9 @@ let Read =   function(user_, store_)
         {
             StoreID      : store.ID
           , Name         : store.Name
-          , State        : store.State
           , Image        : store.Image
           , Type         : store.Type
           , Certs        : store.Certs
-          , MobileNo     : store.MobileNo
-          , Email        : store.Email
-          , Longitude    : store.Longitude
-          , Latitude     : store.Latitude
           , Address      :
           {
               Line1      : store.Address.Line1
@@ -217,7 +212,14 @@ let List = function(user_, store_)
       {
           Method        : Method.GET
         , Path          : '/store/list'
-        , Body          : {}
+        , Query         :
+        {
+            Longitude   : '17.20000'
+          , Latitude    : '17.20000'
+          , Page        : 1
+          , Limit       : 8
+        }
+        , Body          : { }
         , Header        : { Authorization : 'Bearer ' + user.Token }
       }
       , Response        :
@@ -231,12 +233,59 @@ let List = function(user_, store_)
             , Name    : store.Name
             , Image   : store.Image
             , Type    : store.Type
-            , State   : store.State
           }]
       }
     }
     return templ
   }
+}
+
+let Connect = function(store_) 
+{
+    this.ID     = store_
+    this.Data   = function()
+    {
+      let store  = data.Get(data.Obj.Store, this.ID)
+      let templ =      
+      {
+          Type          : Type.Event
+        , Describe      : 'User Socket Connect'
+        , Method        : Method.CONNECT
+        , Authorization : {'auth' : {Token : 'Bearer ' + store.Token }}
+        , Socket        : {}
+        , Skip          : []
+        , Event         : {}
+      }
+      return templ
+    }
+    this.PostSet        = async function(res_)
+    {
+      if(this.ID.startsWith('Store')) { await read() } // TODO bug
+      let store    = data.Get(data.Obj.Store, this.ID)
+      store.Socket = res_.Socket
+      store.Channel= res_.Channel
+      data.Set(data.Obj.Store, this.ID, store)
+    }
+}
+
+let Disconnect = function(store_) 
+{
+    this.ID     = store_
+    this.Data   = function()
+    {
+      let store  = data.Get(data.Obj.Store, this.ID)
+      let templ =      
+      {
+          Type          : Type.Event
+        , Describe      : 'User Socket Disconnect'
+        , Method        : Method.DISCONNECT
+        , Authorization : {}
+        , Socket        : store.Socket
+        , Skip          : []
+        , Event         : {}
+      }
+      return templ
+    }
 }
 
 
@@ -248,4 +297,6 @@ module.exports =
     , RegisterApprove // Store registration sequence
     , Read            
     , List            // Read store
+    , Connect
+    , Disconnect
 }

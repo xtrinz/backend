@@ -1,6 +1,7 @@
 const router                 = require('express').Router()
     , { text, code, status } = require('../../common/error')
 
+// TODO enable rbac
 router.get('/search', async (req, res, next) => {
   try
   {
