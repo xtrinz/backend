@@ -35,10 +35,3 @@ String.prototype.loc = function()
         x = parseFloat(x)
     return x
 }
-
-Number.prototype.revloc = function() 
-{
-    let x = this
-    console.log('##', this)
-    this  //= x.toFixed(5)
-}
