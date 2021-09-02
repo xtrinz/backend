@@ -14,23 +14,17 @@ router.post('/register', async (req, res, next) =>
     {
         case task.New:
             store = new Store(req.body)
-            let id = await store.New(req.body)
+            await store.New(req.body)
             text_ = text.OTPSendToMobileNo.format(
                     store.Data.MobileNo.slice(-4))
-            data_ = { StoreID : id }
             break
 
         case task.ReadOTP:
             store = new Store()
-            await store.ConfirmMobileNo(req.body)
+            const token = await store.ConfirmMobileNo(req.body)
             text_ = text.OTPConfirmed
+            data_ = { Token : token }
             break
-
-        case task.SetPayoutGW:
-          store = new Store()
-          await store.SetPayoutGW(req.body)
-          text_ = text.PayoutGWSet
-          break
             
         case task.Approve:
             store  = new Store()
@@ -50,10 +44,10 @@ router.post('/register', async (req, res, next) =>
 router.get('/view', async (req, res, next) => {
     try 
     {
-      let  store = new Store()
-      const id   = req.query.StoreID
-          , user = req.body.User._id
-          , data = await store.Read(id, user)
+      let  store  = new Store()
+      const id_   = req.query.StoreID
+          , mode_ = req.body.Mode
+          , data  = await store.Read(id_, mode_)
 
       return res.status(code.OK).json({
         Status  : status.Success,
@@ -67,8 +61,8 @@ router.get('/list', async (req, res, next) =>
 {
     try 
     {
-      let store  = new Store()
-      const data = await store.ListStores(req.body.User)
+      const store = new Store()
+          , data  = await store.List(req.query, req.body.Mode)
       
       return res.status(code.OK).json({
         Status  : status.Success,

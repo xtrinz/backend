@@ -8,6 +8,7 @@ const { ObjectID }           = require('mongodb')
           store   : require('../store/archive')
         , user    : require('../user/archive')
     }
+    , jwt                    = require('../../infra/jwt')
 
 function Store(data)
 {
@@ -40,9 +41,9 @@ function Store(data)
         , State           : states.New
     }
 
-    this.Read = async function(store_id, user_id)
+    this.Read = async function(store_id, mode_)
     {
-        console.log('read-store', { StoreID: store_id, UserID: user_id })
+        console.log('read-store', { StoreID: store_id, Mode: mode_ })
     
         this.Data = await db.store.Get(store_id, query.ByID)
         if (!this.Data) Err_(code.BAD_REQUEST, reason.StoreNotFound)
@@ -61,7 +62,7 @@ function Store(data)
           , Latitude  : this.Data.Location.coordinates[1]
           , Address   : this.Data.Address
         }
-        if (String(this.Data.AdminID) !== String(user_id))
+        if (mode_ !== mode.Store)
         {
             if (data.State !== states.Registered)
             Err_(code.FORBIDDEN, reason.PermissionDenied)
@@ -88,6 +89,26 @@ function Store(data)
         return data
     }
     
+    this.Auth   = async function (token)
+    {
+        if (!token) Err_(code.BAD_REQUEST, reason.TokenMissing)
+
+        token       = token.slice(7) // cut 'Bearer <token>'
+        const res   = await jwt.Verify(token)
+        if (!res || !res._id) Err_(code.BAD_REQUEST, reason.UserNotFound)
+
+        if(res.Mode !== mode.Store)
+        Err_(code.BAD_REQUEST, reason.InvalidToken)
+
+        this.Data = await db.store.Get(res._id, query.ByID)
+        if (!this.Data)
+        {
+            console.log('store-not-found', {UserID: res._id})
+            Err_(code.BAD_REQUEST, reason.InvalidToken)
+        }
+        console.log('store-authenticated', {User: this.Data})
+    }
+
     // Authz usr for product mgmt
     this.Authz      = async function(StoreID, UserID) 
     {
@@ -99,13 +120,7 @@ function Store(data)
     }
     
     this.New      = async function ()
-    {
-        // Check admin have shop with same name
-        const key1 = { AdminID  : this.Data.AdminID, Name : this.Data.Name }
-            , res1 = await db.store.Get(key1, query.Custom)
-        if (res1 && res1.State === states.Registered)
-        Err_(code.BAD_REQUEST, reason.StoreExists)
-    
+    {    
         // Check the mobile number already used
         const key2 = { MobileNo : this.Data.MobileNo }
             , res2 = await db.store.Get(key2, query.Custom)
@@ -118,21 +133,17 @@ function Store(data)
             , hash    = await otp_sms.Send(gw.SMS)
     
         if(!this.Data._id) { this.Data._id = new ObjectID() }
+        this.Data.MobileNo   = this.Data.MobileNo
         this.Data.Otp        = hash
         this.Data.State      = states.New
         await db.store.Save(this.Data)
     
-        const user  = await db.user.Get(this.Data.AdminID, query.ByID)
-        if (!user) Err_(code.BAD_REQUEST, reason.AdminNotFound)
-        user.StoreList.Owned.push(String(this.Data._id))
-        await db.user.Save(user)
         console.log('new-store-created', {Store: this.Data})
-        return this.Data._id
     }
     
     this.ConfirmMobileNo   = async function(data)
     {
-        const key = { AdminID: data.User._id, MobileNo : data.MobileNo }
+        const key = { MobileNo : data.MobileNo }
         this.Data = await db.store.Get(key, query.Custom)
         if (!this.Data || this.Data.State === states.Registered)
         {
@@ -148,20 +159,15 @@ function Store(data)
         await db.store.Save(this.Data)
         console.log('store-mobile-number-confirmed', {Store: this.Data})
         // TODO Send an event to Admin
-    }
-    
-    this.SetPayoutGW    = async function(data)
-    {
-        // Create cutomer
-        // Create Account
+        const token = await jwt.Sign({ _id: this.Data._id, Mode: mode.Store })
+        return token        
     }
 
     this.Approve   = async function (data)
     {
         console.log('store-approval', {Store: data})
 
-        const admin = await db.user.Get(data.User._id, query.ByID)
-        if (!admin || admin.Mode !== mode.Admin)
+        if (data.User.Mode !== mode.Admin)
         Err_(code.BAD_REQUEST, reason.PermissionDenied)
     
         this.Data = await db.store.Get(data.StoreID, query.ByID)
@@ -176,15 +182,21 @@ function Store(data)
         console.log('store-approved', {Store: this.Data})
     }
     
-    this.ListStores  = async function (user)
+    this.List  = async function (in_, mode_)
     {
-        console.log('list-store', {User : user})
+        if (mode_ === mode.Store || mode_ === mode.Agent)
+        {
+            console.log('store-list-blocked-for-the-entity', { Entity: in_, Mode: mode_ })
+            Err_(code.FORBIDDEN, reason.PermissionDenied)
+        }
+        console.log('list-store', { In : in_ })
+
         let proj =
         {   _id   : 1, Name  : 1, Type : 1
           , Image : 1, State : 1           }
-        let stores = user.StoreList
-        const data = await db.store.GetMany(stores.Owned , proj)
-        console.log('store-list', {Store: data})
+
+        const data = await db.store.Nearby(in_ , proj)
+        console.log('store-list', { Stores : data })
         return data
     }    
 }

@@ -81,7 +81,7 @@ function User(mob_no, user_mode)
         await db.Save(this.Data)
         console.log('user-mobile-number-confirmed', { User: this.Data })
         
-        const token = await jwt.Sign({ _id: this.Data._id })
+        const token = await jwt.Sign({ _id: this.Data._id, Mode: this.Data.Mode })
         return token
     }
 

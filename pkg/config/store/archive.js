@@ -44,14 +44,17 @@ const Get = async function(param, qType)
     return store
 }
 
-const ListNearby = async function(PageNo, Lon, Lat)
+const Nearby = async function(data, proj)
 {
-    const nPerPage = 30
-        , skip     = PageNo > 0 ? (PageNo - 1) * nPerPage : 0
-        , query    = { Location: { $near: { $geometry: { type: 'Point', coordinates: [Lon, Lat] } } } }
+    const query = { Location: { $near: { $geometry: { type: 'Point', coordinates: [Lon, Lat] } } } }
+        , skip  = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
+        , lmt   = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
 
-    const data     = await stores.find(query).skip(skip).limit(nPerPage).toArray()
-    if (!data.length && pageno == 1)
+    const data     = await stores.find(query, proj)
+                                 .skip(skip)
+                                 .limit(lmt)
+                                 .toArray()
+    if (!data.length && data.Page == 1)
     {
         console.log('no-near-by-stores', { Query : query })
         return data
@@ -61,39 +64,9 @@ const ListNearby = async function(PageNo, Lon, Lat)
     return data
 }
 
-const GetMany = async function(id_lst, proj)
-{
-    if(!id_lst.length)
-    {
-        console.log('empty-store-id-list',
-        {     IDList       : id_lst
-           , Projection    : proj })
-        return []
-    }
-
-    id_lst = id_lst.map(ObjectId)
-    const key  = { '_id' : { $in: id_lst } }
-        , resp = await stores.find(key).project(proj).toArray()
-
-    if (!resp.length && id_lst.length)
-    {
-        console.log('find-stores-failed',
-        { 
-            Key        : key, 
-            Projection : proj,
-            Result     : resp.result
-        })
-        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
-    }
-    resp.forEach((res) => { res.StoreID = res._id; delete res._id })
-    console.log('store-list', { Stores: resp })
-    return resp
-}
-
 module.exports =
 {
-      Save       : Save
-    , Get        : Get
-    , ListNearby : ListNearby
-    , GetMany    : GetMany
+      Save   : Save
+    , Get    : Get
+    , Nearby : Nearby
 }

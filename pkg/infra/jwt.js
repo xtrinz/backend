@@ -6,9 +6,15 @@ const jwt        = require('jsonwebtoken')
         const token = await jwt.sign(data, jwt_secret)
         return token
     }
-    , Verify     = async function(data)
+    , Verify     = async function(token)
     {
-        const res = await jwt.verify(data, jwt_secret)
+        if (!token) Err_(code.BAD_REQUEST, reason.TokenMissing)
+
+        token       = token.slice(7) // cut 'Bearer <token>'
+        const res = await jwt.verify(token, jwt_secret)
+
+        if (!res || !res._id || !res.Mode) 
+        Err_(code.BAD_REQUEST, reason.UserNotFound)
         return res
     }
 
