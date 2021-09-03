@@ -97,7 +97,7 @@ router.put('/edit', async (req, res, next) =>
   try 
   {
     let  store = new Store()
-    // TODO await store.Edit(req.body)
+    await store.Edit(req.body)
 
     return res.status(code.OK).json({
       Status  : status.Success,

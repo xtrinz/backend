@@ -240,6 +240,45 @@ let List = function(user_, store_)
   }
 }
 
+let Edit = function(store_) 
+{
+  this.StoreID  = store_
+  this.Data     = function()
+  {
+    let store = data.Get(data.Obj.Store, this.StoreID)
+    let templ =
+    {
+        Type            : Type.Rest
+      , Describe        : 'Store Edit'
+      , Request         :
+      {
+          Method        : Method.PUT
+        , Path          : '/store/edit'
+        , Query         : {}
+        , Body          : 
+        {
+            Email       : store.Email
+          , Image       : store.Image
+          , Certs       : store.Certs
+          , Type        : store.Type
+          , Name        : store.Name
+          , Longitude   : store.Longitude
+          , Latitude    : store.Latitude 
+        }
+        , Header        : { Authorization : 'Bearer ' + store.Token }
+      }
+      , Response        :
+      {
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : text.ProfileUpdated
+        , Data          : {}
+      }
+    }
+    return templ
+  }
+}
+
 let Connect = function(store_) 
 {
     this.ID     = store_
@@ -297,6 +336,7 @@ module.exports =
     , RegisterApprove // Store registration sequence
     , Read            
     , List            // Read store
+    , Edit
     , Connect
     , Disconnect
 }

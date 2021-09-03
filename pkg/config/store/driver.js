@@ -180,9 +180,6 @@ function Store(data)
     {
         console.log('store-approval', {Store: data})
 
-        if (data.User.Mode !== mode.Admin)
-        Err_(code.BAD_REQUEST, reason.PermissionDenied)
-    
         this.Data = await db.store.Get(data.StoreID, query.ByID)
         if (!this.Data || this.Data.State !== states.MobConfirmed)
         {
@@ -263,7 +260,31 @@ function Store(data)
         }
         console.log('store-list', { Stores : data, Mode: mode_ })
         return data
-    }    
+    }
+
+    this.Edit   = async function (data)
+    {
+        console.log('edit-store', { Input : data})
+
+        let rcd = { _id : data.Store._id }
+        if(data.Email)    rcd.Email    = data.Email
+        if(data.Image)    rcd.Image    = data.Image
+        if(data.Certs)    rcd.Certs    = data.Certs
+        if(data.Type)     rcd.Type     = data.Type
+        if(data.Name)     rcd.Name     = data.Name
+        if(data.Longitude && data.Latitude)  
+                          rcd.Location = 
+                          { 
+                                type        : 'Point'
+                              , coordinates : [ data.Longitude.loc(), data.Latitude.loc() ]
+                          }
+        if(data.Address)  rcd.Address  = data.Address
+        // TODO MobileNo
+        await db.store.Save(rcd)
+
+        console.log('store-updated', { Record: rcd })
+    }
+    
 }
 
 module.exports =
