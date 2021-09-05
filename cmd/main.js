@@ -1,6 +1,8 @@
                  require('./settings')
 const express  = require('express')
+    , fs       = require('fs')
     , app      = express()
+    , https    = require('https')
     , port     = process.env.PORT
     , adptr    = require( '../pkg/common/adapter'          )
     , { test } = require( '../pkg/common/test'             )
@@ -19,6 +21,11 @@ const express  = require('express')
       resource : rsrc,
       version  : v
     }          = require('../pkg/common/models')
+    , options  =
+    {
+          key  : fs.readFileSync('cert/server.key')
+        , cert : fs.readFileSync('cert/server.crt')
+    }
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -49,11 +56,13 @@ const sce_  =
 sce_.forEach((type) => process.on(type, adptr.GracefulExit))
 
 const server_ = () => console.log('server-started', {Port : port})
-    , server  = app.listen(port, server_)
+    , server  = https.createServer(options, app)
     , io      = require('socket.io')(server)
     , event   = require('../pkg/engine/events')
+
       adptr.SetServer(server, io)
       event.SetChannel(io)
+      server.listen(port, server_)
 
 io.on('connection', async (socket) =>
 {
