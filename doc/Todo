@@ -1,6 +1,5 @@
 
 
-11 set token in resp header
 13 https
 14 input validator (Task as mdatory field)
 16 socket limit connections
@@ -24,11 +23,13 @@
 38 TransitIgnoredByAgent - on admin lock, if waiting time exceeds limits, tigger another handler to auto cancel
 40 Clear quoted TODOs
 12 root admin + sub admin logics
-15 bug : for immediate connectivity trigger a rest request after socket connection
+
 
 
 
 Low priority:
+15 bug : for immediate connectivity trigger a rest request after socket connection
+
 03 product add  variant
 05 store   delete
 
