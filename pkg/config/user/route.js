@@ -20,7 +20,7 @@ router.post('/register', async (req, res, next) =>
         user  = new User()
         const token = await user.ConfirmMobileNo(req.body)
         text_ = text.OTPConfirmed
-        data_ = { Token : token }   // Work in progress, keep this one itself as loggin
+        res.setHeader('authorization', token)
         break
 
       case task.Register:
@@ -47,11 +47,12 @@ router.post( '/login', async (req, res, next) =>
   {
     const user  = new User()
     const token = await user.Login(req.body)
+    res.setHeader('authorization', token)    
 
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : text.LoggedIn,
-      Data    : {Token: token}
+      Data    : {}
     })
   } catch (err) { next(err) }
 })
@@ -75,7 +76,7 @@ router.post( '/passwd', async (req, res, next) =>
                 user  = new User()
           const token = await user.AuthzEditPassword(req.body)
                 text_ = text.OTPConfirmed
-                data_ = {Token: token}
+                res.setHeader('authorization', token)                
                 break
 
       case task.SetPassword:

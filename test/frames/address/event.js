@@ -35,7 +35,7 @@ let Add = function(user_, addr_)
             , Country    : addr.Address.Country
           }
         }
-        , Header         : { Authorization: 'Bearer ' + user.Token }
+        , Header         : { Authorization: user.Token }
       }
       , Skip             : [ 'AddressID' ]
       , Response         :
@@ -78,7 +78,7 @@ let View = function(user_, addr_)
           {                                   
                 AddressID    : addr.ID
           }                          
-          , Header           : { Authorization: 'Bearer ' + user.Token }
+          , Header           : { Authorization: user.Token }
       }                                   
       , Response             :
       {                                   
@@ -127,7 +127,7 @@ let List = function(user_, addr_)
           , Path             : '/address/list'
           , Body             : {}
           , Query            : {}
-          , Header           : { Authorization: 'Bearer ' + user.Token }
+          , Header           : { Authorization: user.Token }
       }                                   
       , Response             :
       {                                   
@@ -192,7 +192,7 @@ let Update = function(user_, addr_)
               , Country      : addr.Address.Country
             }
           }
-          , Header           : { Authorization: 'Bearer ' + user.Token }
+          , Header           : { Authorization: user.Token }
       }
       , Response             :
       {
@@ -226,7 +226,7 @@ let Remove = function(user_, addr_)
           {                                   
                 AddressID    : addr.ID
           }                          
-          , Header           : { Authorization: 'Bearer ' + user.Token }
+          , Header           : { Authorization: user.Token }
       }                                   
       , Response             :
       {                                   

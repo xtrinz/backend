@@ -28,7 +28,7 @@ let Insert = function(user_, cart_, product_)
           , StoreID   : product.StoreID
           , Quantity  : product.Quantity
         }             
-        , Header      : { Authorization: 'Bearer ' + user.Token }
+        , Header      : { Authorization: user.Token }
       }                 
       , Skip          : [ 'EntryID' ]
       , Response      :
@@ -65,7 +65,7 @@ let List = function(user_, cart_, addr_, store_)
             Method            : Method.GET
           , Path              : '/cart/list'
           , Body              : { AddressID : addr.ID }
-          , Header            : { Authorization: 'Bearer ' + user.Token }
+          , Header            : { Authorization: user.Token }
       }
       , Response              :
       {
@@ -115,7 +115,7 @@ let Update = function(user_, product_)
             ProductID   : product.ID
           , Quantity    : 5
         }
-        , Header        : { Authorization: 'Bearer ' + user.Token }
+        , Header        : { Authorization: user.Token }
       }
       , Response        :
       {
@@ -152,7 +152,7 @@ let Remove = function(user_, product_)
           {
             ProductID         : product.ID
           }
-          , Header            : { Authorization: 'Bearer ' + user.Token }
+          , Header            : { Authorization: user.Token }
       }
       , Response              :
       {

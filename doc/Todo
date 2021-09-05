@@ -1,5 +1,4 @@
-04 store   edit
-05 store   delete
+
 
 11 set token in resp header
 13 https
@@ -31,6 +30,7 @@
 
 Low priority:
 03 product add  variant
+05 store   delete
 
 28 TransitCompletedByAgent [ Rating / Issue Reporting ] [TODO Set an API to handle issue reporting ]
 

@@ -62,8 +62,8 @@ const { Test, TestSuite } = require('./lib/driver')
     ,    cart.story.Std(user_3_buyer.Name, product_1.Name, addr_1_user_3.Address.Name, store_1.Name)
     , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, store_1.Name)
     , journal.story.Std(user_3_buyer.Name, store_1.Name, agent_1.Name, admin_1.Name)
-    , user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
-    , store.story.Disconnect(store_1.Name)
+    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+    ,   store.story.Disconnect(store_1.Name)
   ]
   cases.forEach((test)=> suite_1.AddCase(test))
 

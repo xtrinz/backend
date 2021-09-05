@@ -32,7 +32,7 @@ let Add = function(staff_, store_, product_)
                 , Description   : product.Description
                 , CategoryID    : product.CategoryID
             }
-            , Header            : { Authorization: 'Bearer ' + store.Token }
+            , Header            : { Authorization: store.Token }
         }
         , Skip                  : [ 'ProductID' ]
         , Response              :
@@ -77,7 +77,7 @@ let View = function(user_, store_, product_)
             {
                   ProductID     : product.ID
             }
-            , Header            : { Authorization: 'Bearer ' + user.Token }
+            , Header            : { Authorization: user.Token }
         }
         , Response              :
         {
@@ -132,7 +132,7 @@ let List = function(user_, store_, product_)
             , Page          : 1
             , Limit         : 8
         }
-        , Header            : { Authorization: 'Bearer ' + user.Token }
+        , Header            : { Authorization: user.Token }
       }
       , Response              :
       {
@@ -184,7 +184,7 @@ let Modify = function(staff_, store_, product_)
               , Description   : product.Description
               , CategoryID    : product.CategoryID
           }
-          , Header            : { Authorization: 'Bearer ' + store.Token }
+          , Header            : { Authorization: store.Token }
       }
       , Response              :
       {
@@ -220,7 +220,7 @@ let Remove = function(staff_, store_, product_)
           {
                 ProductID     : product.ID
           }
-          , Header            : { Authorization: 'Bearer ' + store.Token }
+          , Header            : { Authorization: store.Token }
       }
       , Response              :
       {

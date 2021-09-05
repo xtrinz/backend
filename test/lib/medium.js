@@ -43,7 +43,15 @@ const Type   =
         {
             let data = ''
             res.on('data', (chunk) => data += chunk)
-               .on('close', () => resolve({Code: res.statusCode, ...JSON.parse(data)}))
+               .on('close', () => 
+                {
+                    let data_ = { ...JSON.parse(data) }
+
+                    if(res.headers['authorization'])
+                    data_.Data.Token = res.headers['authorization']
+
+                    resolve({ Code : res.statusCode, ...data_ })
+                })
                .on('error', (err) => reject(err.stack))
         })
         req.write(msg)
