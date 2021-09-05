@@ -13,6 +13,7 @@ const Std = function(admin_, owner_, staff_, store_)
         , new event.RegisterApprove (admin_, store_)
         , new event.Read            (owner_, store_)
         , new event.List            (owner_, store_)
+        , new event.Edit            (store_)
         , new event.Connect         (store_)        
     ]
     store.forEach((step)=> tc.AddStep(step))

@@ -86,7 +86,7 @@ let RegisterReadOTP = function(user_, store_)
             , MobileNo : store.MobileNo
             , OTP      : store.OTP
           }
-          , Header     : { Authorization: 'Bearer ' + user.Token }
+          , Header     : { Authorization: user.Token }
         }
         , Skip         : [ 'Token' ]
         , Response     :
@@ -103,7 +103,7 @@ let RegisterReadOTP = function(user_, store_)
   this.PostSet        = async function(res_)
   {
     let store = data.Get(data.Obj.Store, this.StoreID)
-      data_ = await jwt.Verify('Bearer ' + res_.Data.Token)
+      data_ = await jwt.Verify(res_.Data.Token)
       store.ID    = data_._id
       store.Token = res_.Data.Token
     data.Set(data.Obj.Store, this.StoreID, store)
@@ -133,7 +133,7 @@ let RegisterApprove =  function(admin_, store_)
         }
         , Header        :
         {
-          Authorization : 'Bearer ' + admin.Token
+          Authorization : admin.Token
         }
       }
       , Response        :
@@ -166,7 +166,7 @@ let Read =   function(user_, store_)
         , Path          : '/store/view'
         , Body          : {}
         , Query         : { StoreID     : store.ID }
-        , Header        : { Authorization : 'Bearer ' + user.Token }
+        , Header        : { Authorization : user.Token }
       }
       , Response         :
       {
@@ -220,7 +220,7 @@ let List = function(user_, store_)
           , Limit       : 8
         }
         , Body          : { }
-        , Header        : { Authorization : 'Bearer ' + user.Token }
+        , Header        : { Authorization : user.Token }
       }
       , Response        :
       {
@@ -240,6 +240,45 @@ let List = function(user_, store_)
   }
 }
 
+let Edit = function(store_) 
+{
+  this.StoreID  = store_
+  this.Data     = function()
+  {
+    let store = data.Get(data.Obj.Store, this.StoreID)
+    let templ =
+    {
+        Type            : Type.Rest
+      , Describe        : 'Store Edit'
+      , Request         :
+      {
+          Method        : Method.PUT
+        , Path          : '/store/edit'
+        , Query         : {}
+        , Body          : 
+        {
+            Email       : store.Email
+          , Image       : store.Image
+          , Certs       : store.Certs
+          , Type        : store.Type
+          , Name        : store.Name
+          , Longitude   : store.Longitude
+          , Latitude    : store.Latitude 
+        }
+        , Header        : { Authorization : store.Token }
+      }
+      , Response        :
+      {
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : text.ProfileUpdated
+        , Data          : {}
+      }
+    }
+    return templ
+  }
+}
+
 let Connect = function(store_) 
 {
     this.ID     = store_
@@ -251,7 +290,7 @@ let Connect = function(store_)
           Type          : Type.Event
         , Describe      : 'User Socket Connect'
         , Method        : Method.CONNECT
-        , Authorization : {'auth' : {Token : 'Bearer ' + store.Token }}
+        , Authorization : {'auth' : {Token : store.Token }}
         , Socket        : {}
         , Skip          : []
         , Event         : {}
@@ -297,6 +336,7 @@ module.exports =
     , RegisterApprove // Store registration sequence
     , Read            
     , List            // Read store
+    , Edit
     , Connect
     , Disconnect
 }

@@ -114,7 +114,7 @@ let Register = function(name)
           }
           , Header        :
           {
-            Authorization : 'Bearer ' + user.Token
+            Authorization : user.Token
           }
         }
         , Response        :
@@ -140,7 +140,7 @@ let Connect = function(name)
           Type          : Type.Event
         , Describe      : 'User Socket Connect'
         , Method        : Method.CONNECT
-        , Authorization : {'auth' : {Token : 'Bearer ' + user.Token }}
+        , Authorization : {'auth' : {Token : user.Token }}
         , Socket        : {}
         , Skip          : []
         , Event         : {}
@@ -289,7 +289,7 @@ let PasswordSet = function(name)
         }
         , Header        :
         {
-          Authorization : 'Bearer ' + user.Token
+          Authorization : user.Token
         }
       }
       , Response        :
@@ -321,7 +321,7 @@ let ProfileGet = function(name)
         , Body          : {}
         , Header        :
         {
-          Authorization : 'Bearer ' + user.Token
+          Authorization : user.Token
         }
       }
       , Response        :
@@ -365,7 +365,7 @@ let ProfileEdit =  function(name)
         }                   
         , Header        :
         {                   
-          Authorization : 'Bearer ' + user.Token
+          Authorization : user.Token
         }                   
       }                   
       , Response        :

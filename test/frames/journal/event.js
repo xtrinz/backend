@@ -189,7 +189,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
             {
                 JournalID  : cart.Paytm.OrderID.slice(6)
             }
-            , Header       : { Authorization: 'Bearer ' + token }
+            , Header       : { Authorization: token }
         }
         , Skip             : [ 'TimeStamp', 'Date' ]
         , Response         :
@@ -391,7 +391,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                 Page       : 1
               , Limit      : 8
             }
-            , Header       : { Authorization: 'Bearer ' + token }
+            , Header       : { Authorization: token }
         }
         , Skip             : [ 'TimeStamp', 'Date' ]
         , Response         :

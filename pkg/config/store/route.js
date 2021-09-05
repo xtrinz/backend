@@ -23,7 +23,7 @@ router.post('/register', async (req, res, next) =>
             store = new Store()
             const token = await store.ConfirmMobileNo(req.body)
             text_ = text.OTPConfirmed
-            data_ = { Token : token }
+            res.setHeader('authorization', token)
             break
             
         case task.Approve:
@@ -97,7 +97,7 @@ router.put('/edit', async (req, res, next) =>
   try 
   {
     let  store = new Store()
-    // TODO await store.Edit(req.body)
+    await store.Edit(req.body)
 
     return res.status(code.OK).json({
       Status  : status.Success,

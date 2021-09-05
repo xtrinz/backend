@@ -1,4 +1,5 @@
 const qs        = require('querystring')
+    , fs        = require('fs')
     , socketIo  = require('socket.io-client')
 
 let SockQ    = {}
@@ -10,8 +11,9 @@ const Type   =
     , EWithR : 'EventWithRest'
 }
 
-    , http   = require('http')
-    , opt_g  = { host : 'localhost', port : process.env.PORT }
+    , https  = require('https')
+    , ca     = { ca: fs.readFileSync('cert/ca.crt') } 
+    , opt_g  = { host : 'localhost', port : process.env.PORT, ca: fs.readFileSync('cert/ca.crt'), ...ca }
 
     , Method =
 {
@@ -39,11 +41,19 @@ const Type   =
 
     return new Promise((resolve, reject) =>
     {
-        const req = http.request(opts, (res) =>
+        const req = https.request(opts, (res) =>
         {
             let data = ''
             res.on('data', (chunk) => data += chunk)
-               .on('close', () => resolve({Code: res.statusCode, ...JSON.parse(data)}))
+               .on('close', () => 
+                {
+                    let data_ = { ...JSON.parse(data) }
+
+                    if(res.headers['authorization'])
+                    data_.Data.Token = res.headers['authorization']
+
+                    resolve({ Code : res.statusCode, ...data_ })
+                })
                .on('error', (err) => reject(err.stack))
         })
         req.write(msg)
@@ -56,7 +66,7 @@ const Type   =
 {
       Connect : async function(auth)
     {
-        let socket   = await socketIo('http://'+ opt_g.host + ':' + opt_g.port, auth)
+        let socket   = await socketIo('https://'+ opt_g.host + ':' + opt_g.port, { ...auth, ...ca })
         socket.on('Event', (msg) => 
         {
             if(!SockQ[socket.id]) {SockQ[socket.id] = []}

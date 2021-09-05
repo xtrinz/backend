@@ -4,7 +4,7 @@ const jwt                     = require('jsonwebtoken')
 
     , Sign       = async function(data)
     {
-        const token = await jwt.sign(data, jwt_secret)
+        const token = 'Bearer ' + await jwt.sign(data, jwt_secret)
         return token
     }
     , Verify     = async function(token)

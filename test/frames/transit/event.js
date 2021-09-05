@@ -29,7 +29,7 @@ let Checkout = function(user_, addr_, cart_)
           , Latitude      : addr.Latitude
           , AddressID     : addr.ID
         }                     
-        , Header          : { Authorization: 'Bearer ' + user.Token }
+        , Header          : { Authorization: user.Token }
       }                       
       , Skip              : [ 'Data' ]                    
       , Response          :
@@ -189,7 +189,7 @@ let CancelByUser = function(user_)
                 TransitID   : user.TransitID
               , Task        : task.Cancel
           }
-          , Header          : { Authorization: 'Bearer ' + user.Token }
+          , Header          : { Authorization: user.Token }
       }
       , Response            :
       {
@@ -245,7 +245,7 @@ let RejectedByStore = function(store_)
                 TransitID   : staff.TransitID
               , Task        : task.Reject
           }
-          , Header          : { Authorization: 'Bearer ' + staff.Token }
+          , Header          : { Authorization: staff.Token }
       }
       , Response            :
       {
@@ -301,7 +301,7 @@ let StoreAccept = function(store_)
                 TransitID   : staff.TransitID
               , Task        : task.Accept
           }
-          , Header          : { Authorization: 'Bearer ' + staff.Token }
+          , Header          : { Authorization: staff.Token }
       }
       , Response            :
       {
@@ -388,7 +388,7 @@ let AgentIgnore = function(agent_)
                 TransitID   : agent.TransitID
               , Task        : task.Ignore
           }
-          , Header          : { Authorization: 'Bearer ' + agent.Token }
+          , Header          : { Authorization: agent.Token }
       }
       , Response            :
       {
@@ -447,7 +447,7 @@ let AgentAccept =  function(agent_, store_)
                 TransitID   : agent.TransitID
               , Task        : task.Accept
           }
-          , Header          : { Authorization: 'Bearer ' + agent.Token }
+          , Header          : { Authorization: agent.Token }
       }
       , Response            :
       {
@@ -522,7 +522,7 @@ let StoreDespatch = function(store_, agent_)
             , OTP        : staff.OTP
             , Task       : task.Despatch
         }                 
-        , Header         : { Authorization: 'Bearer ' + staff.Token }
+        , Header         : { Authorization: staff.Token }
       }                  
       , Response         :
       {                    
@@ -587,7 +587,7 @@ let AgentComplete = function(agent_)
               , TransitID   : agent.TransitID
               , Task        : task.Complete
           }
-          , Header          : { Authorization: 'Bearer ' + agent.Token }
+          , Header          : { Authorization: agent.Token }
       }
       , Response            :
       {
