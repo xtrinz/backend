@@ -1,6 +1,6 @@
 const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
-    , { source }   = require('../../../pkg/common/models')
+    , { source }   = require('../../../pkg/system/models')
 
     , Std = function(user_, store_, agent_, admin_)
 {

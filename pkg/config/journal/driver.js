@@ -9,16 +9,16 @@ const { ObjectID, ObjectId } = require('mongodb')
     }
     , { Err_
       , code
-      , reason }   = require('../../common/error')
+      , reason }   = require('../../system/error')
     , { states
       , channel
       , query
-      , mode }     = require('../../common/models')
+      , mode }     = require('../../system/models')
     , { Refund }   = require('../../infra/paytm/ind/refund')
     , { Payment }  = require('../../infra/paytm/ind/payment')
     , { PayTM }    = require('../../infra/paytm/driver')
     , { Store }    = require('../../config/store/driver')
-    , tally        = require('../../common/tally')
+    , tally        = require('../../system/tally')
 
 function Journal()
 {

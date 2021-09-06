@@ -1,6 +1,6 @@
 const { Method, Type } = require('../../lib/medium')
-    , { code, status } = require('../../../pkg/common/error')
-    , { mode }         = require('../../../pkg/common/models')
+    , { code, status } = require('../../../pkg/system/error')
+    , { mode }         = require('../../../pkg/system/models')
     , data             = require('../data')
 
 let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_) 

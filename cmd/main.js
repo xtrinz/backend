@@ -4,8 +4,8 @@ const express  = require('express')
     , app      = express()
     , https    = require('https')
     , port     = process.env.PORT
-    , adptr    = require( '../pkg/common/adapter'       )
-    , { test } = require( '../pkg/common/test'          )
+    , adptr    = require( '../pkg/system/adapter'       )
+    , { test } = require( '../pkg/system/test'          )
     , user     = require( '../pkg/config/user/route'    )
     , store    = require( '../pkg/config/store/route'   )
     , product  = require( '../pkg/config/product/route' )
@@ -19,7 +19,7 @@ const express  = require('express')
     {
       resource : rsrc,
       version  : v
-    }          = require('../pkg/common/models')
+    }          = require('../pkg/system/models')
     , options  =
     {
           key  : fs.readFileSync('cert/server.key')

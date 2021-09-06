@@ -5,12 +5,12 @@ const {
         method,
         mode,
         states
-      }		    = require('../common/models')
+      }		    = require('../system/models')
 	  , { 
         Err_,
         code, 
         reason
-      }       = require('../common/error')
+      }       = require('../system/error')
 
 const Controller 		 = function()
 {

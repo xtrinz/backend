@@ -1,5 +1,5 @@
-const { states, query, message, gw } = require('../../common/models')
-    , { Err_, code, reason}          = require('../../common/error')
+const { states, query, message, gw } = require('../../system/models')
+    , { Err_, code, reason}          = require('../../system/error')
     , otp                            = require('../../infra/otp')
     , jwt                            = require('../../infra/jwt')
     , { ObjectID }                   = require('mongodb')

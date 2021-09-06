@@ -1,4 +1,4 @@
-const { code, text, status } = require('../../common/error')
+const { code, text, status } = require('../../system/error')
     , router 	               = require('express').Router()
     , { Product }            = require('../product/driver')
     , { Store }              = require('../store/driver')

@@ -1,8 +1,8 @@
 const { ObjectID }           = require('mongodb')
     , otp                    = require('../../infra/otp')
-    , { Err_, code, reason}  = require('../../common/error')
+    , { Err_, code, reason}  = require('../../system/error')
     , { states, mode, qtype
-      , query, message, gw } = require('../../common/models')
+      , query, message, gw } = require('../../system/models')
     , db                     = 
     {
           store   : require('../store/archive')

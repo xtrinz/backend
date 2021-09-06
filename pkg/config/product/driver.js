@@ -1,6 +1,6 @@
 const { ObjectId, ObjectID } = require('mongodb')
-    , { Err_, code, reason } = require('../../common/error')
-    , { query }              = require('../../common/models')
+    , { Err_, code, reason } = require('../../system/error')
+    , { query }              = require('../../system/models')
     , db                     = require('../product/archive')
 
 function Product(data)

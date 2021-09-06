@@ -1,6 +1,6 @@
 const { Method, Type }       = require('../../lib/medium')
     , data                   = require('../data')
-    , { code, status, text } = require('../../../pkg/common/error')
+    , { code, status, text } = require('../../../pkg/system/error')
 
 let Add = function(user_, addr_) 
 {

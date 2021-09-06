@@ -3,8 +3,8 @@ const twilio_sid   = process.env.TWILIO_SID
     , twilio       = require('twilio')(twilio_sid, twilio_token)
     ,  nodemailer  = require('nodemailer')
     , bcrypt       = require('bcryptjs')
-    , test         = require('../common/test')
-    , { gw }       = require('../common/models')
+    , test         = require('../system/test')
+    , { gw }       = require('../system/models')
 
 function OneTimePasswd(data)
 {

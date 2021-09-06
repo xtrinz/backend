@@ -1,7 +1,7 @@
 const { ObjectId }           = require('mongodb')
-    , { transits } 	         = require('../../common/database')
-    , { Err_, code, reason } = require('../../common/error')
-    , { query }              = require('../../common/models')
+    , { transits } 	         = require('../../system/database')
+    , { Err_, code, reason } = require('../../system/error')
+    , { query }              = require('../../system/models')
 
 const Get = async function(param, qType)
 {

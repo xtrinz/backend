@@ -1,4 +1,4 @@
-const { states, alerts, query, mode } = require('../common/models')
+const { states, alerts, query, mode } = require('../system/models')
     , { Socket }                = require('../config/socket/driver')
     , db                        =
     {
@@ -6,7 +6,7 @@ const { states, alerts, query, mode } = require('../common/models')
       , store                   : require('../config/store/archive')        
       , socket                  : require('../config/socket/archive')
     }
-    , { Err_, code, reason }    = require('../common/error')
+    , { Err_, code, reason }    = require('../system/error')
     , jwt                       = require('../infra/jwt')
 
 let Channel 

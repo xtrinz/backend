@@ -1,7 +1,7 @@
 const { ObjectId }           = require('mongodb')
-    , { Err_, code, reason } = require('../../common/error')
-    , { journals }           = require('../../common/database')
-    , { dbset }              = require('../../common/models')
+    , { Err_, code, reason } = require('../../system/error')
+    , { journals }           = require('../../system/database')
+    , { dbset }              = require('../../system/models')
 
 const GetByID    = async function(_id)
 {
