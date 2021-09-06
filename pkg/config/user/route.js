@@ -11,7 +11,7 @@ router.post('/register', async (req, res, next) =>
     switch (req.body.Task)
     {
       case task.New:
-        user = new User(req.body.MobileNo, req.body.Mode)
+        user = new User(req.body)
         await user.New()
         text_ = text.OTPSendToMobileNo.format(req.body.MobileNo.slice(-4))
         break
@@ -25,7 +25,6 @@ router.post('/register', async (req, res, next) =>
 
       case task.Register:
         user  = new User()
-        await user.Auth(req.headers['authorization'])
         await user.Register(req.body)
         text_ = text.Registered
         break
@@ -39,74 +38,16 @@ router.post('/register', async (req, res, next) =>
   } catch(err) { next(err) }
 })
 
-// Login
-// validator.verify_login,
-router.post( '/login', async (req, res, next) =>
-{
-  try
-  {
-    const user  = new User()
-    const token = await user.Login(req.body)
-    res.setHeader('authorization', token)    
-
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.LoggedIn,
-      Data    : {}
-    })
-  } catch (err) { next(err) }
-})
-
-router.post( '/passwd', async (req, res, next) =>
-{
-  try
-  {
-    console.log('edit-password',req.body)
-
-    let text_, data_ = {}, user
-    switch (req.body.Task)
-    {
-      case task.GenOTP:
-                user  = new User()
-          const dest  = await user.EnableEditPassword(req.body)
-                text_ = text.OTPSendVia.format(dest)      
-                break
-
-      case task.ConfirmOTP:
-                user  = new User()
-          const token = await user.AuthzEditPassword(req.body)
-                text_ = text.OTPConfirmed
-                res.setHeader('authorization', token)                
-                break
-
-      case task.SetPassword:
-                user  = new User()
-          await user.Auth(req.headers['authorization'])
-          await user.UpdatePasswd(req.body.Password)
-                text_ = text.PasswdUpdated
-                break
-    }
-
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text_,
-      Data    : data_
-    })
-  } catch (err) { next(err) }
-})
-
 // Read Profile
 router.get('/profile', async (req, res, next) => {
   try {
-    const user  = new User()
-    await user.Auth(req.headers['authorization'])
 
     const data = 
     {
-        Name      : user.Data.Name
-      , MobileNo  : user.Data.MobileNo
-      , Email     : user.Data.Email
-      , Mode      : user.Data.Mode
+        Name      : req.body.User.Name
+      , MobileNo  : req.body.User.MobileNo
+      , Email     : req.body.User.Email
+      , Mode      : req.body.User.Mode
     }
 
     return res.status(code.OK).json({
@@ -122,8 +63,7 @@ router.put('/profile', async (req, res, next) =>
   try 
   {
     const user  = new User()
-    await user.Auth(req.headers['authorization'])
-    await user.EditProfile(req.body)
+    await user.Edit(req.body)
 
     return res.status(code.OK).json({
       Status  : status.Success,

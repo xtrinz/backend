@@ -1,5 +1,6 @@
 const router                 = require('express').Router()
     , { text, code, status } = require('../../common/error')
+    , { Journal }            = require('../journal/driver')
 
 // TODO enable rbac
 router.get('/search', async (req, res, next) => {
@@ -14,6 +15,22 @@ router.get('/search', async (req, res, next) => {
         Text    : text_,
         Data    : data_
       })
+  } catch (err) { next(err) }
+})
+
+router.post('/checkout', async (req, res, next) =>
+{
+  try
+  {
+
+    const journal = new Journal() 
+        , data    = await journal.New(req.body)
+
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : text.PaymentInitiated,
+      Data    : data
+    })
   } catch (err) { next(err) }
 })
 

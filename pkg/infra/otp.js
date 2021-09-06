@@ -1,5 +1,5 @@
-const twilio_sid   = process.env.TWILIO_ACCOUNT_SID
-    , twilio_token = process.env.TWILIO_AUTH_TOKEN
+const twilio_sid   = process.env.TWILIO_SID
+    , twilio_token = process.env.TWILIO_KEY
     , twilio       = require('twilio')(twilio_sid, twilio_token)
     ,  nodemailer  = require('nodemailer')
     , bcrypt       = require('bcryptjs')

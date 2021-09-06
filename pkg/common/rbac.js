@@ -3,7 +3,8 @@ const {
         verb,
         task,
         method,
-        mode
+        mode,
+        states
       }		    = require('../common/models')
 	  , { 
         Err_,
@@ -44,7 +45,8 @@ const Controller 		 = function()
           , [mode.Agent]  : true
           , [mode.Store]  : false
           , [mode.Admin] 	: true
-          , [mode.Enabled]: false
+          , [mode.Enabled]: true
+          , [states.State]: states.MobConfirmed
         }
         , [task.Enabled] : true        
         }
@@ -371,7 +373,7 @@ const Controller 		 = function()
     }
 
   // Checkout
-  , [rsrc.checkout]      :
+  , [rsrc.checkout]      : // TODO correct it root as rsrc and checkout as verb
     {
       [verb.root]        :
       {
@@ -571,7 +573,14 @@ const Controller 		 = function()
       Err_(code.FORBIDDEN, reason.PermissionDenied)
     }
 
-    if(!res[task.Enabled]) return res // === modes
+    if(!res[task.Enabled]) 
+    {
+      
+      if(!res[states.State]) 
+      res.State = states.Registered
+      
+      return res // === modes
+    }
 
     const modes   = res[tsk]
     if(!modes)
@@ -579,6 +588,10 @@ const Controller 		 = function()
       console.log('mode-not-found', { Opts: opt_, Tasks: res })
       Err_(code.FORBIDDEN, reason.PermissionDenied)
     }
+    
+    if(!modes[states.State]) 
+    modes.State = states.Registered
+    
     return modes
 	}
 }

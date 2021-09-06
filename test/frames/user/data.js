@@ -20,6 +20,8 @@ let User = function(mode)
   this.Channel     = ''
   this.OTP         = ''
   this.TransitID   = ''
+  this.Latitude    = '17.20000'
+  this.Longitude   = '17.20000'
 
   new Cart(this.Name) // Create a cart for the user
 
