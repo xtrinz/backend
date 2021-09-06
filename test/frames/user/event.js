@@ -23,6 +23,8 @@ let RegisterNew = function(name)
               Task     : task.New
             , MobileNo : user.MobileNo
             , Mode     : user.Mode
+            , Longitude: user.Longitude
+            , Latitude : user.Latitude            
           }
           , Header     : {}
         }

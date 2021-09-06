@@ -10,7 +10,7 @@ const paytm                          = require('paytm-pg-node-sdk')
 
 console.log('init-payment-gateway', { Env: env, WebSite: website})
 
-paytm.MerchantProperties.setCallbackUrl(process.env.PAYTM_CB_URL)
+paytm.MerchantProperties.setCallbackUrl(process.env.PAYTM_CB)
 paytm.MerchantProperties.initialize(env, process.env.PAYTM_MID, process.env.PAYTM_KEY, website )
 
 // paytm.Config.logName  = '[PAYTM]'

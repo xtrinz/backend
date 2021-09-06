@@ -54,7 +54,7 @@ function PayTM()
           , Token        : txnToken
           , Amount       : amnt
           , MID          : process.env.PAYTM_MID
-          , CallBackURL  : process.env.PAYTM_CB_URL
+          , CallBackURL  : process.env.PAYTM_CB
         }
 
         return txn_i

@@ -7,12 +7,13 @@ const { states, query, message, gw } = require('../../common/models')
     , bcrypt                         = require('bcryptjs')
     , db                             = require('../user/archive')
 
-function User(mob_no, user_mode)
+function User(data)
 {
+    if(data)
     this.Data =
     {
-        MobileNo      : mob_no
-      , Mode       : user_mode              // User/ Agent / Admin / Owner
+        MobileNo   : data.MobileNo
+      , Mode       : data.Mode              // User/ Agent / Admin / Owner
       , _id        : ''
       , Otp        : ''
       , State      : states.None
@@ -26,6 +27,11 @@ function User(mob_no, user_mode)
       {
           Owned    : []
       }  
+      , Location        :
+      {
+            type        : 'Point'
+          , coordinates : [data.Longitude.loc(), data.Latitude.loc()]
+      }
       , ResetPasswd: false
       , IsLive     : false
     }

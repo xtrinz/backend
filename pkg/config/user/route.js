@@ -11,7 +11,7 @@ router.post('/register', async (req, res, next) =>
     switch (req.body.Task)
     {
       case task.New:
-        user = new User(req.body.MobileNo, req.body.Mode)
+        user = new User(req.body)
         await user.New()
         text_ = text.OTPSendToMobileNo.format(req.body.MobileNo.slice(-4))
         break
