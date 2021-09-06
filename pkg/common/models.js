@@ -78,6 +78,7 @@ module.exports =
 	{
 		  Running 				: 'Running'
 		, Closed 				: 'Closed'
+		, State 				: 'State'
 
 		, None 					: 'None'
         , New 					: 'New'

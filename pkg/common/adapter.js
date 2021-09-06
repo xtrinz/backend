@@ -1,5 +1,5 @@
 const { Err, Err_, code, status, reason } = require('./error')
-    , { states, mode, query }             = require('./models')
+    , { mode, query }                     = require('./models')
     , { client }                          = require('./database')
     , db                                  =
     {
@@ -45,7 +45,7 @@ const Authnz = async function (req, res, next)
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
 
-        if (store.State !== states.Registered)
+        if (store.State !== mode_.State)
         Err_(code.UNAUTHORIZED, reason.RegIncomplete)
 
         req.body.Store    = store
@@ -63,7 +63,7 @@ const Authnz = async function (req, res, next)
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
 
-        if (user.State !== states.Registered)
+        if (user.State !== mode_.State)
         Err_(code.UNAUTHORIZED, reason.RegIncomplete)
 
         req.body.User = user
