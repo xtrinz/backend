@@ -2,8 +2,8 @@ const { ObjectId } 				            = require('mongodb')
     , router                          = require('express').Router()
     , { Transit }                     = require('../transit/driver')
     , { Engine }                      = require('../../engine/engine')
-    , { alerts, event, query, task }  = require('../../common/models')
-    , { Err_, code, status, reason }  = require('../../common/error')
+    , { alerts, event, query, task }  = require('../../system/models')
+    , { Err_, code, status, reason }  = require('../../system/error')
     , db                              = require('../transit/archive')
 
 router.post('/user', async (req, res, next) =>
@@ -91,6 +91,11 @@ router.post('/agent', async (req, res, next) =>
         let event_, text_
         switch(req.body.Task)
         {
+          case task.ResendOTP:
+            event_ = event.ResendOTP
+            text_  = alerts.OTPSend
+            break
+
           case task.Reject:
             event_ = event.RejectionByAgent
             text_  = alerts.Rejected

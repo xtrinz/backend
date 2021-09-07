@@ -1,8 +1,8 @@
 const { Method, Type }       = require('../../lib/medium')
     , data                   = require('../data')
     , { read }               = require('../../lib/driver')
-    , { code, status, text } = require('../../../pkg/common/error')
-    , { task }               = require('../../../pkg/common/models')
+    , { code, status, text } = require('../../../pkg/system/error')
+    , { task }               = require('../../../pkg/system/models')
     , jwt                    = require('../../../pkg/infra/jwt')
 
 let RegisterNew = function(store_) 

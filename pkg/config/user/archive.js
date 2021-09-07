@@ -1,6 +1,6 @@
-const { users }             = require('../../common/database')
-    , { query, mode }       = require('../../common/models')
-    , { Err_, code, reason} = require('../../common/error')
+const { users }             = require('../../system/database')
+    , { query, mode }       = require('../../system/models')
+    , { Err_, code, reason} = require('../../system/error')
     , { ObjectId }          = require('mongodb')
 
 const Save       = async function(data)

@@ -1,5 +1,5 @@
-const { task }               = require('../../../pkg/common/models')
-    , { code, status, text } = require('../../../pkg/common/error')
+const { task }               = require('../../../pkg/system/models')
+    , { code, status, text } = require('../../../pkg/system/error')
     , { Method, Type }       = require('../../lib/medium')
     , { read }               = require('../../lib/driver')
     , data                   = require('../data')

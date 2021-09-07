@@ -1,4 +1,4 @@
-const { states, alerts, query, mode } = require('../common/models')
+const { states, alerts, query, mode, limits } = require('../system/models')
     , { Socket }                = require('../config/socket/driver')
     , db                        =
     {
@@ -6,7 +6,7 @@ const { states, alerts, query, mode } = require('../common/models')
       , store                   : require('../config/store/archive')        
       , socket                  : require('../config/socket/archive')
     }
-    , { Err_, code, reason }    = require('../common/error')
+    , { Err_, code, reason }    = require('../system/error')
     , jwt                       = require('../infra/jwt')
 
 let Channel 
@@ -20,7 +20,7 @@ const Connect = async function(socket_)
     const token   = String(socket_.handshake.auth.Token)
         , resp    = await jwt.Verify(token)
 
-    let data
+    let data, sock_id
     switch(resp.Mode)
     {
       case mode.Store:
@@ -32,6 +32,10 @@ const Connect = async function(socket_)
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
         data.SockID.push(socket_.id)
+        
+        if(data.SockID.length > limits.SocketCount)
+          sock_id = data.SockID[0]
+
         data.IsLive = true    
         await db.store.Save(data)
         break
@@ -47,6 +51,10 @@ const Connect = async function(socket_)
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
         data.SockID.push(socket_.id)
+
+        if(data.SockID.length > limits.SocketCount)
+          sock_id = data.SockID[0]
+
         data.IsLive = true    
         await db.user.Save(data)
         break
@@ -57,6 +65,13 @@ const Connect = async function(socket_)
     }
     const socket = new Socket()
     await socket.Insert(data, resp.Mode, socket_.id)
+    
+    if(data.SockID.length > limits.SocketCount)
+    {
+      const socket_a  = await Channel.sockets.sockets.get(sock_id)
+      await Disconnect(socket_a)
+      socket_a.disconnect()
+    }
 
     console.info('client-connected', { Client : data, SockID : socket_.id })
 

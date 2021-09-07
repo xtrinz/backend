@@ -1,6 +1,6 @@
 const checksum               = require("paytmchecksum")
-    , { Err_, code, reason } = require('../../../common/error')
-	, { paytm: pgw, states } = require('../../../common/models')
+    , { Err_, code, reason } = require('../../../system/error')
+	, { paytm: pgw, states } = require('../../../system/models')
 	, journal				 = require('../../../config/journal/archive')
 	, { Cart } 				 = require('../../../config/cart/driver')
 	, { ObjectID }			 = require('mongodb')

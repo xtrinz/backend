@@ -7,7 +7,7 @@ const { Err, Err_, code, status, reason } = require('./error')
       , user                              : require('../config/user/archive')
     }
     , jwt                                 = require('../infra/jwt')
-    , rbac                                = require('../common/rbac')
+    , rbac                                = require('../system/rbac')
 
 let   Server, io
 const SetServer = (server, io_) => { Server = server; io = io_ }

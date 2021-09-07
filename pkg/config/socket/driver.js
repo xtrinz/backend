@@ -1,4 +1,4 @@
-const { mode } = require('../../common/models')
+const { mode } = require('../../system/models')
 
 const db                     =
     {

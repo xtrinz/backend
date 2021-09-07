@@ -1,6 +1,6 @@
 const jwt                     = require('jsonwebtoken')
     , jwt_secret              = process.env.JWT_KEY
-    , { Err_, code, reason }  = require('../common/error')
+    , { Err_, code, reason }  = require('../system/error')
 
     , Sign       = async function(data)
     {

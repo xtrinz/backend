@@ -1,5 +1,5 @@
 const router                 = require('express').Router()
-    , { text, code, status } = require('../../common/error')
+    , { text, code, status } = require('../../system/error')
     , { Journal }            = require('../journal/driver')
 
 // TODO enable rbac

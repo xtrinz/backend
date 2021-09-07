@@ -1,13 +1,13 @@
 const   { Emit } 			 	   = require('./events')
-	  , { Err_ , code, reason }    = require('../common/error')
-	  , { states , alerts, query } = require('../common/models')
+	  , { Err_ , code, reason }    = require('../system/error')
+	  , { states , alerts, query } = require('../system/models')
 	  , { User } 			 	   = require('../config/user/driver')
 	  , { PayOut , SendOTP, Save, SetAgent, PingAdmins
 		, ConfirmOTP, ResetAgent } = require('./wrap')
 	  , db 						   =
 	  {
 		    user 				   : require('../config/user/archive')
-		  
+		  , transit 			   : require('../config/transit/archive')
 	  }
 
 // Notify | UpdateState | Payout | OTP
@@ -42,6 +42,23 @@ const RejectedByStore		= async function(ctxt)
 
 	await PayOut(ctxt)
 	console.log('order-rejected', ctxt.Data)
+}
+
+const ResendOTP			 	= async function(ctxt)
+{
+	console.log('resend-otp', { Transit: ctxt.Data })
+	switch (ctxt.Data.State)
+	{
+		case states.OrderDespatched:
+			// To Authz-User
+			ctxt.Data.User.Otp 	= await SendOTP(ctxt.Data.User.MobileNo)
+		break
+		case states.TransitAccepted:
+			// To Authz@Shop
+			ctxt.Data.Agent.Otp = await SendOTP(ctxt.Data.Agent.MobileNo)			
+		break
+	}
+	await db.transit.Save(ctxt.Data)	
 }
 
 const TimeoutByStore		= async function(ctxt)
@@ -238,5 +255,6 @@ module.exports =
 	RejectedByAgent	  : RejectedByAgent,
 	AssignedByAdmin   : AssignedByAdmin,
 	TerminatedByAdmin : TerminatedByAdmin,
-	CompletedByAgent  : CompletedByAgent
+	CompletedByAgent  : CompletedByAgent,
+	ResendOTP		  : ResendOTP
 }

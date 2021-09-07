@@ -1,6 +1,6 @@
 const checksum               = require("paytmchecksum")
-    , { Err_, code, reason } = require('../../../common/error')
-	, { paytm: pgw }         = require('../../../common/models')
+    , { Err_, code, reason } = require('../../../system/error')
+	, { paytm: pgw }         = require('../../../system/models')
 	, journal				 = require('../../../config/journal/archive')
 
 function Refund(data, signature)
