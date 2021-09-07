@@ -1,21 +1,13 @@
-18 generic api for otp resend in all scenarios [user{profile/reg/login}/cart/shop | product/addr/payment/transit]
-
-
-16 socket limit connections
-23 no deletion of records, only unlisting of the data [ if it has used at someother critical point ] [ when a product get deleted what to do for its associated journals ]
-
 14 input validator (Task as mdatory field)
 19 google map distance
 
 20 search & product filtering with tree tags
-22 reinforce bill
 
 24 jwt - set timestamp and expire the token - why sperate token for partially registered user
 
 29 Modify a transit history array with {Time: enitity:action }
 
 35 at read_otp : there is a race condition
-36 limit devices / socket connections
 37 - lock cart checkout once the payment initated 
    - Add Journal ID to the cart & remove it only after payment success - limit number of checkouts in given span of time [This will be a good algorithm ]
 38 TransitIgnoredByAgent - on admin lock, if waiting time exceeds limits, tigger another handler to auto cancel
@@ -26,6 +18,11 @@
 
 
 Low priority:
+
+23 no deletion of records, only unlisting of the data [ if it has used at someother critical point ] [ when a product get deleted what to do for its associated journals ]
+
+
+22 reinforce bill
 15 bug : for immediate connectivity trigger a rest request after socket connection
 
 03 product add  variant

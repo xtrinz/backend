@@ -15,6 +15,7 @@ module.exports =
 	{
 		  AddressCount 			: 16			// Max allowed address count / user
 		, ProductCount 			:128			// Max count for cart elements
+		, SocketCount 			: 3
 	},
 	paytm: 
 	{
