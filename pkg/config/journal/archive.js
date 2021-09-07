@@ -1,5 +1,5 @@
 const { ObjectId }           = require('mongodb')
-    , { Err_, code, reason } = require('../../system/error')
+    , { Err_, code, reason } = require('../../system/models')
     , { journals }           = require('../../system/database')
     , { dbset }              = require('../../system/models')
 

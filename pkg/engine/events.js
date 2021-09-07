@@ -6,7 +6,7 @@ const { states, alerts, query, mode, limits } = require('../system/models')
       , store                   : require('../config/store/archive')        
       , socket                  : require('../config/socket/archive')
     }
-    , { Err_, code, reason }    = require('../system/error')
+    , { Err_, code, reason }    = require('../system/models')
     , jwt                       = require('../infra/jwt')
 
 let Channel 

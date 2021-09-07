@@ -1,4 +1,4 @@
-const { code, status } = require('../../system/error')
+const { code, status } = require('../../system/models')
     ,  { mode }        = require('../../system/models')
     , router 	         = require('express').Router()
     , { Journal }      = require('./driver')

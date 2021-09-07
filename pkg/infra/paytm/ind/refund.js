@@ -1,5 +1,5 @@
 const checksum               = require("paytmchecksum")
-    , { Err_, code, reason } = require('../../../system/error')
+    , { Err_, code, reason } = require('../../../system/models')
 	, { paytm: pgw }         = require('../../../system/models')
 	, journal				 = require('../../../config/journal/archive')
 

@@ -1,7 +1,7 @@
 //-- The packge acts as an enabler for unit test --//
 const router                 = require('express').Router()
     , test                   = process.env.ENABLETEST
-    , { code, status, text } = require('../system/error')
+    , { code, status, text } = require('../system/models')
 
     var Exports =
 {

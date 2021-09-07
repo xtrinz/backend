@@ -1,5 +1,5 @@
-const { Err, Err_, code, status, reason } = require('./error')
-    , { mode, query }                     = require('./models')
+const { Err, Err_, code, status
+    , reason , mode, query }              = require('./models')
     , { client }                          = require('./database')
     , db                                  =
     {

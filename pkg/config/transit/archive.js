@@ -1,6 +1,6 @@
 const { ObjectId }           = require('mongodb')
     , { transits } 	         = require('../../system/database')
-    , { Err_, code, reason } = require('../../system/error')
+    , { Err_, code, reason } = require('../../system/models')
     , { query }              = require('../../system/models')
 
 const Get = async function(param, qType)

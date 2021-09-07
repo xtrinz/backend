@@ -1,6 +1,6 @@
 const { ObjectId }           = require('mongodb')
     , { sockets }            = require('../../system/database')
-    , { Err_, code, reason } = require('../../system/error')
+    , { Err_, code, reason } = require('../../system/models')
 
 const Insert = async function(_id, mode_, sock_id) 
 {

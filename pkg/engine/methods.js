@@ -1,5 +1,5 @@
 const   { Emit } 			 	   = require('./events')
-	  , { Err_ , code, reason }    = require('../system/error')
+	  , { Err_ , code, reason }    = require('../system/models')
 	  , { states , alerts, query } = require('../system/models')
 	  , { User } 			 	   = require('../config/user/driver')
 	  , { PayOut , SendOTP, Save, SetAgent, PingAdmins

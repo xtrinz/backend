@@ -1,8 +1,7 @@
-const { task }               = require('../../../pkg/system/models')
-    , { code, status, text } = require('../../../pkg/system/error')
-    , { Method, Type }       = require('../../lib/medium')
-    , { read }               = require('../../lib/driver')
-    , data                   = require('../data')
+const { task, code, status, text } = require('../../../pkg/system/models')
+    , { Method, Type }             = require('../../lib/medium')
+    , { read }                     = require('../../lib/driver')
+    , data                         = require('../data')
 
 let RegisterNew = function(name) 
 {

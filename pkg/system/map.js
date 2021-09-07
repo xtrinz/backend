@@ -1,7 +1,7 @@
 // require('../../cmd/settings')
 
 const { Client }             = require('../infra/rest')
-    , { Err_, code, reason } = require('./error')
+    , { Err_, code, reason } = require('./models')
 
 const Distance = async function(data)
 {

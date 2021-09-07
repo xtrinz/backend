@@ -1,6 +1,6 @@
 const data                   = require('../data')
     , { Method, Type }       = require('../../lib/medium')
-    , { code, status, text } = require('../../../pkg/system/error')
+    , { code, status, text } = require('../../../pkg/system/models')
 
 let Insert = function(user_, cart_, product_) 
 {
