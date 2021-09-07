@@ -1,13 +1,14 @@
-const { states, alerts, query, mode, limits } = require('../system/models')
-    , { Socket }                = require('../config/socket/driver')
-    , db                        =
+const { states, alerts, 
+      query, mode, limits,
+      Err_, code, reason } = require('../system/models')
+    , { Socket }           = require('../config/socket/driver')
+    , db                   =
     {
-        user                    : require('../config/user/archive')
-      , store                   : require('../config/store/archive')        
-      , socket                  : require('../config/socket/archive')
+        user               : require('../config/user/archive')
+      , store              : require('../config/store/archive')        
+      , socket             : require('../config/socket/archive')
     }
-    , { Err_, code, reason }    = require('../system/models')
-    , jwt                       = require('../infra/jwt')
+    , jwt                  = require('../infra/jwt')
 
 let Channel 
 

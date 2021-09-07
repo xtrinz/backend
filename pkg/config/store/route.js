@@ -1,6 +1,6 @@
 const router 	               = require('express').Router()
-    , { code, text, status } = require('../../system/models')
-    , { task, mode }         = require('../../system/models')
+    , { code, text, status
+    , task, mode }           = require('../../system/models')
     , { Store }              = require('../store/driver')
 
 router.post('/register', async (req, res, next) =>

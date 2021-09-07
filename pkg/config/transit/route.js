@@ -2,8 +2,8 @@ const { ObjectId } 				            = require('mongodb')
     , router                          = require('express').Router()
     , { Transit }                     = require('../transit/driver')
     , { Engine }                      = require('../../engine/engine')
-    , { alerts, event, query, task }  = require('../../system/models')
-    , { Err_, code, status, reason }  = require('../../system/models')
+    , { alerts, event, query, task,
+        Err_, code, status, reason }  = require('../../system/models')
     , db                              = require('../transit/archive')
 
 router.post('/user', async (req, res, next) =>

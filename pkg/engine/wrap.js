@@ -1,6 +1,6 @@
 const   otp 				 	 = require('../infra/otp')
-	  , { Err_ , code, reason }  = require('../system/models')
-	  , { message, gw }          = require('../system/models')
+	  , { Err_ , code, reason,
+		  message, gw }          = require('../system/models')
 	  , { Journal } 		 	 = require('../config/journal/driver')
 	  , db 						 = 
 	  {

@@ -1,7 +1,6 @@
-const { ObjectId }          = require('mongodb')
-    , { stores }            = require('../../system/database')
-    , { Err_, code, reason} = require('../../system/models')
-    , { query, dbset }      = require('../../system/models')
+const { ObjectId }                         = require('mongodb')
+    , { stores }                           = require('../../system/database')
+    , { Err_, code, reason, query, dbset } = require('../../system/models')
 
 const Save       = async function(data)
 {

@@ -1,6 +1,7 @@
-const paytm                          = require('paytm-pg-node-sdk')
-    , { paytm: pgw }                 = require('../../system/models')
-    , { Err_, code, reason, status } = require('../../system/models')
+const paytm                = require('paytm-pg-node-sdk')
+    , {   paytm: pgw
+        , Err_, code
+        , reason, status } = require('../../system/models')
 
 function PayTM()
 {

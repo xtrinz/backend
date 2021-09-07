@@ -1,6 +1,6 @@
 const {  ObjectId } 	        = require('mongodb')
-    , { Err_, code, reason }    = require('../../system/models')
-    , { states, event, query }  = require('../../system/models')
+    , { Err_, code, reason
+    , states, event, query }    = require('../../system/models')
     , { Engine }                = require('../../engine/engine')
     , db                        =
     {
