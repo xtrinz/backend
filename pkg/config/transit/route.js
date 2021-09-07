@@ -91,6 +91,11 @@ router.post('/agent', async (req, res, next) =>
         let event_, text_
         switch(req.body.Task)
         {
+          case task.ResendOTP:
+            event_ = event.ResendOTP
+            text_  = alerts.OTPSend
+            break
+
           case task.Reject:
             event_ = event.RejectionByAgent
             text_  = alerts.Rejected

@@ -59,11 +59,13 @@ const Engine 				 = function()
 			, [event.RejectionByAgent] 		: method.RejectedByAgent 
 			, [event.RejectionByStore]  	: method.RejectedByStore
 			, [event.DespatchmentByStore] 	: method.DespatchedByStore
+			, [event.ResendOTP] 			: method.ResendOTP
 		}											
 		, [states.OrderDespatched] 			:
 		{											
 			  [event.RejectionByAgent] 		: method.RejectedByAgent 
 			, [event.CompletionByAgent] 	: method.CompletedByAgent
+			, [event.ResendOTP] 			: method.ResendOTP			
 		}											
 		, [states.TransitRejected] 			:
 		{											

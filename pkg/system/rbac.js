@@ -51,49 +51,6 @@ const Controller 		 = function()
         , [task.Enabled] : true        
         }
       }
-    , [verb.login]        : 
-      { 
-          [method.post]   : 
-          { 
-            [mode.User]   : true
-          , [mode.Agent]  : true
-          , [mode.Store]  : false
-          , [mode.Admin] 	: true
-          , [mode.Enabled]: false
-          , [task.Enabled] : false          
-          } 
-      }
-    , [verb.passwd]       :
-      {
-        [method.post]     : 
-        { 
-          [task.GenOTP]   : 
-          { 
-            [mode.User]   : true
-          , [mode.Agent]  : true
-          , [mode.Store]  : false
-          , [mode.Admin] 	: true
-          , [mode.Enabled]: false
-          }
-        , [task.ConfirmOTP]  : 
-        { 
-            [mode.User]   : true
-          , [mode.Agent]  : true
-          , [mode.Store]  : false
-          , [mode.Admin] 	: true
-          , [mode.Enabled]: false
-        }
-        , [task.SetPassword] : 
-        { 
-            [mode.User]   : true
-          , [mode.Agent]  : true
-          , [mode.Store]  : false
-          , [mode.Admin] 	: true
-          , [mode.Enabled]: true
-        } 
-        , [task.Enabled] : true        
-        }
-      }
     , [verb.profile]      :
       {
           [method.put]    : 
@@ -471,7 +428,15 @@ const Controller 		 = function()
       {
         [method.post]     : 
         { 
-            [task.Reject] : 
+          [task.ResendOTP]: 
+          {
+            [mode.User]   : false
+          , [mode.Agent]  : true
+          , [mode.Store]  : false
+          , [mode.Admin] 	: false
+          , [mode.Enabled]: true
+          }
+          , [task.Reject] : 
           { 
             [mode.User]   : false
           , [mode.Agent]  : true

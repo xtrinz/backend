@@ -141,6 +141,7 @@ module.exports =
 		, AcceptanceByAgent		: 'AcceptanceByAgent'			// event transit acception by agent
 		, RejectionByAgent		: 'RejectionByAgent'			// event transit rejection by agent
 		, CompletionByAgent		: 'CompletionByAgent'			// event tranist completion by agent
+		, ResendOTP 			: 'ResendOTP'
 	},
 	alerts:
 	{
@@ -159,6 +160,7 @@ module.exports =
 		, Assigned 				: 'Agent_Assigned'
 		, Terminated			: 'Order_Terminated'
 		, Scheduled 			: 'Scheduled'
+		, OTPSend 				: 'OTP_Send'
 	},
 	entity:
 	{
@@ -245,6 +247,7 @@ module.exports =
 		, Despatch 				: 'Despatch'
 		, Ignore 				: 'Ignore'
 		, Complete 				: 'Complete'
+		, ResendOTP				: 'Resend_OTP'
 
 		, Enabled				: 'HasTaskEnabled' // Ref field for RBAC		
 	},
