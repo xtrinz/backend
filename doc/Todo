@@ -1,13 +1,10 @@
+24 jwt - set timestamp and expire the token - why sperate token for partially registered user
+
 14 input validator (Task as mdatory field)
 19 google map distance
 
 20 search & product filtering with tree tags
 
-24 jwt - set timestamp and expire the token - why sperate token for partially registered user
-
-29 Modify a transit history array with {Time: enitity:action }
-
-35 at read_otp : there is a race condition
 37 - lock cart checkout once the payment initated 
    - Add Journal ID to the cart & remove it only after payment success - limit number of checkouts in given span of time [This will be a good algorithm ]
 38 TransitIgnoredByAgent - on admin lock, if waiting time exceeds limits, tigger another handler to auto cancel
@@ -23,6 +20,9 @@ Low priority:
 
 
 22 reinforce bill
+
+35 at read_otp : there is a race condition
+
 15 bug : for immediate connectivity trigger a rest request after socket connection
 
 03 product add  variant

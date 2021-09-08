@@ -173,6 +173,8 @@ module.exports =
 		, Agent 				: 'Agent'
 		, Admin 				: 'Admin'
 		, Store 				: 'Store'
+		, Paytm					: 'Paytm'
+		, System 				: 'System'
 		, Enabled 				: 'HasModeEnabled'
 	},
 	source:

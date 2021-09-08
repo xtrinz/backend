@@ -118,9 +118,10 @@ const IgnoredByAgent		= async function(ctxt)
 		await PingAdmins(states.TransitIgnored, ctxt)
 		return	
 	}
-	ctxt.Data.Agent = ResetAgent
+	ctxt.Data.Agent = ResetAgent // Cleared temp data
 	ctxt.Data.Event = ''
-	await ctxt.Save()
+	// TODO add to history
+	await db.transit.Save(ctxt.Data)
 }
 
 const TimeoutByAgent		= async function(ctxt)
