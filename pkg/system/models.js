@@ -79,6 +79,7 @@ module.exports =
 		, InvalidToken              : 'Invalid Token'
 		, ResourceNotFound          : 'Resource Not Found'
 		, PermissionDenied          : 'Permission Denied'
+		, IncorrectInput 			: 'Incorrect Input'
 		},
 	text:
 	{
