@@ -124,7 +124,7 @@ const IgnoredByAgent		= async function(ctxt)
 	await db.transit.Save(ctxt.Data)
 }
 
-const TimeoutByAgent		= async function(ctxt)
+const TransitIgnoredByAgent		= async function(ctxt)
 {
 	await Save(ctxt, states.TransitTimeout)
 }

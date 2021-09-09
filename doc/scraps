@@ -77,6 +77,9 @@ Completed
 26 add UserMode(Customer,Agent,Seller,Admin) User record, limit one mode with one mob_no [dup]
 34 check if one of the socket id is not present at the time of emission, how system crashes
 16 socket limit connections
+37    - lock cart checkout once the payment initated - Add Journal ID to the cart & remove it only after payment success 
+      - limit number of checkouts in given span of time [This will be a good algorithm ]
+
 
 ---
 

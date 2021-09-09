@@ -141,7 +141,7 @@ const SetHistory = async function(ctxt)
 			{
 				  Type 	: mode.Agent
 				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent._id
+				, Name  : ctxt.Data.Agent.Name
 			}
 			break
 		case event.RejectionByAgent:
@@ -149,7 +149,7 @@ const SetHistory = async function(ctxt)
 			{
 				  Type 	: mode.Agent
 				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent._id
+				, Name  : ctxt.Data.Agent.Name
 			}
 			break
 		case event.CompletionByAgent:
@@ -157,7 +157,7 @@ const SetHistory = async function(ctxt)
 			{
 				  Type 	: mode.Agent
 				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent._id
+				, Name  : ctxt.Data.Agent.Name
 			}
 			break
 		case event.ResendOTP:
@@ -165,7 +165,7 @@ const SetHistory = async function(ctxt)
 			{
 				  Type 	: mode.Agent
 				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent._id
+				, Name  : ctxt.Data.Agent.Name
 			}
 			break
 	}

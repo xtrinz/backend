@@ -51,7 +51,7 @@ function Refund(data, signature)
 	this.Store 	  = async function(rcd)
 	{
 		/*
-		rcd.Payment.TimeStamp = Date.now()
+		rcd.Payment.TimeStamp.Webhook = Date.now()
 		switch (this.Data.Status)
 		{
 		case pgw.TxnSuccess:

@@ -26,6 +26,7 @@ function Journal()
     {
         _id               : ''
       , Date              : ''
+      , IsRetry           : false // Pressed checkout more than once
       
       , Buyer             :
       {
@@ -119,7 +120,10 @@ function Journal()
       Err_(code.BAD_REQUEST, reason.CartFlagged)
 
       if(items.JournalID)
-      this.Data._id = items.JournalID
+      {
+        this.Data.IsRetry = true
+        this.Data._id = items.JournalID
+      }
 
       this.Data.Order    =
       {
@@ -144,29 +148,64 @@ function Journal()
 
     this.SetPayment = async function(j_id, price, user)
     {
-        const paytm_      = new PayTM()
-            , txn_i       = await paytm_.CreateToken(j_id, price, user)
+        let txn_i, time
+        if(this.Data.IsRetry)
+        {
+          
+          const j_rcd = await db.journal.GetByID(this.Data._id)
+          
+          if((price.toFixed(2).toString() === j_rcd.Payment.Amount) &&
+              (Date.now() - j_rcd.Payment.TimeStamp.Token < 15 * 60 * 1000 )) // 15m is the paytm token expiry time
+          {
+            txn_i =
+            {
+                ID          : j_rcd.Payment.TransactionID
+              , Token       : j_rcd.Payment.Token
+              , Amount      : j_rcd.Payment.Amount
+              , MID         : process.env.PAYTM_MID
+              , CallBackURL : process.env.PAYTM_CB
+            }
+            time  = j_rcd.Payment.TimeStamp.Token
+          }
+          else
+          {
+            const paytm_ = new PayTM()
+                  txn_i  = await paytm_.CreateToken(j_id, price, user)
+                  time   = Date.now()
+          }
+        }
+        else
+        {
+          const paytm_ = new PayTM()
+                txn_i  = await paytm_.CreateToken(j_id, price, user)
+                time   = Date.now()
+        }
         this.Data.Payment =
         {
             Channel       : channel.Paytm
           , TransactionID : txn_i.ID
+          , Token         : txn_i.Token
           , ChannelRefID  : ''
           , Amount        : txn_i.Amount
           , Status        : states.TokenGenerated
-          , TimeStamp     : ''      // Webhook entry time
+          , TimeStamp     :
+          {
+              Token       : time
+            , Webhook     : ''
+          }
         }
         return txn_i
     }
 
     this.New    = async function(data)
     {
-      // Set Buyer
+      // Set User Context
       await this.SetBuyer(data.User, data.AddressID)
 
       // Set Order
       let store_id = await this.SetOrder(data.User._id, this.Data.Buyer)
 
-      // Set Seller
+      // Set Seller Context
       await this.SetSeller(store_id)
 
       // Set ID & Date
