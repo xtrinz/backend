@@ -212,9 +212,7 @@ let ProfileEdit =  function(name)
         , Path          : '/user/profile'
         , Body          : 
         {                   
-            Password    : user.Password
-          , NewPassword : user.Password
-          , Name        : user.Name
+            Name        : user.Name
           , Email       : user.Email
         }                   
         , Header        :

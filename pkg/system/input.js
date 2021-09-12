@@ -2,14 +2,13 @@ const {
         resource: rsrc, 
         verb,
         method,
+        task,
         Err_,
         code, 
-        reason
-      }       = require('../system/models')
-
-//      required|email|minLength:5|maxLength:15|
-
-//      new Validator(req.body, {})
+        reason,
+        mode
+      }             = require('../system/models')
+    , { Validator } = require('node-input-validator')
 
 const Controller 		 = function()
 {
@@ -20,7 +19,28 @@ const Controller 		 = function()
     {
       [verb.register]     : 
       {
-        [method.post]     : {}
+        [method.post]     : 
+        {
+          Body            :
+          {
+              Fields      :
+            {
+                Task      : [ 'required', 'string', [ 'in', task.New, task.ReadOTP, task.Register ] ]
+              , MobileNo  : [ 'required' ] 
+              , Mode      : [ 'required', 'string', [ 'in', mode.User, mode.Agent, mode.Admin ] ]
+              , Longitude : [ 'required', 'numeric' ]
+              , Latitude  : [ 'required', 'numeric' ]
+            }
+            , Err         :
+            {
+                Task      : 'Unknown Task'
+              , MobileNo  : 'Invalid Mobile Number'
+              , Mode      : 'Incorrect Mode'
+              , Longitude : 'Incorrect Longitude'
+              , Latitude  : 'Incorrect Latitude'
+            }
+          }
+        }
       }
     , [verb.profile]      :
       {
@@ -169,7 +189,7 @@ const Controller 		 = function()
     }*/
 	}
 
-	, this.IsHonest = async (src, vrb, mthd) =>
+	, this.IsHonest = async (req, src, vrb, mthd) =>
 	{
         const opt_ =
         { 
@@ -193,21 +213,39 @@ const Controller 		 = function()
             Err_(code.FORBIDDEN, reason.PermissionDenied)
         }
 
-        const validator     = methods[mthd]
-        if(!validator)
+        const rules     = methods[mthd]
+        if(!rules)
         {
             console.log('iv-method-not-found', { Opts: opt_, Methods: methods })
             Err_(code.FORBIDDEN, reason.PermissionDenied)
         }
-
-        const matched = await validator.check()
-        if(!matched)
+        
+        if(rules.Body)
         {
-            console.log('iv-incorrect-input', { Opts: opt_, Methods: methods })            
-            Err_(code.FORBIDDEN, reason.PermissionDenied)
+          const v       = new Validator(req.body, rules.Body.Fields, rules.Body.Err)
+          const matched = await v.check()
+          if(!matched)
+          {
+              console.log('iv-incorrect-input', { Opts: opt_, Methods: methods })            
+              Err_(code.FORBIDDEN, reason.PermissionDenied)
+          }
         }
     }
 }
+
+let x = new Controller()
+let r = 
+{
+  body:
+  {
+      Task      : task.New
+    , MobileNo  : '+91123456789'
+    , Mode      : mode.Admin
+    , Longitude : '17.12345'
+    , Latitude  : '17.12345'    
+  }
+}
+x.IsHonest(r, rsrc.user, verb.register, method.post)
 
 module.exports =
 {
