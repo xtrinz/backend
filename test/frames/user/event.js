@@ -111,7 +111,6 @@ let Register = function(name)
             , MobileNo    : user.MobileNo
             , Name        : user.Name
             , Email       : user.Email
-            , Password    : user.Password
           }
           , Header        :
           {

@@ -23,29 +23,32 @@ const Controller 		 = function()
         {
           Body            :
           {
-              Fields      :
-            {
-                Task      : [ 'required', 'string', [ 'in', task.New, task.ReadOTP, task.Register ] ]
-              , MobileNo  : [ 'required' ] 
-              , Mode      : [ 'required', 'string', [ 'in', mode.User, mode.Agent, mode.Admin ] ]
-              , Longitude : [ 'required', 'numeric' ]
-              , Latitude  : [ 'required', 'numeric' ]
-            }
-            , Err         :
-            {
-                Task      : 'Unknown Task'
-              , MobileNo  : 'Invalid Mobile Number'
-              , Mode      : 'Incorrect Mode'
-              , Longitude : 'Incorrect Longitude'
-              , Latitude  : 'Incorrect Latitude'
-            }
+              Task        : [ 'required', 'string', [ 'in', task.New, task.ReadOTP, task.Register ] ]
+            , MobileNo    : [ 'required' ]
+            , Mode        : [ [ 'requiredIf', 'Task', task.New      ], 'string' , [ 'in', mode.User, mode.Agent, mode.Admin ] ]
+            , Longitude   : [ [ 'requiredIf', 'Task', task.New      ], 'numeric', [ 'between', -180, 180 ] ]
+            , Latitude    : [ [ 'requiredIf', 'Task', task.New      ], 'numeric', [ 'between', -90, 90 ] ]
+            , OTP         : [ [ 'requiredIf', 'Task', task.ReadOTP  ], 'integer', [ 'between', 000000, 999999 ] ]
+            , Name        : [ [ 'requiredIf', 'Task', task.Register ], 'string' , [ 'length', 50, 2 ] ]
+            , Email       : [ [ 'requiredIf', 'Task', task.Register ], 'email' ]
           }
         }
       }
     , [verb.profile]      :
       {
-          [method.put]    : {}
-        , [method.get]    : {} 
+          [method.put]    : 
+          {
+            Body          :
+            {
+                Name      : [ [ 'requiredWithout', 'Email' ] , 'string', [ 'length', 50, 2 ] ]
+              , Email     : [ [ 'requiredWithout', 'Name'  ] , 'email' ]
+            }
+            , Head        : {} // TODO            
+          }
+        , [method.get]    : 
+          {
+              Head        : {} // TODO
+          } 
       }                
     } // TODO rm verbs not needed
 
@@ -222,7 +225,7 @@ const Controller 		 = function()
         
         if(rules.Body)
         {
-          const v       = new Validator(req.body, rules.Body.Fields, rules.Body.Err)
+          const v       = new Validator(req.body, rules.Body) // TODO add errors rules.Body
           const matched = await v.check()
           if(!matched)
           {
