@@ -57,19 +57,74 @@ const Controller 		 = function()
     {
       [verb.register]     :
       {
-        [method.post]     : {}
+        [method.post]     :
+        {
+            Task            : [ 'required', 'string', [ 'in', task.New, task.ReadOTP, task.Register ] ]
+          , Name            : [ [ 'requiredIf', 'Task', task.New ], 'string' , [ 'length', 50, 2 ]  ]
+          , Image           : [ [ 'requiredIf', 'Task', task.New ], 'string' , [ 'length', 200, 2 ] ]
+          , Type            : [ [ 'requiredIf', 'Task', task.New ], 'string' ]
+          , Certs           : [ [ 'requiredIf', 'Task', task.New ], 'string' ]
+          , MobileNo        : ''
+          , Email           : ''
+          , Longitude       : ''
+          , Latitude        : ''
+          , Address         :
+          {
+                Line1       : ''
+              , Line2       : ''
+              , City        : ''
+              , PostalCode  : ''
+              , State       : ''
+              , Country     : ''
+          }    
+          // Read OTP
+          , Task            : ''
+          , MobileNo        : ''
+          , OTP             : ''
+          
+          // Approve
+          , Task            : ''
+          , StoreID         : ''
+        }
       }
     , [verb.view]         :
       {
-          [method.get]    : {}                     
+          [method.get]    : 
+          {
+              Query       : { StoreID       : '' }
+            , Head        : { Authorization : '' }
+          }                     
       }
     , [verb.list]         :
       {
-          [method.get]    : {}                                         
+          [method.get]    :
+          {
+             Query        :
+            {
+                Longitude : '17.20000'
+              , Latitude  : '17.20000'
+              , Page      : 1
+              , Limit     : 8
+            }
+            , Header      : { Authorization : '' }            
+          }                                         
       }
     , [verb.edit]         :
       {
-          [method.put]    : {}                                         
+          [method.put]    : 
+          {
+              Body        : 
+            {
+                Email     : ''
+              , Image     : ''
+              , Certs     : ''
+              , Type      : ''
+              , Name      : ''
+              , Longitude : ''
+              , Latitude  : '' 
+            }
+            , Head        : { Authorization : '' }            
+          }                                         
       }
     } // TODO move del verbs from user to store
 
@@ -78,23 +133,66 @@ const Controller 		 = function()
     {
       [verb.add]          :
       {
-          [method.post]   : {}
+          [method.post]   : 
+          {
+              Body        : 
+            {
+                StoreID     : ''
+              , Name        : ''
+              , Image       : ''
+              , Price       : ''
+              , Quantity    : ''
+              , Description : ''
+              , CategoryID  : ''
+            }
+            , Head          : { Authorization: '' }
+          }
       }
     , [verb.list]         :
       {
-          [method.get]    : {}
+          [method.get]    :
+          {
+             Query        : 
+            {
+                  StoreID : ''
+                , Page    : 1
+                , Limit   : 8
+            }
+            , Head        : { Authorization: '' }
+          }
       }
     , [verb.view]         :
       {
-          [method.get]    : {}
+          [method.get]    : 
+          {
+              Query       : { ProductID : '' }
+            , Header      : { Authorization: '' }
+          }
       }
     , [verb.modify]       :
       {
-          [method.post]   : {}
+          [method.post]   :
+          {
+              Body        : 
+            {
+                ProductID   : ''
+              , Name        : ''
+              , Image       : ''
+              , Price       : 200
+              , Quantity    : ''
+              , Description : ''
+              , CategoryID  : ''
+            }
+            , Head        : { Authorization: '' }            
+          }
       }
     , [verb.remove]       :
       {
-          [method.delete] : {}
+          [method.delete] : 
+          {
+              Body        : { ProductID : '' }
+            , Head        : { Authorization: '' }
+          }
       }
     } // Correct authz
 
@@ -103,19 +201,44 @@ const Controller 		 = function()
     {
       [verb.insert]       :
       {
-          [method.post]   : {}
+          [method.post]   : 
+          {
+              Body        : 
+            {             
+                ProductID : ''
+              , StoreID   : ''
+              , Quantity  : ''
+            }
+            , Head        : { Authorization: '' }            
+          }
       }
     , [verb.list]         :
       {
-          [method.get]    : {}
+          [method.get]    : 
+          {
+              Body        : { AddressID : '' }
+            , Head        : { Authorization: '' }
+          }
       }
     , [verb.modify]       : 
       {
-          [method.post]   : {}
+          [method.post]   : 
+          {
+              Body        : 
+            {
+                ProductID : ''
+              , Quantity  : 5
+            }
+            , Head        : { Authorization: '' }            
+          }
       }
     , [verb.remove]       :
       {
-          [method.delete] : {}
+          [method.delete] : 
+          {
+              Body        : { ProductID   : '' }
+            , Head        : { Authorization: '' }
+          }
       }
     }
 
@@ -124,23 +247,72 @@ const Controller 		 = function()
     {
       [verb.add]          :
       {
-          [method.post]   : {}
+          [method.post]   : 
+          {
+              Body           : 
+            {
+                Longitude    : ''
+              , Latitude     : ''
+              , Tag          : ''
+              , IsDefault    : ''
+              , Address      :
+              {
+                  Name       : ''
+                , Line1      : ''
+                , Line2      : ''
+                , City       : ''
+                , PostalCode : ''
+                , State      : ''
+                , Country    : ''
+              }
+            }
+            , Head           : { Authorization: '' }            
+          }
       }
     , [verb.list]         :
       {
-          [method.get]    : {}
+          [method.get]    : { Header : { Authorization: '' } }
       }
     , [verb.view]         :
       {
-          [method.get]    : {}
+          [method.get]    : 
+          {
+              Query       : { AddressID : '' }                          
+            , Head        : { Authorization: '' }            
+          }
       }
     , [verb.modify]       :
       {
-          [method.post]   : {}
+          [method.post]   : 
+          {
+              Body        : 
+            {
+                AddressID : ''
+              , Longitude : ''
+              , Latitude  : ''
+              , Tag       : ''
+              , IsDefault : false
+              , Address   :
+              {
+                  Name       : ''
+                , Line1      : ''
+                , Line2      : ''
+                , City       : ''
+                , PostalCode : ''
+                , State      : ''
+                , Country    : ''
+              }
+            }
+            , Head        : { Authorization: '' }            
+          }
       }
     , [verb.remove]       :
       {
-          [method.delete] : {}
+          [method.delete] : 
+          {
+              Body        : { AddressID : '' }                          
+            , Head        : { Authorization: '' }
+          }
       }
     }
 
@@ -149,7 +321,16 @@ const Controller 		 = function()
     {
       [verb.root]        :
       {
-        [method.post]    : {}
+        [method.post]    : 
+        {
+            Body         : 
+          {                     
+              Longitude  : ''
+            , Latitude   : ''
+            , AddressID  : ''
+          }                     
+          , Head         : { Authorization: '' }          
+        }
       }
     }
 
@@ -158,32 +339,96 @@ const Controller 		 = function()
     {
       [verb.list]         :
       {
-          [method.get]    : {}
+          [method.get]    :
+          {
+              Query       : { JournalID : '' }
+            , Header      : { Authorization: '' }
+          }
       }
     , [verb.view]         :
       {
-          [method.get]    : {}
+          [method.get]    :
+          {
+              Query       : 
+            {
+                Page      : 1
+              , Limit     : 8
+            }
+            , Header      : { Authorization: '' }            
+          }
       }
     }
+/**
+ *         , Body   : 
+        {
+            ORDERID      : cart.Paytm.OrderID
+          , TXNID        : cart.Paytm.OrderID
+          , TXNDATE      : String(Date.now())
+          , STATUS       : paytm.TxnSuccess
+          , BANKTXNID    : cart.Paytm.OrderID
+          , MID          : cart.Paytm.MID
+          , TXNAMOUNT    : cart.Paytm.Amount
+          , CHECKSUMHASH : '--pre-set--'
+        }
 
+
+ */
   // Transit
   , [rsrc.transit]        :
     {
       [verb.user]         :
       {
-        [method.post]     : {}
+        [method.post]     : 
+        {
+           Body           : 
+          {
+              TransitID   : 'TransitID'
+            , Task        : 'task.Cancel'
+          }
+          , Head          : { Authorization: '' }          
+        }
       }
     , [verb.store]        :
       {
-        [method.post]     : {}
+        [method.post]     : 
+        {
+            Body          : 
+          {
+              TransitID   : 'TransitID'
+            , Task        : 'task.Reject'
+
+            , OTP         : staff.OTP
+          }
+          , Head          : { Authorization: '' }          
+        }
       }
     , [verb.agent]        :
       {
-        [method.post]     : {}
+        [method.post]     :
+        {
+            Body          : 
+          {
+              TransitID   : 'TransitID'
+            , Task        : 'task.Reject'
+
+            , OTP         : agent.OTP          
+          }
+          , Head          : { Authorization: '' }          
+        }        
       }
     , [verb.admin]        :
       {
-        [method.post]     : {}
+        [method.post]     :
+        {
+            Body          : 
+          {
+              TransitID   : 'TransitID'
+            , Task        : 'task.Reject'
+
+            , MobileNo    : ''          
+          }
+          , Head          : { Authorization: '' }          
+        }                
       }
     }
 /*  , [rsrc.root] :
