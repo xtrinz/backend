@@ -1,8 +1,7 @@
-const { task }               = require('../../../pkg/system/models')
-    , { code, status, text } = require('../../../pkg/system/error')
-    , { Method, Type }       = require('../../lib/medium')
-    , { read }               = require('../../lib/driver')
-    , data                   = require('../data')
+const { task, code, status, text } = require('../../../pkg/system/models')
+    , { Method, Type }             = require('../../lib/medium')
+    , { read }                     = require('../../lib/driver')
+    , data                         = require('../data')
 
 let RegisterNew = function(name) 
 {
@@ -112,7 +111,6 @@ let Register = function(name)
             , MobileNo    : user.MobileNo
             , Name        : user.Name
             , Email       : user.Email
-            , Password    : user.Password
           }
           , Header        :
           {
@@ -213,9 +211,7 @@ let ProfileEdit =  function(name)
         , Path          : '/user/profile'
         , Body          : 
         {                   
-            Password    : user.Password
-          , NewPassword : user.Password
-          , Name        : user.Name
+            Name        : user.Name
           , Email       : user.Email
         }                   
         , Header        :

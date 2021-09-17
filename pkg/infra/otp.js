@@ -21,7 +21,7 @@ function OneTimePasswd(data)
   {
     this.Otp = Math.random()
                    .toFixed(len)
-                   .substr('-${len}')
+                   .substr(`-${len}`)
     test.Set('OTP', this.Otp) // #101
   }
 
@@ -109,10 +109,9 @@ function OneTimePasswd(data)
 
   this.Send = async function (opts) 
   { 
-    console.log('####OTP-blocked-for-testing-purpose###')
-
     console.log('send-otp', { MobileNo : this.Data.MobileNo, Email : this.Data.EmailID, Options: opts})
     this.GenOtp(this.Data.OtpLen)
+    console.log('####OTP-blocked-for-testing-purpose###', this.Otp, ">>####")    
     /*//
     switch (opts)
     {

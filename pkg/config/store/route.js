@@ -1,6 +1,6 @@
 const router 	               = require('express').Router()
-    , { code, text, status } = require('../../system/error')
-    , { task, mode }         = require('../../system/models')
+    , { code, text, status
+    , task, mode }           = require('../../system/models')
     , { Store }              = require('../store/driver')
 
 router.post('/register', async (req, res, next) =>
@@ -44,7 +44,6 @@ router.post('/register', async (req, res, next) =>
 router.get('/view', async (req, res, next) => {
     try 
     {
-      console.log('######', req.query, req.body)
       const store = new Store()
       let in_
       switch(req.body.Mode)
@@ -80,7 +79,6 @@ router.get('/list', async (req, res, next) =>
 {
     try 
     {
-      console.log('######', req.query)
       const store = new Store()
           , data  = await store.List(req.query, req.body.Mode)
       

@@ -1,6 +1,6 @@
 const checksum               = require("paytmchecksum")
-    , { Err_, code, reason } = require('../../../system/error')
-	, { paytm: pgw, states } = require('../../../system/models')
+    , { Err_, code, reason
+	,   paytm: pgw, states } = require('../../../system/models')
 	, journal				 = require('../../../config/journal/archive')
 	, { Cart } 				 = require('../../../config/cart/driver')
 	, { ObjectID }			 = require('mongodb')
@@ -55,8 +55,8 @@ function Payment(data)
 	this.Store 	  = async function(rcd)
 	{
 
-		rcd.Payment.TimeStamp 	 = this.Data.TXNDATE
-		rcd.Payment.ChannelRefID = this.Data.TXNID
+		rcd.Payment.TimeStamp.Webhook = this.Data.TXNDATE
+		rcd.Payment.ChannelRefID 	  = this.Data.TXNID
 
 		switch (this.Data.Status)
 		{

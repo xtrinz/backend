@@ -1,8 +1,8 @@
 const { Method, Type }        = require('../../lib/medium')
     , data                    = require('../data')
     , { read }                = require('../../lib/driver')
-    , { code, status, text }  = require('../../../pkg/system/error')
-    , { alerts, task, paytm } = require('../../../pkg/system/models')
+    , { code, status, text
+    , alerts, task, paytm }   = require('../../../pkg/system/models')
     , PaytmChecksum           = require('paytmchecksum')
 
 let Checkout = function(user_, addr_, cart_) 

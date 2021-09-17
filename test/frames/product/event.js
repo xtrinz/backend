@@ -1,5 +1,5 @@
 const { Method, Type }       = require('../../lib/medium')
-    , { code, status, text } = require('../../../pkg/system/error')
+    , { code, status, text } = require('../../../pkg/system/models')
     , data                   = require('../data')
 
 let Add = function(staff_, store_, product_) 

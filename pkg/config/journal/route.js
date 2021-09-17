@@ -1,7 +1,6 @@
-const { code, status } = require('../../system/error')
-    ,  { mode }        = require('../../system/models')
-    , router 	         = require('express').Router()
-    , { Journal }      = require('./driver')
+const { code, status, mode } = require('../../system/models')
+    , router 	               = require('express').Router()
+    , { Journal }            = require('./driver')
 
 // List Journals
 router.get('/list', async (req, res, next) =>

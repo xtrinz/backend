@@ -1,5 +1,5 @@
-const { Err, Err_, code, status, reason } = require('./error')
-    , { mode, query }                     = require('./models')
+const { Err, Err_, code, status
+    , reason , mode, query }              = require('./models')
     , { client }                          = require('./database')
     , db                                  =
     {
@@ -8,9 +8,24 @@ const { Err, Err_, code, status, reason } = require('./error')
     }
     , jwt                                 = require('../infra/jwt')
     , rbac                                = require('../system/rbac')
+    , input                               = require('./input')
 
 let   Server, io
 const SetServer = (server, io_) => { Server = server; io = io_ }
+
+const SecInput = async function(req, res, next)
+{
+  try 
+  {
+
+    const objs = req.url.path()
+        , inst = new input.Controller()
+
+    await inst.IsHonest(req, objs[0], objs[1], req.method)
+
+    next()
+  } catch (err) { next(err) }
+}
 
 const Authnz = async function (req, res, next)
 {
@@ -153,6 +168,7 @@ const ErrorHandler = function(err, req, res, next)
 module.exports =
 {
     Authnz        : Authnz
+  , SecInput      : SecInput
   , SetServer     : SetServer
   , Forbidden     : Forbidden
   , GracefulExit  : GracefulExit

@@ -1,6 +1,6 @@
 const   { Emit } 			 	   = require('./events')
-	  , { Err_ , code, reason }    = require('../system/error')
-	  , { states , alerts, query } = require('../system/models')
+	  , { Err_ , code, reason
+	  , states , alerts, query }   = require('../system/models')
 	  , { User } 			 	   = require('../config/user/driver')
 	  , { PayOut , SendOTP, Save, SetAgent, PingAdmins
 		, ConfirmOTP, ResetAgent } = require('./wrap')
@@ -118,9 +118,10 @@ const IgnoredByAgent		= async function(ctxt)
 		await PingAdmins(states.TransitIgnored, ctxt)
 		return	
 	}
-	ctxt.Data.Agent = ResetAgent
+	ctxt.Data.Agent = ResetAgent // Cleared temp data
 	ctxt.Data.Event = ''
-	await ctxt.Save()
+	// TODO add to history
+	await db.transit.Save(ctxt.Data)
 }
 
 const TimeoutByAgent		= async function(ctxt)

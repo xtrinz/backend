@@ -77,6 +77,9 @@ Completed
 26 add UserMode(Customer,Agent,Seller,Admin) User record, limit one mode with one mob_no [dup]
 34 check if one of the socket id is not present at the time of emission, how system crashes
 16 socket limit connections
+37    - lock cart checkout once the payment initated - Add Journal ID to the cart & remove it only after payment success 
+      - limit number of checkouts in given span of time [This will be a good algorithm ]
+
 
 ---
 
@@ -94,3 +97,113 @@ npm notice
 
 
 Page/Limit
+
+
+
+our view and display
+
+current progress
+
+alpha expectations
+
+------------------------------------------------------------------
+
+Add processing time to journal, enable delay between otp resends.
+Add varient, 
+
+- pull frame for input validation [not important]
+
+Needed:
+
+optional, requied, float, integer, 
+string, mode in, objectID (custom validator),
+duplication check, email, token, array,
+maxstrlen, nested objs, boolean
+
+------------------------------------------------------------------
+
+required|
+email|
+maxLength:50|
+integer
+string
+array
+
+
+
+    plan: [ { price: '25', title: 'OK' } ]
+
+    'plan'		: 'required|array',
+    	'plan.*.price'	: 'required|integer',
+    	'plan.*.title'	: 'required'
+
+// 
+
+const niv = require('node-input-validator')
+niv.extend('sumOfFields', ({ value, args }, validator) => 
+{
+  if (args.length !== 2) throw new Error('Invalid seed for rule sumOfFields')
+  const anotherValue = Number(validator.inputs[args[0]])
+  const eq = Number(args[1])
+  if ((Number(value) + anotherValue) !== eq)
+  return false
+  return true
+})
+let v = new niv.Validator({ num1: '50', num2: '50' },{ num1: 'sumOfFields:num2,100|required' })
+let matched = await v.check()
+assert.equal(matched, true)
+
+new Validator(
+  { email: '', age: '16' },
+  { email: 'requiredIf:age,16' },
+)
+
+requiredNotIf:age
+
+requiredWith:age
+
+requiredWithout:phone,pan
+requiredWithout:email
+
+new Validator(
+  { joining: '' },
+  { joining: 'required|after:2018-02-10' },
+);
+
+
+hash:algo - The field under validation must be a valid hash as per provided seed.
+new Validator( { id: 'fd1baf48377a9f644f9af89abbee29f6' }, { id: 'required|hash:md5' })
+
+new Validator(
+  { status: '' },
+  { status: 'required|in:active,inactive,blocked' },
+);
+
+
+age:'required|between:17,30'
+
+
+'required|max:35'
+
+password: 'required|same:confirm_password'
+
+niv.extend('even', ({ value }) => {
+  if ((parseInt(value) % 2) == 0) {
+    return true;
+  }
+  return false;
+});
+
+
+
+niv.extend('unique', async ({ value, args }) =>
+{
+  const field 		= args[1] || 'email'
+  let condition 	= {}
+  condition[field] 	= value
+  if (args[2]) condition['_id'] = { $ne: mongoose.Types.ObjectId(args[2]) }
+  let emailExist = await mongoose.model(args[0]).findOne(condition).select(field)
+  if (emailExist) return false
+  return true
+})
+

@@ -1,6 +1,6 @@
 const data                   = require('../data')
     , { Method, Type }       = require('../../lib/medium')
-    , { code, status, text } = require('../../../pkg/system/error')
+    , { code, status, text } = require('../../../pkg/system/models')
 
 let Insert = function(user_, cart_, product_) 
 {
@@ -64,7 +64,8 @@ let List = function(user_, cart_, addr_, store_)
       {
             Method            : Method.GET
           , Path              : '/cart/list'
-          , Body              : { AddressID : addr.ID }
+          , Body              : {}
+          , Query             : { AddressID : addr.ID }
           , Header            : { Authorization: user.Token }
       }
       , Response              :

@@ -1,6 +1,6 @@
 const checksum               = require("paytmchecksum")
-    , { Err_, code, reason } = require('../../../system/error')
-	, { paytm: pgw }         = require('../../../system/models')
+    , { Err_, code, reason
+	, paytm: pgw }         	 = require('../../../system/models')
 	, journal				 = require('../../../config/journal/archive')
 
 function Refund(data, signature)
@@ -51,7 +51,7 @@ function Refund(data, signature)
 	this.Store 	  = async function(rcd)
 	{
 		/*
-		rcd.Payment.TimeStamp = Date.now()
+		rcd.Payment.TimeStamp.Webhook = Date.now()
 		switch (this.Data.Status)
 		{
 		case pgw.TxnSuccess:

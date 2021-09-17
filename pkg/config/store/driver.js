@@ -1,7 +1,7 @@
 const { ObjectID }           = require('mongodb')
     , otp                    = require('../../infra/otp')
-    , { Err_, code, reason}  = require('../../system/error')
-    , { states, mode, qtype
+    , { Err_, code, reason
+      , states, mode, qtype
       , query, message, gw } = require('../../system/models')
     , db                     = 
     {

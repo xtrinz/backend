@@ -1,7 +1,7 @@
-const { code, status, text }  = require('../../system/error')
-    , router                  = require('express').Router()
-    , { User }                = require('../user/driver')
-    , { task }                = require('../../system/models')
+const { code, status
+    ,   text, task } = require('../../system/models')
+    , router         = require('express').Router()
+    , { User }       = require('../user/driver')
 
 router.post('/register', async (req, res, next) => 
 {

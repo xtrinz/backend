@@ -1,6 +1,6 @@
-const {states, event}		 = require('../system/models')
-	, { Err_, code, reason } = require('../system/error')
-	, method				 = require('./methods')
+const {states, event
+	, Err_, code, reason } 	= require('../system/models')
+	, method				= require('./methods')
 
 const Engine 				 = function()
 {
