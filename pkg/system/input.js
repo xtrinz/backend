@@ -7,18 +7,9 @@ const {
         code, 
         reason,
         mode
-      }                     = require('../system/models')
-    , { Validator, extend } = require('node-input-validator')
+      }               = require('../system/models')
+    , niv             = require('node-input-validator')
 
-    extend('startWith', ({ str, args }) => 
-    {
-      if (args.length !== 1)       return false
-      if (str.startsWith(args[0])) return true
-      return false
-    })
-
-// TODO body object
-// head object
 
 const Controller 		 = function()
 {
@@ -31,7 +22,8 @@ const Controller 		 = function()
       {
         [method.post]     : 
         {
-            'body.Task'        : [ 'required', 'string', [ 'in', task.New, task.ReadOTP, task.Register ] ]
+            'body'             : [ 'required', 'object' ]
+          , 'body.Task'        : [ 'required', 'string', [ 'in', task.New, task.ReadOTP, task.Register ] ]
           , 'body.MobileNo'    : [ 'required' ]
           , 'body.Mode'        : [ [ 'requiredIf', 'body.Task', task.New      ], 'string' , [ 'in', mode.User, mode.Agent, mode.Admin ] ]
           , 'body.Longitude'   : [ [ 'requiredIf', 'body.Task', task.New      ], 'numeric', [ 'between', -180, 180 ] ]
@@ -45,16 +37,19 @@ const Controller 		 = function()
       {
           [method.put]    : 
           {
-              'body.Name'           : [ [ 'requiredWithout', 'Email' ] , 'string', [ 'length', 50, 2 ] ]
+              'body'                    : [ 'required', 'object' ]
+            , 'headers'                 : [ 'required', 'object' ] 
+            , 'body.Name'           : [ [ 'requiredWithout', 'Email' ] , 'string', [ 'length', 50, 2 ] ]
             , 'body.Email'          : [ [ 'requiredWithout', 'Name'  ] , 'email' ]
-            , 'head..authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
+            , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
           }
         , [method.get]    : 
           {
-            'head..authorization'   : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
+            'headers'                 : [ 'required', 'object' ] 
+          , 'headers.authorization'   : [ 'required', 'string', [ 'length', 500, 8 ] ]
           } 
       }                
-    } // TODO rm verbs not needed
+    }
 
   // Store
   , [rsrc.store]          :
@@ -63,52 +58,60 @@ const Controller 		 = function()
       {
         [method.post]     :
         {
-            'body.Task'               : [ 'required', 'string', [ 'in', task.New, task.ReadOTP, task.Approve ] ]
+            'body'                    : [ 'required', 'object' ]
+          , 'headers'                 : [ 'required', 'object' ]            
+          , 'body.Task'               : [ 'required', 'string', [ 'in', task.New, task.ReadOTP, task.Approve ] ]
           , 'body.Name'               : [ [ 'requiredIf', 'body.Task', task.New     ], 'string' , [ 'length', 50, 2 ]  ]
           , 'body.Image'              : [ [ 'requiredIf', 'body.Task', task.New     ], 'string' , [ 'length', 200, 2 ] ]
           , 'body.Type'               : [ [ 'requiredIf', 'body.Task', task.New     ], 'string' ]
           , 'body.Certs'              : [ [ 'requiredIf', 'body.Task', task.New     ], 'array' ]
           , 'body.Certs.*'            : [ [ 'requiredIf', 'body.Task', task.New     ], 'string' ]
-          , 'body.MobileNo'           : [ [ 'requiredIf', 'body.Task', task.ReadOTP ], [ 'requiredIf', 'body.Task', task.New ], 'string', 'regex:^+91[0-9]{10}$' ]
+          , 'body.MobileNo'           : [ [ 'requiredIf', 'body.Task', task.ReadOTP ], [ 'requiredIf', 'body.Task', task.New ], 'string', [ 'length', 15, 2 ] ] // [ 'regex', '/^+91[0-9]{10}$/' ]
           , 'body.Email'              : [ [ 'requiredIf', 'body.Task', task.New     ], 'email' ]
           , 'body.Longitude'          : [ [ 'requiredIf', 'body.Task', task.New     ], 'numeric', [ 'between', -180, 180 ] ]
           , 'body.Latitude'           : [ [ 'requiredIf', 'body.Task', task.New     ], 'numeric', [ 'between', -90, 90 ] ]
           , 'body.Address'            : [ [ 'requiredIf', 'body.Task', task.New     ], 'object' ]
-          , 'body.Address.Line1'      : [ [ 'requiredIf', 'body.Task', task.New     ], 'string' ]
-          , 'body.Address.Line2'      : [ [ 'requiredIf', 'body.Task', task.New     ], 'string' ]
-          , 'body.Address.City'       : [ [ 'requiredIf', 'body.Task', task.New     ], 'string' ]
+          , 'body.Address.Line1'      : [ [ 'requiredIf', 'body.Task', task.New     ], 'string', [ 'length', 100, 2 ] ]
+          , 'body.Address.Line2'      : [ [ 'requiredIf', 'body.Task', task.New     ], 'string', [ 'length', 100, 2 ] ]
+          , 'body.Address.City'       : [ [ 'requiredIf', 'body.Task', task.New     ], 'string', [ 'length', 100, 2 ] ]
           , 'body.Address.PostalCode' : [ [ 'requiredIf', 'body.Task', task.New     ], 'integer' ]
-          , 'body.Address.State'      : [ [ 'requiredIf', 'body.Task', task.New     ], 'string', [ 'in', 'Kerala' ] ]
-          , 'body.Address.Country'    : [ [ 'requiredIf', 'body.Task', task.New     ], 'string', [ 'in', 'India' ] ]
+          , 'body.Address.State'      : [ [ 'requiredIf', 'body.Task', task.New     ], 'string', [ 'length', 50, 2 ] ]
+          , 'body.Address.Country'    : [ [ 'requiredIf', 'body.Task', task.New     ], 'string', [ 'length', 50, 2 ] ]
           , 'body.OTP'                : [ [ 'requiredIf', 'body.Task', task.ReadOTP ], 'integer', [ 'between', 000000, 999999 ] ]
           , 'body.StoreID'            : [ [ 'requiredIf', 'body.Task', task.Approve ], 'mongoId']
-          , 'head.authorization'      : [ [ 'requiredIf', 'body.Task', task.Approve ], 'string', [ 'startWith', 'Bearer ' ] ]
+          , 'headers.authorization'      : [ [ 'requiredIf', 'body.Task', task.Approve ], 'string', [ 'length', 500, 8 ] ]
         }
       }
-    , [verb.view]         :
+    , [verb.view]                 :
       {
-          [method.get]    : 
-          {
-              'body.StoreID'            : [ [ 'requiredIf', 'body.Task', task.Approve ], 'mongoId']
-            , 'head.authorization'      : [ [ 'requiredIf', 'body.Task', task.Approve ], 'string', [ 'startWith', 'Bearer ' ] ]
-          }                     
+        [method.get]              : 
+        {
+            'body'                : [ 'required', 'object' ]
+          , 'headers'                : [ 'required', 'object' ]
+          , 'body.StoreID'        : [ [ 'requiredIf', 'body.Task', task.Approve ], 'mongoId']
+          , 'headers.authorization'  : [ [ 'requiredIf', 'body.Task', task.Approve ], 'string', [ 'length', 500, 8 ] ]
+        }                     
       }
-    , [verb.list]         :
+    , [verb.list]                 :
       {
-          [method.get]    :
-          {
-              'query.Longitude'    : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
-            , 'query.Latitude'     : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
-            , 'query.Page'         : [ 'required', 'integer', [ 'min', 1 ] ]
-            , 'query.Limit'        : [ 'required', 'integer', [ 'min', 1 ] ]
-            , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
-          }
+        [method.get]              :
+        {
+            'query'               : [ 'required', 'object' ]
+          , 'headers'                : [ 'required', 'object' ]
+          , 'query.Longitude'     : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
+          , 'query.Latitude'      : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
+          , 'query.Page'          : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'query.Limit'         : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'headers.authorization'  : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
       }
-    , [verb.edit]         :
+    , [verb.edit]                 :
       {
-          [method.put]    : 
+          [method.put]            : 
           {
-              'body.Name'               : [ 'string' , [ 'length', 50, 2 ]  ]
+              'body'                    : [ 'required', 'object' ]
+            , 'headers'                    : [ 'required', 'object' ]            
+            , 'body.Name'               : [ 'string' , [ 'length', 50, 2 ]  ]
             , 'body.Image'              : [ 'string' , [ 'length', 200, 2 ] ]
             , 'body.Type'               : [ 'string' ]
             , 'body.Certs'              : [ 'array' ]
@@ -121,211 +124,242 @@ const Controller 		 = function()
             , 'body.Address.Line2'      : [ 'string' ]
             , 'body.Address.City'       : [ 'string' ]
             , 'body.Address.PostalCode' : [ 'integer' ]
-            , 'body.Address.State'      : [ 'string', [ 'in', 'Kerala' ] ]
-            , 'body.Address.Country'    : [ 'string', [ 'in', 'India' ] ]
-            , 'head.authorization'      : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
+            , 'body.Address.State'      : [ 'string', [ 'length', 50, 2 ] ]
+            , 'body.Address.Country'    : [ 'string', [ 'length', 50, 2 ] ]
+            , 'headers.authorization'      : [ 'required', 'string', [ 'length', 500, 8 ] ]
           }                                         
       }
     } // TODO move del verbs from user to store
 
   // Product
-  , [rsrc.product]        :
+  , [rsrc.product]               :
     {
-      [verb.add]          :
+      [verb.add]                 :
       {
-          [method.post]   : 
-          {
-              'body.StoreID'       : [ 'required', 'mongoId'] // ?
-            , 'body.Name'          : [ 'required', 'string' , [ 'length', 50, 2 ]  ]
-            , 'body.Image'         : [ 'required', 'string' , [ 'length', 200, 2 ] ]
-            , 'body.Price'         : [ 'required', 'integer', [ 'min', 1 ] ]            
-            , 'body.Quantity'      : [ 'required', 'integer', [ 'min', 1 ] ]
-            , 'body.Image'         : [ 'required', 'string' , [ 'length', 3000, 2 ] ]            
-            , 'body.CategoryID'    : [ 'required', 'integer', [ 'min', 1 ] ]
-            , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
-          }      
+        [method.post]            : 
+        {
+            'body'               : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'body.StoreID'       : [ 'required', 'mongoId'] // ?
+          , 'body.Name'          : [ 'required', 'string' , [ 'length', 50, 2 ]  ]
+          , 'body.Image'         : [ 'required', 'string' , [ 'length', 200, 2 ] ]
+          , 'body.Price'         : [ 'required', 'integer', [ 'min', 1 ] ]            
+          , 'body.Quantity'      : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'body.Image'         : [ 'required', 'string' , [ 'length', 3000, 2 ] ]            
+          , 'body.CategoryID'    : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }      
       }
-    , [verb.list]         :
+    , [verb.list]                :
       {
-          [method.get]    :
-          {
-              'query.StoreID'      : [ 'required', 'mongoId'] // ?
-            , 'query.Page'         : [ 'required', 'integer', [ 'min', 1 ] ]
-            , 'query.Limit'        : [ 'required', 'integer', [ 'min', 1 ] ]
-            , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
-          }
+        [method.get]             :
+        {
+            'query'              : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'query.StoreID'      : [ 'required', 'mongoId'] // ?
+          , 'query.Page'         : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'query.Limit'        : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
       }
-    , [verb.view]         :
+    , [verb.view]                :
       {
-          [method.get]    : 
-          {
-              'query.ProductID'    : [ 'required', 'mongoId']
-            , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]            
-          }
+        [method.get]             : 
+        {
+            'query.ProductID'    : [ 'required', 'mongoId']
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]            
+        }
       }
-    , [verb.modify]       :
+    , [verb.modify]              :
       {
-          [method.post]   :
-          {
-              'body.ProductID'     : [ 'mongoId']
-            , 'body.Name'          : [ 'string' , [ 'length', 50, 2 ]  ]
-            , 'body.Image'         : [ 'string' , [ 'length', 200, 2 ] ]
-            , 'body.Price'         : [ 'integer', [ 'min', 1 ] ]            
-            , 'body.Quantity'      : [ 'integer', [ 'min', 1 ] ]
-            , 'body.Image'         : [ 'string' , [ 'length', 3000, 2 ] ]            
-            , 'body.CategoryID'    : [ 'integer', [ 'min', 1 ] ]
-            , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]         
-          }
+        [method.post]            :
+        {
+            'body'               : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'body.ProductID'     : [ 'mongoId']
+          , 'body.Name'          : [ 'string' , [ 'length', 50, 2 ]  ]
+          , 'body.Image'         : [ 'string' , [ 'length', 200, 2 ] ]
+          , 'body.Price'         : [ 'integer', [ 'min', 1 ] ]            
+          , 'body.Quantity'      : [ 'integer', [ 'min', 1 ] ]
+          , 'body.Image'         : [ 'string' , [ 'length', 3000, 2 ] ]            
+          , 'body.CategoryID'    : [ 'integer', [ 'min', 1 ] ]
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]         
+        }
       }
-    , [verb.remove]       :
+    , [verb.remove]              :
       {
-          [method.delete] : 
-          {
-              'body.ProductID'     : [ 'required', 'mongoId']
-            , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]  
-          }
+        [method.delete]          : 
+        {
+            'body'               : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'body.ProductID'     : [ 'required', 'mongoId']
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]  
+        }
       }
     } // Correct authz
 
   // Cart
-  , [rsrc.cart]           :
+  , [rsrc.cart]                  :
     {
-      [verb.insert]       :
+      [verb.insert]              :
       {
-          [method.post]   : 
-          {
-              'body.ProductID'     : [ 'required', 'mongoId']
-            , 'body.StoreID'       : [ 'required', 'mongoId'] // ?
-            , 'body.Quantity'      : [ 'integer', [ 'min', 1 ] ]
-            , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]  
-          }
+        [method.post]            : 
+        {
+            'body'               : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'body.ProductID'     : [ 'required', 'mongoId']
+          , 'body.StoreID'       : [ 'required', 'mongoId'] // ?
+          , 'body.Quantity'      : [ 'integer', [ 'min', 1 ] ]
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]  
+        }
       }
-    , [verb.list]         :
+    , [verb.list]                :
       {
-          [method.get]    : 
-          {
-              'body.AddressID'     : [ 'required', 'mongoId']
-            , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]              
-          }
+        [method.get]             : 
+        {
+            'query'              : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'query.AddressID'    : [ 'required', 'mongoId']
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]              
+        }
       }
-    , [verb.modify]       : 
+    , [verb.modify]              : 
       {
-          [method.post]   : 
-          {
-              'body.ProductID'     : [ 'mongoId']
-            , 'body.Quantity'      : [ 'integer', [ 'min', 1 ] ]
-            , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
-          }
+        [method.post]            : 
+        {
+            'body'               : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'body.ProductID'     : [ 'mongoId']
+          , 'body.Quantity'      : [ 'integer', [ 'min', 1 ] ]
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
       }
-    , [verb.remove]       :
+    , [verb.remove]              :
       {
-          [method.delete] : 
-          {
-              'body.ProductID'     : [ 'mongoId']
-            , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
-          }
+        [method.delete]          : 
+        {
+            'body'               : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'body.ProductID'     : [ 'mongoId']
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
       }
     }
 
   // Address
-  , [rsrc.address]        :
+  , [rsrc.address]               :
     {
-      [verb.add]          :
+      [verb.add]                 :
       {
-          [method.post]   : 
-          {
-              'body.Longitude'          : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
-            , 'body.Latitude'           : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
-            , 'body.Tag'                : [ 'required', 'string' ]
-            , 'body.IsDefault'          : [ 'required', 'boolean' ]
-            , 'body.Address'            : [ 'required', 'object' ]
-            , 'body.Address.Line1'      : [ 'required', 'string' ]
-            , 'body.Address.Line2'      : [ 'required', 'string' ]
-            , 'body.Address.City'       : [ 'required', 'string' ]
-            , 'body.Address.PostalCode' : [ 'required', 'integer' ]
-            , 'body.Address.State'      : [ 'required', 'string', [ 'in', 'Kerala' ] ]
-            , 'body.Address.Country'    : [ 'required', 'string', [ 'in', 'India' ] ]
-            , 'head.authorization'      : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
-          }
+        [method.post]            : 
+        {
+            'body'                    : [ 'required', 'object' ]
+          , 'headers'                    : [ 'required', 'object' ]            
+          , 'body.Longitude'          : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
+          , 'body.Latitude'           : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
+          , 'body.Tag'                : [ 'required', 'string' ]
+          , 'body.IsDefault'          : [ 'required', 'boolean' ]
+          , 'body.Address'            : [ 'required', 'object' ]
+          , 'body.Address.Line1'      : [ 'required', 'string' ]
+          , 'body.Address.Line2'      : [ 'required', 'string' ]
+          , 'body.Address.City'       : [ 'required', 'string' ]
+          , 'body.Address.PostalCode' : [ 'required', 'integer' ]
+          , 'body.Address.State'      : [ 'required', 'string', [ 'length', 50, 2 ] ]
+          , 'body.Address.Country'    : [ 'required', 'string', [ 'length', 50, 2 ] ]
+          , 'headers.authorization'      : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
       }
-    , [verb.list]         :
+    , [verb.list]                :
       {
-          [method.get]    : 
-          {
-            'head.authorization'        : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
-          }
+        [method.get]             :
+        {
+            'headers'               : [ 'required', 'object' ]            
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
       }
-    , [verb.view]         :
+    , [verb.view]                :
       {
-          [method.get]    : 
-          {
-                'query.AddressID'       : [ 'required', 'mongoId']
-              , 'head.authorization'    : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
-          }
+        [method.get]             :
+        {
+            'query'              : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'query.AddressID'    : [ 'required', 'mongoId']
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
       }
-    , [verb.modify]       :
+    , [verb.modify]              :
       {
-          [method.post]   : 
-          {
-                'body.AddressID'          : [ 'required', 'mongoId']
-              , 'body.Longitude'          : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
-              , 'body.Latitude'           : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
-              , 'body.Tag'                : [ 'required', 'string' ]
-              , 'body.IsDefault'          : [ 'required', 'boolean' ]
-              , 'body.Address'            : [ 'required', 'object' ]
-              , 'body.Address.Line1'      : [ 'required', 'string' ]
-              , 'body.Address.Line2'      : [ 'required', 'string' ]
-              , 'body.Address.City'       : [ 'required', 'string' ]
-              , 'body.Address.PostalCode' : [ 'required', 'integer' ]
-              , 'body.Address.State'      : [ 'required', 'string', [ 'in', 'Kerala' ] ]
-              , 'body.Address.Country'    : [ 'required', 'string', [ 'in', 'India' ] ]
-              , 'head.authorization'      : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]      
-          }
+        [method.post]            : 
+        {
+            'body'                    : [ 'required', 'object' ]
+          , 'headers'                    : [ 'required', 'object' ]            
+          , 'body.AddressID'          : [ 'required', 'mongoId']
+          , 'body.Longitude'          : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
+          , 'body.Latitude'           : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
+          , 'body.Tag'                : [ 'required', 'string' ]
+          , 'body.IsDefault'          : [ 'required', 'boolean' ]
+          , 'body.Address'            : [ 'required', 'object' ]
+          , 'body.Address.Line1'      : [ 'required', 'string' ]
+          , 'body.Address.Line2'      : [ 'required', 'string' ]
+          , 'body.Address.City'       : [ 'required', 'string' ]
+          , 'body.Address.PostalCode' : [ 'required', 'integer' ]
+          , 'body.Address.State'      : [ 'required', 'string', [ 'length', 50, 2 ] ]
+          , 'body.Address.Country'    : [ 'required', 'string', [ 'length', 50, 2 ] ]
+          , 'headers.authorization'      : [ 'required', 'string', [ 'length', 500, 8 ] ]      
+        }
       }
-    , [verb.remove]       :
+      , [verb.remove]            :
       {
-          [method.delete] : 
-          {
-                'body.AddressID'          : [ 'required', 'mongoId'] // TODO what if deleting default addr    
-              , 'head.authorization'      : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
-          }
+        [method.delete]          : 
+        {
+            'body'               : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'body.AddressID'     : [ 'required', 'mongoId'] // TODO what if deleting default addr    
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
       }
     }
 
   // Checkout
-  , [rsrc.checkout]      : // TODO correct it root as rsrc and checkout as verb
+  , [rsrc.checkout]              : // TODO correct it root as rsrc and checkout as verb
     {
-      [verb.root]        :
+      [verb.root]                :
       {
-        [method.post]    : 
+        [method.post]            : 
         {
-            'body.AddressID'     : [ 'required', 'mongoId']
+            'body'               : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'body.AddressID'     : [ 'required', 'mongoId']
           , 'body.Longitude'     : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
           , 'body.Latitude'      : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
-          , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }
       }
     }
 
   // Journal
-  , [rsrc.journal]        :
+  , [rsrc.journal]               :
     {
-      [verb.list]         :
+      [verb.view]                :
       {
-          [method.get]    :
-          {
-              'query.JournalID'       : [ 'required', 'mongoId']
-            , 'head.authorization'    : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
-          }
+        [method.get]             :
+        {
+            'query'              : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'query.JournalID'    : [ 'required', 'mongoId']
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
       }
-    , [verb.view]         :
+      , [verb.list]              :
       {
-          [method.get]    :
-          {
-              'query.Page'         : [ 'required', 'integer', [ 'min', 1 ] ]
-            , 'query.Limit'        : [ 'required', 'integer', [ 'min', 1 ] ]
-            , 'head.authorization' : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ]
-          }
+        [method.get]             :
+        {
+            'query'              : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'query.Page'         : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'query.Limit'        : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
       }
     }
 /**
@@ -344,60 +378,54 @@ const Controller 		 = function()
 
  */
   // Transit
-  , [rsrc.transit]        :
+  , [rsrc.transit]                 :
     {
-      [verb.user]         :
+      [verb.user]                  :
       {
-        [method.post]     : 
-        {
-           Body           : 
-          {
-              TransitID   : 'TransitID'
-            , Task        : 'task.Cancel'
-          }
-          , Head          : { authorization : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ] }
+        [method.post]              : 
+        {   
+               'body'              : [ 'required', 'object' ]
+            , 'headers'               : [ 'required', 'object' ]            
+            , 'body.TransitID'     : [ 'required', 'mongoId']
+            , 'body.Task'          : [ 'required', 'string', [ 'in', task.Cancel ] ]
+            , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }
       }
-    , [verb.store]        :
+    , [verb.store]               :
       {
-        [method.post]     : 
+        [method.post]            : 
         {
-            Body          : 
-          {
-              TransitID   : 'TransitID'
-            , Task        : 'task.Reject'
+            'body'               : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'body.TransitID'     : [ 'required', 'mongoId']
+          , 'body.Task'          : [ 'required', 'string', [ 'in', task.Reject, task.Accept, task.Despatch ] ]
+          , 'body.OTP'           : [ [ 'requiredIf', 'body.Task', task.Despatch ], 'integer', [ 'between', 000000, 999999 ] ]
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
 
-            , OTP         : staff.OTP
-          }
-          , Head          : { authorization : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ] }   
         }
       }
-    , [verb.agent]        :
+    , [verb.agent]               :
       {
-        [method.post]     :
+        [method.post]            :
         {
-            Body          : 
-          {
-              TransitID   : 'TransitID'
-            , Task        : 'task.Reject'
-
-            , OTP         : agent.OTP          
-          }
-          , Head          : { authorization : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ] }
+            'body'               : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'body.TransitID'     : [ 'required', 'mongoId']
+          , 'body.Task'          : [ 'required', 'string', [ 'in', task.ResendOTP, task.Reject, task.Ignore, task.Accept, task.Complete ] ]
+          , 'body.OTP'           : [ [ 'requiredIf', 'body.Task', task.Completes ], 'integer', [ 'between', 000000, 999999 ] ]
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }        
       }
-    , [verb.admin]        :
+    , [verb.admin]               :
       {
-        [method.post]     :
+        [method.post]            :
         {
-            Body          : 
-          {
-              TransitID   : 'TransitID'
-            , Task        : 'task.Reject'
-
-            , MobileNo    : ''          
-          }
-          , Head          : { authorization : [ 'required', 'string', [ 'startWith', 'Bearer ' ] ] }    
+            'body'               : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'body.TransitID'     : [ 'required', 'mongoId']
+          , 'body.Task'          : [ 'required', 'string', [ 'in', task.Accept, task.Assign, task.Termiate ] ]
+          , 'body.MobileNo'      : [ [ 'requiredIf', 'body.Task', task.Assign ], 'string' ] // [ 'regex', '/^+91[0-9]{10}$/' ]
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }                
       }
     }
@@ -407,6 +435,28 @@ const Controller 		 = function()
     }*/
 	}
 
+  , this.SetErr   = (rules) =>
+  {
+    const err_ =
+    {
+        required  : ''
+      , object    : ''
+      , mongoId   : ''
+      , string    : ''
+      , in        : ''
+      , requiredIf: ''
+      , integer   : ''
+      , startWith : ''
+      , between   : ''
+      , min       : ''
+      , numeric   : ''
+      , length    : ''
+      , email     : ''
+      , regex     : ''
+    }
+    return {}
+  }
+
 	, this.IsHonest = async (req, src, vrb, mthd) =>
 	{
         const opt_ =
@@ -414,6 +464,10 @@ const Controller 		 = function()
               Source  : src
             , Verb    : vrb
             , Method  : mthd
+            , Body    : req.body
+            , Head    : req.headers
+            , Query   : req.query
+            , Params  : req.params
         }
         
         console.log('iv-new-query', opt_)
@@ -437,33 +491,18 @@ const Controller 		 = function()
             console.log('iv-method-not-found', { Opts: opt_, Methods: methods })
             Err_(code.FORBIDDEN, reason.PermissionDenied)
         }
-        
-        if(rules.Body)
+
+        const err_    = this.SetErr(rules)
+
+        const v       = new niv.Validator(req, rules) // TODO add errors rules.Body
+        const matched = await v.check()
+        if(!matched)
         {
-          const v       = new Validator(req.body, rules.Body) // TODO add errors rules.Body
-          const matched = await v.check()
-          if(!matched)
-          {
-              console.log('iv-incorrect-input', { Opts: opt_, Methods: methods })            
-              Err_(code.FORBIDDEN, reason.PermissionDenied)
-          }
-        }
+            console.log('iv-incorrect-input', { Opts: opt_, Rule: rules, Err: v.errors })
+            Err_(code.FORBIDDEN, reason.PermissionDenied)
+        }      
     }
 }
-
-let x = new Controller()
-let r = 
-{
-  body:
-  {
-      Task      : task.New
-    , MobileNo  : '+91123456789'
-    , Mode      : mode.Admin
-    , Longitude : '17.12345'
-    , Latitude  : '17.12345'    
-  }
-}
-x.IsHonest(r, rsrc.user, verb.register, method.post)
 
 module.exports =
 {

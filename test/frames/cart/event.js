@@ -64,7 +64,8 @@ let List = function(user_, cart_, addr_, store_)
       {
             Method            : Method.GET
           , Path              : '/cart/list'
-          , Body              : { AddressID : addr.ID }
+          , Body              : {}
+          , Query             : { AddressID : addr.ID }
           , Header            : { Authorization: user.Token }
       }
       , Response              :

@@ -94,10 +94,10 @@ const Disconnect = async function(socket_)
     {
       case mode.Store:
 
-        data = await db.store.Get(sckt._id, query.ByID)
+        data = await db.store.Get(sckt.Entity, query.ByID)
         if (!data)
         {
-            console.log('store-not-found', { StoreID: sckt._id })
+            console.log('store-not-found', { StoreID: sckt.Entity })
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
         data.SockID.pop(socket_.id)
@@ -111,10 +111,10 @@ const Disconnect = async function(socket_)
       case mode.Agent:
       case mode.Admin:
 
-        data = await db.user.Get(sckt._id, query.ByID)
+        data = await db.user.Get(sckt.Entity, query.ByID)
         if (!data)
         {
-            console.log('user-not-found', { UserID: sckt._id })
+            console.log('user-not-found', { UserID: sckt.Entity })
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
         data.SockID.pop(socket_.id)

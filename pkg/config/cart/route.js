@@ -29,7 +29,7 @@ router.get('/list', async (req, res, next) =>
     const address = new Address()
     const addr    = await address.Read({
         UserID    : req.body.User._id
-      , AddressID : req.body.AddressID
+      , AddressID : req.query.AddressID
     })
 
     const data    = await (new Cart()).Read(req.body.User._id)

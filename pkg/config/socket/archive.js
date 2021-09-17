@@ -4,7 +4,7 @@ const { ObjectId }           = require('mongodb')
 
 const Insert = async function(_id, mode_, sock_id) 
 {
-    const rcd_  = { _id: ObjectId(_id), Mode: mode_, SockID: sock_id }
+    const rcd_  = { Entity: ObjectId(_id), Mode: mode_, SockID: sock_id }
     , resp  = await sockets.insertOne(rcd_)
     if (resp.insertedCount !== 1)
     {
@@ -26,7 +26,7 @@ const Get     = async function (sock_id)
 
 const Remove = async function(_id, mode_, sock_id) 
 {
-    const query = { _id: ObjectId(_id), Mode: mode_, SockID: sock_id }
+    const query = { Entity: ObjectId(_id), Mode: mode_, SockID: sock_id }
         , resp  = await sockets.deleteOne(query)
     if (resp.deletedCount !== 1) 
     {

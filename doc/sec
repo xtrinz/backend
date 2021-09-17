@@ -1,0 +1,34 @@
+limit failed login attempts
+“incorrect credentials”
+use Bcrypt or Scrypt. 
+authentication solutions like Okta or OAuth.
+
+don’t return the full error object to the client
+
+Use some component in front of it, such 
+	as a load balancer, 
+	a cloud firewall or gateway, 
+	or old good nginx. 
+This will allow you to rate limit DoS attacks one step before they hit your Node.js app.
+
+
+run frequent automated vulnerability scans on npm packages
+	npm audit for the basic check, but consider using one of the tools described here.
+
+Only send the data that’s required
+you need logging and monitoring
+
+plugins like eslint-plugin-security, A security linter will notify you every time you use unsafe code practices
+
+
+Importing secrets from environment variables is the first step
+use secret management solutions like Vault.
+
+Whenever using Vault isn’t possible, encrypt your secrets when you store them and be sure to rotate them on a regular basis. 
+
+consider using modules like helmet, which will add even more headers in order to secure your application. 
+Helmet can implement eleven different header-based security mechanisms for you with one line of code:
+
+app.use(helmet());
+
+But using Docker doesn’t mean that running Node.js as root is not a problem anymore
