@@ -6,7 +6,8 @@ const {
         Err_,
         code, 
         reason,
-        mode
+        mode,
+        paytm
       }               = require('../system/models')
     , niv             = require('node-input-validator')
 
@@ -354,29 +355,65 @@ const Controller 		 = function()
       {
         [method.get]             :
         {
-            'query'              : [ 'required', 'object' ]
+            'query'                 : [ 'required', 'object' ]
           , 'headers'               : [ 'required', 'object' ]            
-          , 'query.Page'         : [ 'required', 'integer', [ 'min', 1 ] ]
-          , 'query.Limit'        : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'query.Page'            : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'query.Limit'           : [ 'required', 'integer', [ 'min', 1 ] ]
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }
       }
     }
-/**
- *         , Body   : 
+
+  // Transit
+  , [rsrc.paytm]                 :
+    {
+      [verb.payment]             :
+      {
+        [method.post]            : 
         {
-            ORDERID      : cart.Paytm.OrderID
-          , TXNID        : cart.Paytm.OrderID
-          , TXNDATE      : String(Date.now())
-          , STATUS       : paytm.TxnSuccess
-          , BANKTXNID    : cart.Paytm.OrderID
-          , MID          : cart.Paytm.MID
-          , TXNAMOUNT    : cart.Paytm.Amount
-          , CHECKSUMHASH : '--pre-set--'
+            'body'               : [ 'required', 'object' ]          
+          , 'body.ORDERID'       : [ 'required', 'string', [ 'length', 30, 30 ] ]
+          , 'body.TXNID'         : [ 'required', 'string' ]
+          , 'body.TXNDATE'       : [ 'required', 'string' ]
+          , 'body.STATUS'        : [ 'required', 'string', [ 'in', paytm.TxnSuccess, paytm.TxnFailure, paytm.TxnPending ] ]
+          , 'body.BANKTXNID'     : [ 'required', 'string' ]
+          , 'body.MID'           : [ 'required', 'string', [ 'in', process.env.PAYTM_MID ] ]
+          , 'body.TXNAMOUNT'     : [ 'required', 'numeric', [ 'min', 1 ] ]
+          , 'body.CHECKSUMHASH'  : [ 'required', 'string' ] // LEN
         }
+      }
+      , [verb.refund]           :
+      {
+        [method.post]           : 
+        {
+            'body'              : [ 'required', 'object' ]  
+          , 'headers'           : [ 'required', 'object' ]
+        }
+      }      
+    }
 
+  // Socket
+  , [rsrc.socket]                 :
+    {
+      [verb.connect]             :
+      {
+        [method.void]            : 
+        {
+            'handshake'            : [ 'required', 'object' ]
+          , 'handshake.auth'       : [ 'required', 'object' ]
+          , 'handshake.auth.Token' : [ 'required', 'string', [ 'length', 500, 8 ] ]                                  
+          , 'id'                   : [ 'required', 'string', [ 'length', 100, 1 ] ]
+        }
+      }
+      , [verb.disconnect]          :
+      {
+        [method.void]              : 
+        {
+            'id'                   : [ 'required', 'string', [ 'length', 100, 1 ] ]
+        }
+      }      
+    }
 
- */
   // Transit
   , [rsrc.transit]                 :
     {

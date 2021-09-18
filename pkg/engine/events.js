@@ -1,5 +1,6 @@
 const { states, alerts, 
       query, mode, limits,
+      resource: rsrc, verb, method,      
       Err_, code, reason } = require('../system/models')
     , { Socket }           = require('../config/socket/driver')
     , db                   =
@@ -9,6 +10,7 @@ const { states, alerts,
       , socket             : require('../config/socket/archive')
     }
     , jwt                  = require('../infra/jwt')
+    , input                = require('../system/input')
 
 let Channel 
 
@@ -18,6 +20,9 @@ const Connect = async function(socket_)
 {
   try
   {
+    const inst = new input.Controller()
+    await inst.IsHonest(socket_, rsrc.socket, verb.connect, method.void)
+
     const token   = String(socket_.handshake.auth.Token)
         , resp    = await jwt.Verify(token)
 
@@ -88,6 +93,10 @@ const Disconnect = async function(socket_)
 {
   try
   {
+    
+    const inst = new input.Controller()
+    await inst.IsHonest(socket_, rsrc.socket, verb.disconnect, method.void)
+
     const sckt   = await db.socket.Get(socket_.id)
     let data
     switch(sckt.Mode)
