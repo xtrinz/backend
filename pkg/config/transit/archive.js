@@ -24,12 +24,12 @@ const Get = async function(param, qType)
     return transit
 }
 
-const Save       = async function(data)
+const Save       = async function(data, upsert)
 {
     console.log('save-transit', { Transit: data })
-    const key  = { _id    : data._id }
+    const key  = { _id    : data._id, State: data.Return }
         , act  = { $set   : data     }
-        , opt  = { upsert : true          }
+        , opt  = { upsert : upsert   }
         , resp = await transits.updateOne(key, act, opt)
     if (!resp.result.ok)
     {

@@ -1,12 +1,8 @@
-
-14 input validator : Paytm & socket, limit str sizes
-
+40 Clear quoted TODOs
+- add state in find transit record
 19 google map distance
 
 20 search & product filtering with tree tags
-
-40 Clear quoted TODOs
-
 12 root admin + sub admin logics
 
 
@@ -73,3 +69,9 @@ Low priority:
 
 Test
 02 journal	list admin
+
+constrain http req size and set upper and lower limit for each field
+
+at a state multiple entities can act on a single transit record
+see how to handle race condition
+- add state in find transit record

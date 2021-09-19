@@ -70,7 +70,7 @@ const Controller 		 = function()
         , [task.Enabled]  : false        
         } 
       }                
-    } // TODO rm verbs not needed
+    }
 
   // Store
   , [rsrc.store]          :
@@ -501,10 +501,6 @@ const Controller 		 = function()
         }
       }
     }
-/*  , [rsrc.root] :
-    {
-          // TODO
-    }*/
 	}
 
 	, this.HasAccess = (src, vrb, mthd, tsk) =>
