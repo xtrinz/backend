@@ -21,7 +21,7 @@ let Insert = function(user_, cart_, product_)
       , Request       :
       {                 
           Method      : Method.POST
-        , Path        : '/cart/insert'
+        , Path        : '/v1/cart/insert'
         , Body        : 
         {             
             ProductID : product.ID
@@ -63,7 +63,7 @@ let List = function(user_, cart_, addr_, store_)
       , Request               :
       {
             Method            : Method.GET
-          , Path              : '/cart/list'
+          , Path              : '/v1/cart/list'
           , Body              : {}
           , Query             : { AddressID : addr.ID }
           , Header            : { Authorization: user.Token }
@@ -110,7 +110,7 @@ let Update = function(user_, product_)
       , Request         :
       {
           Method        : Method.POST
-        , Path          : '/cart/modify'
+        , Path          : '/v1/cart/modify'
         , Body          : 
         {
             ProductID   : product.ID
@@ -148,7 +148,7 @@ let Remove = function(user_, product_)
       , Request               :
       {
             Method            : Method.DELETE
-          , Path              : '/cart/remove'
+          , Path              : '/v1/cart/remove'
           , Body              : 
           {
             ProductID         : product.ID

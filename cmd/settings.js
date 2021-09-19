@@ -1,6 +1,6 @@
-// Read environment vars file
-require("dotenv").config()
-require('../pkg/infra/paytm/setttings')
+                         require("dotenv").config()             // Read environment vars
+                         require('../pkg/infra/paytm/setttings')
+const { version  : v } = require('../pkg/system/models')
 
 // Set string formater utility function
 // "{0}".format("1") : {0} get replaced with "1"
@@ -17,6 +17,12 @@ String.prototype.format = function()
 String.prototype.path = function() 
 {
     let res = [], k = 0, x = this
+
+    if(!x || x == '' || !x.startsWith(v.v1)) 
+        return ['null', 'null']
+
+    x = x.slice(v.v1.length)
+
     if(x.length === 1 || x[x.length - 1] !== '/') x += '/'
     for(let i = 1; i < x.length; i++)
     if(x[i] === '/' || i === x.length - 1 || x[i] === '?')

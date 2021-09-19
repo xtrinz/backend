@@ -130,7 +130,7 @@ const Controller 		 = function()
             , 'headers.authorization'      : [ 'required', 'string', [ 'length', 500, 8 ] ]
           }                                         
       }
-    } // TODO move del verbs from user to store
+    }
 
   // Product
   , [rsrc.product]               :
@@ -315,7 +315,7 @@ const Controller 		 = function()
         {
             'body'               : [ 'required', 'object' ]
           , 'headers'               : [ 'required', 'object' ]            
-          , 'body.AddressID'     : [ 'required', 'mongoId'] // TODO what if deleting default addr    
+          , 'body.AddressID'     : [ 'required', 'mongoId']    
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }
       }
@@ -466,10 +466,6 @@ const Controller 		 = function()
         }                
       }
     }
-/*  , [rsrc.root] :
-    {
-          // TODO
-    }*/
 	}
 
   , this.SetErr   = (rules) =>

@@ -306,7 +306,7 @@ module.exports =
 	},
 	version:
 	{
-		v1 						: '' // TODO updates as 'v1'
+		v1 						: '/v1'
 	},
 	resource:
 	{

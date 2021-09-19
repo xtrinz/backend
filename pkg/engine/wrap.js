@@ -83,9 +83,9 @@ const SetHistory = async function(ctxt)
 		case event.IgnoranceByAgent:
 			rcd.Subject =
 			{
-				  Type 	: mode.Agent // TODO Not passed to Save Wrapper
-				, UID	: ''		 // handle it within its handler
-				, Name  : ''
+				  Type 	: mode.Agent
+				, UID	: ctxt.Data.Agent._id
+				, Name  : ctxt.Data.Agent.Name
 			}
 			break
 		case event.LockByAdmin:
@@ -238,4 +238,5 @@ module.exports =
     , PingAdmins  : PingAdmins
     , ResetAgent  : ResetAgent
 	, SetAgent 	  : SetAgent
+	, SetHistory  : SetHistory
 }

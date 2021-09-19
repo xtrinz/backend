@@ -1,5 +1,4 @@
 40 Clear quoted TODOs
-- add state in find transit record
 19 google map distance
 
 20 search & product filtering with tree tags
@@ -75,3 +74,5 @@ constrain http req size and set upper and lower limit for each field
 at a state multiple entities can act on a single transit record
 see how to handle race condition
 - add state in find transit record
+
+clear TO-DO

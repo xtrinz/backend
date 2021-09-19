@@ -2,7 +2,7 @@ const   { Emit } 			 	   = require('./events')
 	  , { Err_ , code, reason
 	  , states , alerts, query }   = require('../system/models')
 	  , { User } 			 	   = require('../config/user/driver')
-	  , { PayOut , SendOTP, Save, SetAgent, PingAdmins
+	  , { PayOut , SendOTP, Save, SetAgent, PingAdmins, SetHistory
 		, ConfirmOTP, ResetAgent } = require('./wrap')
 	  , db 						   =
 	  {
@@ -118,9 +118,9 @@ const IgnoredByAgent		= async function(ctxt)
 		await PingAdmins(states.TransitIgnored, ctxt)
 		return	
 	}
+	SetHistory(ctxt)
 	ctxt.Data.Agent = ResetAgent // Cleared temp data
 	ctxt.Data.Event = ''
-	// TODO add to history
 	await db.transit.Save(ctxt.Data)
 }
 
@@ -194,7 +194,6 @@ const AcceptedByAgent		= async function(ctxt)
 
 const RejectedByAgent		= async function(ctxt)
 {
-	// TODO ? Agent History
 	switch(ctxt.Data.State)
 	{
 	case states.TransitAccepted:
@@ -210,7 +209,7 @@ const RejectedByAgent		= async function(ctxt)
 		}
 		// ? TODO Resolve the loop, 'auto cancel' on ultra delay
 		// add faul rate idx for agent, record reasons as feedback
-		// TODO Create new state, Check delay, if it had grown high assign to admin
+		// Create new state, Check delay, if it had grown high assign to admin
 		// Then give admin an api to filter near by agents to that perticular store
 		await Emit(alerts.NewTransit, ctxt)
 			ctxt.Data.Agents = agents
@@ -219,7 +218,7 @@ const RejectedByAgent		= async function(ctxt)
 		return
 
 	case states.OrderDespatched:
-		/** TODO: Set 911 ops */
+		/** TO-DO: Set 911 ops */
 		ctxt.Data.Agent = ResetAgent
 		await Save(ctxt, states.TransitOnDrift)
 		return

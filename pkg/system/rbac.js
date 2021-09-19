@@ -142,7 +142,7 @@ const Controller 		 = function()
           , [task.Enabled] : false          
           }                                         
       }
-    } // TODO move del verbs from user to store
+    }
 
   // Product
   , [rsrc.product]        :

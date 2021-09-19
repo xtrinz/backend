@@ -16,7 +16,7 @@ let RegisterNew = function(name)
         , Request      :
         {
             Method     : Method.POST
-          , Path       : '/user/register'
+          , Path       : '/v1/user/register'
           , Body       : 
           {
               Task     : task.New
@@ -63,7 +63,7 @@ let RegisterReadOTP = function(name)
         , Request      :
         {
             Method     : Method.POST
-          , Path       : '/user/register'
+          , Path       : '/v1/user/register'
           , Body       : 
           {
               Task     : task.ReadOTP
@@ -104,7 +104,7 @@ let Register = function(name)
         , Request         :
         {
             Method        : Method.POST
-          , Path          : '/user/register'
+          , Path          : '/v1/user/register'
           , Body          : 
           {
               Task        : task.Register
@@ -170,7 +170,7 @@ let ProfileGet = function(name)
       , Request         :
       {
           Method        : Method.GET
-        , Path          : '/user/profile'
+        , Path          : '/v1/user/profile'
         , Body          : {}
         , Header        :
         {
@@ -208,7 +208,7 @@ let ProfileEdit =  function(name)
       , Request         :
       {                   
           Method        : Method.PUT
-        , Path          : '/user/profile'
+        , Path          : '/v1/user/profile'
         , Body          : 
         {                   
             Name        : user.Name

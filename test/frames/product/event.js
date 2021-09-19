@@ -21,7 +21,7 @@ let Add = function(staff_, store_, product_)
         , Request               :
         {
               Method            : Method.POST
-            , Path              : '/product/add'
+            , Path              : '/v1/product/add'
             , Body              : 
             {
                   StoreID       : store.ID
@@ -71,7 +71,7 @@ let View = function(user_, store_, product_)
         , Request               :
         {
               Method            : Method.GET
-            , Path              : '/product/view'
+            , Path              : '/v1/product/view'
             , Body              : {}
             , Query             : 
             {
@@ -124,7 +124,7 @@ let List = function(user_, store_, product_)
       , Request               :
       {
           Method            : Method.GET
-        , Path              : '/product/list'
+        , Path              : '/v1/product/list'
         , Body              : {}
         , Query             : 
         {
@@ -173,7 +173,7 @@ let Modify = function(staff_, store_, product_)
       , Request               :
       {
             Method            : Method.POST
-          , Path              : '/product/modify'
+          , Path              : '/v1/product/modify'
           , Body              : 
           {
                 ProductID     : product.ID
@@ -215,7 +215,7 @@ let Remove = function(staff_, store_, product_)
       , Request               :
       {
             Method            : Method.DELETE
-          , Path              : '/product/remove'
+          , Path              : '/v1/product/remove'
           , Body              : 
           {
                 ProductID     : product.ID
