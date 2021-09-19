@@ -1,5 +1,5 @@
 const { states, query, message, gw,
-        Err_, code, reason}          = require('../../system/models')
+        Err_, code, reason, mode}          = require('../../system/models')
     , otp                            = require('../../infra/otp')
     , jwt                            = require('../../infra/jwt')
     , { ObjectID }                   = require('mongodb')
@@ -34,6 +34,13 @@ function User(data)
         let user = await db.Get(this.Data.MobileNo, query.ByMobileNo)
         if (user && user.State === states.Registered)
         Err_(code.BAD_REQUEST, reason.UserFound)
+
+        if(this.Data.Mode     === mode.Admin &&
+            !process.env.ADMIN_MOB_NO.split(' ').includes(this.Data.MobileNo))
+        {
+            console.log('unmatched-mobile-no-seed-unknown-admin', { Admin: this.Data })
+            Err_(code.NOT_FOUND, reason.Unauthorized)
+        }
 
         const otp_sms = new otp.OneTimePasswd({
                         MobileNo: 	this.Data.MobileNo, 
