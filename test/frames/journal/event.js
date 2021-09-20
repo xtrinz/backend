@@ -182,7 +182,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
         , Request          :
         {
               Method       : Method.GET
-            , Path         : '/journal/view'
+            , Path         : '/v1/journal/view'
             , Body         : {}
             , Query        : 
             {
@@ -383,7 +383,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
         , Request          :
         {
               Method       : Method.GET
-            , Path         : '/journal/list'
+            , Path         : '/v1/journal/list'
             , Body         : {}
             , Query        : 
             {

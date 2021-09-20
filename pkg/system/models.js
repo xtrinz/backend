@@ -146,6 +146,7 @@ module.exports =
 
 		, TxnSuccess 			: 'TXN_SUCCESS'
 		, TxnFailure			: 'TXN_FAILURE'
+		, TxnPending			: 'PENDING'
 		, RefundPending 		: 'PENDING'
 		, RefundFailure 		: 'TXN_FAILURE'
 
@@ -305,7 +306,7 @@ module.exports =
 	},
 	version:
 	{
-		v1 						: '' // TODO updates as 'v1'
+		v1 						: '/v1'
 	},
 	resource:
 	{
@@ -320,6 +321,7 @@ module.exports =
 		, checkout				: '/checkout'
 		, journal				: '/journal'
 		, transit				: '/transit'
+		, socket 				: '/socket'
 	},
 	verb:
 	{
@@ -341,7 +343,9 @@ module.exports =
 		, user					: '/user'
 		, store					: '/store'
 		, agent					: '/agent'
-		, admin					: '/admin'		
+		, admin					: '/admin'
+		, connect 				: '/connect'
+		, disconnect 			: '/disconnect'		
 	},
 	task:
 	{
@@ -378,5 +382,6 @@ module.exports =
 		, post 					: 'POST'
 		, put 					: 'PUT'
 		, delete 				: 'DELETE'
+		, void 					: 'NULL'
 	}
 }

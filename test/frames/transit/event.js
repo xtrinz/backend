@@ -22,7 +22,7 @@ let Checkout = function(user_, addr_, cart_)
       , Request           :
       {                     
           Method          : Method.POST
-        , Path            : '/checkout'
+        , Path            : '/v1/checkout'
         , Body            : 
         {                     
             Longitude     : addr.Longitude
@@ -87,7 +87,7 @@ let ConfirmPayment = function(cart_)
       , Request  :
       {              
           Method : Method.POST
-        , Path   : '/paytm/payment'
+        , Path   : '/v1/paytm/payment'
         , Body   : 
         {
             ORDERID      : cart.Paytm.OrderID
@@ -183,7 +183,7 @@ let CancelByUser = function(user_)
       , Request             :
       {
             Method          : Method.POST
-          , Path            : '/transit/user'
+          , Path            : '/v1/transit/user'
           , Body            : 
           {
                 TransitID   : user.TransitID
@@ -239,7 +239,7 @@ let RejectedByStore = function(store_)
       , Request             :
       {
             Method          : Method.POST
-          , Path            : '/transit/store'
+          , Path            : '/v1/transit/store'
           , Body            : 
           {
                 TransitID   : staff.TransitID
@@ -295,7 +295,7 @@ let StoreAccept = function(store_)
       , Request             :
       {
             Method          : Method.POST
-          , Path            : '/transit/store'
+          , Path            : '/v1/transit/store'
           , Body            : 
           {
                 TransitID   : staff.TransitID
@@ -382,7 +382,7 @@ let AgentIgnore = function(agent_)
       , Request             :
       {
             Method          : Method.POST
-          , Path            : '/transit/agent'
+          , Path            : '/v1/transit/agent'
           , Body            : 
           {
                 TransitID   : agent.TransitID
@@ -441,7 +441,7 @@ let AgentAccept =  function(agent_, store_)
       , Request             :
       {
             Method          : Method.POST
-          , Path            : '/transit/agent'
+          , Path            : '/v1/transit/agent'
           , Body            : 
           {
                 TransitID   : agent.TransitID
@@ -515,7 +515,7 @@ let StoreDespatch = function(store_, agent_)
       , Request          :
       {                  
           Method         : Method.POST
-        , Path           : '/transit/store'
+        , Path           : '/v1/transit/store'
         , Body           : 
         {                
               TransitID  : staff.TransitID
@@ -580,7 +580,7 @@ let AgentComplete = function(agent_)
       , Request             :
       {
             Method          : Method.POST
-          , Path            : '/transit/agent'
+          , Path            : '/v1/transit/agent'
           , Body            : 
           {
                 OTP         : agent.OTP

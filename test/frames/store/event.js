@@ -17,7 +17,7 @@ let RegisterNew = function(store_)
         , Request               :
         {
               Method            : Method.POST
-            , Path              : '/store/register'
+            , Path              : '/v1/store/register'
             , Body              : 
             {
                 Task            : task.New
@@ -78,7 +78,7 @@ let RegisterReadOTP = function(user_, store_)
         , Request      :
         {
             Method     : Method.POST
-          , Path       : '/store/register'
+          , Path       : '/v1/store/register'
           , Body       : 
           {
               Task     : task.ReadOTP
@@ -124,7 +124,7 @@ let RegisterApprove =  function(admin_, store_)
       , Request         :
       {
           Method        : Method.POST
-        , Path          : '/store/register'
+        , Path          : '/v1/store/register'
         , Body          : 
         {
             Task        : task.Approve
@@ -162,7 +162,7 @@ let Read =   function(user_, store_)
       , Request         :
       {
           Method        : Method.GET
-        , Path          : '/store/view'
+        , Path          : '/v1/store/view'
         , Body          : {}
         , Query         : { StoreID     : store.ID }
         , Header        : { Authorization : user.Token }
@@ -210,7 +210,7 @@ let List = function(user_, store_)
       , Request         :
       {
           Method        : Method.GET
-        , Path          : '/store/list'
+        , Path          : '/v1/store/list'
         , Query         :
         {
             Longitude   : '17.20000'
@@ -252,7 +252,7 @@ let Edit = function(store_)
       , Request         :
       {
           Method        : Method.PUT
-        , Path          : '/store/edit'
+        , Path          : '/v1/store/edit'
         , Query         : {}
         , Body          : 
         {

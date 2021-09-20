@@ -70,7 +70,7 @@ const Controller 		 = function()
         , [task.Enabled]  : false        
         } 
       }                
-    } // TODO rm verbs not needed
+    }
 
   // Store
   , [rsrc.store]          :
@@ -142,7 +142,7 @@ const Controller 		 = function()
           , [task.Enabled] : false          
           }                                         
       }
-    } // TODO move del verbs from user to store
+    }
 
   // Product
   , [rsrc.product]        :
@@ -501,10 +501,6 @@ const Controller 		 = function()
         }
       }
     }
-/*  , [rsrc.root] :
-    {
-          // TODO
-    }*/
 	}
 
 	, this.HasAccess = (src, vrb, mthd, tsk) =>

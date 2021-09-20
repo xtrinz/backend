@@ -6,7 +6,8 @@ const {
         Err_,
         code, 
         reason,
-        mode
+        mode,
+        paytm
       }               = require('../system/models')
     , niv             = require('node-input-validator')
 
@@ -63,7 +64,7 @@ const Controller 		 = function()
           , 'body.Task'               : [ 'required', 'string', [ 'in', task.New, task.ReadOTP, task.Approve ] ]
           , 'body.Name'               : [ [ 'requiredIf', 'body.Task', task.New     ], 'string' , [ 'length', 50, 2 ]  ]
           , 'body.Image'              : [ [ 'requiredIf', 'body.Task', task.New     ], 'string' , [ 'length', 200, 2 ] ]
-          , 'body.Type'               : [ [ 'requiredIf', 'body.Task', task.New     ], 'string' ]
+          , 'body.Type'               : [ [ 'requiredIf', 'body.Task', task.New     ], 'string', [ 'length', 200, 0 ] ]
           , 'body.Certs'              : [ [ 'requiredIf', 'body.Task', task.New     ], 'array' ]
           , 'body.Certs.*'            : [ [ 'requiredIf', 'body.Task', task.New     ], 'string' ]
           , 'body.MobileNo'           : [ [ 'requiredIf', 'body.Task', task.ReadOTP ], [ 'requiredIf', 'body.Task', task.New ], 'string', [ 'length', 15, 2 ] ] // [ 'regex', '/^+91[0-9]{10}$/' ]
@@ -113,23 +114,23 @@ const Controller 		 = function()
             , 'headers'                    : [ 'required', 'object' ]            
             , 'body.Name'               : [ 'string' , [ 'length', 50, 2 ]  ]
             , 'body.Image'              : [ 'string' , [ 'length', 200, 2 ] ]
-            , 'body.Type'               : [ 'string' ]
+            , 'body.Type'               : [ 'string', [ 'length', 200, 0 ] ]
             , 'body.Certs'              : [ 'array' ]
             , 'body.Certs.*'            : [ 'string' ]
             , 'body.Email'              : [ 'email' ]
             , 'body.Longitude'          : [ 'numeric', [ 'between', -180, 180 ] ]
             , 'body.Latitude'           : [ 'numeric', [ 'between', -90, 90 ] ]
             , 'body.Address'            : [ 'object' ]
-            , 'body.Address.Line1'      : [ 'string' ]
-            , 'body.Address.Line2'      : [ 'string' ]
-            , 'body.Address.City'       : [ 'string' ]
+            , 'body.Address.Line1'      : [ 'string', [ 'length', 200, 0 ] ]
+            , 'body.Address.Line2'      : [ 'string', [ 'length', 200, 0 ] ]
+            , 'body.Address.City'       : [ 'string', [ 'length', 200, 0 ] ]
             , 'body.Address.PostalCode' : [ 'integer' ]
             , 'body.Address.State'      : [ 'string', [ 'length', 50, 2 ] ]
             , 'body.Address.Country'    : [ 'string', [ 'length', 50, 2 ] ]
             , 'headers.authorization'      : [ 'required', 'string', [ 'length', 500, 8 ] ]
           }                                         
       }
-    } // TODO move del verbs from user to store
+    }
 
   // Product
   , [rsrc.product]               :
@@ -257,12 +258,12 @@ const Controller 		 = function()
           , 'headers'                    : [ 'required', 'object' ]            
           , 'body.Longitude'          : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
           , 'body.Latitude'           : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
-          , 'body.Tag'                : [ 'required', 'string' ]
+          , 'body.Tag'                : [ 'required', 'string', [ 'length', 30, 0 ] ]
           , 'body.IsDefault'          : [ 'required', 'boolean' ]
           , 'body.Address'            : [ 'required', 'object' ]
-          , 'body.Address.Line1'      : [ 'required', 'string' ]
-          , 'body.Address.Line2'      : [ 'required', 'string' ]
-          , 'body.Address.City'       : [ 'required', 'string' ]
+          , 'body.Address.Line1'      : [ 'required', 'string', [ 'length', 200, 0 ] ]
+          , 'body.Address.Line2'      : [ 'required', 'string', [ 'length', 200, 0 ] ]
+          , 'body.Address.City'       : [ 'required', 'string', [ 'length', 200, 0 ] ]
           , 'body.Address.PostalCode' : [ 'required', 'integer' ]
           , 'body.Address.State'      : [ 'required', 'string', [ 'length', 50, 2 ] ]
           , 'body.Address.Country'    : [ 'required', 'string', [ 'length', 50, 2 ] ]
@@ -296,12 +297,12 @@ const Controller 		 = function()
           , 'body.AddressID'          : [ 'required', 'mongoId']
           , 'body.Longitude'          : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
           , 'body.Latitude'           : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
-          , 'body.Tag'                : [ 'required', 'string' ]
+          , 'body.Tag'                : [ 'required', 'string', [ 'length', 30, 0 ] ]
           , 'body.IsDefault'          : [ 'required', 'boolean' ]
           , 'body.Address'            : [ 'required', 'object' ]
-          , 'body.Address.Line1'      : [ 'required', 'string' ]
-          , 'body.Address.Line2'      : [ 'required', 'string' ]
-          , 'body.Address.City'       : [ 'required', 'string' ]
+          , 'body.Address.Line1'      : [ 'required', 'string', [ 'length', 200, 0 ] ]
+          , 'body.Address.Line2'      : [ 'required', 'string', [ 'length', 200, 0 ] ]
+          , 'body.Address.City'       : [ 'required', 'string', [ 'length', 200, 0 ] ]
           , 'body.Address.PostalCode' : [ 'required', 'integer' ]
           , 'body.Address.State'      : [ 'required', 'string', [ 'length', 50, 2 ] ]
           , 'body.Address.Country'    : [ 'required', 'string', [ 'length', 50, 2 ] ]
@@ -314,7 +315,7 @@ const Controller 		 = function()
         {
             'body'               : [ 'required', 'object' ]
           , 'headers'               : [ 'required', 'object' ]            
-          , 'body.AddressID'     : [ 'required', 'mongoId'] // TODO what if deleting default addr    
+          , 'body.AddressID'     : [ 'required', 'mongoId']    
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }
       }
@@ -354,29 +355,65 @@ const Controller 		 = function()
       {
         [method.get]             :
         {
-            'query'              : [ 'required', 'object' ]
+            'query'                 : [ 'required', 'object' ]
           , 'headers'               : [ 'required', 'object' ]            
-          , 'query.Page'         : [ 'required', 'integer', [ 'min', 1 ] ]
-          , 'query.Limit'        : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'query.Page'            : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'query.Limit'           : [ 'required', 'integer', [ 'min', 1 ] ]
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }
       }
     }
-/**
- *         , Body   : 
+
+  // Transit
+  , [rsrc.paytm]                 :
+    {
+      [verb.payment]             :
+      {
+        [method.post]            : 
         {
-            ORDERID      : cart.Paytm.OrderID
-          , TXNID        : cart.Paytm.OrderID
-          , TXNDATE      : String(Date.now())
-          , STATUS       : paytm.TxnSuccess
-          , BANKTXNID    : cart.Paytm.OrderID
-          , MID          : cart.Paytm.MID
-          , TXNAMOUNT    : cart.Paytm.Amount
-          , CHECKSUMHASH : '--pre-set--'
+            'body'               : [ 'required', 'object' ]          
+          , 'body.ORDERID'       : [ 'required', 'string', [ 'length', 30, 30 ] ]
+          , 'body.TXNID'         : [ 'required', 'string' ]
+          , 'body.TXNDATE'       : [ 'required', 'string' ]
+          , 'body.STATUS'        : [ 'required', 'string', [ 'in', paytm.TxnSuccess, paytm.TxnFailure, paytm.TxnPending ] ]
+          , 'body.BANKTXNID'     : [ 'required', 'string' ]
+          , 'body.MID'           : [ 'required', 'string', [ 'in', process.env.PAYTM_MID ] ]
+          , 'body.TXNAMOUNT'     : [ 'required', 'numeric', [ 'min', 1 ] ]
+          , 'body.CHECKSUMHASH'  : [ 'required', 'string' ] // LEN
         }
+      }
+      , [verb.refund]           :
+      {
+        [method.post]           : 
+        {
+            'body'              : [ 'required', 'object' ]  
+          , 'headers'           : [ 'required', 'object' ]
+        }
+      }      
+    }
 
+  // Socket
+  , [rsrc.socket]                 :
+    {
+      [verb.connect]             :
+      {
+        [method.void]            : 
+        {
+            'handshake'            : [ 'required', 'object' ]
+          , 'handshake.auth'       : [ 'required', 'object' ]
+          , 'handshake.auth.Token' : [ 'required', 'string', [ 'length', 500, 8 ] ]                                  
+          , 'id'                   : [ 'required', 'string', [ 'length', 100, 1 ] ]
+        }
+      }
+      , [verb.disconnect]          :
+      {
+        [method.void]              : 
+        {
+            'id'                   : [ 'required', 'string', [ 'length', 100, 1 ] ]
+        }
+      }      
+    }
 
- */
   // Transit
   , [rsrc.transit]                 :
     {
@@ -429,10 +466,6 @@ const Controller 		 = function()
         }                
       }
     }
-/*  , [rsrc.root] :
-    {
-          // TODO
-    }*/
 	}
 
   , this.SetErr   = (rules) =>

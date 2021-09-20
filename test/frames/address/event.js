@@ -17,7 +17,7 @@ let Add = function(user_, addr_)
       , Request          :
       {
           Method         : Method.POST
-        , Path           : '/address/add'
+        , Path           : '/v1/address/add'
         , Body           : 
         {
             Longitude    : addr.Longitude
@@ -72,7 +72,7 @@ let View = function(user_, addr_)
       , Request              :
       {                                   
             Method           : Method.GET
-          , Path             : '/address/view'
+          , Path             : '/v1/address/view'
           , Body             : {}
           , Query            :
           {                                   
@@ -124,7 +124,7 @@ let List = function(user_, addr_)
       , Request              :
       {                                   
             Method           : Method.GET
-          , Path             : '/address/list'
+          , Path             : '/v1/address/list'
           , Body             : {}
           , Query            : {}
           , Header           : { Authorization: user.Token }
@@ -173,7 +173,7 @@ let Update = function(user_, addr_)
       , Request                :
       {
             Method             : Method.POST
-          , Path               : '/address/modify'
+          , Path               : '/v1/address/modify'
           , Body               : 
           {
               AddressID      : addr.ID
@@ -221,7 +221,7 @@ let Remove = function(user_, addr_)
       , Request              :
       {                                   
             Method           : Method.DELETE
-          , Path             : '/address/remove'
+          , Path             : '/v1/address/remove'
           , Body             :
           {                                   
                 AddressID    : addr.ID

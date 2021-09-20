@@ -126,7 +126,7 @@ var read = async function ()
     let req =
     {
         Method       : Method.GET
-        , Path       : '/test'
+        , Path       : '/v1/test'
         , Body       : {}
         , Header     : {}
     }

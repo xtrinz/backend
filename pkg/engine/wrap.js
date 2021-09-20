@@ -1,5 +1,5 @@
 const   otp 				 	 = require('../infra/otp')
-	  , { Err_ , code, reason, mode,
+	  , { Err_ , code, reason, mode, states,
 		  message, gw, event }  = require('../system/models')
 	  , { Journal } 		 	 = require('../config/journal/driver')
 	  , db 						 = 
@@ -83,9 +83,9 @@ const SetHistory = async function(ctxt)
 		case event.IgnoranceByAgent:
 			rcd.Subject =
 			{
-				  Type 	: mode.Agent // TODO Not passed to Save Wrapper
-				, UID	: ''		 // handle it within its handler
-				, Name  : ''
+				  Type 	: mode.Agent
+				, UID	: ctxt.Data.Agent._id
+				, Name  : ctxt.Data.Agent.Name
 			}
 			break
 		case event.LockByAdmin:
@@ -199,9 +199,12 @@ const Save = async function(ctxt, state_)
 	ctxt.Data.Return = ctxt.Data.State
 	ctxt.Data.State  = state_
 	SetHistory(ctxt)
-	// Clear Event After History Update
+	// Clear Event Only After History Update
 	ctxt.Data.Event  = ''
-	await db.transit.Save(ctxt.Data)
+
+	let upsert = (state_ === states.CargoInitiated)
+
+	await db.transit.Save(ctxt.Data, upsert)
 }
 
 const PingAdmins = async function(st, ctxt)
@@ -235,4 +238,5 @@ module.exports =
     , PingAdmins  : PingAdmins
     , ResetAgent  : ResetAgent
 	, SetAgent 	  : SetAgent
+	, SetHistory  : SetHistory
 }
