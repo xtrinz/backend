@@ -1,16 +1,98 @@
 19 google map distance
 20 search & product filtering with tree tags
+21 add varient
+
+7. When ever send product info to client, check product existance in cart. if found, attach quantity along with product details 
+
+    --- Because quantity stored in product collection is total available stock. When listing product in seller app we required total stock.
+        But for client app we required product quantity stored in cart 
+
+8. An end point to make store open and closed (For seller app)
+
+9. When ever authenticate success fully , send (Basic User info like Name, mobileNo, email, image etc) to frontend
+
+    --- Frontend can use this stored user info in multiple pages without requiring again and again from frontent
+
+10. Send address details also along cart details (Don't delete that field when fetching cart details)
+
+11. Send bill details along almost all crud end points of cart
+
+    --- If cart products modified in cart page, then we should update bill details simultanousely
+
+12. when ever calculate bill details , if client didn't send address id don't throw error instead send bill details with
+    transit cost equel to zero
+
+    --- Especially from cart page, if user didn't have a default address this scenario occuers. So after fetching data app will force
+        user to add an address to proceed , then reload data again(check swiggy for more info. if required we can have a discussion)
+
+13. Don't initate payment when checkout trigger. Create a seperate end point for that (If required, we can have a discussion)
+
+    --- Two reasons
+        --- Cash on delivery mode 
+        --- Session handling issue (If user takes long time to start payment, then product price may change. We need to double check that)
+
+14. Because checkout creates a journal collection, when listing journal details avoid journals for which payment not initated
+
+15. During checkout and payment initate, make sure that product info not changed(mainly price). If changed throw some error 
+    app will redirect user to start checkout process again
+
+16. Only pass required field to frontend
+
+    --- Two reasons
+        --- memory 
+        --- certificates and other potential data
+
+17. Make sure server return ids with it's significance
+
+    --- If _id is about product then ProductID
+    --- Because, server used this names for ids (ProductID, StoreID, JournalID, TransitID etc) make sure it is applied all along 
+
+18. I have lot to discuss about product variants. Better we can have a talk
+
+19. Provision for multiple images for product (For a time being We can avoid this)
+
+    --- If you are going to implement this, make sure you notify me. Cause frontent need some changes to accomodate multiple images
+
+20. Attach mobile number of both seller and buyer in journal. So that if needed agent can contact them
+
+21. In modify cart end point, change product quantity via increment or decrement and return quantity of that product along
+    total item count in cart and bill details (May be returned these data in all cart crud )
+
+    --- Client can fake Orders of larger quantity(say 10 or 100). To avoid this issue.
+
+22. Make sure quantity of products decreased from total available stock after order placed and rechange to previous
+!!    if order become cancelled!!s
+
+    --- Before rechange consider all possible scenarios. Like if order cancelled by seller and changed 
+        product availability status to out of stock(quantity zero) then don't increment again which will results availability to yes
+
+23. Make sure date returned in ISOdate formate - "yyyy-MM-dd'T'HH:mm:ss'Z'"
+
+24. Product db should contains some more fields. QuantityPerPrice, QuantityType(Pc, Kg, L etc)
+
+25. End points and html for terms and condition, privacy policies, help etc
+
+26. A provision to get 
+        - product categories in store
+        - store categories nearby user current location
+        
+27. A provision for communicating user  
+        - via carousel images
+        - FCM
+
+28. Close store when closing time surpasses (Either by db indexing(If possible) or a background bot)
+
+29. During checkout and payment initiate, make sure store are not closed. If so , throw error
+
+30. while adding product to cart, make sure stockes availability
 
 
 
+Medium
 
-
-
-
-
-
-
-
+1. Index based on Location, recent date of updation and can have field for category
+    ref: https://stackoverflow.com/a/11599283/16490315
+         https://medium.com/swlh/mongodb-pagination-fast-consistent-ece2a97070f3
 
 
 

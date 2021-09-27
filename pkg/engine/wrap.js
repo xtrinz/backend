@@ -6,6 +6,7 @@ const   otp 				 	 = require('../infra/otp')
 	  {
 			  transit 			 : require('../config/transit/archive')
 			, user 				 : require('../config/user/archive')
+			, journal 			 : require('../config/journal/archive')
 	  }
 
 // Notify | UpdateState | Payout | OTP
@@ -205,6 +206,12 @@ const Save = async function(ctxt, state_)
 	let upsert = (state_ === states.CargoInitiated)
 
 	await db.transit.Save(ctxt.Data, upsert)
+
+	if(!( state_ === states.CargoCancelled 	  || // For these states PayOut
+		  state_ === states.OrderRejected 	  || // handle updates DB
+		  state_ === states.TransitTerminated ||
+		  state_ === states.TranistCompleted  ))
+	await db.journal.Save({ _id: ctxt.Data.JournalID, 'Transit.State': state_ })
 }
 
 const PingAdmins = async function(st, ctxt)

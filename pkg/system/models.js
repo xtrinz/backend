@@ -383,5 +383,15 @@ module.exports =
 		, put 					: 'PUT'
 		, delete 				: 'DELETE'
 		, void 					: 'NULL'
+	},
+	set:
+	{
+		  user					: 'user'
+		, socket				: 'socket'
+		, store					: 'store'
+		, product				: 'product'
+		, cart					: 'cart'
+		, journal				: 'journal'
+		, transit				: 'transit'
 	}
 }

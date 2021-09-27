@@ -62,7 +62,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
               { 
                   ID            : journal.Transit.ID
                 , Status        : 'Closed'
-                , ClosingState  : 'TranistCompleted'
+                , State  : 'TranistCompleted'
               }
             }
             break;
@@ -93,7 +93,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                 { 
                     ID            : journal.Transit.ID
                   , Status        : 'Closed'
-                  , ClosingState  : 'TranistCompleted'
+                  , State  : 'TranistCompleted'
                 }
               }
             break;
@@ -142,7 +142,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                 { 
                     ID            : journal.Transit.ID
                   , Status        : 'Closed'
-                  , ClosingState  : 'TranistCompleted'
+                  , State  : 'TranistCompleted'
                 }
               }
             break;
@@ -167,7 +167,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
               { 
                   ID            : journal.Transit.ID
                 , Status        : 'Closed'
-                , ClosingState  : 'TranistCompleted'
+                , State  : 'TranistCompleted'
               }                
               , Penalty         : 0
               , Income          : journal.Order.Bill.Total
@@ -263,7 +263,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
               { 
                   ID            : journal.Transit.ID
                 , Status        : 'Closed'
-                , ClosingState  : 'TranistCompleted'
+                , State  : 'TranistCompleted'
               }
             }
             break;
@@ -294,7 +294,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                 { 
                     ID            : journal.Transit.ID
                   , Status        : 'Closed'
-                  , ClosingState  : 'TranistCompleted'
+                  , State  : 'TranistCompleted'
                 }
               }
             break;
@@ -343,7 +343,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                 { 
                     ID            : journal.Transit.ID
                   , Status        : 'Closed'
-                  , ClosingState  : 'TranistCompleted'
+                  , State  : 'TranistCompleted'
                 }
               }
             break;
@@ -368,7 +368,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
               { 
                   ID            : journal.Transit.ID
                 , Status        : 'Closed'
-                , ClosingState  : 'TranistCompleted'
+                , State  : 'TranistCompleted'
               }                
               , Penalty         : 0
               , Income          : journal.Order.Bill.Total
