@@ -7,6 +7,7 @@ const { ObjectID }           = require('mongodb')
     {
           store   : require('../store/archive')
         , user    : require('../user/archive')
+        , journal : require('../journal/archive')
     }
     , jwt                    = require('../../infra/jwt')
 
@@ -39,6 +40,24 @@ function Store(data)
             , Country     : data.Address.Country
         }
         , State           : states.New
+        , Time            :
+        {
+            Open          : { Hour: data.Time.Open.Hour,  Minute: data.Time.Open.Minute  }
+          , Close         : { Hour: data.Time.Close.Hour, Minute: data.Time.Close.Minute }
+        }
+        , IsLive          : false
+        , Status          :
+        {
+              Current     : states.Closed
+            , SetOn       : 
+            {
+                  Minute  : (new Date(0)).getMinutes()
+                , Hour    : (new Date(0)).getHours()
+                , Day     : (new Date(0)).getDate()
+                , Month   : (new Date(0)).getMonth()
+                , Year    : (new Date(0)).getFullYear()
+            }
+        }
     }
 
     this.Read = async function(in_)
@@ -199,7 +218,7 @@ function Store(data)
         switch(mode_)
         {
           case mode.User:
-            proj    = { projection: { _id   : 1, Name  : 1, Type : 1, Image : 1 } }
+            proj    = { projection: { _id   : 1, Name  : 1, Type : 1, Image : 1, Status: 1, Time: 1 } }
             in_.Query   =
             { 
                 Location: 
@@ -216,12 +235,22 @@ function Store(data)
             {
                 data[idx].StoreID = data[idx]._id
                 delete data[idx]._id    
+
+                let now_               = new Date()        
+                if(now_.is_now(data[idx].Time.Open, data[idx].Time.Close))
+                {
+                    if(!now_.is_today(data[idx].Status.SetOn)) 
+                    { data[idx].Status = states.Closed            }
+                    else
+                    { /* No action: set state as set by seller */ }
+                }
+                else { data[idx].Status = states.Closed }
             }
             break
           case mode.Admin:
             proj =
             { _id   : 1, Name  : 1, Type : 1
-            , Image : 1, State : 1           }
+            , Image : 1, State : 1, Status: 1, Time: 1 }
             switch(in_.Type)
             {
                 case qtype.NearList:
@@ -256,6 +285,17 @@ function Store(data)
                 break
             }
             data = await db.store.List(query_, proj)
+                
+            let now_               = new Date()        
+            if(now_.is_now(data[idx].Time.Open, data[idx].Time.Close))
+            {
+                if(!now_.is_today(data[idx].Status.SetOn)) 
+                { data[idx].Status = states.Closed            }
+                else
+                { /* No action: set state as set by seller */ }
+            }
+            else { data[idx].Status = states.Closed }
+            
             break
         }
         console.log('store-list', { Stores : data, Mode: mode_ })
@@ -279,6 +319,22 @@ function Store(data)
                               , coordinates : [ data.Longitude.loc(), data.Latitude.loc() ]
                           }
         if(data.Address)  rcd.Address  = data.Address
+        if(data.Status)
+        {
+            let now_ = new Date()
+            rcd.Status = 
+            {
+                  Current     : data.Status
+                , SetOn       :
+                {
+                    Minute    : now_.getMinutes()
+                  , Hour      : now_.getHours()
+                  , Day       : now_.getDate()
+                  , Month     : now_.getMonth()
+                  , Year      : now_.getFullYear()
+                }
+            }
+        }
         // TODO MobileNo
         await db.store.Save(rcd)
 

@@ -97,6 +97,15 @@ function Journal()
     {
       const store   = await db.store.Get(store_id, query.ByID)
       if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+
+      if(closed or_min_gap < 20 to_close)
+      {
+        // Store Closed
+        Err_(code.BAD_REQUEST, reason.StoreNotFound)
+        // Store Is about to close        
+        Err_(code.BAD_REQUEST, reason.StoreNotFound)
+      }
+
       this.Data.Seller    = 
       {                 
           ID        : store._id
