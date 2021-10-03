@@ -7,7 +7,8 @@ const {
         code, 
         reason,
         mode,
-        paytm
+        paytm,
+        states
       }               = require('../system/models')
     , niv             = require('node-input-validator')
 
@@ -78,6 +79,15 @@ const Controller 		 = function()
           , 'body.Address.PostalCode' : [ [ 'requiredIf', 'body.Task', task.New     ], 'integer' ]
           , 'body.Address.State'      : [ [ 'requiredIf', 'body.Task', task.New     ], 'string', [ 'length', 50, 2 ] ]
           , 'body.Address.Country'    : [ [ 'requiredIf', 'body.Task', task.New     ], 'string', [ 'length', 50, 2 ] ]
+
+          , 'body.Time'               : [ [ 'requiredIf', 'body.Task', task.New     ], 'object' ]
+          , 'body.Time.Open'          : [ [ 'requiredIf', 'body.Task', task.New     ], 'object' ]          
+          , 'body.Time.Close'         : [ [ 'requiredIf', 'body.Task', task.New     ], 'object' ]
+          , 'body.Time.Open.Hour'     : [ [ 'requiredIf', 'body.Task', task.New     ], 'integer', [ 'between', 0, 23 ] ]          
+          , 'body.Time.Open.Minute'   : [ [ 'requiredIf', 'body.Task', task.New     ], 'integer', [ 'between', 0, 59 ] ]
+          , 'body.Time.Close.Hour'    : [ [ 'requiredIf', 'body.Task', task.New     ], 'integer', [ 'between', 0, 23 ] ]
+          , 'body.Time.Close.Minute'  : [ [ 'requiredIf', 'body.Task', task.New     ], 'integer', [ 'between', 0, 59 ] ]
+
           , 'body.OTP'                : [ [ 'requiredIf', 'body.Task', task.ReadOTP ], 'integer', [ 'between', 000000, 999999 ] ]
           , 'body.StoreID'            : [ [ 'requiredIf', 'body.Task', task.Approve ], 'mongoId']
           , 'headers.authorization'      : [ [ 'requiredIf', 'body.Task', task.Approve ], 'string', [ 'length', 500, 8 ] ]
@@ -127,7 +137,18 @@ const Controller 		 = function()
             , 'body.Address.PostalCode' : [ 'integer' ]
             , 'body.Address.State'      : [ 'string', [ 'length', 50, 2 ] ]
             , 'body.Address.Country'    : [ 'string', [ 'length', 50, 2 ] ]
-            , 'headers.authorization'      : [ 'required', 'string', [ 'length', 500, 8 ] ]
+
+            , 'body.Time'               : [ 'object' ]
+            , 'body.Time.Open'          : [ 'object' ]          
+            , 'body.Time.Close'         : [ 'object' ]
+            , 'body.Time.Open.Hour'     : [ 'integer', [ 'between', 0, 23 ] ]          
+            , 'body.Time.Open.Minute'   : [ 'integer', [ 'between', 0, 59 ] ]
+            , 'body.Time.Close.Hour'    : [ 'integer', [ 'between', 0, 23 ] ]
+            , 'body.Time.Close.Minute'  : [ 'integer', [ 'between', 0, 59 ] ]
+
+            , 'body.Status'             : [ 'required', 'string', [ 'in', states.Running, states.Closed ] ]
+
+            , 'headers.authorization'   : [ 'required', 'string', [ 'length', 500, 8 ] ]
           }                                         
       }
     }

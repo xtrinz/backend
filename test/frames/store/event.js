@@ -29,6 +29,11 @@ let RegisterNew = function(store_)
               , Email           : store.Email
               , Longitude       : store.Longitude
               , Latitude        : store.Latitude
+              , Time            :
+              {
+                  Open          : store.Time.Open
+                , Close         : store.Time.Close
+              }
               , Address         :
               {
                     Line1       : store.Address.Line1
@@ -188,6 +193,12 @@ let Read =   function(user_, store_)
             , State      : store.Address.State
             , Country    : store.Address.Country
           }
+          , Time         :
+          {
+              Open       : store.Time.Open
+            , Close      : store.Time.Close
+          }
+          , Status       : store.Status
         }
       }
     }
@@ -228,10 +239,16 @@ let List = function(user_, store_)
         , Text          : ''
         , Data          :
           [{
-              StoreID : store.ID
-            , Name    : store.Name
-            , Image   : store.Image
-            , Type    : store.Type
+              StoreID   : store.ID
+            , Name      : store.Name
+            , Image     : store.Image
+            , Type      : store.Type
+            , Time      :
+            {
+                Open    : store.Time.Open
+              , Close   : store.Time.Close
+            }
+            , Status    : store.Status
           }]
       }
     }
@@ -262,7 +279,13 @@ let Edit = function(store_)
           , Type        : store.Type
           , Name        : store.Name
           , Longitude   : store.Longitude
-          , Latitude    : store.Latitude 
+          , Latitude    : store.Latitude
+          , Time        :
+          {
+              Open      : store.Time.Open
+            , Close     : store.Time.Close
+          }
+          , Status      : store.Status
         }
         , Header        : { Authorization : store.Token }
       }

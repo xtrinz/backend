@@ -13,6 +13,12 @@ let Store = function()
   this.Email        = this.Name.toLowerCase() + '@' + this.Name.toLowerCase() + '.com'
   this.Longitude    = '17.20000'
   this.Latitude 	  = '17.20000'
+  this.Time         =
+  {
+      Open          : { Hour: 0, Minute: 00 }
+    , Close         : { Hour: 23, Minute: 59 }
+  }
+  this.Status       = states.Running
   this.OTP 	        = ''
   this.State        = states.Registered
   this.Address      =

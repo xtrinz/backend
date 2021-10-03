@@ -48,8 +48,8 @@ String.prototype.loc = function()
 Date.prototype.is_now = function(lb, ub)
 {
     const today = new Date()
-    return (today.getHour()    >= lb.Hour)   &&
-           (today.getHour()    <= ub.Hour)   &&
+    return (today.getHours()   >= lb.Hour)   &&
+           (today.getHours()   <= ub.Hour)   &&
            (today.getMinutes() >= lb.Minute) &&
            (today.getMinutes() <= ub.Minute)
 }

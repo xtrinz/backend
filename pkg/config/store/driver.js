@@ -1,6 +1,6 @@
 const { ObjectID }           = require('mongodb')
     , otp                    = require('../../infra/otp')
-    , { Err_, code, reason
+    , { Err_, code, reason, limits
       , states, mode, qtype
       , query, message, gw } = require('../../system/models')
     , db                     = 
@@ -63,7 +63,7 @@ function Store(data)
     this.Read = async function(in_)
     {
         console.log('read-store', { In: in_ })
-        let data
+        let data, now_
         switch(in_.Mode)
         {
           case mode.Store:
@@ -81,7 +81,19 @@ function Store(data)
               , Longitude : in_.Store.Location.coordinates[0]
               , Latitude  : in_.Store.Location.coordinates[1]
               , Address   : in_.Store.Address
+              , Time      : in_.Store.Time
             }
+            
+            now_               = new Date()        
+            if(now_.is_now(in_.Store.Time.Open, in_.Store.Time.Close))
+            {
+                if(!now_.is_today(in_.Store.Status.SetOn)) 
+                { data.Status = states.Closed            }
+                else
+                { data.Status = in_.Store.Status.Current }
+            }
+            else { data.Status = states.Closed }
+
             break
           case mode.User:
 
@@ -98,7 +110,19 @@ function Store(data)
               , Certs     : this.Data.Certs
               , Type      : this.Data.Type
               , Address   : this.Data.Address
+              , Time      : this.Data.Time
             }
+            now_               = new Date()        
+            if(now_.is_now(this.Data.Time.Open, this.Data.Time.Close))
+            {
+                if(!now_.is_today(this.Data.Status.SetOn) ||
+                    now_.diff_in_m(this.Data.Time.Close)  < limits.CheckoutGracePeriod) 
+                { data.Status = states.Closed            }
+                else
+                { data.Status = this.Data.Status.Current }
+            }
+            else { data.Status = states.Closed }
+            
             break
         }
         console.log('store-read', { Store : data })
@@ -242,7 +266,7 @@ function Store(data)
                     if(!now_.is_today(data[idx].Status.SetOn)) 
                     { data[idx].Status = states.Closed            }
                     else
-                    { /* No action: set state as set by seller */ }
+                    { data[idx].Status = data[idx].Status.Current /* No action: set state as set by seller */ }
                 }
                 else { data[idx].Status = states.Closed }
             }
@@ -292,7 +316,7 @@ function Store(data)
                 if(!now_.is_today(data[idx].Status.SetOn)) 
                 { data[idx].Status = states.Closed            }
                 else
-                { /* No action: set state as set by seller */ }
+                { data[idx].Status = data[idx].Status.Current /* No action: set state as set by seller */ }
             }
             else { data[idx].Status = states.Closed }
             
