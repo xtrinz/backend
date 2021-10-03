@@ -335,6 +335,7 @@ function Store(data)
                 }
             }
         }
+        if(data.Time)     rcd.Time     = data.Time
         // TODO MobileNo
         await db.store.Save(rcd)
 
