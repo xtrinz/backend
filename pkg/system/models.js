@@ -47,6 +47,8 @@ module.exports =
 		, BadState                  : 'Bad machine state'
 		, ProductNotFound           : 'Product not found'
 		, StoreNotFound             : 'Store not found'
+		, StoreClosed 				: 'Store Closed'
+		, GracePeriodExceeded 		: 'Store checkout grace period exceeded'
 		, AdminNotFound             : 'Admin not found'
 		, StaffNotFound             : 'Staff not found'
 		, UnapprovedStore           : 'Unapproved Store'
@@ -132,8 +134,9 @@ module.exports =
 	limits:
 	{
 		  AddressCount 			: 16			// Max allowed address count / user
-		, ProductCount 			:128			// Max count for cart elements
+		, ProductCount 			: 128			// Max count for cart elements
 		, SocketCount 			: 3
+		, CheckoutGracePeriod 	: 18
 	},
 	paytm: 
 	{

@@ -61,3 +61,15 @@ Date.prototype.is_today = function(date_)
             date_.Month == today.getMonth() &&
             date_.Year  == today.getFullYear()
 }
+
+Date.prototype.diff_in_m = function(time_)
+{
+    const now = new Date
+        , end = new Date( now.getFullYear()
+                        , now.getMonth()
+                        , now.getDate()
+                        , time_.Hour
+                        , time_.Minute )
+    const diff  = (end - now) / ( 1000 * 60 )
+    return diff
+}

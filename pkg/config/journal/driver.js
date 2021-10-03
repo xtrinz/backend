@@ -98,13 +98,18 @@ function Journal()
       const store   = await db.store.Get(store_id, query.ByID)
       if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
 
-      if(closed or_min_gap < 20 to_close)
+
+      const now_     = new Date()
+          , is_now   = now_.is_now(store.Time.Open, store.Time.Close)
+          , is_today = now_.is_today(store.Status.SetOn)        
+      if( !is_now || (is_today && store.Status === states.Closed) ||
+        ( is_now && now_.diff_in_m(store.Time.Close) < limits.CheckoutGracePeriod))
       {
-        // Store Closed
-        Err_(code.BAD_REQUEST, reason.StoreNotFound)
-        // Store Is about to close        
-        Err_(code.BAD_REQUEST, reason.StoreNotFound)
+        let reason_ = (is_now)? reason.GracePeriodExceeded: reason.StoreClosed
+        console.log('store-has-closed', { Store: store })
+        Err_(code.BAD_REQUEST, reason_)
       }
+
 
       this.Data.Seller    = 
       {                 
