@@ -79,6 +79,24 @@ let List = function(user_, cart_, addr_, store_)
               , Flagged       : false
               , JournalID     : ''
               , StoreID       : store.ID
+              , Address       :
+              {                  
+                  AddressID    : addr.ID 
+                , Longitude    : addr.Longitude
+                , Latitude     : addr.Latitude
+                , Tag          : addr.Tag
+                , IsDefault    : addr.IsDefault
+                , Address      :
+                  {                  
+                      Name       : addr.Address.Name
+                    , Line1      : addr.Address.Line1
+                    , Line2      : addr.Address.Line2
+                    , City       : addr.Address.City
+                    , PostalCode : addr.Address.PostalCode
+                    , State      : addr.Address.State
+                    , Country    : addr.Address.Country
+                  } 
+              }
               , Bill          : 
               {
                   Total       : cart.Bill.Total

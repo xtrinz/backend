@@ -241,7 +241,7 @@ const Controller 		 = function()
         {
             'query'              : [ 'required', 'object' ]
           , 'headers'               : [ 'required', 'object' ]            
-          , 'query.AddressID'    : [ 'required', 'mongoId']
+          , 'query.AddressID'    : [ 'mongoId']
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]              
         }
       }

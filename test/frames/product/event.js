@@ -86,7 +86,7 @@ let View = function(user_, store_, product_)
           , Text              : ''
           , Data              :
           {
-              _id           : product.ID
+              ProductID     : product.ID
             , StoreID       : store.ID
             , Name          : product.Name
             , Image         : product.Image
@@ -141,7 +141,7 @@ let List = function(user_, store_, product_)
         , Text              : ''
         , Data              :
         [{
-              _id           : product.ID
+              ProductID     : product.ID
             , StoreID       : store.ID
             , Name          : product.Name
             , Image         : product.Image

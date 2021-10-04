@@ -87,7 +87,7 @@ let View = function(user_, addr_)
           , Text             : ''
           , Data             : 
           {                  
-                _id          : addr.ID 
+                AddressID    : addr.ID 
               , Longitude    : addr.Longitude
               , Latitude     : addr.Latitude
               , Tag          : addr.Tag
@@ -136,7 +136,7 @@ let List = function(user_, addr_)
           , Text             : ''
           , Data             : 
           [{                  
-                _id          : addr.ID
+                AddressID    : addr.ID
               , Longitude    : addr.Longitude
               , Latitude     : addr.Latitude
               , Tag          : addr.Tag
