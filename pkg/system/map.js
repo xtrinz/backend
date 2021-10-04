@@ -5,6 +5,11 @@ const { Client }             = require('../infra/rest')
 
 const Distance = async function(data)
 {
+    if( data.SrcLt == 0           &&
+        data.SrcLt == data.DestLt && 
+        data.SrcLn == data.DestLn )
+        return 0
+
     return 5 // Set it once APIs are ready
     let in_     =
     {

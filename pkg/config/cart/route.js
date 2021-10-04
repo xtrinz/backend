@@ -26,24 +26,30 @@ router.get('/list', async (req, res, next) =>
 {
   try
   {
-    const address = new Address()
-    const addr    = await address.Read({
-        UserID    : req.body.User._id
-      , AddressID : req.query.AddressID
-    })
+    let data, src_loc, dest_loc
+    
+    data = await (new Cart()).Read(req.body.User._id)
+    dest_loc = src_loc  = { Lattitude : 0, Longitude : 0 }
 
-    const data    = await (new Cart()).Read(req.body.User._id)
-     data.Address = addr
-
-    const src_loc = await (new Store()).GetLoc(data.StoreID)
-        , dest_loc= 
-        {
-            Lattitude : data.Address.Lattitude
-          , Longitude : data.Address.Longitude
-        }
+    if(req.query.AddressID)
+    {
+      const address = new Address()
+          , in_     =
+      {
+          UserID    : req.body.User._id
+        , AddressID : req.query.AddressID
+      }
+      data.Address  = await address.Read(in_)
+      src_loc       = await (new Store()).GetLoc(data.StoreID)
+      dest_loc      =
+      {
+          Lattitude : data.Address.Lattitude
+        , Longitude : data.Address.Longitude
+      }
+    }
 
     await tally.SetBill(data, src_loc, dest_loc)
-    delete data.Address
+
     return res.status(code.OK).json({
       Status  : status.Success,
       Text    : '',

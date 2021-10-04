@@ -1,5 +1,5 @@
-/doc/scrap2.js
-/logs
+/tmp
+/log
 /node_modules
 package-lock.json
 .env

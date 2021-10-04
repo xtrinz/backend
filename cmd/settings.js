@@ -41,3 +41,35 @@ String.prototype.loc = function()
         x = parseFloat(x)
     return x
 }
+
+// Returns whether the time is in given span
+// lb = { Hour: 8, Minute: 15 }
+// ub = { Hour: 9, Minute: 30 }
+Date.prototype.is_now = function(lb, ub)
+{
+    const today = new Date()
+    return (today.getHours()   >= lb.Hour)   &&
+           (today.getHours()   <= ub.Hour)   &&
+           (today.getMinutes() >= lb.Minute) &&
+           (today.getMinutes() <= ub.Minute)
+}
+
+Date.prototype.is_today = function(date_)
+{
+    const today = this
+    return  date_.Day   == today.getDate()  &&
+            date_.Month == today.getMonth() &&
+            date_.Year  == today.getFullYear()
+}
+
+Date.prototype.diff_in_m = function(time_)
+{
+    const now = new Date
+        , end = new Date( now.getFullYear()
+                        , now.getMonth()
+                        , now.getDate()
+                        , time_.Hour
+                        , time_.Minute )
+    const diff  = (end - now) / ( 1000 * 60 )
+    return diff
+}

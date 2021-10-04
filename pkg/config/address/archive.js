@@ -37,6 +37,9 @@ const Read     = async function (user_id, addr_id)
     resp.Latitude  = resp.Location.coordinates[1]
     delete resp.Location
 
+    resp.AddressID = resp._id
+    delete resp._id
+
     console.log('address-read', { Address: resp })
     return resp
 }
@@ -53,6 +56,9 @@ const List     = async function (user_id)
         addr.Longitude = addr.Location.coordinates[0]
         addr.Latitude  = addr.Location.coordinates[1]
         delete addr.Location
+
+        addr.AddressID = addr._id
+        delete addr._id
     })
 
     console.log('address-list', {Addresses : resp.AddressList })

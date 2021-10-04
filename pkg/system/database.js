@@ -1,5 +1,6 @@
 const { MongoClient } = require('mongodb')
-const client    = new MongoClient(process.env.DB_URL,
+const { set }         = require('../system/models')
+const client          = new MongoClient(process.env.DB_URL,
 {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -15,13 +16,13 @@ client.connect()
 
 const database  = client.db(process.env.DB_NAME)
 
-    , users 	  = database.collection('user')
-    , sockets 	= database.collection('socket')
-    , stores 	  = database.collection('store')
-    , products 	= database.collection('product')
-    , carts 	  = database.collection('cart')
-    , journals 	= database.collection('journal')
-    , transits 	= database.collection('transit')
+    , users 	  = database.collection(set.user)
+    , sockets 	= database.collection(set.socket)
+    , stores 	  = database.collection(set.store)
+    , products 	= database.collection(set.product)
+    , carts 	  = database.collection(set.cart)
+    , journals 	= database.collection(set.journal)
+    , transits 	= database.collection(set.transit)
 
     stores.createIndex({ Location: '2dsphere' })
      users.createIndex({ Location: '2dsphere' })

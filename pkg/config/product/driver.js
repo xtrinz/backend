@@ -45,6 +45,9 @@ function Product(data)
         const product = await db.Get(product_id, query.ByID)
         if (!product) Err_(code.BAD_REQUEST, reason.ProductNotFound)
 
+        product.ProductID = product._id
+        delete product._id
+
         return product
     }
 

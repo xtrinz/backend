@@ -106,11 +106,14 @@ const Insert     = async function (cart_id, data)
         { 'Products.StoreID' : { $not : { $eq : data.StoreID } } }
       ]
     } // To Avoid multiple shop entry
-  const resp2 = await carts.findOne(key2)
-  if(resp2)
+    , act   = { $set : { Products : [] }    }
+    , opt   = { upsert : false  }
+  const resp2  = await carts.updateOne(key2, act, opt)
+  if (!resp2.result.ok)
   {
-    console.log('product-from-different-store', { Key: key2, Resp: resp2 })
-    Err_(code.CONFLICT, reason.MutiStoreNotSupported)
+      console.log('multi-store-purchase-clearance-failed',
+      { Key: key2, Option: opt, Result: resp2.result})
+      Err_(code.INTERNAL_SERVER, reason.DBUpdationFailed)
   }
 
   const key1  =

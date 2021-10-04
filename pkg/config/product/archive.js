@@ -69,6 +69,11 @@ const ReadAll         = async function (data)
         console.log('no-product-found', { Query : query, Project: project })
         return
     }
+    for(let idx = 0; idx < products_.length; idx++)
+    {
+        products_[idx].ProductID = products_[idx]._id
+        delete products_[idx]._id
+    }
     console.log('products-found', { Products : products_ })
     return products_
 }

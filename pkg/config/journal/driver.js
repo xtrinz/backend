@@ -13,6 +13,7 @@ const { ObjectID, ObjectId } = require('mongodb')
       , states
       , channel
       , query
+      , limits
       , mode }     = require('../../system/models')
     , { Refund }   = require('../../infra/paytm/ind/refund')
     , { Payment }  = require('../../infra/paytm/ind/payment')
@@ -74,7 +75,7 @@ function Journal()
       , Transit           : 
       {
           ID              : ''
-        , ClosingState    : ''
+        , State    : ''
         , Status          : states.Running
       }
     }
@@ -97,6 +98,20 @@ function Journal()
     {
       const store   = await db.store.Get(store_id, query.ByID)
       if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+
+
+      const now_     = new Date()
+          , is_now   = now_.is_now(store.Time.Open, store.Time.Close)
+          , is_today = now_.is_today(store.Status.SetOn)        
+      if( !is_now || (is_today && store.Status === states.Closed) ||
+        ( is_now && now_.diff_in_m(store.Time.Close) < limits.CheckoutGracePeriod))
+      {
+        let reason_ = (is_now)? reason.GracePeriodExceeded: reason.StoreClosed
+        console.log('store-has-closed', { Store: store })
+        Err_(code.BAD_REQUEST, reason_)
+      }
+
+
       this.Data.Seller    = 
       {                 
           ID        : store._id
@@ -300,8 +315,8 @@ function Journal()
           , Name      : ctxt.Data.Agent.Name
           , MobileNo  : ctxt.Data.Agent.MobileNo
       }
-      this.Data.Transit.Status        = states.Closed
-      this.Data.Transit.ClosingState  = ctxt.Data.State
+      this.Data.Transit.Status = states.Closed
+      this.Data.Transit.State  = ctxt.Data.State
       await db.journal.Save(this.Data)
     }
 
@@ -331,7 +346,7 @@ function Journal()
                   , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
                   , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
                   , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-                  , 'Transit.ClosingState' : 1
+                  , 'Transit.State' : 1
                 }
               }
               , data_ = await db.journal.Get(query_, proj)
@@ -362,7 +377,7 @@ function Journal()
                     , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'    : 1
 
                     , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-                    , 'Transit.ClosingState' : 1
+                    , 'Transit.State' : 1
 
                     , 'Account.In.Static.Penalty.Agent' : 1
                     , 'Account.Out.Static.Payout.Agent' : 1
@@ -403,7 +418,7 @@ function Journal()
                   , 'Buyer.Name'           : 1
                   , 'Agent.Name'           : 1  , 'Agent.MobileNo'    : 1
                   , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-                  , 'Transit.ClosingState' : 1
+                  , 'Transit.State' : 1
                   , 'Order.Products'       : 1  , 'Order.Bill.Total'  : 1
                   , 'Account.In.Static.Penalty.Store' : 1
                   , 'Account.Out.Static.Payout.Store' : 1
@@ -446,7 +461,7 @@ function Journal()
                 , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
 
                 , 'Transit.ID'           : 1  , 'Transit.Status'  : 1
-                , 'Transit.ClosingState' : 1
+                , 'Transit.State' : 1
 
                 , 'Order.Products'       : 1  , 'Order.Bill'      : 1
                 , 'Account.In.Static.Penalty'        : 1
@@ -499,7 +514,7 @@ function Journal()
               , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
               , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
               , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-              , 'Transit.ClosingState' : 1
+              , 'Transit.State' : 1
             }
           }
           cond_   =
@@ -537,7 +552,7 @@ function Journal()
               , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'    : 1
 
               , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-              , 'Transit.ClosingState' : 1
+              , 'Transit.State' : 1
 
               , 'Account.In.Static.Penalty.Agent' : 1
               , 'Account.Out.Static.Payout.Agent' : 1
@@ -585,7 +600,7 @@ function Journal()
               , 'Buyer.Name'           : 1
               , 'Agent.Name'           : 1  , 'Agent.MobileNo'    : 1
               , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-              , 'Transit.ClosingState' : 1
+              , 'Transit.State' : 1
               , 'Order.Products'       : 1  , 'Order.Bill.Total'  : 1
               , 'Account.In.Static.Penalty.Store' : 1
               , 'Account.Out.Static.Payout.Store' : 1
@@ -640,7 +655,7 @@ function Journal()
               , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
 
               , 'Transit.ID'           : 1  , 'Transit.Status'  : 1
-              , 'Transit.ClosingState' : 1
+              , 'Transit.State' : 1
 
               , 'Order.Products'       : 1  , 'Order.Bill'      : 1
               , 'Account.In.Static.Penalty'        : 1

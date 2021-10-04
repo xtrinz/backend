@@ -57,7 +57,7 @@ const Authnz = async function (req, res, next)
         if (!store)
         {
             console.log('store-not-found', { StoreID: resp._id })
-            Err_(code.BAD_REQUEST, reason.InvalidToken)
+            Err_(code.UNAUTHORIZED, reason.InvalidToken)
         }
 
         if (store.State !== mode_.State)
@@ -75,7 +75,7 @@ const Authnz = async function (req, res, next)
         if (!user)
         {
             console.log('user-not-found', { UserID: resp._id })
-            Err_(code.BAD_REQUEST, reason.InvalidToken)
+            Err_(code.UNAUTHORIZED, reason.InvalidToken)
         }
 
         if (user.State !== mode_.State)
@@ -96,7 +96,7 @@ const Authnz = async function (req, res, next)
       {   Body         : req.body
         , Query        : req.body
         , AllowedModes : mode_ })                     
-      Err_(code.BAD_REQUEST, reason.PermissionDenied)    
+      Err_(code.UNAUTHORIZED, reason.PermissionDenied)    
     }
   } catch (err) { next(err) }
 }

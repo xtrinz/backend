@@ -122,7 +122,13 @@ let Register = function(name)
             Code          : code.OK
           , Status        : status.Success
           , Text          : text.Registered
-          , Data          : {}
+          , Data          :
+          {
+              Name        : user.Name
+            , MobileNo    : user.MobileNo
+            , Email       : user.Email
+            , Mode        : user.Mode
+          }
         }
       }
       return templ
