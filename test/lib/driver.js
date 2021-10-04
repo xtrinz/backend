@@ -30,7 +30,7 @@ function TestRig()
 
                 // console.log(data.Request.Body, data.Response.Data, resp.Data)
                 
-                console.log(prints.Failed, '\n\nExpected : ', data.Response, '\nReceived : ', resp)
+                console.log(prints.Failed, '\n\nExpected : ',JSON.stringify(data.Response), '\nReceived : ', JSON.stringify(resp))
                 return { Status: false, Data: resp }
             case Type.Event:
                 switch(data.Method)
