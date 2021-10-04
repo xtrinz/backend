@@ -1,4 +1,4 @@
-const { code, status
+const { code, status, states
     ,   text, task } = require('../../system/models')
     , router         = require('express').Router()
     , { User }       = require('../user/driver')
@@ -7,7 +7,7 @@ router.post('/register', async (req, res, next) =>
 {
   try
   {
-    let text_ = '', data_ = {}, user
+    let text_ = '', data_ = {}, user, info_
     switch (req.body.Task)
     {
       case task.New:
@@ -20,14 +20,25 @@ router.post('/register', async (req, res, next) =>
         user  = new User()
         const token = await user.ConfirmMobileNo(req.body)
         text_ = text.OTPConfirmed
+        info_ = user.Data
         res.setHeader('authorization', token)
         break
 
       case task.Register:
         user  = new User()
+        info_ = req.body.User
         await user.Register(req.body)
         text_ = text.Registered
         break
+    }
+
+    if(info_ && info_.State === states.Registered)
+    data_ = 
+    {
+        Name      : info_.Name
+      , MobileNo  : info_.MobileNo
+      , Email     : info_.Email
+      , Mode      : info_.Mode
     }
 
     return res.status(code.OK).json({
