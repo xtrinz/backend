@@ -186,14 +186,14 @@ function Journal()
           {
             const paytm_ = new PayTM()
                   txn_i  = await paytm_.CreateToken(j_id, price, user)
-                  time   = Date.now()
+                  time   = (new Date()).toISOString()
           }
         }
         else
         {
           const paytm_ = new PayTM()
                 txn_i  = await paytm_.CreateToken(j_id, price, user)
-                time   = Date.now()
+                time   = (new Date()).toISOString()
         }
         this.Data.Payment =
         {
@@ -225,7 +225,7 @@ function Journal()
 
       // Set ID & Date
       this.Data._id  = (this.Data._id) ? this.Data._id  : new ObjectID()
-      this.Data.Date = Date.now()
+      this.Data.Date = (new Date()).toISOString()
 
       // Set Payment
       const details_ = await this.SetPayment(this.Data._id, 
@@ -368,12 +368,12 @@ function Journal()
                   {
                        _id                   : 1  , 'Date'              : 1
 
-                    , 'Seller.Name'          : 1
+                    , 'Seller.Name'          : 1  , 'Seller.MobileNo'   : 1
                     , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
                     , 'Seller.Longitude'     : 1  , 'Seller.Latitude'   : 1
 
                     , 'Buyer.Name'           : 1
-                    , 'Buyer.Address'        : 1
+                    , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'    : 1
                     , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'    : 1
 
                     , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
@@ -448,12 +448,13 @@ function Journal()
                    _id                   : 1  , 'Date'            : 1
                 
                 , 'Buyer.Name'           : 1
-                , 'Buyer.Address'        : 1
+                , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'  : 1
                 , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'  : 1
 
                 , 'Seller.ID'            : 1  , 'Seller.Name'     : 1
                 , 'Seller.Address'       : 1  , 'Seller.Image'    : 1
                 , 'Seller.Longitude'     : 1  , 'Seller.Latitude' : 1
+                , 'Seller.MobileNo'      : 1
                 
                 , 'Agent.Name'           : 1  , 'Agent.MobileNo'  : 1
 
@@ -499,7 +500,8 @@ function Journal()
 
           query_ =
           { 
-            'Buyer.ID' : ObjectId(in_._id)
+              'Buyer.ID'       : ObjectId(in_._id)
+            , 'Payment.Status' : { $nin: [ states.Initiated, states.Failed ] }
           }
           proj   = 
           {
@@ -535,7 +537,7 @@ function Journal()
 
           query_ =
           {
-            'Agent.ID' : ObjectId(in_._id)
+              'Agent.ID'       : ObjectId(in_._id)
           }
           proj  = 
           {
@@ -543,12 +545,12 @@ function Journal()
             {
                   _id                   : 1  , 'Date'              : 1
 
-              , 'Seller.Name'          : 1
+              , 'Seller.Name'          : 1  , 'Seller.MobileNo'   : 1
               , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
               , 'Seller.Longitude'     : 1  , 'Seller.Latitude'   : 1
 
               , 'Buyer.Name'           : 1
-              , 'Buyer.Address'        : 1
+              , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'    : 1
               , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'    : 1
 
               , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
@@ -590,7 +592,8 @@ function Journal()
 
           query_ =
           {
-            'Seller.ID' : ObjectId(in_._id)
+              'Seller.ID'      : ObjectId(in_._id)
+            , 'Payment.Status' : { $nin: [ states.Initiated, states.Failed ] }
           }
           proj  = 
           {
@@ -640,15 +643,16 @@ function Journal()
             projection : 
             {
                   _id                   : 1  , 'Date'            : 1
-              
+                            
               , 'Buyer.Name'           : 1
-              , 'Buyer.Address'        : 1
+              , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'  : 1
               , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'  : 1
 
               , 'Seller.ID'            : 1  , 'Seller.Name'     : 1
               , 'Seller.Address'       : 1  , 'Seller.Image'    : 1
               , 'Seller.Longitude'     : 1  , 'Seller.Latitude' : 1
-              
+              , 'Seller.MobileNo'      : 1
+
               , 'Agent.Name'           : 1  , 'Agent.MobileNo'  : 1
 
               , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1

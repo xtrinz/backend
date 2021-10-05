@@ -21,7 +21,8 @@ router.get('/list', async (req, res, next) =>
 {
   try
   {
-    const data = await db.ReadAll(req.query)
+    let product = new Product()
+    const data  = await product.List(req.query, req.body.Mode)
     
     return res.status(code.OK).json({
       Status  : status.Success,

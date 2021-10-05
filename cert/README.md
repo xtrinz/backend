@@ -9,6 +9,6 @@
     1. Server key
        openssl genrsa -out server.key 2048
     2. Server CSR
-       openssl req -new -key server.key -subj '/CN=TRANSIT-ENGINE' -out server.csr
+       openssl req -new -key server.key -subj '/CN=localhost' -out server.csr
     3. Server cert
        openssl x509 -req -in server.csr -CAcreateserial -CA ca.crt -CAkey ca.pem -out server.crt

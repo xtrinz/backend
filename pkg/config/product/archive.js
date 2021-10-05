@@ -1,6 +1,6 @@
 const { ObjectId }           = require('mongodb')
     , { Err_, code, reason
-    , query, dbset }         = require('../../system/models')
+    , query, dbset, mode }         = require('../../system/models')
     , { products }           = require('../../system/database')
 
 const Save      = async function(data)
@@ -44,7 +44,7 @@ const Get        = async function(param, qType)
 }
 
 
-const ReadAll         = async function (data)
+const ReadAll         = async function (data, mode_)
 {
     data.Page  = data.Page.loc()
     data.Limit = data.Limit.loc()
@@ -59,7 +59,10 @@ const ReadAll         = async function (data)
         , query     = { StoreID: ObjectId(data.StoreID) }
         , skip      = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
         , lmt       = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
-        , products_ = await products.find(query)
+
+    if(mode_ === mode.User) query.Quantity = { $gt : 0 }
+
+    const products_ = await products.find(query)
                                     .project(project)
                                     .skip(skip)
                                     .limit(lmt)

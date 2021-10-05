@@ -48,7 +48,8 @@ function Payment(data)
             Err_(code.BAD_REQUEST, reason.JournalNotFound)
 		}
 
-		// TODO : Match Price
+		// TODO : Match Price IMPORTANT if prices are not matching some malpractic had happened
+
 		return rcd
 	}
 

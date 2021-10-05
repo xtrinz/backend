@@ -78,6 +78,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                   , Address       : journal.Buyer.Address
                   , Longitude     : journal.Buyer.Longitude
                   , Latitude      : journal.Buyer.Latitude
+                  , MobileNo      : journal.Buyer.MobileNo                  
                 }
                 , Seller          : 
                 { 
@@ -86,6 +87,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                   , Image         : journal.Seller.Image
                   , Longitude     : journal.Seller.Longitude
                   , Latitude      : journal.Seller.Latitude
+                  , MobileNo      : journal.Seller.MobileNo                  
                 }
                 , Penalty         : 0
                 , Income          : .75 * journal.Order.Bill.TransitCost
@@ -109,6 +111,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                   , Address       : journal.Buyer.Address
                   , Longitude     : journal.Buyer.Longitude
                   , Latitude      : journal.Buyer.Latitude
+                  , MobileNo      : journal.Buyer.MobileNo              
                 }
                 , Seller          : 
                 { 
@@ -118,6 +121,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                   , Image         : journal.Seller.Image
                   , Longitude     : journal.Seller.Longitude
                   , Latitude      : journal.Seller.Latitude
+                  , MobileNo      : journal.Seller.MobileNo                  
                 }
                 , Agent           :
                 {
@@ -279,6 +283,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                   , Address       : journal.Buyer.Address
                   , Longitude     : journal.Buyer.Longitude
                   , Latitude      : journal.Buyer.Latitude
+                  , MobileNo      : journal.Buyer.MobileNo                  
                 }
                 , Seller          : 
                 { 
@@ -287,6 +292,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                   , Image         : journal.Seller.Image
                   , Longitude     : journal.Seller.Longitude
                   , Latitude      : journal.Seller.Latitude
+                  , MobileNo      : journal.Seller.MobileNo
                 }
                 , Penalty         : 0
                 , Income          : .75 * journal.Order.Bill.TransitCost
@@ -310,6 +316,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                   , Address       : journal.Buyer.Address
                   , Longitude     : journal.Buyer.Longitude
                   , Latitude      : journal.Buyer.Latitude
+                  , MobileNo      : journal.Buyer.MobileNo
                 }
                 , Seller          : 
                 { 
@@ -319,6 +326,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                   , Image         : journal.Seller.Image
                   , Longitude     : journal.Seller.Longitude
                   , Latitude      : journal.Seller.Latitude
+                  , MobileNo      : journal.Seller.MobileNo                  
                 }
                 , Agent           :
                 {

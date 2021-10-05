@@ -51,6 +51,17 @@ function Product(data)
         return product
     }
 
+    this.List           = async function (in_, mode_)
+    {
+        console.log('list-product', { Data : in_ })
+
+        const data = await db.ReadAll(in_, mode_)
+
+        console.log('product-list', { Data : data })
+
+        return data
+    }    
+
     this.Modify      = async function (data)
     {
         console.log('modify-product', { ProductID: data.ProductID })

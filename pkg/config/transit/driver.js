@@ -62,7 +62,7 @@ function Transit (journal)
         this.Data.User.SockID  = await db.user.GetUserSockID(this.Data.User._id)
         this.Data.Store.SockID = await db.store.GetStoreSockID(this.Data.Store._id)
         this.Data._id          = _id
-        this.Data.OrderedAt    = Date.now()
+        this.Data.OrderedAt    = (new Date()).toISOString()
 
         let engine = new Engine()
         await engine.Transition(this)

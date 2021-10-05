@@ -3,8 +3,8 @@ let Journal = function(user, address, store, cart, agent)
   Journal.Count++
 
   this.JournalID  = ''
-  this.Buyer      = { ID : user.ID , Name : user.Name, Address  : address.Address, Longitude: address.Longitude, Latitude: address.Latitude }
-  this.Seller     = { ID : store.ID , Name : store.Name, Address  : store.Address, Image: store.Image, Longitude: store.Longitude, Latitude: store.Latitude }
+  this.Buyer      = { ID : user.ID , Name : user.Name, Address  : address.Address, Longitude: address.Longitude, Latitude: address.Latitude, MobileNo : user.MobileNo }
+  this.Seller     = { ID : store.ID , Name : store.Name, Address  : store.Address, Image: store.Image, Longitude: store.Longitude, Latitude: store.Latitude, MobileNo : store.MobileNo }
   this.Agent      = { ID : agent.ID , Name : agent.Name, MobileNo : agent.MobileNo }  
   this.Order      = { Products : cart.Products, Bill : cart.Bill }
   this.Payment    = { Channel : 'Paytm', Amount : cart.Bill.NetPrice.toString(), Status: 'Success', TimeStamp: '' }
