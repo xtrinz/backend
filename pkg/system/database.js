@@ -23,6 +23,7 @@ const database  = client.db(process.env.DB_NAME)
     , carts 	  = database.collection(set.cart)
     , journals 	= database.collection(set.journal)
     , transits 	= database.collection(set.transit)
+    , channels 	= database.collection(set.channel)    
 
     stores.createIndex({ Location: '2dsphere' })
      users.createIndex({ Location: '2dsphere' })
@@ -39,4 +40,5 @@ module.exports  =
   , carts
   , journals
   , transits
+  , channels
 }

@@ -396,5 +396,6 @@ module.exports =
 		, cart					: 'cart'
 		, journal				: 'journal'
 		, transit				: 'transit'
+		, channel				: 'channel'
 	}
 }
