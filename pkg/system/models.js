@@ -199,6 +199,11 @@ module.exports =
 		    Stripe 				: 'Stripe'
 		  , Paytm 				: 'Paytm'
 	},
+	search:
+	{
+		  Store 				: 'Store'
+		, Product 				: 'Product'
+	},
 	states:
 	{
 		  Running 				: 'Running'
@@ -397,5 +402,6 @@ module.exports =
 		, journal				: 'journal'
 		, transit				: 'transit'
 		, channel				: 'channel'
+		, tags 					: 'tags'
 	}
 }
