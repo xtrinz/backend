@@ -134,7 +134,7 @@ module.exports =
 	limits:
 	{
 		  AddressCount 			: 16			// Max allowed address count / user
-		, ProductCount 			: 128			// Max count for cart elements
+		, ProductCount 			: 32			// Max count for cart elements
 		, SocketCount 			: 3
 		, CheckoutGracePeriod 	: 18
 	},
@@ -198,11 +198,6 @@ module.exports =
 	{
 		    Stripe 				: 'Stripe'
 		  , Paytm 				: 'Paytm'
-	},
-	search:
-	{
-		  Store 				: 'Store'
-		, Product 				: 'Product'
 	},
 	states:
 	{

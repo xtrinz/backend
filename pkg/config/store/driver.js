@@ -23,6 +23,7 @@ function Store(data)
         , Type            : data.Type
 
         , Name            : data.Name
+        , Description     : data.Description
         , MobileNo        : data.MobileNo
         , SockID          : []
         , Location        :
@@ -70,18 +71,19 @@ function Store(data)
           case mode.AdminID:
             data =
             {
-                StoreID   : in_.Store._id
-              , Email     : in_.Store.Email
-              , State     : in_.Store.State
-              , Image     : in_.Store.Image
-              , Certs     : in_.Store.Certs
-              , Type      : in_.Store.Type
-              , Name      : in_.Store.Name
-              , MobileNo  : in_.Store.MobileNo
-              , Longitude : in_.Store.Location.coordinates[0]
-              , Latitude  : in_.Store.Location.coordinates[1]
-              , Address   : in_.Store.Address
-              , Time      : in_.Store.Time
+                StoreID     : in_.Store._id
+              , Email       : in_.Store.Email
+              , State       : in_.Store.State
+              , Image       : in_.Store.Image
+              , Certs       : in_.Store.Certs
+              , Description : in_.Store.Description
+              , Type        : in_.Store.Type
+              , Name        : in_.Store.Name
+              , MobileNo    : in_.Store.MobileNo
+              , Longitude   : in_.Store.Location.coordinates[0]
+              , Latitude    : in_.Store.Location.coordinates[1]
+              , Address     : in_.Store.Address
+              , Time        : in_.Store.Time
             }
             
             now_               = new Date()        
@@ -104,13 +106,14 @@ function Store(data)
             Err_(code.FORBIDDEN, reason.PermissionDenied)
             data =
             {
-                StoreID   : this.Data._id
-              , Name      : this.Data.Name
-              , Image     : this.Data.Image
-              , Certs     : this.Data.Certs
-              , Type      : this.Data.Type
-              , Address   : this.Data.Address
-              , Time      : this.Data.Time
+                StoreID     : this.Data._id
+              , Name        : this.Data.Name
+              , Image       : this.Data.Image
+              , Description : this.Data.Description              
+              , Certs       : this.Data.Certs
+              , Type        : this.Data.Type
+              , Address     : this.Data.Address
+              , Time        : this.Data.Time
             }
             now_               = new Date()        
             if(now_.is_now(this.Data.Time.Open, this.Data.Time.Close))
@@ -242,18 +245,12 @@ function Store(data)
         switch(mode_)
         {
           case mode.User:
-            proj    = { projection: { _id   : 1, Name  : 1, Type : 1, Image : 1, Status: 1, Time: 1 } }
-            in_.Query   =
-            { 
-                Location: 
-                { 
-                    $near : { $geometry: 
-                        { 
-                              type          : 'Point'
-                            , coordinates   : [ in_.Longitude.loc(), in_.Latitude.loc() ] 
-                        } }
-                } 
-            }
+            proj    = { projection: { _id   : 1, Name  : 1, Type : 1, Image : 1, Status: 1, Time: 1, Description: 1 } }
+            in_.Query = { Location: { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } } 
+
+            if(in_.Category) in_.Query.Type     = in_.Category
+            if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
+
             data = await db.store.List(in_, proj)
             for(let idx = 0; idx < data.length; idx++)
             {
@@ -274,21 +271,17 @@ function Store(data)
           case mode.Admin:
             proj =
             { _id   : 1, Name  : 1, Type : 1
-            , Image : 1, State : 1, Status: 1, Time: 1 }
+            , Image : 1, State : 1, Status: 1, Time: 1, Description: 1 }
             switch(in_.Type)
             {
                 case qtype.NearList:
-                in_.Query = 
-                { 
-                    Location: 
-                    { 
-                        $near : { $geometry: 
-                            { 
-                                  type          : 'Point'
-                                , coordinates   : [ in_.Longitude.loc(), in_.Latitude.loc() ] 
-                            } }
-                    } 
-                }
+                in_.Query = { Location: { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } } 
+
+                // TODO check unit of radius 2500
+
+                if(in_.Category) in_.Query.Type     = in_.Category
+                if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
+
                 break
                 case qtype.Pending:
                 in_.Query = { State : states.MobConfirmed }
@@ -331,11 +324,12 @@ function Store(data)
         console.log('edit-store', { Input : data})
 
         let rcd = { _id : data.Store._id }
-        if(data.Email)    rcd.Email    = data.Email
-        if(data.Image)    rcd.Image    = data.Image
-        if(data.Certs)    rcd.Certs    = data.Certs
-        if(data.Type)     rcd.Type     = data.Type
-        if(data.Name)     rcd.Name     = data.Name
+        if(data.Email)       rcd.Email       = data.Email
+        if(data.Image)       rcd.Image       = data.Image
+        if(data.Certs)       rcd.Certs       = data.Certs
+        if(data.Type)        rcd.Type        = data.Type
+        if(data.Name)        rcd.Name        = data.Name
+        if(data.Description) rcd.Description = data.Description        
         if(data.Longitude && data.Latitude)  
                           rcd.Location = 
                           { 

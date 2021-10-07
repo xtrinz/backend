@@ -25,6 +25,7 @@ let RegisterNew = function(store_)
               , Image           : store.Image
               , Type            : store.Type
               , Certs           : store.Certs
+              , Description     : store.Description
               , MobileNo        : store.MobileNo
               , Email           : store.Email
               , Longitude       : store.Longitude
@@ -182,6 +183,7 @@ let Read =   function(user_, store_)
             StoreID      : store.ID
           , Name         : store.Name
           , Image        : store.Image
+          , Description  : store.Description
           , Type         : store.Type
           , Certs        : store.Certs
           , Address      :
@@ -228,6 +230,8 @@ let List = function(user_, store_)
           , Latitude    : '17.20000'
           , Page        : 1
           , Limit       : 8
+          , Category    : store.Type
+          , Text        : 'Store'
         }
         , Body          : { }
         , Header        : { Authorization : user.Token }
@@ -239,16 +243,17 @@ let List = function(user_, store_)
         , Text          : ''
         , Data          :
           [{
-              StoreID   : store.ID
-            , Name      : store.Name
-            , Image     : store.Image
-            , Type      : store.Type
-            , Time      :
+              StoreID     : store.ID
+            , Name        : store.Name
+            , Image       : store.Image
+            , Description : store.Description            
+            , Type        : store.Type
+            , Time        :
             {
-                Open    : store.Time.Open
-              , Close   : store.Time.Close
+                Open      : store.Time.Open
+              , Close     : store.Time.Close
             }
-            , Status    : store.Status
+            , Status      : store.Status
           }]
       }
     }
@@ -278,6 +283,7 @@ let Edit = function(store_)
           , Certs       : store.Certs
           , Type        : store.Type
           , Name        : store.Name
+          , Description : store.Description
           , Longitude   : store.Longitude
           , Latitude    : store.Latitude
           , Time        :

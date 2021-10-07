@@ -28,6 +28,7 @@ const database  = client.db(process.env.DB_NAME)
 
     stores.createIndex({ Location: '2dsphere' })
      users.createIndex({ Location: '2dsphere' })
+    stores.createIndex({ Name: "text", Description: "text" } )
 
 module.exports  =
 {

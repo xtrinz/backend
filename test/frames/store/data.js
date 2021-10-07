@@ -9,6 +9,7 @@ let Store = function()
   this.Image        = 'image.{0}.com'.format(this.Name.toLowerCase())
   this.Type         = 'Electorics'
   this.Certs        = ['a.cert', 'b.cert']
+  this.Description  = 'Store Description'
   this.MobileNo     = '+9100110011{0}'.format(('00' + Store.Count).substr(-2))
   this.Email        = this.Name.toLowerCase() + '@' + this.Name.toLowerCase() + '.com'
   this.Longitude    = '17.20000'
