@@ -32,7 +32,7 @@ let Cart = function(user)
       , Image     : product.Image
       , Available : product.Available
       , Flagged   : product.Flagged
-      , CategoryID: product.CategoryID
+      , Category  : product.Category
       , Quantity  : product.Quantity
     }
 

@@ -8,8 +8,8 @@ const event        = require('./event')
     let prod =
     [
           new event.Add    (staff_, store_, product_)
-        , new event.View   (user_ , store_, product_)
         , new event.List   (user_ , store_, product_)
+        , new event.View   (user_ , store_, product_)
         , new event.Modify (staff_, store_, product_)
         , new event.Remove (staff_, store_, product_)
         , new event.Add    (staff_, store_, product_)        

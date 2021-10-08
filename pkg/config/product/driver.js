@@ -14,12 +14,13 @@ function Product(data)
         , Price       : data.Price
         , Quantity    : data.Quantity
         , Description : data.Description
-        , CategoryID  : data.CategoryID
+        , Category    : data.Category
         , Variants    : 
         {
                 Id    : ''
             , Type    : '' // COLOR / SIZE
         }
+        , Location    : data.Store.Location
     }
 
     this.Add      = async function ()
@@ -45,6 +46,9 @@ function Product(data)
         const product = await db.Get(product_id, query.ByID)
         if (!product) Err_(code.BAD_REQUEST, reason.ProductNotFound)
 
+        
+        delete product.Location
+
         product.ProductID = product._id
         delete product._id
 
@@ -54,6 +58,16 @@ function Product(data)
     this.List           = async function (in_, mode_)
     {
         console.log('list-product', { Data : in_ })
+        
+        in_.Query = {}
+
+        if(in_.Latitude  !== undefined &&
+           in_.Longitude !== undefined)
+        { in_.Query.Location = { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } }
+
+        if(in_.StoreID)  in_.Query.StoreID  = ObjectId(in_.StoreID)
+        if(in_.Category) in_.Query.Category = in_.Category
+        if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
 
         const data = await db.ReadAll(in_, mode_)
 
@@ -74,7 +88,7 @@ function Product(data)
         this.Data.Price         = (data.Price)?       data.Price       : this.Data.Price
         this.Data.Quantity      = (data.Quantity)?    data.Quantity    : this.Data.Quantity
         this.Data.Description   = (data.Description)? data.Description : this.Data.Description
-        this.Data.CategoryID    = (data.CategoryID)?  data.CategoryID  : this.Data.CategoryID
+        this.Data.Category      = (data.Category)?    data.Category    : this.Data.Category
         this.Data.Variants.Id   = (data.VariantID)?   data.VariantID   : this.Data.Variants.Id
         this.Data.Variants.Type = (data.Type)?        data.Type        : this.Data.Variants.Type
 

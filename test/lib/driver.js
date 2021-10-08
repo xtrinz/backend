@@ -60,7 +60,9 @@ function TestRig()
             db.database.dropDatabase()
             db.stores.createIndex({ Location: "2dsphere" })
             db.users.createIndex( { Location: "2dsphere" }) 
-            db.stores.createIndex({ Name: "text", Description: "text" } )           
+            db.products.createIndex({ Location: '2dsphere' })
+            db.stores.createIndex({ Name: "text", Description: "text" } )      
+            db.products.createIndex({ Name: "text", Description: "text", Category: 'text' })                 
             await new Promise((resolve) => setTimeout(resolve, 2));
             
             let suite = this.TestSuites[suite_], failed = false

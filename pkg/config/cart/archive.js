@@ -69,7 +69,7 @@ const Read        = async function (user_id)
       , Name       : product.Name
       , Price      : product.Price
       , Image      : product.Image
-      , CategoryID : product.CategoryID
+      , Category   : product.Category
       , Quantity   : item.Quantity
       , Available  : product.Quantity
       , Flagged    : flag

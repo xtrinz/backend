@@ -168,7 +168,7 @@ const Controller 		 = function()
           , 'body.Price'         : [ 'required', 'integer', [ 'min', 1 ] ]            
           , 'body.Quantity'      : [ 'required', 'integer', [ 'min', 1 ] ]
           , 'body.Image'         : [ 'required', 'string' , [ 'length', 3000, 2 ] ]            
-          , 'body.CategoryID'    : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'body.Category'      : [ 'required', 'string',  [ 'length', 50, 2 ] ]
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }      
       }
@@ -204,7 +204,7 @@ const Controller 		 = function()
           , 'body.Price'         : [ 'integer', [ 'min', 1 ] ]            
           , 'body.Quantity'      : [ 'integer', [ 'min', 1 ] ]
           , 'body.Image'         : [ 'string' , [ 'length', 3000, 2 ] ]            
-          , 'body.CategoryID'    : [ 'integer', [ 'min', 1 ] ]
+          , 'body.Category'      : [ 'required', 'string',  [ 'length', 50, 2 ] ]
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]         
         }
       }

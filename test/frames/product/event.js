@@ -30,7 +30,7 @@ let Add = function(staff_, store_, product_)
                 , Price         : product.Price
                 , Quantity      : product.Quantity
                 , Description   : product.Description
-                , CategoryID    : product.CategoryID
+                , Category    : product.Category
             }
             , Header            : { Authorization: store.Token }
         }
@@ -93,7 +93,7 @@ let View = function(user_, store_, product_)
             , Price         : product.Price
             , Quantity      : product.Quantity
             , Description   : product.Description
-            , CategoryID    : product.CategoryID
+            , Category    : product.Category
             , Variants      : 
             {
                     Id      : ''
@@ -131,6 +131,10 @@ let List = function(user_, store_, product_)
               StoreID       : store.ID
             , Page          : 1
             , Limit         : 8
+            , Longitude     : store.Longitude
+            , Latitude      : store.Latitude 
+            , Category      : product.Category 
+            , Text          : product.Category                      
         }
         , Header            : { Authorization: user.Token }
       }
@@ -148,7 +152,7 @@ let List = function(user_, store_, product_)
             , Price         : product.Price
             , Quantity      : product.Quantity
             , Description   : product.Description
-            , CategoryID    : product.CategoryID
+            , Category    : product.Category
         }]
       }
     }
@@ -182,7 +186,7 @@ let Modify = function(staff_, store_, product_)
               , Price         : 200
               , Quantity      : product.Quantity
               , Description   : product.Description
-              , CategoryID    : product.CategoryID
+              , Category    : product.Category
           }
           , Header            : { Authorization: store.Token }
       }

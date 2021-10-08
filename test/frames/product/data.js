@@ -11,7 +11,7 @@ let Product = function()
   this.Available    = Product.Count * 2
   this.Flagged      = false
   this.Description  = '{0} Description'.format(this.Name)
-  this.CategoryID   = 14
+  this.Category     = 'Electronics'
   this.Variants     = 
   {
         Type    : 'COLOR'

@@ -48,15 +48,15 @@ const ReadAll         = async function (data, mode_)
 {
     data.Page  = data.Page.loc()
     data.Limit = data.Limit.loc()
-    console.log('find-all-product-by-store-id', { Data: data })    
+    console.log('find-all-product-by-store-id', { Data: data, Mode: mode_ })    
     const project   =
         {
-            _id         : 1, StoreID    : 1,
-            Name        : 1, Image      : 1,
-            Price       : 1, Quantity   : 1,
-            Description : 1, CategoryID : 1 
+            _id         : 1, StoreID  : 1,
+            Name        : 1, Image    : 1,
+            Price       : 1, Quantity : 1,
+            Description : 1, Category : 1 
         }
-        , query     = { StoreID: ObjectId(data.StoreID) }
+        , query     = data.Query
         , skip      = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
         , lmt       = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
 
