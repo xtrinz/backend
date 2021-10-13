@@ -346,23 +346,33 @@ let NewTransit = function(agent_)
   }
 }
 
-let Accepted = function(user_) 
+let Accepted  = function(name, mode_) 
 {
-  this.UserID  = user_
-  this.Data    = function()
-  {
-    let user   = data.Get(data.Obj.User, this.UserID)
+    this.ID     = name
+    this.Mode   = mode_
+    this.Data   = function()
+    {
+      let in_
+      switch (this.Mode) {
+        case data.Obj.User:
+          in_  = data.Get(data.Obj.User, this.ID)          
+          break;
+        case data.Obj.Store:
+          in_  = data.Get(data.Obj.Store, this.ID)          
+          break;
+      }
+
     let templ  =      
     {
         Type          : Type.Event
-      , Describe      : 'Transit Alert Accepted ' + user.Name
+      , Describe      : 'Transit Alert Accepted ' + in_.Name
       , Method        : Method.EVENT
       , Authorization : {}
-      , Socket        : user.Socket
+      , Socket        : in_.Socket
       , Event         : 
       {
           Type : alerts.Accepted
-        , Data : { TransitID : user.TransitID }
+        , Data : { TransitID : in_.TransitID }
       }
     }
     return templ

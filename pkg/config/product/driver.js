@@ -91,7 +91,7 @@ function Product(data)
         this.Data.Category      = (data.Category)?    data.Category    : this.Data.Category
         this.Data.Variants.Id   = (data.VariantID)?   data.VariantID   : this.Data.Variants.Id
         this.Data.Variants.Type = (data.Type)?        data.Type        : this.Data.Variants.Type
-
+        this.Data.Location      = data.Store.Location
         await db.Save(this.Data)
 
         console.log('product-modified', { Product: this.Data })

@@ -174,7 +174,7 @@ const Emit = async function(alert, ctxt)
                                   to.push(...ctxt.Data.Store.SockID); to.push(...ctxt.Data.Agent.SockID)
                                   ctxt.Data.Agents.forEach((agent)=> { to.push(...agent.SockID) });   break // If any
     case alerts.Assigned        : to.push(...ctxt.Data.Agent.SockID);                                 break
-    case alerts.Accepted        : to = ctxt.Data.User.SockID;                                         break
+    case alerts.Accepted        : to = [...ctxt.Data.User.SockID, ...ctxt.Data.Store.SockID];         break
     case alerts.NewTransit      : ctxt.Data.Agents.forEach((agent)=>{ to.push(...agent.SockID)});     break
     case alerts.EnRoute         : to = [...ctxt.Data.Agent.SockID, ...ctxt.Data.User.SockID];         break
     case alerts.AgentReady      : to = [...ctxt.Data.Store.SockID, ...ctxt.Data.User.SockID]

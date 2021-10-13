@@ -17,7 +17,8 @@ const Std = function(user_, addr_, agent_, store_)
 
         , new event.StoreAccept   (store_)
         , new event.NewTransit    (agent_)
-        , new event.Accepted      (user_ )
+        , new event.Accepted      (user_ , Obj.User)
+        , new event.Accepted      (store_, Obj.Store)
         
         , new event.AgentAccept   (agent_, store_)
         , new event.AgentReady    (user_, Obj.User)
@@ -68,7 +69,8 @@ const CancelByUserAfterAceptance = function(user_, addr_, agent_, store_)
         
         , new event.StoreAccept   (store_)
         , new event.NewTransit    (agent_)
-        , new event.Accepted      (user_ )
+        , new event.Accepted      (user_ , Obj.User)
+        , new event.Accepted      (store_, Obj.Store)
 
         , new event.CancelByUser   (user_ )
         , new event.Cancelled      (store_)
@@ -92,7 +94,8 @@ const CancelByUserAfterTransitAceptance = function(user_, addr_, agent_, store_)
         
         , new event.StoreAccept   (store_)
         , new event.NewTransit    (agent_)
-        , new event.Accepted      (user_ )
+        , new event.Accepted      (user_ , Obj.User)
+        , new event.Accepted      (store_, Obj.Store)
 
         , new event.AgentAccept   (agent_, store_)
         , new event.AgentReady    (user_)
@@ -139,7 +142,8 @@ const CancellationByStoreAfterOrderAcceptance = function(user_, addr_, agent_, s
 
         , new event.StoreAccept   (store_)
         , new event.NewTransit    (agent_)
-        , new event.Accepted      (user_ )
+        , new event.Accepted      (user_ , Obj.User)
+        , new event.Accepted      (store_, Obj.Store)
 
         , new event.RejectedByStore (store_)
         , new event.Rejected        (user_ )
@@ -163,7 +167,8 @@ const CancellationByStoreAfterTransitAcceptance = function(user_, addr_, agent_,
 
         , new event.StoreAccept   (store_)
         , new event.NewTransit    (agent_)
-        , new event.Accepted      (user_ )
+        , new event.Accepted      (user_ , Obj.User)
+        , new event.Accepted      (store_, Obj.Store)
         
         , new event.AgentAccept   (agent_, store_)
         , new event.AgentReady    (user_)
@@ -191,7 +196,8 @@ const IgnoredByLastAgent = function(user_, addr_, agent_, store_, admin_)
 
         , new event.StoreAccept    (store_)
         , new event.NewTransit     (agent_)
-        , new event.Accepted       (user_ )
+        , new event.Accepted      (user_ , Obj.User)
+        , new event.Accepted      (store_, Obj.Store)
 
         , new event.AgentIgnore    (agent_)
         , new event.NoAgents       (admin_)
