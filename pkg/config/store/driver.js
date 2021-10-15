@@ -8,6 +8,7 @@ const { ObjectID }           = require('mongodb')
           store   : require('../store/archive')
         , user    : require('../user/archive')
         , journal : require('../journal/archive')
+        , product : require('../product/archive')
     }
     , jwt                    = require('../../infra/jwt')
 
@@ -354,6 +355,11 @@ function Store(data)
             }
         }
         if(data.Time)     rcd.Time     = data.Time
+        if(rcd.Location)
+        {
+            const data_ = { Location: rcd.Location }
+            await db.product.UpdateMany(rcd._id, data_)
+        }
         // TODO MobileNo
         await db.store.Save(rcd)
 

@@ -104,6 +104,21 @@ const DecProdCount         = async function (prod)
     console.log('product-count-decremented', { Products : qry_[0].updateOne })
 }
 
+const UpdateMany = async function (store_id, data)
+{
+    console.log('update-products-in-a-store', { StoreID: store_id, Data: data })
+    let qry_ = { StoreID : ObjectId(store_id) }
+      , op   = { $set: data }
+
+    const resp = await products.updateMany(qry_, op)
+    if (!resp.result.ok)
+    {
+        console.log('product-updation-failed', { Query : qry_ })
+        Err_(code.INTERNAL_SERVER, reason.DBUpdationFailed)
+    }
+    console.log('products-updated', { StoreId: store_id, Data: data })
+}
+
 const Remove      = async function (data)
 {
     const query = 
@@ -126,5 +141,6 @@ module.exports =
     , Get          : Get
     , ReadAll      : ReadAll
     , DecProdCount : DecProdCount
+    , UpdateMany   : UpdateMany
     , Remove       : Remove
 }
