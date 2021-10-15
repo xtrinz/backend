@@ -92,8 +92,9 @@ let View = function(user_, store_, product_)
             , Image         : product.Image
             , Price         : product.Price
             , Quantity      : product.Quantity
+            , CountAtCart   : 0
             , Description   : product.Description
-            , Category    : product.Category
+            , Category      : product.Category
             , Variants      : 
             {
                     Id      : ''
@@ -151,8 +152,9 @@ let List = function(user_, store_, product_)
             , Image         : product.Image
             , Price         : product.Price
             , Quantity      : product.Quantity
+            , CountAtCart   : 0            
             , Description   : product.Description
-            , Category    : product.Category
+            , Category      : product.Category
         }]
       }
     }

@@ -1,6 +1,10 @@
 const { ObjectId, ObjectID }        = require('mongodb')
-    , { Err_, code, reason, query } = require('../../system/models')
-    , db                            = require('../product/archive')
+    , { Err_, code, reason, query, mode } = require('../../system/models')
+    , db                            =
+    {
+        product : require('../product/archive')
+        , cart  : require('../cart/archive')
+    }
 
 function Product(data)
 {
@@ -30,20 +34,20 @@ function Product(data)
                 StoreID : ObjectId(this.Data.StoreID)
             , Name    : this.Data.Name
         }
-        , product = await db.Get(key, query.Custom)
+        , product = await db.product.Get(key, query.Custom)
         if (product) Err_(code.BAD_REQUEST, reason.ProductExists)
          
         this.Data._id = new ObjectID()
          
-        await db.Save(this.Data)
+        await db.product.Save(this.Data)
         console.log('new-product-added', { Product: this.Data})
     }
 
-    this.Read           = async function (product_id)
+    this.Read           = async function (product_id, entity_)
     {
         console.log('read-product', { ProductID : product_id })
 
-        const product = await db.Get(product_id, query.ByID)
+        const product = await db.product.Get(product_id, query.ByID)
         if (!product) Err_(code.BAD_REQUEST, reason.ProductNotFound)
 
         
@@ -52,10 +56,20 @@ function Product(data)
         product.ProductID = product._id
         delete product._id
 
+        // Polulate count at from cart
+        if(entity_.Mode === mode.User)
+        {
+            product.CountAtCart = 0
+            let cart = await db.cart.Get(entity_.User._id, query.ByUserID)
+            for(let jdx = 0; jdx < cart.Products.length; jdx++)
+            if(String(product.ProductID) === String(cart.Products[jdx].ProductID))
+            product.CountAtCart = cart.Products[jdx].Quantity
+        }        
+
         return product
     }
 
-    this.List           = async function (in_, mode_)
+    this.List           = async function (in_, entity_)
     {
         console.log('list-product', { Data : in_ })
         
@@ -69,7 +83,20 @@ function Product(data)
         if(in_.Category) in_.Query.Category = in_.Category
         if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
 
-        const data = await db.ReadAll(in_, mode_)
+        const data = await db.product.ReadAll(in_, entity_.Mode)
+
+        // Polulate count at from cart
+        if(entity_.Mode === mode.User)
+        {
+            let cart = await db.cart.Get(entity_.User._id, query.ByUserID)
+            for(let idx = 0; idx < data.length; idx++)
+            {
+                data[idx].CountAtCart = 0 // TODO Test it
+                for(let jdx = 0; jdx < cart.Products.length; jdx++)
+                if(String(data[idx].ProductID) === String(cart.Products[jdx].ProductID))
+                data[idx].CountAtCart = cart.Products[jdx].Quantity
+            }
+        }
 
         console.log('product-list', { Data : data })
 
@@ -80,7 +107,7 @@ function Product(data)
     {
         console.log('modify-product', { ProductID: data.ProductID })
 
-        this.Data = await db.Get(data.ProductID, query.ByID)
+        this.Data = await db.product.Get(data.ProductID, query.ByID)
         if (!this.Data) Err_(code.BAD_REQUEST, reason.ProductNotFound)
 
         this.Data.Name          = (data.Name)?        data.Name        : this.Data.Name
@@ -92,7 +119,7 @@ function Product(data)
         this.Data.Variants.Id   = (data.VariantID)?   data.VariantID   : this.Data.Variants.Id
         this.Data.Variants.Type = (data.Type)?        data.Type        : this.Data.Variants.Type
         this.Data.Location      = data.Store.Location
-        await db.Save(this.Data)
+        await db.product.Save(this.Data)
 
         console.log('product-modified', { Product: this.Data })
     }

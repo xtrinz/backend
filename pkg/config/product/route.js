@@ -22,7 +22,7 @@ router.get('/list', async (req, res, next) =>
   try
   {
     let product = new Product()
-    const data  = await product.List(req.query, req.body.Mode)
+    const data  = await product.List(req.query, req.body)
     
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -37,7 +37,7 @@ router.get('/view', async (req, res, next) =>
   try
   {
     let product = new Product()
-    const data  = await product.Read(req.query.ProductID)
+    const data  = await product.Read(req.query.ProductID, req.body)
     
     return res.status(code.OK).json({
       Status  : status.Success,

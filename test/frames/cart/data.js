@@ -26,14 +26,15 @@ let Cart = function(user)
     let product = Product.Products[product_]
     let prod =
     {
-        ProductID : product.ID
-      , Name      : product.Name
-      , Price     : product.Price
-      , Image     : product.Image
-      , Available : product.Available
-      , Flagged   : product.Flagged
-      , Category  : product.Category
-      , Quantity  : product.Quantity
+        ProductID   : product.ID
+      , Name        : product.Name
+      , Price       : product.Price
+      , Image       : product.Image
+      , Available   : product.Available
+      , Flagged     : product.Flagged
+      , Category    : product.Category
+      , Quantity    : product.Quantity
+      , CountAtCart : product.Quantity
     }
 
     this.Products.push(prod)
@@ -52,11 +53,12 @@ let Cart = function(user)
     let product = Product.Products[product_]
     let prod =
     {
-        ProductID : product.ID
-      , Name      : product.Name
-      , Image     : product.Image
-      , Price     : product.Price
-      , Quantity  : product.Quantity
+        ProductID   : product.ID
+      , Name        : product.Name
+      , Image       : product.Image
+      , Price       : product.Price
+      , Quantity    : product.Quantity
+      , CountAtCart : product.Quantity      
     }
 
     this.Products.pop(prod)
