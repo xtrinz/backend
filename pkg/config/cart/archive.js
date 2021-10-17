@@ -60,7 +60,7 @@ const Read        = async function (user_id)
     if (!product) Err_(code.BAD_REQUEST, reason.ProductNotFound)
 
     let flag      = false
-    if (item.Quantity > product.Quantity)
+    if (item.Quantity > product.Quantity || !product.IsAvailable)
     { flag = true ; data.Flagged = true }
 
     const node = 
