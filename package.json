@@ -33,6 +33,7 @@
   "devDependencies": {
     "http": "^0.0.1-security",
     "madge": "^4.0.2",
+    "rus-diff": "^1.1.0",
     "socket.io-client": "^4.1.2"
   }
 }

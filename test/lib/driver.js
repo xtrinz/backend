@@ -1,6 +1,7 @@
 const compare                = require('./compare')
     , { Rest, Socket, Type, Method } = require('./medium')
     , db                     = require('../../pkg/system/database')
+    , rusDiff                = require('rus-diff').rusDiff    
 
 const prints = 
 {
@@ -29,8 +30,8 @@ function TestRig()
                 if(sts) { return { Status: true, Data: resp } }
 
                 // console.log(data.Request.Body, data.Response.Data, resp.Data)
-                
-                console.log(prints.Failed, '\n\nExpected : ',JSON.stringify(data.Response), '\nReceived : ', JSON.stringify(resp))
+                console.log(prints.Failed, JSON.stringify(rusDiff(data.Response, resp)))
+                // console.log(prints.Failed, '\n\nExpected : ',JSON.stringify(data.Response), '\nReceived : ', JSON.stringify(resp))
                 return { Status: false, Data: resp }
             case Type.Event:
                 switch(data.Method)

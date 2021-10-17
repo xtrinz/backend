@@ -35,6 +35,7 @@ let Cart = function(user)
       , Category    : product.Category
       , Quantity    : product.Quantity
       , CountAtCart : product.Quantity
+      , IsAvailable : true
     }
 
     this.Products.push(prod)
@@ -57,8 +58,12 @@ let Cart = function(user)
       , Name        : product.Name
       , Image       : product.Image
       , Price       : product.Price
+      , Available   : product.Available
+      , Flagged     : product.Flagged    
+      , Category    : product.Category        
       , Quantity    : product.Quantity
-      , CountAtCart : product.Quantity      
+      , CountAtCart : product.Quantity  
+      , IsAvailable : true          
     }
 
     this.Products.pop(prod)

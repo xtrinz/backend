@@ -116,6 +116,18 @@ const Insert     = async function (cart_id, data)
       Err_(code.INTERNAL_SERVER, reason.DBUpdationFailed)
   }
 
+  const product_ = await prod.Get(data.ProductID, query.ByID)
+  if (!product_)
+  {
+    console.log('product-not-found-on-addn-to-cart', { Cart: cart_id, Data: data })
+    Err_(code.BAD_REQUEST, reason.ProductNotFound)
+  }
+  if(!product_.IsAvailable || product_.Quantity < 1)
+  {
+    console.log('product-not-available', { Cart: cart_id, Data: data })
+    Err_(code.BAD_REQUEST, reason.ProductUnavailable)
+  }
+
   const key1  =
     { 
       _id                : ObjectId(cart_id),

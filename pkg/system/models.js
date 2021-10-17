@@ -46,6 +46,7 @@ module.exports =
 		, MutiStoreNotSupported     : 'Multistore purchase not supported'
 		, BadState                  : 'Bad machine state'
 		, ProductNotFound           : 'Product not found'
+		, ProductUnavailable 		: 'Product unavailable'
 		, StoreNotFound             : 'Store not found'
 		, StoreClosed 				: 'Store Closed'
 		, GracePeriodExceeded 		: 'Store checkout grace period exceeded'

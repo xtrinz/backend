@@ -99,7 +99,8 @@ let View = function(user_, store_, product_)
             {
                     Id      : ''
                 , Type      : '' // COLOR / SIZE
-            }            
+            }           
+            , IsAvailable   : true 
           }
         }
       }
@@ -155,6 +156,7 @@ let List = function(user_, store_, product_)
             , CountAtCart   : 0            
             , Description   : product.Description
             , Category      : product.Category
+            , IsAvailable   : true
         }]
       }
     }

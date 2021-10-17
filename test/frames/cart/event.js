@@ -55,6 +55,20 @@ let List = function(user_, cart_, addr_, store_)
     let cart    = data.Get(data.Obj.Cart,    this.CartID)
     let addr    = data.Get(data.Obj.Address, this.AddressID)
     let store   = data.Get(data.Obj.Store,   this.StoreID)
+
+    // Ugly: Pls Forgive
+    let prod = []
+    for(let idx = 0; idx < cart.Products.length; idx++)
+    {
+      let tmp  = cart.Products[idx].CountAtCart
+      let tmp1 = cart.Products[idx].IsAvailable
+      delete cart.Products[idx].CountAtCart
+      delete cart.Products[idx].IsAvailable      
+      prod.push({ ...cart.Products[idx] })
+      cart.Products[idx].CountAtCart = tmp
+      cart.Products[idx].IsAvailable = tmp1
+    }
+
     // TODO set custom product qnty
     let templ   =
     {
@@ -75,7 +89,7 @@ let List = function(user_, cart_, addr_, store_)
           , Text              : ''
           , Data              : 
           {
-                Products      : cart.Products
+                Products      : prod
               , Flagged       : false
               , JournalID     : ''
               , StoreID       : store.ID

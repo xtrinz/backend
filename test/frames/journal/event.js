@@ -24,7 +24,20 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
 
       journal.Transit = { ID : user.TransitID }
       data.Set(data.Obj.Journal , this.JournalID, journal)
-  
+
+    // Ugly: Pls Forgive
+    let prod = []
+    for(let idx = 0; idx < journal.Order.Products.length; idx++)
+    {
+      let tmp  = journal.Order.Products[idx].CountAtCart
+      let tmp1 = journal.Order.Products[idx].IsAvailable
+      delete journal.Order.Products[idx].CountAtCart
+      delete journal.Order.Products[idx].IsAvailable      
+      prod.push({ ...journal.Order.Products[idx] })
+      journal.Order.Products[idx].CountAtCart = tmp
+      journal.Order.Products[idx].IsAvailable = tmp1
+    }
+
         switch (this.Mode)
         {
             case mode.User :
@@ -48,7 +61,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
               }
               , Order           :
               { 
-                  Products      : journal.Order.Products
+                  Products      : prod
                 , Bill          : journal.Order.Bill
               }
               , Payment         : 
@@ -130,7 +143,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                 }
                 , Order           :
                 { 
-                    Products      : journal.Order.Products
+                    Products      : prod
                   , Bill          : journal.Order.Bill
                 }
                 , Payment         : 
@@ -164,7 +177,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
               }
               , Order           :
               { 
-                  Products      : journal.Order.Products
+                  Products      : prod
                 , Bill          : { Total: journal.Order.Bill.Total }
               }
               , Transit         : 
@@ -230,6 +243,18 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
       journal.Transit = { ID : user.TransitID }
       data.Set(data.Obj.Journal , this.JournalID, journal)
   
+    // Ugly: Pls Forgive
+    let prod = []
+    for(let idx = 0; idx < journal.Order.Products.length; idx++)
+    {
+      let tmp  = journal.Order.Products[idx].CountAtCart
+      let tmp1 = journal.Order.Products[idx].IsAvailable
+      delete journal.Order.Products[idx].CountAtCart
+      delete journal.Order.Products[idx].IsAvailable      
+      prod.push({ ...journal.Order.Products[idx] })
+      journal.Order.Products[idx].CountAtCart = tmp
+      journal.Order.Products[idx].IsAvailable = tmp1
+    }
         switch (this.Mode)
         {
             case mode.User :
@@ -253,7 +278,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
               }
               , Order           :
               { 
-                  Products      : journal.Order.Products
+                  Products      : prod
                 , Bill          : journal.Order.Bill
               }
               , Payment         : 
@@ -335,7 +360,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                 }
                 , Order           :
                 { 
-                    Products      : journal.Order.Products
+                    Products      : prod
                   , Bill          : journal.Order.Bill
                 }
                 , Payment         : 
@@ -369,7 +394,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
               }
               , Order           :
               { 
-                  Products      : journal.Order.Products
+                  Products      : prod
                 , Bill          : { Total: journal.Order.Bill.Total }
               }
               , Transit         : 
