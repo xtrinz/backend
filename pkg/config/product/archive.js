@@ -51,11 +51,12 @@ const ReadAll         = async function (data, mode_)
     console.log('find-all-product-by-store-id', { Data: data, Mode: mode_ })    
     const project   =
         {
-            _id         : 1, StoreID  : 1,
-            Name        : 1, Image    : 1,
-            Price       : 1, Quantity : 1,
-            Description : 1, Category : 1,
-            IsAvailable : 1
+            _id         : 1, StoreID    : 1,
+            Name        : 1, Image      : 1,
+            Price       : 1, Quantity   : 1,
+            Description : 1, Category   : 1,
+            IsAvailable : 1, PricePerGV :1,
+            GroundVolume: 1, Unit       : 1
         }
         , query     = data.Query
         , skip      = (data.Page > 0)? (data.Page - 1) * data.Limit : 0

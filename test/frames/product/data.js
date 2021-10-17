@@ -12,6 +12,9 @@ let Product = function()
   this.Flagged      = false
   this.Description  = '{0} Description'.format(this.Name)
   this.Category     = 'Electronics'
+  this.PricePerGV   = 30
+  this.GroundVolume = 1
+  this.Unit         = 'kg'
   this.Variants     = 
   {
         Type    : 'COLOR'

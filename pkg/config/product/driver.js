@@ -11,16 +11,19 @@ function Product(data)
    if(data)
    this.Data =
    {
-            _id       : ''
-        , StoreID     : ObjectId(data.Store._id)
-        , Name        : data.Name
-        , Image       : data.Image
-        , Price       : data.Price
-        , Quantity    : data.Quantity
-        , Description : data.Description
-        , Category    : data.Category
-        , IsAvailable : true
-        , Variants    : 
+            _id        : ''
+        , StoreID      : ObjectId(data.Store._id)
+        , Name         : data.Name
+        , Image        : data.Image
+        , Price        : data.Price
+        , Quantity     : data.Quantity
+        , Description  : data.Description
+        , Category     : data.Category
+        , PricePerGV   : data.PricePerGV
+        , GroundVolume : data.GroundVolume
+        , Unit         : data.Unit
+        , IsAvailable  : true
+        , Variants     : 
         {
                 Id    : ''
             , Type    : '' // COLOR / SIZE
@@ -112,15 +115,18 @@ function Product(data)
         this.Data = await db.product.Get(data.ProductID, query.ByID)
         if (!this.Data) Err_(code.BAD_REQUEST, reason.ProductNotFound)
 
-        this.Data.Name          = (data.Name)?        data.Name                      : this.Data.Name
-        this.Data.Image         = (data.Image)?       data.Image                     : this.Data.Image
-        this.Data.Price         = (data.Price)?       data.Price                     : this.Data.Price
-        this.Data.Quantity      = (data.Quantity)?    data.Quantity                  : this.Data.Quantity
-        this.Data.Description   = (data.Description)? data.Description               : this.Data.Description
-        this.Data.Category      = (data.Category)?    data.Category                  : this.Data.Category
-        this.Data.Variants.Id   = (data.VariantID)?   data.VariantID                 : this.Data.Variants.Id
-        this.Data.Variants.Type = (data.Type)?        data.Type                      : this.Data.Variants.Type
+        this.Data.Name          = (data.Name)?           data.Name                      : this.Data.Name
+        this.Data.Image         = (data.Image)?          data.Image                     : this.Data.Image
+        this.Data.Price         = (data.Price)?          data.Price                     : this.Data.Price
+        this.Data.Quantity      = (data.Quantity)?       data.Quantity                  : this.Data.Quantity
+        this.Data.Description   = (data.Description)?    data.Description               : this.Data.Description
+        this.Data.Category      = (data.Category)?       data.Category                  : this.Data.Category
+        this.Data.Variants.Id   = (data.VariantID)?      data.VariantID                 : this.Data.Variants.Id
+        this.Data.Variants.Type = (data.Type)?           data.Type                      : this.Data.Variants.Type
         this.Data.IsAvailable   = (data.IsAvailable !== undefined)? data.IsAvailable : this.Data.IsAvailable
+        this.Data.PricePerGV    = (data.PricePerGV)?    data.PricePerGV                 : this.Data.PricePerGV
+        this.Data.GroundVolume  = (data.GroundVolume)?  data.GroundVolume               : this.Data.GroundVolume 
+        this.Data.Unit          = (data.Unit)?          data.Unit                       : this.Data.Unit
         this.Data.Location      = data.Store.Location
         await db.product.Save(this.Data)
 
