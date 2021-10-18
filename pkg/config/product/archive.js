@@ -24,6 +24,24 @@ const Save      = async function(data)
     console.log('product-saved', { Product : data })
 }
 
+const Update      = async function(Id, act)
+{
+    console.log('save-product', { ID: Id, Act: act })
+    const key   = { _id    : Id }
+
+    const resp  = await products.updateOne(key, act)
+    if (!resp.result.ok)
+    {
+        console.log('product-save-failed', { 
+            Key         : key
+            , Action    : act
+            , Result    : resp.result })
+
+        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
+    }
+    console.log('product-saved', { ID: Id, Act: act })
+}
+
 const Get        = async function(param, qType)
 {
     console.log('find-product', { Param: param, QType: qType})
@@ -141,6 +159,7 @@ module.exports =
 {
       Save         : Save
     , Get          : Get
+    , Update       : Update
     , ReadAll      : ReadAll
     , DecProdCount : DecProdCount
     , UpdateMany   : UpdateMany

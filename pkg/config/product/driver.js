@@ -112,23 +112,38 @@ function Product(data)
     {
         console.log('modify-product', { ProductID: data.ProductID })
 
-        this.Data = await db.product.Get(data.ProductID, query.ByID)
-        if (!this.Data) Err_(code.BAD_REQUEST, reason.ProductNotFound)
+        prod = await db.product.Get(data.ProductID, query.ByID)
+        if (!prod) Err_(code.BAD_REQUEST, reason.ProductNotFound)
 
-        this.Data.Name          = (data.Name)?           data.Name                      : this.Data.Name
-        this.Data.Image         = (data.Image)?          data.Image                     : this.Data.Image
-        this.Data.Price         = (data.Price)?          data.Price                     : this.Data.Price
-        this.Data.Quantity      = (data.Quantity)?       data.Quantity                  : this.Data.Quantity
-        this.Data.Description   = (data.Description)?    data.Description               : this.Data.Description
-        this.Data.Category      = (data.Category)?       data.Category                  : this.Data.Category
-        this.Data.Variants.Id   = (data.VariantID)?      data.VariantID                 : this.Data.Variants.Id
-        this.Data.Variants.Type = (data.Type)?           data.Type                      : this.Data.Variants.Type
-        this.Data.IsAvailable   = (data.IsAvailable !== undefined)? data.IsAvailable : this.Data.IsAvailable
-        this.Data.PricePerGV    = (data.PricePerGV)?    data.PricePerGV                 : this.Data.PricePerGV
-        this.Data.GroundVolume  = (data.GroundVolume)?  data.GroundVolume               : this.Data.GroundVolume 
-        this.Data.Unit          = (data.Unit)?          data.Unit                       : this.Data.Unit
-        this.Data.Location      = data.Store.Location
-        await db.product.Save(this.Data)
+        prod.Name          = (data.Name)?           data.Name                  : prod.Name
+        prod.Image         = (data.Image)?          data.Image                 : prod.Image
+        prod.Price         = (data.Price)?          data.Price                 : prod.Price
+        prod.Description   = (data.Description)?    data.Description           : prod.Description
+        prod.Category      = (data.Category)?       data.Category              : prod.Category
+        prod.Variants.Id   = (data.VariantID)?      data.VariantID             : prod.Variants.Id
+        prod.Variants.Type = (data.Type)?           data.Type                  : prod.Variants.Type
+        prod.IsAvailable   = (data.IsAvailable != undefined)? data.IsAvailable : prod.IsAvailable
+        prod.PricePerGV    = (data.PricePerGV)?    data.PricePerGV             : prod.PricePerGV
+        prod.GroundVolume  = (data.GroundVolume)?  data.GroundVolume           : prod.GroundVolume 
+        prod.Unit          = (data.Unit)?          data.Unit                   : prod.Unit
+        prod.Location      = data.Store.Location
+
+        let act = {}
+        if(data.IsAvailable != undefined &&
+            !data.IsAvailable) 
+        { prod.Quantity = 0 }
+        else if(data.Quantity != undefined)
+        {
+            if(prod.Quantity + data.Quantity > 0)
+            {
+                delete prod.Quantity
+                act[ '$inc' ] = { Quantity: data.Quantity }
+            }
+            else { prod.Quantity = 0 }
+        }
+
+        act[ '$set' ] = prod
+        await db.product.Update(prod._id, act)
 
         console.log('product-modified', { Product: this.Data })
     }
