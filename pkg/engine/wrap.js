@@ -1,5 +1,5 @@
 const   otp 				 	 = require('../infra/otp')
-	  , { Err_ , code, reason, mode, states,
+	  , { Err_ , code, reason, mode, states, query,
 		  message, gw, event }  = require('../system/models')
 	  , { Journal } 		 	 = require('../config/journal/driver')
 	  , db 						 = 
@@ -7,6 +7,7 @@ const   otp 				 	 = require('../infra/otp')
 			  transit 			 : require('../config/transit/archive')
 			, user 				 : require('../config/user/archive')
 			, journal 			 : require('../config/journal/archive')
+			, product 			 : require('../config/product/archive')
 	  }
 
 // Notify | UpdateState | Payout | OTP
@@ -236,14 +237,22 @@ const SetAgent   = function(agent_)
 		, Name	: agent_.Name , MobileNo : agent_.MobileNo  }
 }
 
+const ResetProduct = async function(Journal_id)
+{
+	console.log('reset-product-count-on-order-diffusion', { JournalID: Journal_id })
+	let journal_ = await db.journal.Get(Journal_id, query.ByID)
+	await db.product.IncProdCount(journal_.Order.Products)
+}
+
 module.exports =
 {
-      PayOut      : PayOut
-    , ConfirmOTP  : ConfirmOTP
-    , SendOTP     : SendOTP
-    , Save        : Save
-    , PingAdmins  : PingAdmins
-    , ResetAgent  : ResetAgent
-	, SetAgent 	  : SetAgent
-	, SetHistory  : SetHistory
+      PayOut       : PayOut
+    , ConfirmOTP   : ConfirmOTP
+    , SendOTP      : SendOTP
+    , Save         : Save
+    , PingAdmins   : PingAdmins
+    , ResetAgent   : ResetAgent
+	, SetAgent 	   : SetAgent
+	, SetHistory   : SetHistory
+	, ResetProduct : ResetProduct
 }

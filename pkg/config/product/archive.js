@@ -124,6 +124,29 @@ const DecProdCount         = async function (prod)
     console.log('product-count-decremented', { Products : qry_[0].updateOne })
 }
 
+const IncProdCount         = async function (prod)
+{
+    console.log('increment-product-count', { Products: prod })
+    let qry_ = []
+    prod.forEach((item)=>
+    {
+        qry_.push(
+        { updateOne :
+            {
+               "filter": { _id: ObjectId(item.ProductID), IsAvailable: true },
+               "update": { $inc : { Quantity: (item.Quantity) } }
+            }
+        })
+    })
+    const resp = await products.bulkWrite(qry_)
+    if (!resp.result.ok)
+    {
+        console.log('product-count-increment-failed', { Query : qry_ })
+        return
+    }
+    console.log('product-count-incremented', { Products : qry_[0].updateOne })
+}
+
 const UpdateMany = async function (store_id, data)
 {
     console.log('update-products-in-a-store', { StoreID: store_id, Data: data })
@@ -162,6 +185,7 @@ module.exports =
     , Update       : Update
     , ReadAll      : ReadAll
     , DecProdCount : DecProdCount
+    , IncProdCount : IncProdCount
     , UpdateMany   : UpdateMany
     , Remove       : Remove
 }

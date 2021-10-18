@@ -3,7 +3,7 @@ const   { Emit } 			 	   = require('./events')
 	  , states , alerts, query }   = require('../system/models')
 	  , { User } 			 	   = require('../config/user/driver')
 	  , { PayOut , SendOTP, Save, SetAgent, PingAdmins, SetHistory
-		, ConfirmOTP, ResetAgent } = require('./wrap')
+		, ConfirmOTP, ResetAgent, ResetProduct } = require('./wrap')
 	  , db 						   =
 	  {
 		    user 				   : require('../config/user/archive')
@@ -29,6 +29,9 @@ const CancelledByUser		=  async function(ctxt)
 	await Save(ctxt, states.CargoCancelled)
 
 	await PayOut(ctxt)
+
+	await ResetProduct(ctxt.Data.JournalID)
+
 	console.log('cargo-cancelled', ctxt.Data)
 }
 
@@ -41,6 +44,9 @@ const RejectedByStore		= async function(ctxt)
 	await Save(ctxt, states.OrderRejected)
 
 	await PayOut(ctxt)
+
+	await ResetProduct(ctxt.Data.JournalID)
+
 	console.log('order-rejected', ctxt.Data)
 }
 
@@ -177,6 +183,9 @@ const TerminatedByAdmin		= async function(ctxt)
 	await Save(ctxt, states.TransitTerminated)
 
 	await PayOut(ctxt) // ? Handle loops
+
+	await ResetProduct(ctxt.Data.JournalID)
+
 	console.log('transit-completed', ctxt.Data)
 }
 
