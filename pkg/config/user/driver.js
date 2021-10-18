@@ -33,7 +33,17 @@ function User(data)
     {
         let user = await db.Get(this.Data.MobileNo, query.ByMobileNo)
         if (user && user.State === states.Registered)
-        Err_(code.BAD_REQUEST, reason.UserFound)
+        {
+            const otp_sms = new otp.OneTimePasswd({
+                            MobileNo: 	user.MobileNo, 
+                            Body: 	message.OnAuth })
+                , hash    = await otp_sms.Send(gw.SMS)
+
+            user.Otp = hash
+            await db.Save(user)
+            return
+        }
+
 
         if(this.Data.Mode     === mode.Admin &&
             !process.env.ADMIN_MOB_NO.split(' ').includes(this.Data.MobileNo))
