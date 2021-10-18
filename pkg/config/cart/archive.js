@@ -122,9 +122,11 @@ const Insert     = async function (cart_id, data)
     console.log('product-not-found-on-addn-to-cart', { Cart: cart_id, Data: data })
     Err_(code.BAD_REQUEST, reason.ProductNotFound)
   }
-  if(!product_.IsAvailable || product_.Quantity < 1)
+  if(!product_.IsAvailable  ||
+      product_.Quantity < 1 ||
+      data.Quantity > product_.Quantity)
   {
-    console.log('product-not-available', { Cart: cart_id, Data: data })
+    console.log('product-not-available-or-insufficient', { Cart: cart_id, Data: data, Product: product_ })
     Err_(code.BAD_REQUEST, reason.ProductUnavailable)
   }
 
@@ -160,7 +162,7 @@ const Update     = async function (cart_id, product_id, qnty)
           _id           : ObjectId(cart_id),
           'Products._id': ObjectId(product_id)
         }
-        , opts  = { $set: { 'Products.$.Quantity': qnty }  }
+        , opts  = { $inc: { 'Products.$.Quantity': qnty }  }
 
   const resp  = await carts.updateOne(key, opts)
   if (resp.modifiedCount !== 1) 
