@@ -157,10 +157,36 @@ const Insert     = async function (cart_id, data)
 
 const Update     = async function (cart_id, product_id, qnty)
 {
+  let key1  = 
+  {
+    _id      : ObjectId(cart_id),
+    Products : { $elemMatch: { _id : ObjectId(product_id) } }
+  }
+  let elem_ = await carts.findOne(key1)
+  if (!elem_)
+  {
+      console.log('prodcuct-not-found-at-cart-for-update', { Key: key1 })
+      Err_(code.INTERNAL_SERVER, reason.ProductNotFound)
+  }
+
+  const product_ = await prod.Get(product_id, query.ByID)
+  if (!product_)
+  {
+    console.log('product-not-found-on-update-to-cart', { Cart: cart_id, ProductID: product_id, Quantity: qnty })
+    Err_(code.BAD_REQUEST, reason.ProductNotFound)
+  }
+
+  if(!product_.IsAvailable  || product_.Quantity < 1 || (qnty + elem_.Quantity) > product_.Quantity )
+  {
+    console.log('product-not-available-or-insufficient', { Cart: cart_id, Product: product_ })
+    Err_(code.BAD_REQUEST, reason.ProductUnavailable)
+  }
+
   const   key =
         {
-          _id           : ObjectId(cart_id),
-          'Products._id': ObjectId(product_id)
+          _id                 : ObjectId(cart_id),
+          'Products._id'      : ObjectId(product_id),
+          'Products.Quantity' : { $gt: -1 * qnty }
         }
         , opts  = { $inc: { 'Products.$.Quantity': qnty }  }
 
