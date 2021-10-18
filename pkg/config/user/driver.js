@@ -1,5 +1,5 @@
 const { states, query, message, gw,
-        Err_, code, reason, mode}          = require('../../system/models')
+        Err_, code, reason, mode, command}          = require('../../system/models')
     , otp                            = require('../../infra/otp')
     , jwt                            = require('../../infra/jwt')
     , { ObjectID }                   = require('mongodb')
@@ -79,14 +79,20 @@ function User(data)
         if (this.Data.State === states.Registered)
         {
             console.log('user-exists-logging-in', { User: this.Data })            
-            return token
+            return {
+                  Token: token
+                , Command: command.LoggedIn
+            }
         }
         this.Data.State = states.MobConfirmed
         this.Data.Otp   = ''
         await db.Save(this.Data)
         console.log('user-mobile-number-confirmed', { User: this.Data })
-        
-        return token
+
+        return {
+            Token: token
+          , Command: command.Register
+        }
     }
 
     this.Register   = async function (data)

@@ -1,5 +1,5 @@
 const { code, status, states
-    ,   text, task } = require('../../system/models')
+    ,   text, task, command } = require('../../system/models')
     , router         = require('express').Router()
     , { User }       = require('../user/driver')
 
@@ -18,15 +18,17 @@ router.post('/register', async (req, res, next) =>
 
       case task.ReadOTP:
         user  = new User()
-        const token = await user.ConfirmMobileNo(req.body)
+        const resp = await user.ConfirmMobileNo(req.body)
         text_ = text.OTPConfirmed
         info_ = user.Data
-        res.setHeader('authorization', token)
+        info_.Command = resp.Command
+        res.setHeader('authorization', resp.Token)
         break
 
       case task.Register:
         user  = new User()
         info_ = req.body.User
+        info_.Command = command.LoggedIn
         await user.Register(req.body)
         text_ = text.Registered
         break
@@ -39,6 +41,7 @@ router.post('/register', async (req, res, next) =>
       , MobileNo  : info_.MobileNo
       , Email     : info_.Email
       , Mode      : info_.Mode
+      , Command   : info_.Command
     }
 
     return res.status(code.OK).json({

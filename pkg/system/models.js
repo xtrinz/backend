@@ -200,6 +200,11 @@ module.exports =
 		    Stripe 				: 'Stripe'
 		  , Paytm 				: 'Paytm'
 	},
+	command:
+	{
+		  Register 				: 'Register'
+		, LoggedIn 				: 'LoggedIn'
+	},
 	states:
 	{
 		  Running 				: 'Running'

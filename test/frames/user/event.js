@@ -1,4 +1,4 @@
-const { task, code, status, text } = require('../../../pkg/system/models')
+const { task, code, status, text, command } = require('../../../pkg/system/models')
     , { Method, Type }             = require('../../lib/medium')
     , { read }                     = require('../../lib/driver')
     , data                         = require('../data')
@@ -128,6 +128,7 @@ let Register = function(name)
             , MobileNo    : user.MobileNo
             , Email       : user.Email
             , Mode        : user.Mode
+            , Command     : command.LoggedIn
           }
         }
       }
