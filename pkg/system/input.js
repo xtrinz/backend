@@ -367,8 +367,9 @@ const Controller 		 = function()
         [method.get]             :
         {
             'query'              : [ 'required', 'object' ]
-          , 'headers'               : [ 'required', 'object' ]            
-          , 'query.JournalID'    : [ 'required', 'mongoId']
+          , 'headers'            : [ 'required', 'object' ]
+          , 'query.JournalID'    : [ [ 'requiredWithout', 'query.IsLive' ], 'mongoId']
+          , 'query.IsLive'       : [ [ 'requiredWithout', 'query.JournalID' ], 'boolean' ] // not cleansed well, but it will work
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }
       }

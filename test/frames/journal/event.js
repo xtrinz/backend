@@ -204,6 +204,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
             , Query        : 
             {
                 JournalID  : cart.Paytm.OrderID.slice(6)
+              , IsLive     : false
             }
             , Header       : { Authorization: token }
         }
@@ -422,6 +423,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
             {
                 Page       : 1
               , Limit      : 8
+              , IsLive     : false              
             }
             , Header       : { Authorization: token }
         }

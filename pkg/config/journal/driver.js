@@ -357,10 +357,12 @@ function Journal()
           return data_
           case mode.Agent :
 
-                query_ =
-                { 
-                    _id        : ObjectId(data.JournalID)
-                  , 'Agent.ID' : ObjectId(in_._id)
+                query_ = { 'Agent.ID' : ObjectId(in_._id) }
+
+                if(data.JournalID) query_._id = ObjectId(data.JournalID)
+                if((data.IsLive !== undefined) && (data.IsLive == true))
+                {
+                  query_[ 'Transit.Status' ] = states.Running
                 }
                 proj  = 
                 {
@@ -503,6 +505,12 @@ function Journal()
               'Buyer.ID'       : ObjectId(in_._id)
             , 'Payment.Status' : { $nin: [ states.Initiated, states.Failed ] }
           }
+
+          if((data.IsLive !== undefined) && (data.IsLive == true))
+          query_[ 'Transit.Status' ] = states.Running
+          else if (data.IsLive !== undefined)
+          query_[ 'Transit.Status' ] = states.Closed
+
           proj   = 
           {
             projection : 
@@ -539,6 +547,12 @@ function Journal()
           {
               'Agent.ID'       : ObjectId(in_._id)
           }
+
+          if((data.IsLive !== undefined) && (data.IsLive == true))
+          query_[ 'Transit.Status' ] = states.Running
+          else if (data.IsLive !== undefined)
+          query_[ 'Transit.Status' ] = states.Closed
+
           proj  = 
           {
             projection : 
@@ -595,6 +609,12 @@ function Journal()
               'Seller.ID'      : ObjectId(in_._id)
             , 'Payment.Status' : { $nin: [ states.Initiated, states.Failed ] }
           }
+
+          if((data.IsLive !== undefined) && (data.IsLive == true))
+          query_[ 'Transit.Status' ] = states.Running
+          else if (data.IsLive !== undefined)
+          query_[ 'Transit.Status' ] = states.Closed
+
           proj  = 
           {
             projection : 
@@ -638,6 +658,12 @@ function Journal()
               , { 'Admins.ID' : in_._id }
             ]
           }
+
+          if((data.IsLive !== undefined) && (data.IsLive == true))
+          query_[ 'Transit.Status' ] = states.Running
+          else if (data.IsLive !== undefined)
+          query_[ 'Transit.Status' ] = states.Closed
+
           proj  = 
           {
             projection : 
