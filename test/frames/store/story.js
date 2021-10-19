@@ -9,7 +9,8 @@ const Std = function(admin_, owner_, staff_, store_)
     const store = 
     [
           new event.RegisterNew     (store_)            // Store
-        , new event.RegisterReadOTP (owner_, store_)
+        , new event.RegisterReadOTP (store_)
+        , new event.Register        (store_)
         , new event.RegisterApprove (admin_, store_)
         , new event.Edit            (store_)
         , new event.Read            (owner_, store_)

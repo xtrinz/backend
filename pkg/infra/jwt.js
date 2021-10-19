@@ -15,7 +15,10 @@ const jwt                     = require('jsonwebtoken')
         const res = await jwt.verify(token, jwt_secret)
 
         if (!res || !res._id || !res.Mode) 
-        Err_(code.BAD_REQUEST, reason.InvalidToken)
+        {
+            console.log('invalid-token', { Data: res })
+            Err_(code.BAD_REQUEST, reason.InvalidToken)
+        }
         return res
     }
 

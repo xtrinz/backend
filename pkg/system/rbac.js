@@ -95,6 +95,15 @@ const Controller 		 = function()
         , [mode.Admin] 	  : false
         , [mode.Enabled]  : false
         }
+        , [task.Register] : 
+        { 
+            [mode.User]   : false
+          , [mode.Agent]  : false
+          , [mode.Store]  : true
+          , [mode.Admin] 	: false
+          , [mode.Enabled]: true
+          , [states.State]: states.MobConfirmed
+        }
         , [task.Approve]  : 
         { 
           [mode.User]     : false

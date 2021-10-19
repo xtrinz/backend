@@ -1,7 +1,7 @@
 const { Method, Type }             = require('../../lib/medium')
     , data                         = require('../data')
     , { read }                     = require('../../lib/driver')
-    , { code, status, text, task } = require('../../../pkg/system/models')
+    , { code, status, text, task, command, states } = require('../../../pkg/system/models')
     , jwt                          = require('../../../pkg/infra/jwt')
 
 let RegisterNew = function(store_) 
@@ -21,29 +21,7 @@ let RegisterNew = function(store_)
             , Body              : 
             {
                 Task            : task.New
-              , Name            : store.Name
-              , Image           : store.Image
-              , Type            : store.Type
-              , Certs           : store.Certs
-              , Description     : store.Description
               , MobileNo        : store.MobileNo
-              , Email           : store.Email
-              , Longitude       : store.Longitude
-              , Latitude        : store.Latitude
-              , Time            :
-              {
-                  Open          : store.Time.Open
-                , Close         : store.Time.Close
-              }
-              , Address         :
-              {
-                    Line1       : store.Address.Line1
-                  , Line2       : store.Address.Line2
-                  , City        : store.Address.City
-                  , PostalCode  : store.Address.PostalCode
-                  , State       : store.Address.State
-                  , Country     : store.Address.Country
-              }
             }
             , Header            : {}
         }
@@ -69,14 +47,12 @@ let RegisterNew = function(store_)
     }
 }
 
-let RegisterReadOTP = function(user_, store_) 
+let RegisterReadOTP = function(store_) 
 {
-  this.UserID   = user_
   this.StoreID  = store_
   this.Data     = function()
   {
     let store = data.Get(data.Obj.Store, this.StoreID)
-    let user  = data.Get(data.Obj.User , this.UserID )      
     let templ =
     {
           Type         : Type.Rest
@@ -91,7 +67,7 @@ let RegisterReadOTP = function(user_, store_)
             , MobileNo : store.MobileNo
             , OTP      : store.OTP
           }
-          , Header     : { Authorization: user.Token }
+          , Header     : {  }
         }
         , Skip         : [ 'Token' ]
         , Response     :
@@ -99,7 +75,7 @@ let RegisterReadOTP = function(user_, store_)
             Code       : code.OK
           , Status     : status.Success
           , Text       : text.OTPConfirmed
-          , Data       : { Token : '' }
+          , Data       : { Token : '', Command: command.Register }
         }
 
     } 
@@ -107,12 +83,99 @@ let RegisterReadOTP = function(user_, store_)
   }
   this.PostSet        = async function(res_)
   {
-    let store = data.Get(data.Obj.Store, this.StoreID)
-      data_ = await jwt.Verify(res_.Data.Token)
-      store.ID    = data_._id
-      store.Token = res_.Data.Token
+    let store   = data.Get(data.Obj.Store, this.StoreID)
+      , data_   = await jwt.Verify(res_.Data.Token)
+    store.ID    = data_._id
+    store.Token = res_.Data.Token
     data.Set(data.Obj.Store, this.StoreID, store)
   }  
+}
+
+let Register = function(name) 
+{
+    this.ID     = name
+    this.Data   = function()
+    {
+      let store  = data.Get(data.Obj.Store, this.ID)
+      let templ =      
+      {
+          Type            : Type.Rest
+        , Describe        : 'Store Register Register'
+        , Request         :
+        {
+            Method        : Method.POST
+          , Path          : '/v1/store/register'
+          , Body          : 
+          {
+              Task            : task.Register
+            , Name            : store.Name
+            , Image           : store.Image
+            , Type            : store.Type
+            , Certs           : store.Certs
+            , Description     : store.Description
+            , MobileNo        : store.MobileNo
+            , Email           : store.Email
+            , Longitude       : store.Longitude
+            , Latitude        : store.Latitude
+            , Time            :
+            {
+                Open          : store.Time.Open
+              , Close         : store.Time.Close
+            }
+            , Address         :
+            {
+                  Line1       : store.Address.Line1
+                , Line2       : store.Address.Line2
+                , City        : store.Address.City
+                , PostalCode  : store.Address.PostalCode
+                , State       : store.Address.State
+                , Country     : store.Address.Country
+            }
+          }
+          , Header        :
+          {
+            Authorization : store.Token
+          }
+        }
+        , Response        :
+        {
+            Code          : code.OK
+          , Status        : status.Success
+          , Text          : text.Registered
+          , Data          :
+          {
+              StoreID      : store.ID
+            , Name         : store.Name
+            , MobileNo     : store.MobileNo
+            , Image        : store.Image
+            , Description  : store.Description
+            , Type         : store.Type
+            , Certs        : store.Certs
+            , Address      :
+            {
+                Line1      : store.Address.Line1
+              , Line2      : store.Address.Line2
+              , City       : store.Address.City
+              , PostalCode : store.Address.PostalCode
+              , State      : store.Address.State
+              , Country    : store.Address.Country
+            }
+            , Time         :
+            {
+                Open       : store.Time.Open
+              , Close      : store.Time.Close
+            }
+            , Email        : store.Email
+            , Longitude    : store.Longitude
+            , Latitude     : store.Latitude
+            , State        : 'ToBeApproved'
+            , Status       : states.Closed
+            , Command      : command.LoggedIn
+          }
+        }
+      }
+      return templ
+    }
 }
 
 let RegisterApprove =  function(admin_, store_) 
@@ -361,6 +424,7 @@ module.exports =
 {
       RegisterNew     
     , RegisterReadOTP 
+    , Register
     , RegisterApprove // Store registration sequence
     , Read            
     , List            // Read store

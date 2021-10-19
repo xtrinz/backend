@@ -216,6 +216,7 @@ module.exports =
         , MobConfirmed          : 'MobileNumberConfirmed'
 		, EntityCreated 		: 'EntityCreated'	
         , Registered            : 'Registered'
+		, ToBeApproved 			: 'ToBeApproved'
 
 		, StripeSucess 			: "payment_intent.succeeded"
 		, StripeFailed 			: "payment_intent.payment_failed"
