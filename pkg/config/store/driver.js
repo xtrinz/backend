@@ -2,7 +2,7 @@ const { ObjectID }           = require('mongodb')
     , otp                    = require('../../infra/otp')
     , { Err_, code, reason, limits
       , states, mode, qtype, command
-      , query, message, gw } = require('../../system/models')
+      , query, message, gw, task } = require('../../system/models')
     , db                     = 
     {
           store   : require('../store/archive')
@@ -184,7 +184,8 @@ function Store(data)
         // Check the mobile number already used
         const key2 = { MobileNo : this.Data.MobileNo }
         const store_ = await db.store.Get(key2, query.Custom)
-        if (store_ && store_.State === states.Registered)
+        if (store_ && ( store_.State === states.Registered   ||
+                        store_.State === states.ToBeApproved ))
         {
             const otp_sms = new otp.OneTimePasswd({
                             MobileNo: store_.MobileNo, 
@@ -225,7 +226,9 @@ function Store(data)
 
         const token = await jwt.Sign({ _id : this.Data._id, Mode : mode.Store })
 
-        if (this.Data.State === states.Registered)
+        if (this.Data.State === states.Registered    ||
+            this.Data.State === states.ToBeApproved  ||
+            this.Data.State === states.ToBeCorrected )
         {
             console.log('user-exists-logging-in', { User: this.Data })            
             return {
@@ -293,7 +296,18 @@ function Store(data)
             if(this.Data) reason_ = reason.BadState
             Err_(code.BAD_REQUEST, reason_)
         }
-        this.Data.State      = states.Registered
+
+        if(data.Action == task.Deny)
+        {
+            this.Data.State  = states.ToBeCorrected
+            this.Data.Text   = data.Text
+        }
+        else
+        {
+            this.Data.State  = states.Registered
+            this.Data.Text   = ''
+        }
+
         await db.store.Save(this.Data)
         console.log('store-approved', {Store: this.Data})
     }
@@ -306,7 +320,11 @@ function Store(data)
         {
           case mode.User:
             proj    = { projection: { _id   : 1, Name  : 1, Type : 1, Image : 1, Status: 1, Time: 1, Description: 1 } }
-            in_.Query = { Location: { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } } 
+            in_.Query = 
+            {
+                  State   : states.Registered
+                , Location: { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } 
+            } 
 
             if(in_.Category) in_.Query.Type     = in_.Category
             if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
@@ -330,7 +348,7 @@ function Store(data)
             break
           case mode.Admin:
             proj =
-            { _id   : 1, Name  : 1, Type : 1
+            { _id   : 1, Name  : 1, Type : 1, Text: 1
             , Image : 1, State : 1, Status: 1, Time: 1, Description: 1 }
             switch(in_.Type)
             {
@@ -344,7 +362,7 @@ function Store(data)
 
                 break
                 case qtype.Pending:
-                in_.Query = { State : states.MobConfirmed }
+                in_.Query = { State : states.ToBeApproved }
                 break
                 case qtype.NearPending:
                 in_.Query = 
@@ -357,7 +375,7 @@ function Store(data)
                                 , coordinates   : [ in_.Longitude.loc(), in_.Latitude.loc() ] 
                             } } 
                     },
-                    State     : states.MobConfirmed
+                    State     : states.ToBeApproved
                 }
                 break
             }
@@ -384,6 +402,10 @@ function Store(data)
         console.log('edit-store', { Input : data})
 
         let rcd = { _id : data.Store._id }
+
+        // Refeed for validation
+        if(data.Refeed && (data.Store.State != states.Registered))
+                             rcd.State       = states.ToBeApproved
         if(data.Email)       rcd.Email       = data.Email
         if(data.Image)       rcd.Image       = data.Image
         if(data.Certs)       rcd.Certs       = data.Certs

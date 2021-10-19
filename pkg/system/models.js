@@ -217,6 +217,7 @@ module.exports =
 		, EntityCreated 		: 'EntityCreated'	
         , Registered            : 'Registered'
 		, ToBeApproved 			: 'ToBeApproved'
+		, ToBeCorrected 		: 'ToBeCorrected'
 
 		, StripeSucess 			: "payment_intent.succeeded"
 		, StripeFailed 			: "payment_intent.payment_failed"

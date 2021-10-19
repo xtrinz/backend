@@ -30,7 +30,7 @@ const Controller 		 = function()
           , 'body.Mode'        : [ [ 'requiredIf', 'body.Task', task.New      ], 'string' , [ 'in', mode.User, mode.Agent, mode.Admin ] ]
           , 'body.OTP'         : [ [ 'requiredIf', 'body.Task', task.ReadOTP  ], 'integer', [ 'between', 000000, 999999 ] ]
           , 'body.Name'        : [ [ 'requiredIf', 'body.Task', task.Register ], 'string' , [ 'length', 50, 2 ] ]
-          , 'body.Email'       : [ [ 'requiredIf', 'body.Task', task.Register ], 'email' ]
+          , 'body.Email'       : [ 'email' ]
         }
       }
     , [verb.profile]      :
@@ -93,6 +93,8 @@ const Controller 		 = function()
           , 'body.Time.Close.Minute'  : [ [ 'requiredIf', 'body.Task', task.Register ], 'integer', [ 'between', 0, 59 ] ]
 
           , 'body.StoreID'            : [ [ 'requiredIf', 'body.Task', task.Approve ], 'mongoId']
+          , 'body.Action'             : [ [ 'requiredIf', 'body.Task', task.Approve ], 'string', [ 'in', task.Deny, task.Approve ]]
+          , 'body.Text'               : [ 'string', [ 'length', 1000, 2 ] ]                    
           , 'headers.authorization'   : [ [ 'requiredIf', 'body.Task', task.Approve ], 'string', [ 'length', 500, 8 ] ]
         }
       }
@@ -124,13 +126,14 @@ const Controller 		 = function()
           [method.put]            : 
           {
               'body'                    : [ 'required', 'object' ]
-            , 'headers'                    : [ 'required', 'object' ]            
+            , 'headers'                 : [ 'required', 'object' ]            
             , 'body.Name'               : [ 'string' , [ 'length', 50, 2 ]  ]
             , 'body.Image'              : [ 'string' , [ 'length', 200, 2 ] ]
             , 'body.Type'               : [ 'string', [ 'length', 200, 0 ] ]
             , 'body.Certs'              : [ 'array' ]
             , 'body.Certs.*'            : [ 'string' ]
             , 'body.Email'              : [ 'email' ]
+            , 'body.Refeed'             : [ 'boolean' ]            
             , 'body.Longitude'          : [ 'numeric', [ 'between', -180, 180 ] ]
             , 'body.Latitude'           : [ 'numeric', [ 'between', -90, 90 ] ]
             , 'body.Address'            : [ 'object' ]

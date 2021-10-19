@@ -198,6 +198,9 @@ let RegisterApprove =  function(admin_, store_)
         {
             Task        : task.Approve
           , StoreID     : store.ID
+          , Action      : task.Approve
+        //, Action      : task.Deny
+        //, Text        : "Please correct ASDF Field"
         }
         , Header        :
         {
@@ -355,6 +358,7 @@ let Edit = function(store_)
             , Close     : store.Time.Close
           }
           , Status      : store.Status
+          //, Refeed      : true
         }
         , Header        : { Authorization : store.Token }
       }

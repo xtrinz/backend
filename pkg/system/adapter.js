@@ -60,8 +60,11 @@ const Authnz = async function (req, res, next)
             Err_(code.UNAUTHORIZED, reason.InvalidToken)
         }
 
-        if (store.State !== mode_.State)
-        Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+        if (!mode_.State.includes(store.State))
+        {
+          console.log('state-mismatch-for-store-auth', { Store: store })
+          Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+        }
 
         req.body.Store    = store
         req.query.StoreID = store._id        
@@ -78,8 +81,11 @@ const Authnz = async function (req, res, next)
             Err_(code.UNAUTHORIZED, reason.InvalidToken)
         }
 
-        if (user.State !== mode_.State)
-        Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+        if (!mode_.State.includes(user.State))
+        {
+          console.log('state-mismatch-for-user-auth', { User: user })
+          Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+        }
 
         req.body.User = user
         req.body.Mode = user.Mode

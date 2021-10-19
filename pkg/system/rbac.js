@@ -44,7 +44,7 @@ const Controller 		 = function()
           , [mode.Store]  : false
           , [mode.Admin] 	: true
           , [mode.Enabled]: true
-          , [states.State]: states.MobConfirmed
+          , [states.State]: [ states.MobConfirmed ]
         }
         , [task.Enabled] : true        
         }
@@ -58,7 +58,7 @@ const Controller 		 = function()
           , [mode.Store]  : false
           , [mode.Admin] 	: true
           , [mode.Enabled]: true
-          , [task.Enabled]: false          
+          , [task.Enabled]: false                    
           }
         , [method.get]    : 
         { 
@@ -102,7 +102,7 @@ const Controller 		 = function()
           , [mode.Store]  : true
           , [mode.Admin] 	: false
           , [mode.Enabled]: true
-          , [states.State]: states.MobConfirmed
+          , [states.State]: [ states.MobConfirmed ]
         }
         , [task.Approve]  : 
         { 
@@ -148,7 +148,10 @@ const Controller 		 = function()
           , [mode.Store]  : true
           , [mode.Admin] 	: false
           , [mode.Enabled]: true
-          , [task.Enabled] : false          
+          , [task.Enabled]: false
+          , [states.State]: [ states.ToBeApproved
+                            , states.Registered
+                            , states.ToBeCorrected ]
           }                                         
       }
     }
@@ -558,7 +561,7 @@ const Controller 		 = function()
     }
     
     if(!modes[states.State]) 
-    modes.State = states.Registered
+    modes.State = [ states.Registered ]
     
     return modes
 	}
