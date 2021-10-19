@@ -75,7 +75,6 @@ function User(data)
 
         if (!status) 
         {
-            console.log('#######status)
             Err_(code.BAD_REQUEST, reason.OtpRejected)
         }
 
