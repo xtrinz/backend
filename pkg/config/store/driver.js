@@ -200,8 +200,10 @@ function Store(data)
                         MobileNo: 	this.Data.MobileNo, 
                         Body: 	message.OnAuth })
             , hash    = await otp_sms.Send(gw.SMS)
-    
-        if(!this.Data._id) { this.Data._id = new ObjectID() }
+
+        if(!store_) { this.Data._id = new ObjectID() }
+        else { this.Data._id = store_._id }
+
         this.Data.MobileNo   = this.Data.MobileNo
         this.Data.Otp        = hash
         this.Data.State      = states.New
