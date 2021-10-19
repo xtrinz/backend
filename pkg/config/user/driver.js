@@ -44,7 +44,6 @@ function User(data)
             return
         }
 
-
         if(this.Data.Mode     === mode.Admin &&
             !process.env.ADMIN_MOB_NO.split(' ').includes(this.Data.MobileNo))
         {
@@ -58,6 +57,8 @@ function User(data)
             , hash    = await otp_sms.Send(gw.SMS)
 
         if(!user) { this.Data._id = new ObjectID() }
+        else { this.Data._id = user._id }
+
         this.Data.Otp             = hash
         this.Data.State           = states.New
         await db.Save(this.Data)
@@ -72,7 +73,11 @@ function User(data)
         const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
             , status = await otp_.Confirm(this.Data.Otp, data.OTP)
 
-        if (!status) Err_(code.BAD_REQUEST, reason.OtpRejected)
+        if (!status) 
+        {
+            console.log('#######status)
+            Err_(code.BAD_REQUEST, reason.OtpRejected)
+        }
 
         const token = await jwt.Sign({ _id : this.Data._id, Mode : this.Data.Mode })
 
