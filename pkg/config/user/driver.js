@@ -24,7 +24,7 @@ function User(data)
       , Location      :
       {
           type        : 'Point'
-        , coordinates : [data.Longitude.loc(), data.Latitude.loc()]
+        , coordinates : [0, 88] // [data.Longitude.loc(), data.Latitude.loc()]
       }
       , IsLive        : false
     }
@@ -121,6 +121,12 @@ function User(data)
         let rcd = { _id : data.User._id }
         if(data.Name ) rcd.Name  = data.Name 
         if(data.Email) rcd.Email = data.Email
+        if(data.Longitude && data.Latitude)
+        rcd.Location =
+        {
+            type        : 'Point'
+          , coordinates : [data.Longitude.loc(), data.Latitude.loc()]
+        }
 
         await db.Save(rcd)
         console.log('profile-updated', {User: this.Data})

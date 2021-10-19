@@ -21,9 +21,7 @@ let RegisterNew = function(name)
           {
               Task     : task.New
             , MobileNo : user.MobileNo
-            , Mode     : user.Mode
-            , Longitude: user.Longitude
-            , Latitude : user.Latitude            
+            , Mode     : user.Mode       
           }
           , Header     : {}
         }
@@ -78,7 +76,7 @@ let RegisterReadOTP = function(name)
             Code       : code.OK
           , Status     : status.Success
           , Text       : text.OTPConfirmed
-          , Data       : { Token: '' }
+          , Data       : { Token: '', Command: command.Register }
         }
       }
       return templ
@@ -220,6 +218,8 @@ let ProfileEdit =  function(name)
         {                   
             Name        : user.Name
           , Email       : user.Email
+          , Longitude   : user.Longitude
+          , Latitude    : user.Latitude               
         }                   
         , Header        :
         {                   

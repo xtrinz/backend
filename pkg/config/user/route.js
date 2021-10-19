@@ -19,18 +19,20 @@ router.post('/register', async (req, res, next) =>
       case task.ReadOTP:
         user  = new User()
         const resp = await user.ConfirmMobileNo(req.body)
-        text_ = text.OTPConfirmed
-        info_ = user.Data
+        text_         = text.OTPConfirmed
+        info_         = user.Data
         info_.Command = resp.Command
+        data_         = { Command : info_.Command }
         res.setHeader('authorization', resp.Token)
         break
 
       case task.Register:
-        user  = new User()
-        info_ = req.body.User
-        info_.Command = command.LoggedIn
+        user          = new User()
+        info_         = req.body.User
         await user.Register(req.body)
-        text_ = text.Registered
+        info_.Command = command.LoggedIn
+        data_         = { Command : info_.Command }        
+        text_         = text.Registered
         break
     }
 

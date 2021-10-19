@@ -27,6 +27,7 @@ const AddUser = function(tc, user_)
         new event.RegisterNew         (user_)
       , new event.RegisterReadOTP     (user_)
       , new event.Register            (user_)
+      , new event.ProfileEdit         (user_)      
       , new event.Connect             (user_)
     ]
     steps_.forEach((step)=> {tc.AddStep(step) })
