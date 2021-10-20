@@ -17,6 +17,7 @@ client.connect()
 const database  = client.db(process.env.DB_NAME)
 
     , users 	  = database.collection(set.user)
+    , agents 	  = database.collection(set.agent)
     , sockets 	= database.collection(set.socket)
     , stores 	  = database.collection(set.store)
     , products 	= database.collection(set.product)
@@ -28,6 +29,7 @@ const database  = client.db(process.env.DB_NAME)
 
     stores.createIndex({ Location: '2dsphere' })
      users.createIndex({ Location: '2dsphere' })
+    agents.createIndex({ Location: '2dsphere' })     
   products.createIndex({ Location: '2dsphere' })
     stores.createIndex({ Name: "text", Description: "text" })
   products.createIndex({ Name: "text", Description: "text", Category: 'text' })
@@ -38,6 +40,7 @@ module.exports  =
   , database
 
   , users
+  , agents
   , sockets
   , stores
   , products

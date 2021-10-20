@@ -324,6 +324,7 @@ module.exports =
 		  root					: '/'
 		, test					: '/test'
 		, user					: '/user'
+		, agent					: '/agent'		
 		, paytm					: '/paytm'
 		, store					: '/store'
 		, product				: '/product'
@@ -398,6 +399,7 @@ module.exports =
 	set:
 	{
 		  user					: 'user'
+		, agent					: 'agent'			  
 		, socket				: 'socket'
 		, store					: 'store'
 		, product				: 'product'

@@ -86,7 +86,7 @@ router.post('/agent', async (req, res, next) =>
     try
     {
         let trans  = new Transit()
-        await trans.AuthzAgent(req.body.TransitID, req.body.User._id)
+        await trans.AuthzAgent(req.body.TransitID, req.body.Agent._id)
 
         let event_, text_
         switch(req.body.Task)
@@ -110,10 +110,10 @@ router.post('/agent', async (req, res, next) =>
           case task.Accept:
             trans.Data.Agent =
             {
-                _id      : req.body.User._id
-              , SockID   : req.body.User.SockID
-              , Name     : req.body.User.Name
-              , MobileNo : req.body.User.MobileNo
+                _id      : req.body.Agent._id
+              , SockID   : req.body.Agent.SockID
+              , Name     : req.body.Agent.Name
+              , MobileNo : req.body.Agent.MobileNo
             }
             event_ = event.AcceptanceByAgent
             text_  = alerts.Accepted          

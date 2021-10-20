@@ -5,6 +5,11 @@ const { Test, TestSuite } = require('./lib/driver')
         data  : require('./frames/user/data')
       , story : require('./frames/user/story')
     }
+    , agent     =
+    {
+        data  : require('./frames/agent/data')
+      , story : require('./frames/agent/story')
+    }    
     , store     =
     {
         data  : require('./frames/store/data')
@@ -38,7 +43,7 @@ const { Test, TestSuite } = require('./lib/driver')
   let admin_1       = new    user.data.User    ('Admin')
     , user_1_owner  = new    user.data.User    ('User')
     , user_3_buyer  = new    user.data.User    ('User')
-    , agent_1       = new    user.data.User    ('Agent')
+    , agent_1       = new   agent.data.Agent   ('Agent')
     , store_1       = new   store.data.Store   ()
     , product_1     = new product.data.Product ()
     , addr_1_user_3 = new address.data.Address ()
@@ -47,7 +52,7 @@ const { Test, TestSuite } = require('./lib/driver')
 
   let user_4_owner  = new    user.data.User    ('User')
     , user_6_buyer  = new    user.data.User    ('User')
-    , agent_2       = new    user.data.User    ('Agent')
+    , agent_2       = new   agent.data.Agent   ('Agent')
     , store_2       = new   store.data.Store   ()
     , product_2     = new product.data.Product ()
     , addr_1_user_6 = new address.data.Address ()
@@ -56,13 +61,15 @@ const { Test, TestSuite } = require('./lib/driver')
   let cases =
   [
          user.story.Std(admin_1.Name )
+    ,   agent.story.Std(agent_1.Name )         
     ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
     , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
     , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
     ,    cart.story.Std(user_3_buyer.Name, product_1.Name, addr_1_user_3.Address.Name, store_1.Name)
     , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, store_1.Name)
     , journal.story.Std(user_3_buyer.Name, store_1.Name, agent_1.Name, admin_1.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, admin_1.Name)
+    ,   agent.story.Disconnect(agent_1.Name)
     ,   store.story.Disconnect(store_1.Name)
   ]
   cases.forEach((test)=> suite_1.AddCase(test))

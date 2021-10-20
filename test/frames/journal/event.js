@@ -17,7 +17,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
       let journal = data.Get(data.Obj.Journal , this.JournalID)
       let user    = data.Get(data.Obj.User    , this.UserID)
       let admin   = data.Get(data.Obj.User    , this.AdminID)      
-      let agent   = data.Get(data.Obj.User    , this.AgentID)
+      let agent   = data.Get(data.Obj.Agent   , this.AgentID)
       let cart    = data.Get(data.Obj.Cart    , this.CartID)
       let store   = data.Get(data.Obj.Store   , journal.Seller.Name)
         , data_, src_, token
@@ -236,7 +236,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
       let journal = data.Get(data.Obj.Journal , this.JournalID)
       let user    = data.Get(data.Obj.User    , this.UserID)
       let admin   = data.Get(data.Obj.User    , this.AdminID)      
-      let agent   = data.Get(data.Obj.User    , this.AgentID)
+      let agent   = data.Get(data.Obj.Agent   , this.AgentID)
       let cart    = data.Get(data.Obj.Cart    , this.CartID)
       let store   = data.Get(data.Obj.Store   , journal.Seller.Name)
         , data_, token
@@ -433,7 +433,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
             Code           : code.OK
           , Status         : status.Success
           , Text           : ''
-          , Data           : [ data_ ]
+          , Data           : (this.Mode == mode.Admin)? [] : [ data_ ]
         }
       }
     return templ

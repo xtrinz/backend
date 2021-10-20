@@ -1,3 +1,4 @@
+const { agents } = require('../../../pkg/system/database')
 const { Method, Type }        = require('../../lib/medium')
     , data                    = require('../data')
     , { read }                = require('../../lib/driver')
@@ -203,23 +204,23 @@ let CancelByUser = function(user_)
   }
 }
 
-let Cancelled = function(user_) 
+let Cancelled = function(store_) 
 {
-  this.UserID  = user_
+  this.StoreID = store_
   this.Data    = function()
   {
-    let user   = data.Get(data.Obj.User, this.UserID)
+    let store   = data.Get(data.Obj.Store, this.StoreID)
     let templ  =      
     {
         Type          : Type.Event
-      , Describe      : 'Transit Alert Cancelled ' + user.Name
+      , Describe      : 'Transit Alert Cancelled ' + store.Name
       , Method        : Method.EVENT
       , Authorization : {}
-      , Socket        : user.Socket
+      , Socket        : store.Socket
       , Event         : 
       {
           Type : alerts.Cancelled
-        , Data : { TransitID : user.TransitID }
+        , Data : { TransitID : store.TransitID }
       }
     }
     return templ
@@ -231,7 +232,7 @@ let RejectedByStore = function(store_)
   this.StoreID   = store_
   this.Data      = function()
   {
-    let staff = data.Get(data.Obj.Store, this.StoreID)
+    let store = data.Get(data.Obj.Store, this.StoreID)
     let templ =
     {
         Type                : Type.Rest
@@ -245,7 +246,7 @@ let RejectedByStore = function(store_)
                 TransitID   : staff.TransitID
               , Task        : task.Reject
           }
-          , Header          : { Authorization: staff.Token }
+          , Header          : { Authorization: store.Token }
       }
       , Response            :
       {
@@ -282,12 +283,13 @@ let Rejected = function(user_)
   }
 }
 
-let StoreAccept = function(store_) 
+let StoreAccept = function(store_, agent_) 
 {
   this.StoreID   = store_
+  this.AgentID   = agent_
   this.Data      = function()
   {
-    let staff = data.Get(data.Obj.Store, this.StoreID)
+    let store = data.Get(data.Obj.Store, this.StoreID)
     let templ =
     {
         Type                : Type.Rest
@@ -298,10 +300,10 @@ let StoreAccept = function(store_)
           , Path            : '/v1/transit/store'
           , Body            : 
           {
-                TransitID   : staff.TransitID
+                TransitID   : store.TransitID
               , Task        : task.Accept
           }
-          , Header          : { Authorization: staff.Token }
+          , Header          : { Authorization: store.Token }
       }
       , Response            :
       {
@@ -320,7 +322,7 @@ let NewTransit = function(agent_)
   this.AgentID = agent_
   this.Data    = function()
   {
-    let agent  = data.Get(data.Obj.User, this.AgentID)
+    let agent  = data.Get(data.Obj.Agent, this.AgentID)
     let templ  =      
     {
         Type          : Type.Event
@@ -340,9 +342,9 @@ let NewTransit = function(agent_)
 
   this.PostSet        = async function(res_)
   {
-    let agent        = data.Get(data.Obj.User, this.AgentID)
+    let agent        = data.Get(data.Obj.Agent, this.AgentID)
     agent.TransitID  = res_.Data.TransitID
-    data.Set(data.Obj.User, this.AgentID, agent)
+    data.Set(data.Obj.Agent, this.AgentID, agent)
   }
 }
 
@@ -443,7 +445,7 @@ let AgentAccept =  function(agent_, store_)
   this.StoreID   = store_  
   this.Data      = function()
   {
-    let agent = data.Get(data.Obj.User, this.AgentID)
+    let agent = data.Get(data.Obj.Agent, this.AgentID)
     let templ =
     {
         Type                : Type.Rest
@@ -548,29 +550,39 @@ let StoreDespatch = function(store_, agent_)
   this.PostSet = async function(res_)
   {
     let resp  = await read()
-      , user  = data.Get(data.Obj.User, this.AgentID)
+      , user  = data.Get(data.Obj.Agent, this.AgentID)
     user.OTP  = resp.Data.OTP
-    data.Set(data.Obj.User, this.AgentID, user)
+    data.Set(data.Obj.Agent, this.AgentID, user)
   }
 }
 
-let EnRoute = function(user_) 
+let EnRoute = function(name_, mode_) 
 {
-  this.UserID  = user_
-  this.Data    = function()
+  this.ID   = name_
+  this.Mode = mode_
+  this.Data = function()
   {
-    let user   = data.Get(data.Obj.User, this.UserID)
+    let data_
+    switch (this.Mode) {
+      case data.Obj.User:
+        data_ = data.Get(data.Obj.User, this.ID)        
+        break;
+      case data.Obj.Agent:
+        data_ = data.Get(data.Obj.Agent, this.ID)        
+        break
+    }
+
     let templ  =      
     {
         Type          : Type.Event
-      , Describe      : 'Transit Alert EnRoute ' + user.Name
+      , Describe      : 'Transit Alert EnRoute ' + data_.Name
       , Method        : Method.EVENT
       , Authorization : {}
-      , Socket        : user.Socket
+      , Socket        : data_.Socket
       , Event         : 
       {
           Type : alerts.EnRoute
-        , Data : { TransitID : user.TransitID }
+        , Data : { TransitID : data_.TransitID }
       }
     }
     return templ
@@ -582,7 +594,7 @@ let AgentComplete = function(agent_)
   this.AgentID   = agent_
   this.Data      = function()
   {
-    let agent = data.Get(data.Obj.User, this.AgentID)
+    let agent = data.Get(data.Obj.Agent, this.AgentID)
     let templ =
     {
         Type                : Type.Rest

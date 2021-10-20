@@ -72,6 +72,64 @@ const Controller 		 = function()
       }                
     }
 
+    // Agent
+    , [rsrc.agent]        :
+    {
+      [verb.register]     : 
+      {
+        [method.post]     : 
+        { 
+          [task.New]      : 
+          { 
+            [mode.User]   : false
+          , [mode.Agent]  : true
+          , [mode.Store]  : false
+          , [mode.Admin]  : false
+          , [mode.Enabled]: false
+          }
+        , [task.ReadOTP]  : 
+        { 
+            [mode.User]   : false
+          , [mode.Agent]  : true
+          , [mode.Store]  : false
+          , [mode.Admin] 	: false
+          , [mode.Enabled]: false
+        }
+        , [task.Register] : 
+        { 
+            [mode.User]   : false
+          , [mode.Agent]  : true
+          , [mode.Store]  : false
+          , [mode.Admin] 	: false
+          , [mode.Enabled]: true
+          , [states.State]: [ states.MobConfirmed ]
+        }
+        , [task.Enabled] : true        
+        }
+      }
+    , [verb.profile]      :
+      {
+          [method.put]    : 
+          { 
+            [mode.User]   : false
+          , [mode.Agent]  : true
+          , [mode.Store]  : false
+          , [mode.Admin] 	: false
+          , [mode.Enabled]: true
+          , [task.Enabled]: false                    
+          }
+        , [method.get]    : 
+        { 
+          [mode.User]     : false
+        , [mode.Agent]    : true
+        , [mode.Store]    : false
+        , [mode.Admin] 	  : false
+        , [mode.Enabled]  : true
+        , [task.Enabled]  : false        
+        } 
+      }                
+    }
+
   // Store
   , [rsrc.store]          :
     {

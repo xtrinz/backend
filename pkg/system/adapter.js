@@ -5,6 +5,7 @@ const { Err, Err_, code, status
     {
         store                             : require('../config/store/archive')
       , user                              : require('../config/user/archive')
+      , agent                             : require('../config/agent/archive')      
     }
     , jwt                                 = require('../infra/jwt')
     , rbac                                = require('../system/rbac')
@@ -72,6 +73,26 @@ const Authnz = async function (req, res, next)
 
         console.log('store-authenticated', { Store: store })
       break
+      case mode.Agent:
+
+        let agent = await db.agent.Get(resp._id, query.ByID)
+        if (!agent)
+        {
+            console.log('agent-not-found', { AgentID: resp._id })
+            Err_(code.UNAUTHORIZED, reason.InvalidToken)
+        }
+
+        if (!mode_.State.includes(agent.State))
+        {
+          console.log('state-mismatch-for-agent-auth', { Agent: agent })
+          Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+        }
+
+        req.body.Agent = agent
+        req.body.Mode  = agent.Mode
+
+        console.log('agent-authenticated', { Agent: agent })    
+        break
       default:
 
         let user = await db.user.Get(resp._id, query.ByID)

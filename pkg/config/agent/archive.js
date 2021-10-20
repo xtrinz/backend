@@ -1,0 +1,125 @@
+const { agents }            = require('../../system/database')
+    , { query, mode,
+        Err_, code, reason} = require('../../system/models')
+    , { ObjectId }          = require('mongodb')
+
+const Save       = async function(data)
+{
+    console.log('save-agent', { Agent: data })
+    const query = { _id    : data._id }
+        , act   = { $set   : data }
+        , opt   = { upsert : true }
+    const resp  = await agents.updateOne(query, act, opt)
+    if (!resp.result.ok)
+    {
+        console.log('agent-save-failed', { Agent: data, Result: resp.result})
+        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
+    }
+    console.log('agent-saved', { Agent : data })
+}
+
+const Get = async function(param, qType)
+{
+    console.log('find-agent', { Param: param, QType: qType} )
+    let query_
+    switch (qType)
+    {
+        case query.ByID       : query_ = { _id: ObjectId(param) } ; break;
+        case query.ByMobileNo : query_ = { MobileNo: param }      ; break;
+        case query.ByMail     : query_ = { Email: param }         ; break;
+    }
+    let agent = await agents.findOne(query_)
+    if (!agent)
+    {
+        console.log('agent-not-found', { Query : query_ })
+        return
+    }
+    console.log('agent-found', { Agent: agent })
+    return agent
+}
+
+const NearbyAgents = async function(ln, lt)
+{
+    console.log('list-nearby-live-agents', {Location: [ln, lt]} )
+    const cnt     = 10
+        , maxDist = 5000
+        , proj    = { projection: { _id: 1, Name: 1, SockID: 1 } }
+        , query   =
+        { 
+              Location  :
+            {
+                $near : { $geometry    : 
+                    { 
+                          type: 'Point'
+                        , coordinates: [ln, lt] 
+                    }
+                    , $maxDistance : maxDist }
+            }
+            , IsLive  : true
+            , Mode    : mode.Agent
+        }
+    const agents_ = await agents.find(query, proj)
+                              .limit(cnt)
+                              .toArray()
+    if (!agents_.length)
+    {
+        console.log('no-agents-found', { Location: [ln, lt]})
+        return
+    }
+    console.log('agents-found', { Agents: agents_})
+    return agents_
+}
+
+const GetMany = async function(id_lst, proj)
+{
+    if(!id_lst.length)
+    {
+        console.log('empty-agent-id-list',
+        {     IDList       : id_lst
+           , Projection    : proj })
+        return []
+    }
+
+    id_lst = id_lst.map(ObjectId)
+    const key  = { '_id' : { $in: id_lst } }
+        , resp = await agents.find(key).project(proj).toArray()
+
+    if (!resp.length)
+    {
+        console.log('find-agents-failed',
+        { 
+            Key        : key, 
+            Projection : proj,
+            Result     : resp.result
+        })
+        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
+    }
+    resp.forEach((res) => { delete res._id })
+    console.log('agents-list', { Stores: resp })
+    return resp
+}
+
+const GetAgentSockID = async function(agent_id)
+{
+    console.log('get-agent-sock-id', { AgentID: agent_id })
+
+    const query = { _id: ObjectId(agent_id), IsLive: true }
+
+    let agent = await agents.findOne(query)
+    if(!agent)
+    {
+        console.log('agent-not-found', query)
+        return []
+    }
+    console.log('agent-found', { Agent : agent })
+    return agent.SockID
+}
+
+module.exports =
+{
+      Save                : Save
+    , Get                 : Get
+    , NearbyAgents        : NearbyAgents
+    , GetMany             : GetMany
+    , GetAgentSockID       : GetAgentSockID
+}

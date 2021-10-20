@@ -1,13 +1,14 @@
 const   { Emit } 			 	   = require('./events')
 	  , { Err_ , code, reason
 	  , states , alerts, query }   = require('../system/models')
-	  , { User } 			 	   = require('../config/user/driver')
+	  , { Agent } 			 	   = require('../config/agent/driver')
 	  , { PayOut , SendOTP, Save, SetAgent, PingAdmins, SetHistory
 		, ConfirmOTP, ResetAgent, ResetProduct } = require('./wrap')
 	  , db 						   =
 	  {
 		    user 				   : require('../config/user/archive')
 		  , transit 			   : require('../config/transit/archive')
+		  , agent 			   	   : require('../config/agent/archive')		  
 	  }
 
 // Notify | UpdateState | Payout | OTP
@@ -80,7 +81,7 @@ const AcceptedByStore			=  async function(ctxt)
 	console.log('process-order-acceptance', ctxt.Data)
 	await Emit(alerts.Accepted, ctxt)	// To User: Emit irrespective of it turns to hold
 
-	const agents = await db.user.NearbyAgents(
+	const agents = await db.agent.NearbyAgents(
 			ctxt.Data.Store.Longitude,
 			ctxt.Data.Store.Latitude)
 	if(!agents)
@@ -158,7 +159,7 @@ const AssignedByAdmin		= async function(ctxt)
 {
 	console.log('agent-assignment-by-admin', ctxt.Data)
 
-	const agent   = new User()
+	const agent   = new Agent()
 	const agent_  = await agent.Get(ctxt.Data.Agent.MobileNo, query.ByMobileNo)
 	if(!agent_) Err_(code.NOT_FOUND, reason.AgentNotFound)
 	ctxt.Data.Agents = []
@@ -207,7 +208,7 @@ const RejectedByAgent		= async function(ctxt)
 	{
 	case states.TransitAccepted:
 
-		const agents = await db.user.NearbyAgents(
+		const agents = await db.agent.NearbyAgents(
 				ctxt.Data.Store.Longitude,
 				ctxt.Data.Store.Latitude)
 		if(!agents)

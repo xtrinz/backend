@@ -31,7 +31,7 @@ function TestRig()
 
                 // console.log(data.Request.Body, data.Response.Data, resp.Data)
                 // console.log(prints.Failed, JSON.stringify(rusDiff(data.Response, resp)))
-                //console.log(prints.Failed, '\n\nExpected : ',JSON.stringify(data.Response), '\nReceived : ', JSON.stringify(resp))
+                console.log(prints.Failed, '\n\nExpected : ',JSON.stringify(data.Response), '\nReceived : ', JSON.stringify(resp))
                 return { Status: false, Data: resp }
             case Type.Event:
                 switch(data.Method)
@@ -61,6 +61,7 @@ function TestRig()
             db.database.dropDatabase()
             db.stores.createIndex({ Location: "2dsphere" })
             db.users.createIndex( { Location: "2dsphere" }) 
+            db.agents.createIndex( { Location: "2dsphere" })             
             db.products.createIndex({ Location: '2dsphere' })
             db.stores.createIndex({ Name: "text", Description: "text" } )      
             db.products.createIndex({ Name: "text", Description: "text", Category: 'text' })                 

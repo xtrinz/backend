@@ -17,7 +17,7 @@ const event        = require('./event')
       , new event.List (journal_, user_, store_, agent_, cart_, admin_, source.User)
       , new event.List (journal_, user_, store_, agent_, cart_, admin_, source.Store)
       , new event.List (journal_, user_, store_, agent_, cart_, admin_, source.Agent)
-      //, new event.List (journal_, user_, store_, agent_, cart_, admin_, source.Admin)
+      , new event.List (journal_, user_, store_, agent_, cart_, admin_, source.Admin)
 
     ]
     journal.forEach((step) => tc.AddStep(step))

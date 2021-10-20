@@ -1,4 +1,5 @@
 const { User }     = require('./user/data')
+    , { Agent }    = require('./agent/data')
     , { Store }    = require('./store/data')
     , { Product }  = require('./product/data')
     , { Address }  = require('./address/data')
@@ -8,6 +9,7 @@ const { User }     = require('./user/data')
 const obj =
 {
       User    : 'User'
+    , Agent   : 'Agent'
     , Product : 'Product'
     , Store   : 'Store'
     , Address : 'Address'
@@ -21,6 +23,7 @@ const Get = function(enty, id)
     switch(enty)
     {
     case obj.User    : return    User.Users     [id]
+    case obj.Agent   : return   Agent.Agents    [id]    
     case obj.Store   : return   Store.Stores    [id]
     case obj.Product : return Product.Products  [id]
     case obj.Address : return Address.Addresses [id]
@@ -34,6 +37,7 @@ const Set = function(enty, id, data)
     switch(enty)
     {
     case obj.User    :    User.Users     [id] = data; break
+    case obj.Agent   :   Agent.Agents    [id] = data; break
     case obj.Store   :   Store.Stores    [id] = data; break
     case obj.Product : Product.Products  [id] = data; break
     case obj.Address : Address.Addresses [id] = data; break

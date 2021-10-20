@@ -34,7 +34,7 @@ const Get    = async function(query, proj)
 
 const GetMany    = async function(query, proj, cond_)
 {
-    console.log('list-journals', { Query : query, Projection : proj })
+    console.log('list-journals', { Query : JSON.stringify(query), Projection : proj })
 
     const skip = (cond_.Page > 0)? (cond_.Page - 1) * cond_.Limit : 0
         , lmt  = (cond_.Limit > dbset.Limit)? dbset.Limit : cond_.Limit 

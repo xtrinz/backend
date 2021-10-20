@@ -6,6 +6,7 @@ const { states, alerts,
     , db                   =
     {
         user               : require('../config/user/archive')
+      , agent              : require('../config/agent/archive')
       , store              : require('../config/store/archive')        
       , socket             : require('../config/socket/archive')
     }
@@ -46,8 +47,23 @@ const Connect = async function(socket_)
         await db.store.Save(data)
         break
 
+      case mode.Agent:  
+          data = await db.agent.Get(resp._id, query.ByID)
+          if (!data)
+          {
+              console.log('agent-not-found', { AgentID: resp._id })
+              Err_(code.BAD_REQUEST, reason.InvalidToken)
+          }
+          data.SockID.push(socket_.id)
+  
+          if(data.SockID.length > limits.SocketCount)
+            sock_id = data.SockID[0]
+  
+          data.IsLive = true    
+          await db.agent.Save(data)
+          break
+
       case mode.User:
-      case mode.Agent:
       case mode.Admin:
 
         data = await db.user.Get(resp._id, query.ByID)
@@ -98,7 +114,7 @@ const Disconnect = async function(socket_)
     await inst.IsHonest(socket_, rsrc.socket, verb.disconnect, method.void)
 
     const sckt   = await db.socket.Get(socket_.id)
-    let data
+    let data, index
     switch(sckt.Mode)
     {
       case mode.Store:
@@ -109,15 +125,33 @@ const Disconnect = async function(socket_)
             console.log('store-not-found', { StoreID: sckt.Entity })
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
-        data.SockID.pop(socket_.id)
+        index = data.SockID.indexOf(socket_.id)
+        if (index > -1) { data.SockID.splice(index, 1) }
+
         if(data.SockID.length === 0)
           data.IsLive = false    
   
         await db.store.Save(data)
         break
 
-      case mode.User:
       case mode.Agent:
+  
+          data = await db.agent.Get(sckt.Entity, query.ByID)
+          if (!data)
+          {
+              console.log('agent-not-found', { AgentID: sckt.Entity })
+              Err_(code.BAD_REQUEST, reason.InvalidToken)
+          }
+          index = data.SockID.indexOf(socket_.id)
+          if (index > -1) { data.SockID.splice(index, 1) }
+
+          if(data.SockID.length === 0)
+            data.IsLive = false    
+    
+          await db.agent.Save(data)
+          break
+
+      case mode.User:
       case mode.Admin:
 
         data = await db.user.Get(sckt.Entity, query.ByID)
@@ -126,7 +160,9 @@ const Disconnect = async function(socket_)
             console.log('user-not-found', { UserID: sckt.Entity })
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
-        data.SockID.pop(socket_.id)
+        index = data.SockID.indexOf(socket_.id)
+        if (index > -1) { data.SockID.splice(index, 1) }
+
         if(data.SockID.length === 0)
           data.IsLive = false    
  
