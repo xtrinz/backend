@@ -67,13 +67,21 @@ router.post('/register', async (req, res, next) =>
 router.get('/view', async (req, res, next) => {
   try {
 
+    let now_ = new Date()
+    if(!now_.is_today(req.body.Agent.Status.SetOn))
+    { req.body.Agent.Status = states.OffDuty      }
+    else
+    {
+      req.body.Agent.Status = req.body.Agent.Status.Current
+      /* No action: set state as set by seller */
+    }
     const data = 
     {
         Name      : req.body.Agent.Name
       , MobileNo  : req.body.Agent.MobileNo
       , Email     : req.body.Agent.Email
       , Mode      : req.body.Agent.Mode
-//      , Status    : req.body.Agent.Status
+      , Status    : req.body.Agent.Status
     }
 
     return res.status(code.OK).json({

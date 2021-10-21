@@ -240,6 +240,7 @@ let ProfileGet = function(name)
           , MobileNo    : agent.MobileNo
           , Email       : agent.Email
           , Mode        : agent.Mode
+          , Status      : agent.Status
         }
       }
     }
