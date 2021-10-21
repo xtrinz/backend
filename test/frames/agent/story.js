@@ -1,7 +1,7 @@
 const event         = require('./event')
     , { TestCase }  = require('../../lib/driver')
 
-const Std = function(agent_)
+const Std = function(agent_, admin_)
 {
     let tc    = new TestCase('Agent Management')
     const steps_ =
@@ -9,6 +9,7 @@ const Std = function(agent_)
           new event.RegisterNew         (agent_)
         , new event.RegisterReadOTP     (agent_)
         , new event.Register            (agent_)
+        , new event.RegisterApprove     (agent_, admin_)
         , new event.Connect             (agent_)
         , new event.ProfileGet          (agent_)
         , new event.ProfileEdit         (agent_)

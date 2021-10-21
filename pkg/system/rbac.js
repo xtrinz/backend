@@ -104,6 +104,14 @@ const Controller 		 = function()
           , [mode.Enabled]: true
           , [states.State]: [ states.MobConfirmed ]
         }
+        , [task.Approve]  : 
+        { 
+          [mode.User]     : false
+        , [mode.Agent]    : false
+        , [mode.Store]    : false
+        , [mode.Admin] 	  : true
+        , [mode.Enabled]  : true
+        }        
         , [task.Enabled] : true        
         }
       }
@@ -116,7 +124,10 @@ const Controller 		 = function()
           , [mode.Store]  : false
           , [mode.Admin] 	: false
           , [mode.Enabled]: true
-          , [task.Enabled]: false                    
+          , [task.Enabled]: false    
+          , [states.State]: [ states.ToBeApproved
+                            , states.Registered
+                            , states.ToBeCorrected ]               
           }
         , [method.get]    : 
         { 

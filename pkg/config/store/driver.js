@@ -222,7 +222,11 @@ function Store(data)
         const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
             , status = await otp_.Confirm(this.Data.Otp, data.OTP)
 
-        if (!status) Err_(code.BAD_REQUEST, reason.OtpRejected)
+        if (!status) 
+        {
+            console.log('wrong-otp-on-store-no-confirmation', { Data: data })            
+            Err_(code.BAD_REQUEST, reason.OtpRejected)
+        }
 
         const token = await jwt.Sign({ _id : this.Data._id, Mode : mode.Store })
 
@@ -309,7 +313,7 @@ function Store(data)
         }
 
         await db.store.Save(this.Data)
-        console.log('store-approved', {Store: this.Data})
+        console.log('store-admin-response-marked', {Store: this.Data})
     }
     
     this.List  = async function (in_, mode_)

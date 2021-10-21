@@ -61,7 +61,7 @@ const { Test, TestSuite } = require('./lib/driver')
   let cases =
   [
          user.story.Std(admin_1.Name )
-    ,   agent.story.Std(agent_1.Name )         
+    ,   agent.story.Std(agent_1.Name, admin_1.Name )         
     ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
     , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
     , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )

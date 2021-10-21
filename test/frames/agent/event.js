@@ -2,6 +2,7 @@ const { task, code, status, text, command } = require('../../../pkg/system/model
     , { Method, Type }             = require('../../lib/medium')
     , { read }                     = require('../../lib/driver')
     , data                         = require('../data')
+    , jwt                          = require('../../../pkg/infra/jwt')
 
 let RegisterNew = function(name) 
 {
@@ -84,6 +85,8 @@ let RegisterReadOTP = function(name)
   this.PostSet        = async function(res_)
   {
     let agent   = data.Get(data.Obj.Agent, this.ID)
+      , data_   = await jwt.Verify(res_.Data.Token)
+    agent.ID    = data_._id
     agent.Token = res_.Data.Token
     data.Set(data.Obj.Agent, this.ID, agent)
   }
@@ -109,6 +112,8 @@ let Register = function(name)
             , MobileNo    : agent.MobileNo
             , Name        : agent.Name
             , Email       : agent.Email
+            , Longitude   : agent.Longitude
+            , Latitude    : agent.Latitude            
           }
           , Header        :
           {
@@ -133,6 +138,48 @@ let Register = function(name)
       return templ
     }
 }
+
+let RegisterApprove =  function(agent_, admin_) 
+{
+  this.AdminID  = admin_
+  this.AgentID  = agent_
+  this.Data     = function()
+  {
+    let agent = data.Get(data.Obj.Agent, this.AgentID)
+    let admin = data.Get(data.Obj.User, this.AdminID)
+    let templ =
+    {
+        Type            : Type.Rest
+      , Describe        : 'Agent Register Approve'
+      , Request         :
+      {
+          Method        : Method.POST
+        , Path          : '/v1/agent/register'
+        , Body          : 
+        {
+            Task        : task.Approve
+          , AgentID     : agent.ID
+          , Action      : task.Approve
+        //, Action      : task.Deny
+        //, Text        : "Please correct ASDF Field"
+        }
+        , Header        :
+        {
+          Authorization : admin.Token
+        }
+      }
+      , Response        :
+      {
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : text.Approved
+        , Data          : {}
+      }
+    }
+    return templ
+  }
+}
+
 
 let Connect = function(name) 
 {
@@ -263,6 +310,7 @@ module.exports =
       RegisterNew
     , RegisterReadOTP
     , Register
+    , RegisterApprove
     , Connect
     , ProfileGet
     , ProfileEdit

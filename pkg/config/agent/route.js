@@ -13,11 +13,12 @@ router.post('/register', async (req, res, next) =>
       case task.New:
         agent = new Agent(req.body)
         await agent.New()
-        text_ = text.OTPSendToMobileNo.format(req.body.MobileNo.slice(-4))
+        text_ = text.OTPSendToMobileNo.format(
+                    req.body.MobileNo.slice(-4))
         break
 
       case task.ReadOTP:
-        agent  = new Agent()
+        agent = new Agent()
         const resp = await agent.ConfirmMobileNo(req.body)
         text_         = text.OTPConfirmed
         info_         = agent.Data
@@ -27,16 +28,23 @@ router.post('/register', async (req, res, next) =>
         break
 
       case task.Register:
-        agent          = new Agent()
+        agent         = new Agent()
         info_         = req.body.Agent
         await agent.Register(req.body)
         info_.Command = command.LoggedIn
         data_         = { Command : info_.Command }        
         text_         = text.Registered
         break
-    }
 
-    if(info_ && info_.State === states.Registered)
+      case task.Approve:
+        store  = new Agent()
+        await store.Approve(req.body)
+        text_ = text.Approved
+        break
+    }
+  
+    if(info_ && (info_.State === states.Registered  ||
+                info_.State === states.ToBeApproved ))
     data_ = 
     {
         Name      : info_.Name
