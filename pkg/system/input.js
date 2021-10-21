@@ -8,7 +8,8 @@ const {
         reason,
         mode,
         paytm,
-        states
+        states,
+        qtype
       }               = require('../system/models')
     , niv             = require('node-input-validator')
 
@@ -83,16 +84,36 @@ const Controller 		 = function()
             , 'headers'               : [ 'required', 'object' ] 
             , 'body.Name'             : [ [ 'requiredWithout', 'Email' ] , 'string', [ 'length', 50, 2 ] ]
             , 'body.Email'            : [ [ 'requiredWithout', 'Name'  ] , 'email' ]
-            , 'body.Longitude'        : [ 'numeric', [ 'between', -180, 180 ] ]
-            , 'body.Latitude'         : [ 'numeric', [ 'between', -90, 90 ] ]  
+
+            , 'body.Status'           : [ 'string', [ 'in', states.OnDuty, states.OffDuty ] ]
+
+            , 'body.Longitude'        : [ [ 'requiredIf', 'body.Status', states.OnDuty ], 'numeric', [ 'between', -180, 180 ] ]
+            , 'body.Latitude'         : [ [ 'requiredIf', 'body.Status', states.OnDuty ], 'numeric', [ 'between', -90, 90 ] ]  
             , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
           }
-        , [method.get]    : 
-          {
+      }
+    , [verb.view]      :
+      {
+        [method.get]   : 
+        {
             'headers'                 : [ 'required', 'object' ] 
           , 'headers.authorization'   : [ 'required', 'string', [ 'length', 500, 8 ] ]
-          } 
-      }                
+        } 
+      }  
+      , [verb.list]                 :
+      {
+        [method.get]              :
+        {
+            'query'               : [ 'required', 'object' ]
+          , 'headers'             : [ 'required', 'object' ]
+          , 'query.SearchType'    : [ 'required', 'string', [ 'in', qtype.NearList, qtype.Pending, qtype.NearPending ] ]
+          , 'query.Longitude'     : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
+          , 'query.Latitude'      : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
+          , 'query.Page'          : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'query.Limit'         : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'headers.authorization'  : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
+      }                    
     }    
 
   // Store

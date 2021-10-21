@@ -1,5 +1,5 @@
 const { states, query, message, task,
-        gw, Err_, code, reason, 
+        gw, Err_, code, reason, qtype,
         mode, command}          = require('../../system/models')
     , otp                       = require('../../infra/otp')
     , jwt                       = require('../../infra/jwt')
@@ -16,8 +16,19 @@ function Agent(data)
       , _id           : ''
       , Otp           : ''
       , State         : states.None
+      , Status        : 
+      {
+            Current   : states.OffDuty
+          , SetOn     : 
+          {           
+                Day   : (new Date(0)).getDate()
+              , Month : (new Date(0)).getMonth()
+              , Year  : (new Date(0)).getFullYear()
+          }
+      }      
       , Name          : ''
       , Email         : ''
+      , Text          : ''
       , SockID        : []
       , AddressList   : []
       , Location      :
@@ -161,10 +172,83 @@ function Agent(data)
             type        : 'Point'
           , coordinates : [data.Longitude.loc(), data.Latitude.loc()]
         }
+        if(data.Status)
+        {
+            let now_ = new Date()
+            rcd.Status = 
+            {
+                  Current     : data.Status
+                , SetOn       :
+                {
+                    Day       : now_.getDate()
+                  , Month     : now_.getMonth()
+                  , Year      : now_.getFullYear()
+                }
+            }
+        }
 
         await db.Save(rcd)
         console.log('profile-updated', {Agent: this.Data})
     }
+
+    this.List  = async function (in_)
+    {
+        console.log('list-agents', { In : in_ })
+
+        let data, proj = { projection:  { _id   : 1, Name  : 1, Email : 1, Text: 1, 
+                Location : 1 , Status : 1, State : 1, MobileNo: 1 } }
+
+        switch(in_.SearchType)
+        {
+            case qtype.NearList:
+            in_.Query = { Location: { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } } 
+
+            // TODO check unit of radius 2500
+
+            if(in_.Category) in_.Query.Type     = in_.Category
+            if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
+
+            break
+            case qtype.Pending:
+            in_.Query = { State : states.ToBeApproved }
+            break
+            case qtype.NearPending:
+            in_.Query = 
+            { 
+                Location  :
+                { 
+                    $near : { $geometry: 
+                        { 
+                                type          : 'Point'
+                            , coordinates   : [ in_.Longitude.loc(), in_.Latitude.loc() ] 
+                        } } 
+                },
+                State     : states.ToBeApproved
+            }
+            break
+        }
+        data = await db.List(in_, proj)
+            
+        let now_               = new Date()
+        for(let idx = 0; idx < data.length; idx++)
+        {
+            data[idx].AgentID = data[idx]._id
+            delete data[idx]._id
+
+            data[idx].Longitude = data[idx].Location.coordinates[0].toFixed(5)
+            data[idx].Latitude  = data[idx].Location.coordinates[1].toFixed(5)
+
+            delete data[idx].Location
+
+            if(!now_.is_today(data[idx].Status.SetOn)) 
+            { data[idx].Status = states.OffDuty       }
+            else
+            { data[idx].Status = data[idx].Status.Current /* No action: set state as set by seller */ }
+        }
+            
+        console.log('agent-list', { Agents : data })
+        return data
+    }    
 
 }
 

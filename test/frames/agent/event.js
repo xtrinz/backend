@@ -1,4 +1,4 @@
-const { task, code, status, text, command } = require('../../../pkg/system/models')
+const { task, code, status, text, command, qtype } = require('../../../pkg/system/models')
     , { Method, Type }             = require('../../lib/medium')
     , { read }                     = require('../../lib/driver')
     , data                         = require('../data')
@@ -222,7 +222,7 @@ let ProfileGet = function(name)
       , Request         :
       {
           Method        : Method.GET
-        , Path          : '/v1/agent/profile'
+        , Path          : '/v1/agent/view'
         , Body          : {}
         , Header        :
         {
@@ -241,6 +241,56 @@ let ProfileGet = function(name)
           , Email       : agent.Email
           , Mode        : agent.Mode
         }
+      }
+    }
+    return templ
+  }
+}
+
+let List = function(agent_, admin_) 
+{
+  this.AdminID   = admin_
+  this.AgentID  = agent_
+  this.Data     = function()
+  {
+    let agent = data.Get(data.Obj.Agent, this.AgentID)
+    let admin = data.Get(data.Obj.User, this.AdminID)
+    let templ =
+    {
+        Type            : Type.Rest
+      , Describe        : 'Agent List'
+      , Request         :
+      {
+          Method        : Method.GET
+        , Path          : '/v1/agent/list'
+        , Query         :
+        {
+            Longitude   : '17.20000'
+          , Latitude    : '17.20000'
+          , Page        : 1
+          , Limit       : 8
+          , SearchType  : qtype.NearList
+        }
+        , Body          : { }
+        , Header        : { Authorization : admin.Token }
+      }
+      , Response        :
+      {
+          Code          : code.OK
+        , Status        : status.Success
+        , Text          : ''
+        , Data          :
+          [{
+              AgentID     : agent.ID
+            , Name        : agent.Name
+            , MobileNo    : agent.MobileNo
+            , Email       : agent.Email
+            , Text        : ''            
+            , Latitude    : agent.Latitude
+            , Longitude   : agent.Longitude
+            , Status      : agent.Status
+            , State       : agent.State
+          }]
       }
     }
     return templ
@@ -266,7 +316,8 @@ let ProfileEdit =  function(name)
             Name        : agent.Name
           , Email       : agent.Email
           , Longitude   : agent.Longitude
-          , Latitude    : agent.Latitude               
+          , Latitude    : agent.Latitude   
+          , Status      : 'OnDuty'         // TODO    
         }                   
         , Header        :
         {                   
@@ -313,6 +364,7 @@ module.exports =
     , RegisterApprove
     , Connect
     , ProfileGet
+    , List
     , ProfileEdit
     , Disconnect
 }

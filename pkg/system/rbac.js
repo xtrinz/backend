@@ -129,7 +129,10 @@ const Controller 		 = function()
                             , states.Registered
                             , states.ToBeCorrected ]               
           }
-        , [method.get]    : 
+      }    
+      , [verb.view]      :      
+      {
+          [method.get]    : 
         { 
           [mode.User]     : false
         , [mode.Agent]    : true
@@ -137,8 +140,20 @@ const Controller 		 = function()
         , [mode.Admin] 	  : false
         , [mode.Enabled]  : true
         , [task.Enabled]  : false        
-        } 
-      }                
+        }         
+      }            
+      , [verb.list]      :      
+      {
+          [method.get]    : 
+        { 
+          [mode.User]     : false
+        , [mode.Agent]    : false
+        , [mode.Store]    : false
+        , [mode.Admin] 	  : true
+        , [mode.Enabled]  : true
+        , [task.Enabled]  : false        
+        }         
+      }                  
     }
 
   // Store

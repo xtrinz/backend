@@ -227,6 +227,8 @@ module.exports =
         , Initiated             : 'Initiated'
 		, TokenGenerated 		: 'TokenGenerated'
 
+		, OnDuty 				: 'OnDuty'
+		, OffDuty 				: 'OffDuty'
 
 		, None 					: 'None'						// None
 		, CargoInitiated 		: 'CargoInitiated'				// Payment had succeeded

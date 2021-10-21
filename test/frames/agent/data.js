@@ -1,3 +1,5 @@
+const { states } = require("../../../pkg/system/models")
+
 let Agent = function(mode)
 {
   Agent.Count++
@@ -15,6 +17,8 @@ let Agent = function(mode)
   this.TransitID   = ''
   this.Latitude    = '17.20000'
   this.Longitude   = '17.20000'
+  this.State       = states.Registered
+  this.Status      = states.OnDuty
 
   Agent.Agents[this.Name] = this
 }

@@ -385,15 +385,20 @@ function Store(data)
             }
             data = await db.store.List(query_, proj)
                 
-            let now_               = new Date()        
-            if(now_.is_now(data[idx].Time.Open, data[idx].Time.Close))
+            for(let idx = 0; idx < data.length; idx++)
             {
-                if(!now_.is_today(data[idx].Status.SetOn)) 
-                { data[idx].Status = states.Closed            }
-                else
-                { data[idx].Status = data[idx].Status.Current /* No action: set state as set by seller */ }
+                data[idx].StoreID = data[idx]._id
+                delete data[idx]._id    
+                let now_               = new Date()        
+                if(now_.is_now(data[idx].Time.Open, data[idx].Time.Close))
+                {
+                    if(!now_.is_today(data[idx].Status.SetOn)) 
+                    { data[idx].Status = states.Closed            }
+                    else
+                    { data[idx].Status = data[idx].Status.Current /* No action: set state as set by seller */ }
+                }
+                else { data[idx].Status = states.Closed }
             }
-            else { data[idx].Status = states.Closed }
             
             break
         }

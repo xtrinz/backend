@@ -1,5 +1,5 @@
 const { agents }            = require('../../system/database')
-    , { query, mode,
+    , { query, mode, dbset,
         Err_, code, reason} = require('../../system/models')
     , { ObjectId }          = require('mongodb')
 
@@ -70,6 +70,28 @@ const NearbyAgents = async function(ln, lt)
     return agents_
 }
 
+const List = async function(data, proj)
+{
+    data.Limit  = data.Limit.loc()
+    data.Page   = data.Page.loc()
+    const query = data.Query
+        , skip  = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
+        , lmt   = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
+
+    const data_ = await agents.find(query, proj)
+                              .skip(skip)
+                              .limit(lmt)
+                              .toArray()
+    if (!data_.length && data.Page === 1)
+    {
+        console.log('no-near-by-agents', { Query : query })
+        return data_
+    }
+
+    console.log('near-by-agents', { Agents: data_ })
+    return data_
+}
+
 const GetMany = async function(id_lst, proj)
 {
     if(!id_lst.length)
@@ -119,6 +141,7 @@ module.exports =
 {
       Save                : Save
     , Get                 : Get
+    , List                : List
     , NearbyAgents        : NearbyAgents
     , GetMany             : GetMany
     , GetAgentSockID       : GetAgentSockID

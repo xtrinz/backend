@@ -52,6 +52,7 @@ router.post('/register', async (req, res, next) =>
       , Email     : info_.Email
       , Mode      : info_.Mode
       , Command   : info_.Command
+//      , Status    : req.body.Agent.Status      
     }
 
     return res.status(code.OK).json({
@@ -63,7 +64,7 @@ router.post('/register', async (req, res, next) =>
 })
 
 // Read Profile
-router.get('/profile', async (req, res, next) => {
+router.get('/view', async (req, res, next) => {
   try {
 
     const data = 
@@ -72,6 +73,7 @@ router.get('/profile', async (req, res, next) => {
       , MobileNo  : req.body.Agent.MobileNo
       , Email     : req.body.Agent.Email
       , Mode      : req.body.Agent.Mode
+//      , Status    : req.body.Agent.Status
     }
 
     return res.status(code.OK).json({
@@ -80,6 +82,21 @@ router.get('/profile', async (req, res, next) => {
       Data    : data
     })
   } catch (err) { next(err) }
+})
+
+router.get('/list', async (req, res, next) =>
+{
+    try 
+    {
+      const agent = new Agent()
+          , data  = await agent.List(req.query)
+      
+      return res.status(code.OK).json({
+        Status  : status.Success,
+        Text    : '',
+        Data    : data
+      })
+    } catch (err) { next(err) }
 })
 
 router.put('/profile', async (req, res, next) =>
