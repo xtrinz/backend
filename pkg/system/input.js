@@ -235,7 +235,7 @@ const Controller 		 = function()
           , 'body.Name'          : [ 'required', 'string' , [ 'length', 50, 2 ]  ]
           , 'body.Image'         : [ 'required', 'string' , [ 'length', 200, 2 ] ]
           , 'body.Price'         : [ 'required', 'integer', [ 'min', 1 ] ]            
-          , 'body.Quantity'      : [ 'required', 'integer', [ 'min', 1 ] ]
+          , 'body.Quantity'      : [ 'required', 'integer', [ 'min', -50 ], [ 'max', 50 ] ]
           , 'body.Image'         : [ 'required', 'string' , [ 'length', 3000, 2 ] ]            
           , 'body.Category'      : [ 'required', 'string',  [ 'length', 50, 2 ] ]
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
@@ -271,7 +271,7 @@ const Controller 		 = function()
           , 'body.Name'          : [ 'string' , [ 'length', 50, 2 ]  ]
           , 'body.Image'         : [ 'string' , [ 'length', 200, 2 ] ]
           , 'body.Price'         : [ 'integer', [ 'min', 1 ] ]            
-          , 'body.Quantity'      : [ 'integer', [ 'min', 1 ] ]
+          , 'body.Quantity'      : [ 'integer', [ 'min', -50 ], [ 'max', 50 ] ]
           , 'body.Image'         : [ 'string' , [ 'length', 3000, 2 ] ]            
           , 'body.Category'      : [ 'required', 'string',  [ 'length', 50, 2 ] ]
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]         
@@ -300,7 +300,7 @@ const Controller 		 = function()
           , 'headers'               : [ 'required', 'object' ]            
           , 'body.ProductID'     : [ 'required', 'mongoId']
           , 'body.StoreID'       : [ 'required', 'mongoId'] // ?
-          , 'body.Quantity'      : [ 'integer', [ 'min', 1 ] ]
+          , 'body.Quantity'      : [ 'integer', [ 'min', -50 ], [ 'max', 50 ] ]
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]  
         }
       }
@@ -321,7 +321,7 @@ const Controller 		 = function()
             'body'               : [ 'required', 'object' ]
           , 'headers'               : [ 'required', 'object' ]            
           , 'body.ProductID'     : [ 'mongoId']
-          , 'body.Quantity'      : [ 'integer', [ 'min', 1 ] ]
+          , 'body.Quantity'      : [ 'integer', [ 'min', -50 ], [ 'max', 50 ] ]
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }
       }
