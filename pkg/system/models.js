@@ -25,6 +25,7 @@ module.exports =
 	reason:
 	{
 			PurchaseNotFound 		: 'Purchase not found'
+		, MapQueryFailed 			: 'Google map query failed'
 		, UserNotFound 			    : 'User not found'
 		, UserFound 			    : 'User exists'
 		, IncorrectCredentials      : 'Incorrect username or password'
@@ -336,6 +337,7 @@ module.exports =
 		, journal				: '/journal'
 		, transit				: '/transit'
 		, socket 				: '/socket'
+		, cloudinary 			: '/cloudinary'			
 	},
 	verb:
 	{
@@ -359,7 +361,7 @@ module.exports =
 		, agent					: '/agent'
 		, admin					: '/admin'
 		, connect 				: '/connect'
-		, disconnect 			: '/disconnect'		
+		, disconnect 			: '/disconnect'	
 	},
 	task:
 	{

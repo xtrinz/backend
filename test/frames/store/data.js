@@ -12,8 +12,8 @@ let Store = function()
   this.Description  = 'Store Description'
   this.MobileNo     = '+9100110011{0}'.format(('00' + Store.Count).substr(-2))
   this.Email        = this.Name.toLowerCase() + '@' + this.Name.toLowerCase() + '.com'
-  this.Longitude    = '17.20000'
-  this.Latitude 	  = '17.20000'
+  this.Longitude    = '75.935870'
+  this.Latitude 	  = '11.060447'
   this.Time         =
   {
       Open          : { Hour: 0, Minute: 00 }

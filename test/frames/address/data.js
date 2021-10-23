@@ -2,8 +2,8 @@ let Address = function()
 {
   Address.Count++
 
-  this.Longitude = '17.20000'
-  this.Latitude  = '17.20000'
+  this.Longitude = '75.940163'
+  this.Latitude  = '11.045950'
   this.Tag       = 'HOME'
   this.IsDefault = true
   this.Address   =

@@ -90,35 +90,6 @@ const NearbyAdmins = async function(ln, lt)
     return admins
 }
 
-const GetMany = async function(id_lst, proj)
-{
-    if(!id_lst.length)
-    {
-        console.log('empty-user-id-list',
-        {     IDList       : id_lst
-           , Projection    : proj })
-        return []
-    }
-
-    id_lst = id_lst.map(ObjectId)
-    const key  = { '_id' : { $in: id_lst } }
-        , resp = await users.find(key).project(proj).toArray()
-
-    if (!resp.length)
-    {
-        console.log('find-users-failed',
-        { 
-            Key        : key, 
-            Projection : proj,
-            Result     : resp.result
-        })
-        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
-    }
-    resp.forEach((res) => { delete res._id })
-    console.log('users-list', { Stores: resp })
-    return resp
-}
-
 const GetUserSockID = async function(user_id)
 {
     console.log('get-user-sock-id', { UserID: user_id })
@@ -141,6 +112,5 @@ module.exports =
     , Get                 : Get
     , NearbyAgents        : NearbyAgents
     , NearbyAdmins        : NearbyAdmins
-    , GetMany             : GetMany
     , GetUserSockID       : GetUserSockID
 }

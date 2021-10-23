@@ -42,10 +42,10 @@ const GetMany    = async function(query, proj, cond_)
                                .skip(skip)
                                .limit(lmt)
                                .toArray()
-    if (!resp)
+    if (!resp.length)
     {
       console.log('no-journal-found', { Query : query, Projection : proj })
-      Err_(code.INTERNAL_SERVER, reason.JournalNotFound)
+      return resp
     }
     console.log('journals-found', { Journals : resp })
     return resp

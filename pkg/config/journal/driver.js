@@ -150,7 +150,7 @@ function Journal()
       const src_loc  = await (new Store()).GetLoc(items.StoreID)
           , dest_loc =
           {
-              Lattitude : dest.Lattitude
+              Latitude : dest.Latitude
             , Longitude : dest.Longitude
           }
 
@@ -396,10 +396,10 @@ function Journal()
             data_.Penalty = penalty
             data_.Income  = income
 
-            data_.Buyer.Longitude   = data_.Buyer.Longitude.toFixed(5)
-            data_.Buyer.Latitude    = data_.Buyer.Latitude.toFixed(5)
-            data_.Seller.Longitude  = data_.Seller.Longitude.toFixed(5)
-            data_.Seller.Latitude   = data_.Seller.Latitude.toFixed(5)
+            data_.Buyer.Longitude   = data_.Buyer.Longitude.toFixed(6)
+            data_.Buyer.Latitude    = data_.Buyer.Latitude.toFixed(6)
+            data_.Seller.Longitude  = data_.Seller.Longitude.toFixed(6)
+            data_.Seller.Latitude   = data_.Seller.Latitude.toFixed(6)
             return data_
 
             case mode.Store :
@@ -482,10 +482,10 @@ function Journal()
         data_.Penalty   = penalty
         data_.Refund    = income
 
-        data_.Buyer.Longitude   = data_.Buyer.Longitude.toFixed(5)
-        data_.Buyer.Latitude    = data_.Buyer.Latitude.toFixed(5)
-        data_.Seller.Longitude  = data_.Seller.Longitude.toFixed(5)
-        data_.Seller.Latitude   = data_.Seller.Latitude.toFixed(5)
+        data_.Buyer.Longitude   = data_.Buyer.Longitude.toFixed(6)
+        data_.Buyer.Latitude    = data_.Buyer.Latitude.toFixed(6)
+        data_.Seller.Longitude  = data_.Seller.Longitude.toFixed(6)
+        data_.Seller.Latitude   = data_.Seller.Latitude.toFixed(6)
         
         return data_
 
@@ -592,10 +592,10 @@ function Journal()
             data_[idx].Penalty = penalty
             data_[idx].Income  = income
 
-            data_[idx].Buyer.Longitude  = data_[idx].Buyer.Longitude.toFixed(5)
-            data_[idx].Buyer.Latitude   = data_[idx].Buyer.Latitude.toFixed(5)
-            data_[idx].Seller.Longitude = data_[idx].Seller.Longitude.toFixed(5)
-            data_[idx].Seller.Latitude  = data_[idx].Seller.Latitude.toFixed(5)                  
+            data_[idx].Buyer.Longitude  = data_[idx].Buyer.Longitude.toFixed(6)
+            data_[idx].Buyer.Latitude   = data_[idx].Buyer.Latitude.toFixed(6)
+            data_[idx].Seller.Longitude = data_[idx].Seller.Longitude.toFixed(6)
+            data_[idx].Seller.Latitude  = data_[idx].Seller.Latitude.toFixed(6)                  
           }
           return data_
 
@@ -710,10 +710,10 @@ function Journal()
               data_[idx].Penalty   = penalty
               data_[idx].Refund    = income
 
-              data_[idx].Buyer.Longitude  = data_[idx].Buyer.Longitude.toFixed(5)
-              data_[idx].Buyer.Latitude   = data_[idx].Buyer.Latitude.toFixed(5)
-              data_[idx].Seller.Longitude = data_[idx].Seller.Longitude.toFixed(5)
-              data_[idx].Seller.Latitude  = data_[idx].Seller.Latitude.toFixed(5)    
+              data_[idx].Buyer.Longitude  = data_[idx].Buyer.Longitude.toFixed(6)
+              data_[idx].Buyer.Latitude   = data_[idx].Buyer.Latitude.toFixed(6)
+              data_[idx].Seller.Longitude = data_[idx].Seller.Longitude.toFixed(6)
+              data_[idx].Seller.Latitude  = data_[idx].Seller.Latitude.toFixed(6)    
           }
           return data_
       }

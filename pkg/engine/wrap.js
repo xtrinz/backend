@@ -9,6 +9,7 @@ const   otp 				 	 = require('../infra/otp')
 			, journal 			 : require('../config/journal/archive')
 			, product 			 : require('../config/product/archive')
 	  }
+	  , { Emit }				= require('./events')
 
 // Notify | UpdateState | Payout | OTP
 

@@ -15,8 +15,8 @@ let Agent = function(mode)
   this.Channel     = ''
   this.OTP         = ''
   this.TransitID   = ''
-  this.Latitude    = '17.20000'
-  this.Longitude   = '17.20000'
+  this.Longitude   = '75.940163'
+  this.Latitude    = '11.045950'
   this.State       = states.Registered
   this.Status      = states.OnDuty
 

@@ -235,8 +235,8 @@ function Agent(data)
             data[idx].AgentID = data[idx]._id
             delete data[idx]._id
 
-            data[idx].Longitude = data[idx].Location.coordinates[0].toFixed(5)
-            data[idx].Latitude  = data[idx].Location.coordinates[1].toFixed(5)
+            data[idx].Longitude = data[idx].Location.coordinates[0].toFixed(6)
+            data[idx].Latitude  = data[idx].Location.coordinates[1].toFixed(6)
 
             delete data[idx].Location
 

@@ -440,6 +440,24 @@ const Controller 		 = function()
       }
     }
 
+    // Cloudinary Sign
+  , [rsrc.cloudinary]    : // TODO correct it root as rsrc and checkout as verb
+    {
+      [verb.root]        :
+      {
+        [method.post]    :
+        {
+          [mode.User]    : false
+        , [mode.Agent]   : false
+        , [mode.Store]   : true
+        , [mode.Admin] 	 : false
+        , [mode.Enabled] : true
+        , [task.Enabled] : false
+        }
+      }
+    }
+
+
   // Journal
   , [rsrc.journal]        :
     {

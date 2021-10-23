@@ -9,8 +9,8 @@ let Cart = function(user)
   this.Bill         = 
   {                 
         Total       : 0
-      , TransitCost : 25
-      , Tax         : 4.5
+      , TransitCost : 2.459 * 5
+      , Tax         : 2.2131
       , NetPrice    : 0
   }
   this.Paytm        = 

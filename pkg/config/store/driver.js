@@ -81,8 +81,8 @@ function Store(data)
               , Type        : in_.Store.Type
               , Name        : in_.Store.Name
               , MobileNo    : in_.Store.MobileNo
-              , Longitude   : in_.Store.Location.coordinates[0].toFixed(5).toString()
-              , Latitude    : in_.Store.Location.coordinates[1].toFixed(5).toString()
+              , Longitude   : in_.Store.Location.coordinates[0].toFixed(6).toString()
+              , Latitude    : in_.Store.Location.coordinates[1].toFixed(6).toString()
               , Address     : in_.Store.Address
               , Time        : in_.Store.Time
             }

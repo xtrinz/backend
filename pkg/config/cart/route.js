@@ -29,7 +29,7 @@ router.get('/list', async (req, res, next) =>
     let data, src_loc, dest_loc
     
     data = await (new Cart()).Read(req.body.User._id)
-    dest_loc = src_loc  = { Lattitude : 0, Longitude : 0 }
+    dest_loc = src_loc  = { Latitude : 0, Longitude : 0 }
 
     if(req.query.AddressID)
     {
@@ -43,7 +43,7 @@ router.get('/list', async (req, res, next) =>
       src_loc       = await (new Store()).GetLoc(data.StoreID)
       dest_loc      =
       {
-          Lattitude : data.Address.Lattitude
+          Latitude : data.Address.Latitude
         , Longitude : data.Address.Longitude
       }
     }

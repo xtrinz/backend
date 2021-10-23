@@ -42,7 +42,6 @@ const Read        = async function (user_id)
 
   let cart = await Get(user_id, query.ByUserID)
   if (!cart)                 Err_(code.BAD_REQUEST, reason.CartNotFound)
-  if (!cart.Products.length) Err_(code.BAD_REQUEST, reason.NoProductsFound)
 
   let data = 
   {

@@ -92,35 +92,6 @@ const List = async function(data, proj)
     return data_
 }
 
-const GetMany = async function(id_lst, proj)
-{
-    if(!id_lst.length)
-    {
-        console.log('empty-agent-id-list',
-        {     IDList       : id_lst
-           , Projection    : proj })
-        return []
-    }
-
-    id_lst = id_lst.map(ObjectId)
-    const key  = { '_id' : { $in: id_lst } }
-        , resp = await agents.find(key).project(proj).toArray()
-
-    if (!resp.length)
-    {
-        console.log('find-agents-failed',
-        { 
-            Key        : key, 
-            Projection : proj,
-            Result     : resp.result
-        })
-        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
-    }
-    resp.forEach((res) => { delete res._id })
-    console.log('agents-list', { Stores: resp })
-    return resp
-}
-
 const GetAgentSockID = async function(agent_id)
 {
     console.log('get-agent-sock-id', { AgentID: agent_id })
@@ -143,6 +114,5 @@ module.exports =
     , Get                 : Get
     , List                : List
     , NearbyAgents        : NearbyAgents
-    , GetMany             : GetMany
     , GetAgentSockID       : GetAgentSockID
 }

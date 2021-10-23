@@ -90,7 +90,7 @@ const ReadAll         = async function (data, mode_)
     if (!products_.length)
     {
         console.log('no-product-found', { Query : query, Project: project })
-        return
+        return products_
     }
     for(let idx = 0; idx < products_.length; idx++)
     {

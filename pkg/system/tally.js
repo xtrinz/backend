@@ -36,9 +36,9 @@ const SetBill      = async function(data, src_loc, dest_loc)
     // Transit Charge
     let cord =
     {
-          SrcLt  : src_loc.Lattitude
+          SrcLt  : src_loc.Latitude
         , SrcLn  : src_loc.Longitude
-        , DestLt : dest_loc.Lattitude
+        , DestLt : dest_loc.Latitude
         , DestLn : dest_loc.Longitude
     }
     let dist = await map.Distance(cord)
