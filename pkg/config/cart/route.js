@@ -33,17 +33,16 @@ router.get('/list', async (req, res, next) =>
 
     if(req.query.AddressID)
     {
-      const address = new Address()
-          , in_     =
+      const in_     =
       {
           UserID    : req.body.User._id
         , AddressID : req.query.AddressID
       }
-      data.Address  = await address.Read(in_)
+      data.Address  = await Address.Read(in_)
       src_loc       = await (new Store()).GetLoc(data.StoreID)
       dest_loc      =
       {
-          Latitude : data.Address.Latitude
+          Latitude  : data.Address.Latitude
         , Longitude : data.Address.Longitude
       }
     }

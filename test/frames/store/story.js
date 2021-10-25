@@ -1,11 +1,9 @@
 const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
-    , { AddUser }  = require('../user/story')
 
-const Std = function(admin_, owner_, staff_, store_)
+const Std = function(text_, store_, admin_, user_)
 {
-    let tc = new TestCase('Store Management')
-        tc = AddUser(tc, owner_)
+    let tc = new TestCase(text_)
     const store = 
     [
           new event.RegisterNew     (store_)            // Store
@@ -13,8 +11,8 @@ const Std = function(admin_, owner_, staff_, store_)
         , new event.Register        (store_)
         , new event.RegisterApprove (admin_, store_)
         , new event.Edit            (store_)
-        , new event.Read            (owner_, store_)
-        , new event.List            (owner_, store_)
+        , new event.Read            (user_, store_)
+        , new event.List            (user_, store_)
         , new event.Connect         (store_)        
     ]
     store.forEach((step)=> tc.AddStep(step))

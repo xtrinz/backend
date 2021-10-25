@@ -383,7 +383,7 @@ let Connect = function(store_)
       let templ =      
       {
           Type          : Type.Event
-        , Describe      : 'User Socket Connect'
+        , Describe      : 'Store Socket Connect'
         , Method        : Method.CONNECT
         , Authorization : {'auth' : {Token : store.Token }}
         , Socket        : {}
@@ -411,7 +411,7 @@ let Disconnect = function(store_)
       let templ =      
       {
           Type          : Type.Event
-        , Describe      : 'User Socket Disconnect'
+        , Describe      : 'Store Socket Disconnect'
         , Method        : Method.DISCONNECT
         , Authorization : {}
         , Socket        : store.Socket

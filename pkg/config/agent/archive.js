@@ -40,6 +40,8 @@ const Get = async function(param, qType)
 
 const NearbyAgents = async function(ln, lt)
 {
+    ln = ln.loc()
+    lt = lt.loc()    
     console.log('list-nearby-live-agents', {Location: [ln, lt]} )
     const cnt     = 10
         , maxDist = 5000

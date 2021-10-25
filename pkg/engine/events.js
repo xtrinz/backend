@@ -125,7 +125,7 @@ const Disconnect = async function(socket_)
             console.log('store-not-found', { StoreID: sckt.Entity })
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
-        index = data.SockID.indexOf(socket_.id)
+        index = await data.SockID.indexOf(String(socket_.id))
         if (index > -1) { data.SockID.splice(index, 1) }
 
         if(data.SockID.length === 0)
@@ -142,7 +142,7 @@ const Disconnect = async function(socket_)
               console.log('agent-not-found', { AgentID: sckt.Entity })
               Err_(code.BAD_REQUEST, reason.InvalidToken)
           }
-          index = data.SockID.indexOf(socket_.id)
+          index = await data.SockID.indexOf(String(socket_.id))
           if (index > -1) { data.SockID.splice(index, 1) }
 
           if(data.SockID.length === 0)
@@ -160,7 +160,7 @@ const Disconnect = async function(socket_)
             console.log('user-not-found', { UserID: sckt.Entity })
             Err_(code.BAD_REQUEST, reason.InvalidToken)
         }
-        index = data.SockID.indexOf(socket_.id)
+        index = await data.SockID.indexOf(String(socket_.id))
         if (index > -1) { data.SockID.splice(index, 1) }
 
         if(data.SockID.length === 0)

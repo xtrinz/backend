@@ -1,4 +1,3 @@
-const { agents } = require('../../../pkg/system/database')
 const { Method, Type }        = require('../../lib/medium')
     , data                    = require('../data')
     , { read }                = require('../../lib/driver')

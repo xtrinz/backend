@@ -2,7 +2,7 @@ const { Method, Type }        = require('../../lib/medium')
     , { code, status, mode }  = require('../../../pkg/system/models')
     , data                    = require('../data')
 
-let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_) 
+let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_) 
 {
     this.JournalID = journal_
     this.UserID    = user_
@@ -11,6 +11,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
     this.CartID    = cart_
     this.AdminID   = admin_
     this.Mode      = mode_
+    this.AddressID = addr_
 
     this.Data      = function()
     {
@@ -21,6 +22,12 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
       let cart    = data.Get(data.Obj.Cart    , this.CartID)
       let store   = data.Get(data.Obj.Store   , journal.Seller.Name)
         , data_, src_, token
+
+      let address = { ...data.Get(data.Obj.Address , this.AddressID)}
+      delete address.IsDefault
+      delete address.Tag
+      address.AddressID = address.ID
+      delete address.ID      
 
       journal.Transit = { ID : user.TransitID }
       data.Set(data.Obj.Journal , this.JournalID, journal)
@@ -46,7 +53,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
             {
                 JournalID       : cart.Paytm.OrderID.slice(6)
               , Date            : ''
-              , Buyer           : { Address: journal.Buyer.Address }
+              , Buyer           : { Address: address }
               , Seller          : 
               { 
                   ID            : store.ID
@@ -88,9 +95,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                 , Buyer           :
                 { 
                     Name          : journal.Buyer.Name
-                  , Address       : journal.Buyer.Address
-                  , Longitude     : journal.Buyer.Longitude
-                  , Latitude      : journal.Buyer.Latitude
+                  , Address       : address
                   , MobileNo      : journal.Buyer.MobileNo                  
                 }
                 , Seller          : 
@@ -121,9 +126,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                 , Buyer           :
                 {
                     Name          : journal.Buyer.Name
-                  , Address       : journal.Buyer.Address
-                  , Longitude     : journal.Buyer.Longitude
-                  , Latitude      : journal.Buyer.Latitude
+                  , Address       : address
                   , MobileNo      : journal.Buyer.MobileNo              
                 }
                 , Seller          : 
@@ -221,7 +224,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
   }
 }
 
-let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_) 
+let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_) 
 {
     this.JournalID = journal_
     this.UserID    = user_
@@ -230,6 +233,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
     this.CartID    = cart_
     this.AdminID   = admin_
     this.Mode      = mode_
+    this.AddressID = addr_
 
     this.Data      = function()
     {
@@ -244,6 +248,12 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
       journal.Transit = { ID : user.TransitID }
       data.Set(data.Obj.Journal , this.JournalID, journal)
   
+      let address = { ...data.Get(data.Obj.Address , this.AddressID)}
+      delete address.IsDefault
+      delete address.Tag
+      address.AddressID = address.ID
+      delete address.ID   
+
     // Ugly: Pls Forgive
     let prod = []
     for(let idx = 0; idx < journal.Order.Products.length; idx++)
@@ -264,7 +274,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
             {
                 JournalID       : cart.Paytm.OrderID.slice(6)
               , Date            : ''
-              , Buyer           : { Address: journal.Buyer.Address }
+              , Buyer           : { Address: address }
               , Seller          : 
               { 
                   ID            : store.ID
@@ -293,7 +303,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
               { 
                   ID            : journal.Transit.ID
                 , Status        : 'Closed'
-                , State  : 'TranistCompleted'
+                , State         : 'TranistCompleted'
               }
             }
             break;
@@ -306,9 +316,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                 , Buyer           :
                 { 
                     Name          : journal.Buyer.Name
-                  , Address       : journal.Buyer.Address
-                  , Longitude     : journal.Buyer.Longitude
-                  , Latitude      : journal.Buyer.Latitude
+                  , Address       : address
                   , MobileNo      : journal.Buyer.MobileNo                  
                 }
                 , Seller          : 
@@ -339,9 +347,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_)
                 , Buyer           :
                 {
                     Name          : journal.Buyer.Name
-                  , Address       : journal.Buyer.Address
-                  , Longitude     : journal.Buyer.Longitude
-                  , Latitude      : journal.Buyer.Latitude
+                  , Address       : address
                   , MobileNo      : journal.Buyer.MobileNo
                 }
                 , Seller          : 

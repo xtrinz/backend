@@ -23,9 +23,8 @@ router.get('/view', async (req, res, next) =>
 {
   try
   {
-    const address     = new Address()
     req.query.UserID  = req.body.User._id
-    const data        = await address.Read(req.query)
+    const data        = await Address.Read(req.query)
 
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -40,8 +39,7 @@ router.get('/list', async (req, res, next) =>
 {
   try
   {
-    const address = new Address()
-        , data    = await address.List(req.body.User._id)
+    const data = await Address.List(req.body.User._id)
 
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -55,8 +53,7 @@ router.get('/list', async (req, res, next) =>
 router.post('/modify', async (req, res, next) => {
   try
   {
-    const entry = new Address()
-    await entry.Update(req.body)
+    await Address.Update(req.body)
     
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -71,8 +68,7 @@ router.delete('/remove', async (req, res, next) =>
 {
   try
   {
-    const entry = new Address()
-    await entry.Remove( req.body.User._id,
+    await Address.Remove( req.body.User._id,
                         req.body.AddressID)
     
     return res.status(code.OK).json({

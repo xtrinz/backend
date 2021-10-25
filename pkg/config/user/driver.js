@@ -133,7 +133,7 @@ function User(data)
         }
 
         await db.Save(rcd)
-        console.log('profile-updated', {User: this.Data})
+        console.log('profile-updated', {User: rcd })
     }
 
 }

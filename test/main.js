@@ -41,14 +41,34 @@ const { Test, TestSuite } = require('./lib/driver')
     }
 
   let admin_1       = new    user.data.User    ('Admin')
-    , user_1_owner  = new    user.data.User    ('User')
-    , user_3_buyer  = new    user.data.User    ('User')
+    , client_1      = new    user.data.User    ('User')
     , agent_1       = new   agent.data.Agent   ('Agent')
     , store_1       = new   store.data.Store   ()
     , product_1     = new product.data.Product ()
-    , addr_1_user_3 = new address.data.Address ()
+    , client_1_addr = new address.data.Address ()
     
-    new journal.data.Journal (user_3_buyer, addr_1_user_3, store_1, cart.data.Cart.Carts[user_3_buyer.Name], agent_1)
+    new journal.data.Journal (client_1, client_1_addr, store_1, cart.data.Cart.Carts[client_1.Name], agent_1)
+
+  var suite_1 = new TestSuite('End to End Process')
+  let cases =
+  [
+         user.story.Std('Add Admin ',               admin_1.Name)
+    ,    user.story.Std('Add Client',              client_1.Name)         
+    ,   agent.story.Std('Add Agent ',               agent_1.Name,   admin_1.Name)
+    ,   store.story.Std('Add Seller',               store_1.Name,   admin_1.Name, client_1.Name)
+    , product.story.Std('Add Product',              store_1.Name, product_1.Name, client_1.Name)
+    , address.story.Std('Set Client Address', client_1_addr.Name,  client_1.Name )
+    ,    cart.story.Std(client_1.Name, product_1.Name, client_1_addr.Name, store_1.Name)
+    , transit.story.Std(client_1.Name, client_1_addr.Name, agent_1.Name, store_1.Name)
+    , journal.story.Std(client_1.Name, store_1.Name, agent_1.Name, admin_1.Name, client_1_addr.Name)
+    ,    user.story.Disconnect(client_1.Name, admin_1.Name)
+    ,   agent.story.Disconnect(agent_1.Name)
+    ,   store.story.Disconnect(store_1.Name)
+  ]
+  cases.forEach((test)=> suite_1.AddCase(test))
+
+
+/*
 
   let user_4_owner  = new    user.data.User    ('User')
     , user_6_buyer  = new    user.data.User    ('User')
@@ -57,33 +77,16 @@ const { Test, TestSuite } = require('./lib/driver')
     , product_2     = new product.data.Product ()
     , addr_1_user_6 = new address.data.Address ()
 
-  var suite_1 = new TestSuite('End to End Process')
-  let cases =
-  [
-         user.story.Std(admin_1.Name )
-    ,   agent.story.Std(agent_1.Name, admin_1.Name )         
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name, addr_1_user_3.Address.Name, store_1.Name)
-    , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, store_1.Name)
-    , journal.story.Std(user_3_buyer.Name, store_1.Name, agent_1.Name, admin_1.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, admin_1.Name)
-    ,   agent.story.Disconnect(agent_1.Name)
-    ,   store.story.Disconnect(store_1.Name)
-  ]
-  cases.forEach((test)=> suite_1.AddCase(test))
-
   var suite_2 = new TestSuite('E2E Cancel By User')
   cases =
   [
          user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancelByUser(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+    ,   store.story.Std(admin_1.Name, client_1.Name, client_1.Name, store_1.Name )
+    , product.story.Std(client_1.Name, store_1.Name, product_1.Name )
+    , address.story.Std(client_1_addr.Address.Name, client_1.Name )
+    ,    cart.story.Std(client_1.Name, product_1.Name )
+    , transit.story.CancelByUser(client_1.Name, client_1_addr.Address.Name, agent_1.Name, client_1.Name, client_1.Name)
+    ,    user.story.Disconnect(client_1.Name, client_1.Name, client_1.Name, agent_1.Name, admin_1.Name)
   ]
   cases.forEach((test)=> suite_2.AddCase(test))
 
@@ -91,12 +94,12 @@ const { Test, TestSuite } = require('./lib/driver')
   cases =
   [
          user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancelByUserAfterAceptance(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+    ,   store.story.Std(admin_1.Name, client_1.Name, client_1.Name, store_1.Name )
+    , product.story.Std(client_1.Name, store_1.Name, product_1.Name )
+    , address.story.Std(client_1_addr.Address.Name, client_1.Name )
+    ,    cart.story.Std(client_1.Name, product_1.Name )
+    , transit.story.CancelByUserAfterAceptance(client_1.Name, client_1_addr.Address.Name, agent_1.Name, client_1.Name, client_1.Name)
+    ,    user.story.Disconnect(client_1.Name, client_1.Name, client_1.Name, agent_1.Name, admin_1.Name)
   ]
   cases.forEach((test)=> suite_3.AddCase(test))
 
@@ -105,12 +108,12 @@ const { Test, TestSuite } = require('./lib/driver')
   cases =
   [
          user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancelByUserAfterTransitAceptance(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+    ,   store.story.Std(admin_1.Name, client_1.Name, client_1.Name, store_1.Name )
+    , product.story.Std(client_1.Name, store_1.Name, product_1.Name )
+    , address.story.Std(client_1_addr.Address.Name, client_1.Name )
+    ,    cart.story.Std(client_1.Name, product_1.Name )
+    , transit.story.CancelByUserAfterTransitAceptance(client_1.Name, client_1_addr.Address.Name, agent_1.Name, client_1.Name, client_1.Name)
+    ,    user.story.Disconnect(client_1.Name, client_1.Name, client_1.Name, agent_1.Name, admin_1.Name)
   ]
   cases.forEach((test)=> suite_4.AddCase(test))
 
@@ -118,12 +121,12 @@ const { Test, TestSuite } = require('./lib/driver')
   cases =
   [
          user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancellationByStoreAfterInit(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+    ,   store.story.Std(admin_1.Name, client_1.Name, client_1.Name, store_1.Name )
+    , product.story.Std(client_1.Name, store_1.Name, product_1.Name )
+    , address.story.Std(client_1_addr.Address.Name, client_1.Name )
+    ,    cart.story.Std(client_1.Name, product_1.Name )
+    , transit.story.CancellationByStoreAfterInit(client_1.Name, client_1_addr.Address.Name, agent_1.Name, client_1.Name, client_1.Name)
+    ,    user.story.Disconnect(client_1.Name, client_1.Name, client_1.Name, agent_1.Name, admin_1.Name)
   ]
   cases.forEach((test)=> suite_5.AddCase(test))
 
@@ -131,12 +134,12 @@ const { Test, TestSuite } = require('./lib/driver')
   cases =
   [
          user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancellationByStoreAfterOrderAcceptance(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+    ,   store.story.Std(admin_1.Name, client_1.Name, client_1.Name, store_1.Name )
+    , product.story.Std(client_1.Name, store_1.Name, product_1.Name )
+    , address.story.Std(client_1_addr.Address.Name, client_1.Name )
+    ,    cart.story.Std(client_1.Name, product_1.Name )
+    , transit.story.CancellationByStoreAfterOrderAcceptance(client_1.Name, client_1_addr.Address.Name, agent_1.Name, client_1.Name, client_1.Name)
+    ,    user.story.Disconnect(client_1.Name, client_1.Name, client_1.Name, agent_1.Name, admin_1.Name)
   ]
   cases.forEach((test)=> suite_6.AddCase(test))
 
@@ -144,12 +147,12 @@ const { Test, TestSuite } = require('./lib/driver')
   cases =
   [
          user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancellationByStoreAfterTransitAcceptance(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+    ,   store.story.Std(admin_1.Name, client_1.Name, client_1.Name, store_1.Name )
+    , product.story.Std(client_1.Name, store_1.Name, product_1.Name )
+    , address.story.Std(client_1_addr.Address.Name, client_1.Name )
+    ,    cart.story.Std(client_1.Name, product_1.Name )
+    , transit.story.CancellationByStoreAfterTransitAcceptance(client_1.Name, client_1_addr.Address.Name, agent_1.Name, client_1.Name, client_1.Name)
+    ,    user.story.Disconnect(client_1.Name, client_1.Name, client_1.Name, agent_1.Name, admin_1.Name)
   ]
   cases.forEach((test)=> suite_7.AddCase(test))
 
@@ -157,12 +160,12 @@ const { Test, TestSuite } = require('./lib/driver')
   cases =
   [
          user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.IgnoredByLastAgent(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name, admin_1.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+    ,   store.story.Std(admin_1.Name, client_1.Name, client_1.Name, store_1.Name )
+    , product.story.Std(client_1.Name, store_1.Name, product_1.Name )
+    , address.story.Std(client_1_addr.Address.Name, client_1.Name )
+    ,    cart.story.Std(client_1.Name, product_1.Name )
+    , transit.story.IgnoredByLastAgent(client_1.Name, client_1_addr.Address.Name, agent_1.Name, client_1.Name, client_1.Name, admin_1.Name)
+    ,    user.story.Disconnect(client_1.Name, client_1.Name, client_1.Name, agent_1.Name, admin_1.Name)
   ]
   cases.forEach((test)=> suite_8.AddCase(test))
 
@@ -171,21 +174,21 @@ const { Test, TestSuite } = require('./lib/driver')
   [
          user.story.Std(admin_1.Name )
 
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
+    ,   store.story.Std(admin_1.Name, client_1.Name, client_1.Name, store_1.Name )
+    , product.story.Std(client_1.Name, store_1.Name, product_1.Name )
 
     ,   store.story.Std(admin_1.Name, user_4_owner.Name, user_4_owner.Name, store_2.Name )
     , product.story.Std(user_4_owner.Name, store_2.Name, product_2.Name )
 
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name, addr_1_user_3.Address.Name, store_1.Name)
+    , address.story.Std(client_1_addr.Address.Name, client_1.Name )
+    ,    cart.story.Std(client_1.Name, product_1.Name, client_1_addr.Address.Name, store_1.Name)
 
-    ,    cart.story.Std(user_3_buyer.Name, product_2.Name, addr_1_user_3.Address.Name, store_2.Name)
-    , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+    ,    cart.story.Std(client_1.Name, product_2.Name, client_1_addr.Address.Name, store_2.Name)
+    , transit.story.Std(client_1.Name, client_1_addr.Address.Name, agent_1.Name, client_1.Name, client_1.Name)
+    ,    user.story.Disconnect(client_1.Name, client_1.Name, client_1.Name, agent_1.Name, admin_1.Name)
     ]
     cases.forEach((test)=> suite_9.AddCase(test))
-
+*/
     Test.AddTestSuite(suite_1)
 //  Test.AddTestSuite(suite_2)
 //  Test.AddTestSuite(suite_3)

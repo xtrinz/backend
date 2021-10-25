@@ -1,11 +1,9 @@
 const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
-    , { AddUser }  = require('../user/story')
 
-const Std = function(addr_, user_)
+const Std = function(text_, addr_, user_)
 {
-        let tc = new TestCase('Address Management')
-            tc = AddUser(tc, user_)
+        let tc = new TestCase(text_)
     const steps =
     [
           new event.Add    (user_, addr_)

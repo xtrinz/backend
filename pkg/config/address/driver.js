@@ -1,39 +1,31 @@
-const { ObjectId
-    , ObjectID } = require('mongodb')
-    , db         = require('../address/archive')
-    , { limits } = require('../../system/models')
+const { ObjectId, ObjectID } = require('mongodb')
+    , db                     = require('../address/archive')
+    , { limits }             = require('../../system/models')
 
-function Address(data)
+class Address
 {
-    if(data)
-    this.Data =
+    constructor(data)
     {
-          _id               : ''
-        , Location          :
+        this._id          = new ObjectID()
+        this.Location     =
         {
-              type          : 'Point'
-            , coordinates   : [data.Longitude, data.Latitude]
+              type        : 'Point'
+            , coordinates : [data.Longitude.loc(), data.Latitude.loc()]
         }
-        , Tag               : data.Tag
-        , IsDefault         : data.IsDefault
-
-        , Address           :
-        {
-              Name          : data.Address.Name
-            , Line1         : data.Address.Line1
-            , Line2         : data.Address.Line2
-            , City          : data.Address.City
-            , PostalCode    : data.Address.PostalCode
-            , State         : data.Address.State
-            , Country       : data.Address.Country
-        }
+        this.Tag          = data.Tag
+        this.IsDefault    = data.IsDefault
+        this.Name         = data.Name
+        this.Line1        = data.Line1
+        this.Line2        = data.Line2
+        this.City         = data.City
+        this.PostalCode   = data.PostalCode
+        this.State        = data.State
+        this.Country      = data.Country
     }
 
-    this.Insert     = async function (user_id, addrs)
+    async Insert(user_id, addrs)
     {
-        this.Data._id = new ObjectID()
-
-        console.log('insert-address', { Address: this.Data })
+        console.log('insert-address', { Address: this })
 
         if(addrs.length > limits.AddressCount)
         {
@@ -41,37 +33,35 @@ function Address(data)
             Err_(code.INTERNAL_SERVER, reason.AddressLimitExceeded)
         }
 
-        if(this.Data.IsDefault)
-        { await db.ResetDefault(user_id) }
+        if(this.IsDefault) await db.ResetDefault(user_id)
 
-        await db.Insert(user_id, this.Data)
+        await db.Insert(user_id, this)
 
-        return this.Data._id
+        return this._id
     }
 
-    this.Read     = async function (data)
+    static async Read(data)
     {
         console.log('read-address', data)
         const addr = await db.Read(data.UserID, data.AddressID)
         return addr
     }
 
-    this.List     = async function (user_id)
+    static async List(user_id)
     {
         console.log('list-address', { UserID : user_id })
         const list = await db.List(user_id)
         return list
     }
 
-    this.Update     = async function (data)
+    static async Update(data)
     {
         console.log('update-address', { Address : data })
 
         const user_id = data.User._id
         delete data.User
 
-        if(data.IsDefault)
-        { await db.ResetDefault(user_id) }
+        if(data.IsDefault) await db.ResetDefault(user_id)
 
         data._id  = ObjectId(data.AddressID)
         delete data.AddressID
@@ -79,9 +69,10 @@ function Address(data)
         await db.Update(user_id, data)
     }
 
-    this.Remove     = async function (user_id, addr_id)
+    static async Remove(user_id, addr_id)
     {
-        console.log('remove-address', { 
+        console.log('remove-address',
+        {
               UserID    : user_id
             , AddressID : addr_id
         })

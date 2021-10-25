@@ -24,16 +24,13 @@ let Add = function(user_, addr_)
           , Latitude     : addr.Latitude
           , Tag          : addr.Tag
           , IsDefault    : addr.IsDefault
-          , Address      :
-          {
-              Name       : addr.Address.Name
-            , Line1      : addr.Address.Line1
-            , Line2      : addr.Address.Line2
-            , City       : addr.Address.City
-            , PostalCode : addr.Address.PostalCode
-            , State      : addr.Address.State
-            , Country    : addr.Address.Country
-          }
+          , Name         : addr.Name
+          , Line1        : addr.Line1
+          , Line2        : addr.Line2
+          , City         : addr.City
+          , PostalCode   : addr.PostalCode
+          , State        : addr.State
+          , Country      : addr.Country
         }
         , Header         : { Authorization: user.Token }
       }
@@ -92,16 +89,13 @@ let View = function(user_, addr_)
               , Latitude     : addr.Latitude
               , Tag          : addr.Tag
               , IsDefault    : addr.IsDefault
-              , Address      :
-              {                  
-                  Name       : addr.Address.Name
-                , Line1      : addr.Address.Line1
-                , Line2      : addr.Address.Line2
-                , City       : addr.Address.City
-                , PostalCode : addr.Address.PostalCode
-                , State      : addr.Address.State
-                , Country    : addr.Address.Country
-              } 
+              , Name         : addr.Name
+              , Line1        : addr.Line1
+              , Line2        : addr.Line2
+              , City         : addr.City
+              , PostalCode   : addr.PostalCode
+              , State        : addr.State
+              , Country      : addr.Country
           }
       }
     }
@@ -141,16 +135,13 @@ let List = function(user_, addr_)
               , Latitude     : addr.Latitude
               , Tag          : addr.Tag
               , IsDefault    : addr.IsDefault
-              , Address      :
-              {                  
-                  Name       : addr.Address.Name
-                , Line1      : addr.Address.Line1
-                , Line2      : addr.Address.Line2
-                , City       : addr.Address.City
-                , PostalCode : addr.Address.PostalCode
-                , State      : addr.Address.State
-                , Country    : addr.Address.Country
-              } 
+              , Name         : addr.Name
+              , Line1        : addr.Line1
+              , Line2        : addr.Line2
+              , City         : addr.City
+              , PostalCode   : addr.PostalCode
+              , State        : addr.State
+              , Country      : addr.Country
           }]
       }
     }
@@ -168,29 +159,26 @@ let Update = function(user_, addr_)
     let addr  = data.Get(data.Obj.Address, this.AddressID)
     let templ =
     {
-        Type                   : Type.Rest
-      , Describe               : 'Address Update'
-      , Request                :
+        Type                 : Type.Rest
+      , Describe             : 'Address Update'
+      , Request              :
       {
-            Method             : Method.POST
-          , Path               : '/v1/address/modify'
-          , Body               : 
+            Method           : Method.POST
+          , Path             : '/v1/address/modify'
+          , Body             : 
           {
               AddressID      : addr.ID
             , Longitude      : addr.Longitude
             , Latitude       : addr.Latitude
             , Tag            : 'OFFICE'
             , IsDefault      : addr.IsDefault
-            , Address        :
-            {
-                Name         : addr.Address.Name
-              , Line1        : addr.Address.Line1
-              , Line2        : addr.Address.Line2
-              , City         : addr.Address.City
-              , PostalCode   : addr.Address.PostalCode
-              , State        : addr.Address.State
-              , Country      : addr.Address.Country
-            }
+            , Name           : addr.Name
+            , Line1          : addr.Line1
+            , Line2          : addr.Line2
+            , City           : addr.City
+            , PostalCode     : addr.PostalCode
+            , State          : addr.State
+            , Country        : addr.Country
           }
           , Header           : { Authorization: user.Token }
       }

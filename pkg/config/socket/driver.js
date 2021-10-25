@@ -68,7 +68,7 @@ function Socket()
             await db.transit.UnsetUserSockID(data._id, sock_id)
             break
         }
-        console.log('user-sock-id-poped', opt)
+        console.log('sock-id-poped', opt)
     }
 }
 

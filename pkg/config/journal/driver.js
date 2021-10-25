@@ -33,9 +33,7 @@ function Journal()
       {
           ID              : ''
         , Name            : ''
-        , Longitude       : 0
-        , Latitude        : 0
-        , Address         : {}
+        , Address         : {} // Lat / Lon / ID/ Other Dest details
       }
       , Seller            :
       {
@@ -83,14 +81,14 @@ function Journal()
     this.SetBuyer = async function(user, addr_id)
     {      
       const addr = await db.addr.Read(user._id, addr_id)
+      delete addr.IsDefault
+      delete addr.Tag
       this.Data.Buyer     = 
-      {                 
-          ID        : user._id
-        , Name      : user.Name
-        , MobileNo  : user.MobileNo
-        , Longitude : addr.Longitude.loc()
-        , Latitude  : addr.Latitude.loc()
-        , Address   : addr.Address
+      {
+          ID       : user._id
+        , Name     : user.Name
+        , MobileNo : user.MobileNo
+        , Address  : addr
       }
     }
 
@@ -118,8 +116,8 @@ function Journal()
         , Name      : store.Name
         , MobileNo  : store.MobileNo
         , Image     : store.Image
-        , Longitude : store.Location.coordinates[0]
-        , Latitude  : store.Location.coordinates[1]
+        , Longitude : store.Location.coordinates[0].toFixed(6)
+        , Latitude  : store.Location.coordinates[1].toFixed(6)
         , Address   : store.Address
       }
     }
@@ -150,8 +148,8 @@ function Journal()
       const src_loc  = await (new Store()).GetLoc(items.StoreID)
           , dest_loc =
           {
-              Latitude : dest.Latitude
-            , Longitude : dest.Longitude
+              Latitude : dest.Address.Latitude
+            , Longitude : dest.Address.Longitude
           }
 
       await tally.SetBill(this.Data.Order, src_loc, dest_loc)
@@ -396,10 +394,6 @@ function Journal()
             data_.Penalty = penalty
             data_.Income  = income
 
-            data_.Buyer.Longitude   = data_.Buyer.Longitude.toFixed(6)
-            data_.Buyer.Latitude    = data_.Buyer.Latitude.toFixed(6)
-            data_.Seller.Longitude  = data_.Seller.Longitude.toFixed(6)
-            data_.Seller.Latitude   = data_.Seller.Latitude.toFixed(6)
             return data_
 
             case mode.Store :
@@ -451,7 +445,6 @@ function Journal()
                 
                 , 'Buyer.Name'           : 1
                 , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'  : 1
-                , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'  : 1
 
                 , 'Seller.ID'            : 1  , 'Seller.Name'     : 1
                 , 'Seller.Address'       : 1  , 'Seller.Image'    : 1
@@ -481,11 +474,6 @@ function Journal()
         delete data_.Account
         data_.Penalty   = penalty
         data_.Refund    = income
-
-        data_.Buyer.Longitude   = data_.Buyer.Longitude.toFixed(6)
-        data_.Buyer.Latitude    = data_.Buyer.Latitude.toFixed(6)
-        data_.Seller.Longitude  = data_.Seller.Longitude.toFixed(6)
-        data_.Seller.Latitude   = data_.Seller.Latitude.toFixed(6)
         
         return data_
 
@@ -515,7 +503,7 @@ function Journal()
           {
             projection : 
             {
-                  _id                   : 1  , 'Date'              : 1  
+                  _id                  : 1  , 'Date'              : 1  
               , 'Buyer.Address'        : 1
               , 'Agent.Name'           : 1  , 'Agent.MobileNo'    : 1
               , 'Seller.ID'            : 1  , 'Seller.Name'       : 1
@@ -590,12 +578,7 @@ function Journal()
 
             delete data_[idx].Account
             data_[idx].Penalty = penalty
-            data_[idx].Income  = income
-
-            data_[idx].Buyer.Longitude  = data_[idx].Buyer.Longitude.toFixed(6)
-            data_[idx].Buyer.Latitude   = data_[idx].Buyer.Latitude.toFixed(6)
-            data_[idx].Seller.Longitude = data_[idx].Seller.Longitude.toFixed(6)
-            data_[idx].Seller.Latitude  = data_[idx].Seller.Latitude.toFixed(6)                  
+            data_[idx].Income  = income              
           }
           return data_
 
@@ -708,12 +691,7 @@ function Journal()
       
               delete data_[idx].Account
               data_[idx].Penalty   = penalty
-              data_[idx].Refund    = income
-
-              data_[idx].Buyer.Longitude  = data_[idx].Buyer.Longitude.toFixed(6)
-              data_[idx].Buyer.Latitude   = data_[idx].Buyer.Latitude.toFixed(6)
-              data_[idx].Seller.Longitude = data_[idx].Seller.Longitude.toFixed(6)
-              data_[idx].Seller.Latitude  = data_[idx].Seller.Latitude.toFixed(6)    
+              data_[idx].Refund    = income 
           }
           return data_
       }

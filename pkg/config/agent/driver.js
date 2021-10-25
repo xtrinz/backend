@@ -188,7 +188,7 @@ function Agent(data)
         }
 
         await db.Save(rcd)
-        console.log('profile-updated', {Agent: this.Data})
+        console.log('profile-updated', {Agent: rcd })
     }
 
     this.List  = async function (in_)

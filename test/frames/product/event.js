@@ -2,15 +2,13 @@ const { Method, Type }       = require('../../lib/medium')
     , { code, status, text } = require('../../../pkg/system/models')
     , data                   = require('../data')
 
-let Add = function(staff_, store_, product_) 
+let Add = function(store_, product_) 
 {
-    this.StaffID  	= staff_
     this.StoreID  	= store_
     this.ProductID  = product_
     this.Data     = function()
     {
       let store       = data.Get(data.Obj.Store, this.StoreID)
-      let staff       = data.Get(data.Obj.User, this.StaffID)
       let product     = data.Get(data.Obj.Product, this.ProductID)
       product.StoreID = store.ID
       data.Set(data.Obj.Product, this.ProductID, product)
@@ -173,15 +171,13 @@ let List = function(user_, store_, product_)
   }
 }
 
-let Modify = function(staff_, store_, product_) 
+let Modify = function(store_, product_) 
 {
-  this.StaffID   = staff_
   this.StoreID   = store_
   this.ProductID = product_
   this.Data      = function()
   {
     let store   = data.Get(data.Obj.Store,   this.StoreID)
-    let staff   = data.Get(data.Obj.User,    this.StaffID)
     let product = data.Get(data.Obj.Product, this.ProductID)
     let templ   =
     {
@@ -218,15 +214,13 @@ let Modify = function(staff_, store_, product_)
   }
 }
 
-let Remove = function(staff_, store_, product_) 
+let Remove = function(store_, product_) 
 {
-  this.StaffID   = staff_
   this.StoreID   = store_
   this.ProductID = product_
   this.Data      = function()
   {
     let store   = data.Get(data.Obj.Store,   this.StoreID)
-    let staff   = data.Get(data.Obj.User,    this.StaffID)
     let product = data.Get(data.Obj.Product, this.ProductID)
     let templ   =
     {

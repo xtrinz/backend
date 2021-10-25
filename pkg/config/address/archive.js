@@ -32,9 +32,8 @@ const Read     = async function (user_id, addr_id)
     }
     
     resp = resp.AddressList[0]
-    delete resp.State
-    resp.Longitude = resp.Location.coordinates[0]
-    resp.Latitude  = resp.Location.coordinates[1]
+    resp.Longitude = resp.Location.coordinates[0].toFixed(6)
+    resp.Latitude  = resp.Location.coordinates[1].toFixed(6)
     delete resp.Location
 
     resp.AddressID = resp._id
@@ -52,9 +51,8 @@ const List     = async function (user_id)
 
     resp.AddressList.forEach((addr)=>
     {
-        delete addr.State
-        addr.Longitude = addr.Location.coordinates[0]
-        addr.Latitude  = addr.Location.coordinates[1]
+        addr.Longitude = addr.Location.coordinates[0].toFixed(6)
+        addr.Latitude  = addr.Location.coordinates[1].toFixed(6)
         delete addr.Location
 
         addr.AddressID = addr._id

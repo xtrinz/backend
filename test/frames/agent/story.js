@@ -1,9 +1,9 @@
 const event         = require('./event')
     , { TestCase }  = require('../../lib/driver')
 
-const Std = function(agent_, admin_)
+const Std = function(text_, agent_, admin_)
 {
-    let tc    = new TestCase('Agent Management')
+    let tc    = new TestCase(text_)
     const steps_ =
     [
           new event.RegisterNew         (agent_)

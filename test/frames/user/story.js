@@ -1,9 +1,9 @@
 const event         = require('./event')
     , { TestCase }  = require('../../lib/driver')
 
-const Std = function(user_)
+const Std = function(desc_, user_)
 {
-    let tc    = new TestCase('User Management')
+    let tc    = new TestCase(desc_)
     const steps_ =
     [
           new event.RegisterNew         (user_)
@@ -12,8 +12,8 @@ const Std = function(user_)
         , new event.Connect             (user_)
         , new event.ProfileGet          (user_)
         , new event.ProfileEdit         (user_)
-        , new event.Disconnect          (user_)
-        , new event.Connect             (user_)
+        //, new event.Disconnect          (user_)
+        //, new event.Connect             (user_)
     ]
     steps_.forEach((step)=> {tc.AddStep(step) })
     return tc

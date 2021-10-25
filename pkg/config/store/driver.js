@@ -141,8 +141,8 @@ function Store(data)
         if (!this.Data) Err_(code.BAD_REQUEST, reason.StoreNotFound)
         let data =
         {
-            Longitude : this.Data.Location.coordinates[0]
-          , Latitude  : this.Data.Location.coordinates[1]
+            Longitude : this.Data.Location.coordinates[0].toFixed(6)
+          , Latitude  : this.Data.Location.coordinates[1].toFixed(6)
         }
 
         console.log('store-location-found', { StoreID: store_id, Loc : data })
