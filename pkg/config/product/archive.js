@@ -1,7 +1,8 @@
 const { ObjectId }           = require('mongodb')
     , { Err_, code, reason
-    , query, dbset, mode }   = require('../../system/models')
+    , query, dbset, mode, verb }   = require('../../system/models')
     , { products }           = require('../../system/database')
+    , project                = require('../../tools/project/product')
 
 const Save      = async function(data)
 {
@@ -67,23 +68,15 @@ const ReadAll         = async function (data, mode_)
     data.Page  = data.Page.loc()
     data.Limit = data.Limit.loc()
     console.log('find-all-product-by-store-id', { Data: data, Mode: mode_ })    
-    const project   =
-        {
-            _id         : 1, StoreID    : 1,
-            Name        : 1, Image      : 1,
-            Price       : 1, Quantity   : 1,
-            Description : 1, Category   : 1,
-            IsAvailable : 1, PricePerGV :1,
-            GroundVolume: 1, Unit       : 1
-        }
-        , query     = data.Query
-        , skip      = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
-        , lmt       = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
+    const proj   = project[verb.view]
+        , query  = data.Query
+        , skip   = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
+        , lmt    = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
 
     if(mode_ === mode.User) query.Quantity = { $gt : 0 }
 
     const products_ = await products.find(query)
-                                    .project(project)
+                                    .project(proj)
                                     .skip(skip)
                                     .limit(lmt)
                                     .toArray()

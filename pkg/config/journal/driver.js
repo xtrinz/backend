@@ -14,12 +14,14 @@ const { ObjectID, ObjectId } = require('mongodb')
       , channel
       , query
       , limits
-      , mode }     = require('../../system/models')
+      , mode, 
+      verb}     = require('../../system/models')
     , { Refund }   = require('../../infra/paytm/ind/refund')
     , { Payment }  = require('../../infra/paytm/ind/payment')
     , { PayTM }    = require('../../infra/paytm/driver')
     , { Store }    = require('../../config/store/driver')
     , tally        = require('../../system/tally')
+    , project      = require('../../tools/project/journal')
 
 function Journal()
 {
@@ -331,22 +333,7 @@ function Journal()
                   _id        : ObjectId(data.JournalID)
                 , 'Buyer.ID' : ObjectId(in_._id)
               }
-              , proj  = 
-              {
-                projection : 
-                {
-                     _id                   : 1  , 'Date'              : 1  
-                  , 'Buyer.Address'        : 1
-                  , 'Agent.Name'           : 1  , 'Agent.MobileNo'    : 1
-                  , 'Seller.ID'            : 1  , 'Seller.Name'       : 1
-                  , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
-                  , 'Order.Products'       : 1  , 'Order.Bill'        : 1
-                  , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
-                  , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
-                  , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-                  , 'Transit.State' : 1
-                }
-              }
+              , proj  = { projection : project[verb.view][mode.User] }
               , data_ = await db.journal.Get(query_, proj)
 
           delete data_._id
@@ -362,27 +349,7 @@ function Journal()
                 {
                   query_[ 'Transit.Status' ] = states.Running
                 }
-                proj  = 
-                {
-                  projection : 
-                  {
-                       _id                   : 1  , 'Date'              : 1
-
-                    , 'Seller.Name'          : 1  , 'Seller.MobileNo'   : 1
-                    , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
-                    , 'Seller.Longitude'     : 1  , 'Seller.Latitude'   : 1
-
-                    , 'Buyer.Name'           : 1
-                    , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'    : 1
-                    , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'    : 1
-
-                    , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-                    , 'Transit.State' : 1
-
-                    , 'Account.In.Static.Penalty.Agent' : 1
-                    , 'Account.Out.Static.Payout.Agent' : 1
-                  }
-                }
+                proj  = { projection : project[verb.view][mode.Agent] }
                 data_ = await db.journal.Get(query_, proj)
 
             delete data_._id
@@ -406,20 +373,7 @@ function Journal()
                   _id         : ObjectId(data.JournalID)
                 , 'Seller.ID' : ObjectId(in_._id)
               }
-              proj  = 
-              {
-                projection : 
-                {
-                     _id                   : 1  , 'Date'              : 1
-                  , 'Buyer.Name'           : 1
-                  , 'Agent.Name'           : 1  , 'Agent.MobileNo'    : 1
-                  , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-                  , 'Transit.State' : 1
-                  , 'Order.Products'       : 1  , 'Order.Bill.Total'  : 1
-                  , 'Account.In.Static.Penalty.Store' : 1
-                  , 'Account.Out.Static.Payout.Store' : 1
-                }
-              }
+              proj  = { projection : project[verb.view][mode.Store] }
               data_ = await db.journal.Get(query_, proj)
 
           delete data_._id
@@ -437,33 +391,7 @@ function Journal()
             {
                 _id         : ObjectId(data.JournalID)
             }
-            proj  = 
-            {
-              projection : 
-              {
-                   _id                   : 1  , 'Date'            : 1
-                
-                , 'Buyer.Name'           : 1
-                , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'  : 1
-
-                , 'Seller.ID'            : 1  , 'Seller.Name'     : 1
-                , 'Seller.Address'       : 1  , 'Seller.Image'    : 1
-                , 'Seller.Longitude'     : 1  , 'Seller.Latitude' : 1
-                , 'Seller.MobileNo'      : 1
-                
-                , 'Agent.Name'           : 1  , 'Agent.MobileNo'  : 1
-
-                , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
-                , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
-
-                , 'Transit.ID'           : 1  , 'Transit.Status'  : 1
-                , 'Transit.State' : 1
-
-                , 'Order.Products'       : 1  , 'Order.Bill'      : 1
-                , 'Account.In.Static.Penalty'        : 1
-                , 'Account.Out.Dynamic.Refund.Buyer' : 1
-              }
-            }
+            proj  = { projection : project[verb.view][mode.Admin] }
             data_ = await db.journal.Get(query_, proj)
 
         delete data_._id
@@ -499,22 +427,7 @@ function Journal()
           else if (data.IsLive !== undefined)
           query_[ 'Transit.Status' ] = states.Closed
 
-          proj   = 
-          {
-            projection : 
-            {
-                  _id                  : 1  , 'Date'              : 1  
-              , 'Buyer.Address'        : 1
-              , 'Agent.Name'           : 1  , 'Agent.MobileNo'    : 1
-              , 'Seller.ID'            : 1  , 'Seller.Name'       : 1
-              , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
-              , 'Order.Products'       : 1  , 'Order.Bill'        : 1
-              , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
-              , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
-              , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-              , 'Transit.State' : 1
-            }
-          }
+          proj  = { projection : project[verb.view][mode.User] }
           cond_   =
           {
               Page  : data.Page.loc()
@@ -541,27 +454,7 @@ function Journal()
           else if (data.IsLive !== undefined)
           query_[ 'Transit.Status' ] = states.Closed
 
-          proj  = 
-          {
-            projection : 
-            {
-                  _id                   : 1  , 'Date'              : 1
-
-              , 'Seller.Name'          : 1  , 'Seller.MobileNo'   : 1
-              , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
-              , 'Seller.Longitude'     : 1  , 'Seller.Latitude'   : 1
-
-              , 'Buyer.Name'           : 1
-              , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'    : 1
-              , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'    : 1
-
-              , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-              , 'Transit.State' : 1
-
-              , 'Account.In.Static.Penalty.Agent' : 1
-              , 'Account.Out.Static.Payout.Agent' : 1
-            }
-          }
+          proj  = { projection : project[verb.view][mode.Agent] }
           cond_   =
           {
               Page  : data.Page.loc()
@@ -598,20 +491,7 @@ function Journal()
           else if (data.IsLive !== undefined)
           query_[ 'Transit.Status' ] = states.Closed
 
-          proj  = 
-          {
-            projection : 
-            {
-                  _id                   : 1  , 'Date'              : 1
-              , 'Buyer.Name'           : 1
-              , 'Agent.Name'           : 1  , 'Agent.MobileNo'    : 1
-              , 'Transit.ID'           : 1  , 'Transit.Status'    : 1
-              , 'Transit.State' : 1
-              , 'Order.Products'       : 1  , 'Order.Bill.Total'  : 1
-              , 'Account.In.Static.Penalty.Store' : 1
-              , 'Account.Out.Static.Payout.Store' : 1
-            }
-          }
+          proj  = { projection : project[verb.view][mode.Store] }
           cond_   =
           {
               Page  : data.Page.loc()
@@ -647,34 +527,8 @@ function Journal()
           else if (data.IsLive !== undefined)
           query_[ 'Transit.Status' ] = states.Closed
 
-          proj  = 
-          {
-            projection : 
-            {
-                  _id                   : 1  , 'Date'            : 1
-                            
-              , 'Buyer.Name'           : 1
-              , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'  : 1
-              , 'Buyer.Longitude'      : 1  , 'Buyer.Latitude'  : 1
+          proj  = { projection : project[verb.view][mode.Admin] }
 
-              , 'Seller.ID'            : 1  , 'Seller.Name'     : 1
-              , 'Seller.Address'       : 1  , 'Seller.Image'    : 1
-              , 'Seller.Longitude'     : 1  , 'Seller.Latitude' : 1
-              , 'Seller.MobileNo'      : 1
-
-              , 'Agent.Name'           : 1  , 'Agent.MobileNo'  : 1
-
-              , 'Payment.Channel'      : 1  , 'Payment.Amount'    : 1
-              , 'Payment.Status'       : 1  , 'Payment.TimeStamp' : 1
-
-              , 'Transit.ID'           : 1  , 'Transit.Status'  : 1
-              , 'Transit.State' : 1
-
-              , 'Order.Products'       : 1  , 'Order.Bill'      : 1
-              , 'Account.In.Static.Penalty'        : 1
-              , 'Account.Out.Dynamic.Refund.Buyer' : 1
-            }
-          }
           cond_   =
           {
               Page  : data.Page.loc()
