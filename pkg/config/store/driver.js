@@ -1,8 +1,6 @@
-const { rmdirSync } = require('fs')
-
 const { ObjectID }           = require('mongodb')
     , otp                    = require('../../infra/otp')
-    , { Err_, code, reason, limits
+    , { Err_, code, reason
       , states, mode, qtype, command
       , query, message, gw, task, verb } = require('../../system/models')
     , db                     = 
@@ -86,8 +84,8 @@ function Store(data)
               , Type        : store_.Type
               , Name        : store_.Name
               , MobileNo    : store_.MobileNo
-              , Longitude   : store_.Location.coordinates[0].toFixed(6).toString()
-              , Latitude    : store_.Location.coordinates[1].toFixed(6).toString()
+              , Longitude   : store_.Location.coordinates[0].toFixed(6)
+              , Latitude    : store_.Location.coordinates[1].toFixed(6)
               , Address     : store_.Address
               , Time        : store_.Time
             }

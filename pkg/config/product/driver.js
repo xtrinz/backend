@@ -1,10 +1,11 @@
 const { ObjectId, ObjectID }        = require('mongodb')
-    , { Err_, code, reason, query, mode } = require('../../system/models')
+    , { Err_, code, reason, query, mode, verb } = require('../../system/models')
     , db                            =
     {
         product : require('../product/archive')
         , cart  : require('../cart/archive')
     }
+    , rinse                         = require('../../tools/rinse/product')
 
 function Product(data)
 {
@@ -62,13 +63,7 @@ function Product(data)
 
         // Polulate count at from cart
         if(entity_.Mode === mode.User)
-        {
-            product.CountAtCart = 0
-            let cart = await db.cart.Get(entity_.User._id, query.ByUserID)
-            for(let jdx = 0; jdx < cart.Products.length; jdx++)
-            if(String(product.ProductID) === String(cart.Products[jdx].ProductID))
-            product.CountAtCart = cart.Products[jdx].Quantity
-        }        
+        await rinse[verb.view](entity_, product)
 
         return product
     }
@@ -90,18 +85,9 @@ function Product(data)
 
         const data = await db.product.ReadAll(in_, entity_.Mode)
 
-        // Polulate count at from cart
+        // Polulate CountAtCart
         if(entity_.Mode === mode.User)
-        {
-            let cart = await db.cart.Get(entity_.User._id, query.ByUserID)
-            for(let idx = 0; idx < data.length; idx++)
-            {
-                data[idx].CountAtCart = 0 // TODO Test it
-                for(let jdx = 0; jdx < cart.Products.length; jdx++)
-                if(String(data[idx].ProductID) === String(cart.Products[jdx].ProductID))
-                data[idx].CountAtCart = cart.Products[jdx].Quantity
-            }
-        }
+        await rinse[verb.list](entity_, data)
 
         console.log('product-list', { Data : data })
 

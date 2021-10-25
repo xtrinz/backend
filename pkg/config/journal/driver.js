@@ -22,6 +22,8 @@ const { ObjectID, ObjectId } = require('mongodb')
     , { Store }    = require('../../config/store/driver')
     , tally        = require('../../system/tally')
     , project      = require('../../tools/project/journal')
+    , rinse        = require('../../tools/rinse/journal')
+    , filter       = require('../../tools/filter/journal')
 
 function Journal()
 {
@@ -323,232 +325,80 @@ function Journal()
     this.Read = async function(data, in_, mode_)
     {
       console.log('read-journal', { Input: data, Client: in_ })
-      let query_, proj, penalty, income
-      switch(mode_)
-      {
-        case mode.User :
-
-              query_ =
-              { 
-                  _id        : ObjectId(data.JournalID)
-                , 'Buyer.ID' : ObjectId(in_._id)
-              }
-              , proj  = { projection : project[verb.view][mode.User] }
-              , data_ = await db.journal.Get(query_, proj)
-
-          delete data_._id
-          data_.JournalID = data.JournalID
-
-          return data_
-          case mode.Agent :
-
-                query_ = { 'Agent.ID' : ObjectId(in_._id) }
-
-                if(data.JournalID) query_._id = ObjectId(data.JournalID)
-                if((data.IsLive !== undefined) && (data.IsLive == true))
-                {
-                  query_[ 'Transit.Status' ] = states.Running
-                }
-                proj  = { projection : project[verb.view][mode.Agent] }
-                data_ = await db.journal.Get(query_, proj)
-
-            delete data_._id
-            data_.JournalID = data.JournalID
-            penalty   = data_.Account.In.Static.Penalty.Agent
-            income    = data_.Account.Out.Static.Payout.Agent
-
-            delete data_.Account
-            data_.Penalty = penalty
-            data_.Income  = income
-
-            return data_
-
-            case mode.Store :
-              
-              let store = await db.store.Get(in_._id, query.ByID)
-              if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
-
-              query_ =
-              {
-                  _id         : ObjectId(data.JournalID)
-                , 'Seller.ID' : ObjectId(in_._id)
-              }
-              proj  = { projection : project[verb.view][mode.Store] }
-              data_ = await db.journal.Get(query_, proj)
-
-          delete data_._id
-          data_.JournalID = data.JournalID
-          penalty   = data_.Account.In.Static.Penalty.Store
-          income    = data_.Account.Out.Static.Payout.Store
-
-          delete data_.Account
-          data_.Penalty = penalty
-          data_.Income  = income
-          return data_
-
-          case mode.Admin :
-            query_ =
-            {
-                _id         : ObjectId(data.JournalID)
-            }
-            proj  = { projection : project[verb.view][mode.Admin] }
-            data_ = await db.journal.Get(query_, proj)
-
-        delete data_._id
-        data_.JournalID = data.JournalID
-        penalty   = data_.Account.In.Static.Penalty
-        income    = data_.Account.Out.Dynamic.Refund.Buyer
-
-        delete data_.Account
-        data_.Penalty   = penalty
-        data_.Refund    = income
-        
-        return data_
-
-      }
-    }
-
-    this.List = async function(data, in_, mode_)
-    {
-      console.log('list-journal', { Input: data, Client: in_ })
-      let query_, proj, penalty, income, data_, cond_
+      let query_, proj, data_
       switch(mode_)
       {
         case mode.User :
 
           query_ =
           { 
-              'Buyer.ID'       : ObjectId(in_._id)
-            , 'Payment.Status' : { $nin: [ states.Initiated, states.Failed ] }
+              _id        : ObjectId(data.JournalID)
+            , 'Buyer.ID' : ObjectId(in_._id)
           }
-
-          if((data.IsLive !== undefined) && (data.IsLive == true))
-          query_[ 'Transit.Status' ] = states.Running
-          else if (data.IsLive !== undefined)
-          query_[ 'Transit.Status' ] = states.Closed
-
-          proj  = { projection : project[verb.view][mode.User] }
-          cond_   =
-          {
-              Page  : data.Page.loc()
-            , Limit : data.Limit.loc()
-          }          
-          data_   = await db.journal.GetMany(query_, proj, cond_)
-
-          for(let idx = 0; idx < data_.length; idx++)
-          {
-            data_[idx].JournalID = data_[idx]._id
-            delete data_[idx]._id
-          }
-          return data_
+          break
 
         case mode.Agent :
 
-          query_ =
-          {
-              'Agent.ID'       : ObjectId(in_._id)
-          }
+          query_ = { 'Agent.ID' : ObjectId(in_._id) }
 
+          if(data.JournalID) query_._id = ObjectId(data.JournalID)
           if((data.IsLive !== undefined) && (data.IsLive == true))
-          query_[ 'Transit.Status' ] = states.Running
-          else if (data.IsLive !== undefined)
-          query_[ 'Transit.Status' ] = states.Closed
-
-          proj  = { projection : project[verb.view][mode.Agent] }
-          cond_   =
           {
-              Page  : data.Page.loc()
-            , Limit : data.Limit.loc()
-          }          
-          data_ = await db.journal.GetMany(query_, proj, cond_)
-
-          for(let idx = 0; idx < data_.length; idx++)
-          {
-            data_[idx].JournalID = data_[idx]._id
-            delete data_[idx]._id
-            penalty   = data_[idx].Account.In.Static.Penalty.Agent
-            income    = data_[idx].Account.Out.Static.Payout.Agent
-
-            delete data_[idx].Account
-            data_[idx].Penalty = penalty
-            data_[idx].Income  = income              
+            query_[ 'Transit.Status' ] = states.Running
           }
-          return data_
+          break
 
         case mode.Store :
-          
-          let store = await db.store.Get(in_._id, query.ByID)
-          if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
 
           query_ =
           {
-              'Seller.ID'      : ObjectId(in_._id)
-            , 'Payment.Status' : { $nin: [ states.Initiated, states.Failed ] }
+              _id         : ObjectId(data.JournalID)
+            , 'Seller.ID' : ObjectId(in_._id)
           }
-
-          if((data.IsLive !== undefined) && (data.IsLive == true))
-          query_[ 'Transit.Status' ] = states.Running
-          else if (data.IsLive !== undefined)
-          query_[ 'Transit.Status' ] = states.Closed
-
-          proj  = { projection : project[verb.view][mode.Store] }
-          cond_   =
-          {
-              Page  : data.Page.loc()
-            , Limit : data.Limit.loc()
-          }          
-          data_ = await db.journal.GetMany(query_, proj, cond_)
-
-          for(let idx = 0; idx < data_.length; idx++)
-          {
-            data_[idx].JournalID = data_[idx]._id
-            delete data_[idx]._id
-            penalty   = data_[idx].Account.In.Static.Penalty.Store
-            income    = data_[idx].Account.Out.Static.Payout.Store
-  
-            delete data_[idx].Account
-            data_[idx].Penalty = penalty
-            data_[idx].Income  = income 
-          }
-            return data_
+          break
 
         case mode.Admin :
 
           query_ =
-          { '$or': // TODO $lookup cross transit status
-            [
-                {  'Admin.ID' : in_._id }
-              , { 'Admins.ID' : in_._id }
-            ]
-          }
-
-          if((data.IsLive !== undefined) && (data.IsLive == true))
-          query_[ 'Transit.Status' ] = states.Running
-          else if (data.IsLive !== undefined)
-          query_[ 'Transit.Status' ] = states.Closed
-
-          proj  = { projection : project[verb.view][mode.Admin] }
-
-          cond_   =
           {
-              Page  : data.Page.loc()
-            , Limit : data.Limit.loc()
-          }             
-          data_ = await db.journal.GetMany(query_, proj, cond_)
-
-          for(let idx = 0; idx < data_.length; idx++)
-          {
-              data_[idx].JournalID = data_[idx]._id
-              delete data_[idx]._id
-              penalty        = data_[idx].Account.In.Static.Penalty
-              income         = data_[idx].Account.Out.Dynamic.Refund.Buyer
-      
-              delete data_[idx].Account
-              data_[idx].Penalty   = penalty
-              data_[idx].Refund    = income 
-          }
-          return data_
+              _id         : ObjectId(data.JournalID)
+          }        
+          break
       }
+
+      proj  = { projection : project[verb.view][mode_] }
+      data_ = await db.journal.Get(query_, proj)
+
+      rinse[verb.view][mode_](data_)
+
+      return data_
+    }
+
+    this.List = async function(data, in_, mode_)
+    {
+      console.log('list-journal', { Input: data, Client: in_ })
+      let query_, proj, data_, cond_
+
+      query_ =  filter[verb.list][mode_](in_)
+
+      if((data.IsLive !== undefined) && (data.IsLive == true))
+      query_[ 'Transit.Status' ] = states.Running
+      else if (data.IsLive !== undefined)
+      query_[ 'Transit.Status' ] = states.Closed
+
+      cond_   =
+      {
+          Page  : data.Page.loc()
+        , Limit : data.Limit.loc()
+      }
+
+      proj  = { projection : project[verb.view][mode_] }
+
+      data_ = await db.journal.GetMany(query_, proj, cond_)
+
+      rinse[verb.list][mode_](data_)
+
+      return data_
     }
 }
 
