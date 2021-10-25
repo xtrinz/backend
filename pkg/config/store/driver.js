@@ -1,3 +1,5 @@
+const { rmdirSync } = require('fs')
+
 const { ObjectID }           = require('mongodb')
     , otp                    = require('../../infra/otp')
     , { Err_, code, reason, limits
@@ -12,6 +14,7 @@ const { ObjectID }           = require('mongodb')
     }
     , jwt                    = require('../../infra/jwt')
     , project                = require('../../tools/project/store')
+    , rinse                  = require('../../tools/rinse/store')
 
 function Store(data)
 {
@@ -66,70 +69,54 @@ function Store(data)
     this.Read = async function(in_)
     {
         console.log('read-store', { In: in_ })
-        let data, now_
+        let data, store_
         switch(in_.Mode)
         {
           case mode.Store:
-          case mode.AdminID:
+          case mode.Admin:
+            store_ = in_.Store
             data =
             {
-                StoreID     : in_.Store._id
-              , Email       : in_.Store.Email
-              , State       : in_.Store.State
-              , Image       : in_.Store.Image
-              , Certs       : in_.Store.Certs
-              , Description : in_.Store.Description
-              , Type        : in_.Store.Type
-              , Name        : in_.Store.Name
-              , MobileNo    : in_.Store.MobileNo
-              , Longitude   : in_.Store.Location.coordinates[0].toFixed(6).toString()
-              , Latitude    : in_.Store.Location.coordinates[1].toFixed(6).toString()
-              , Address     : in_.Store.Address
-              , Time        : in_.Store.Time
+                StoreID     : store_._id
+              , Email       : store_.Email
+              , State       : store_.State
+              , Image       : store_.Image
+              , Certs       : store_.Certs
+              , Description : store_.Description
+              , Type        : store_.Type
+              , Name        : store_.Name
+              , MobileNo    : store_.MobileNo
+              , Longitude   : store_.Location.coordinates[0].toFixed(6).toString()
+              , Latitude    : store_.Location.coordinates[1].toFixed(6).toString()
+              , Address     : store_.Address
+              , Time        : store_.Time
             }
-            
-            now_               = new Date()        
-            if(now_.is_now(in_.Store.Time.Open, in_.Store.Time.Close))
-            {
-                if(!now_.is_today(in_.Store.Status.SetOn)) 
-                { data.Status = states.Closed            }
-                else
-                { data.Status = in_.Store.Status.Current }
-            }
-            else { data.Status = states.Closed }
 
             break
           case mode.User:
 
-            this.Data = await db.store.Get(in_.ID, query.ByID)
-            if (!this.Data) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+            store_ = await db.store.Get(in_.ID, query.ByID)
+            if (!store_) Err_(code.BAD_REQUEST, reason.StoreNotFound)
             
-            if (this.Data.State !== states.Registered)
+            if (store_.State !== states.Registered)
             Err_(code.FORBIDDEN, reason.PermissionDenied)
             data =
             {
-                StoreID     : this.Data._id
-              , Name        : this.Data.Name
-              , Image       : this.Data.Image
-              , Description : this.Data.Description              
-              , Certs       : this.Data.Certs
-              , Type        : this.Data.Type
-              , Address     : this.Data.Address
-              , Time        : this.Data.Time
+                StoreID     : store_._id
+              , Name        : store_.Name
+              , Image       : store_.Image
+              , Description : store_.Description              
+              , Certs       : store_.Certs
+              , Type        : store_.Type
+              , Address     : store_.Address
+              , Time        : store_.Time
             }
-            now_               = new Date()        
-            if(now_.is_now(this.Data.Time.Open, this.Data.Time.Close))
-            {
-                if(!now_.is_today(this.Data.Status.SetOn) ||
-                    now_.diff_in_m(this.Data.Time.Close)  < limits.CheckoutGracePeriod) 
-                { data.Status = states.Closed            }
-                else
-                { data.Status = this.Data.Status.Current }
-            }
-            else { data.Status = states.Closed }
             
             break
         }
+
+        rinse[verb.view][in_.Mode](data, store_)
+
         console.log('store-read', { Store : data })
         return data
     }
@@ -335,21 +322,6 @@ function Store(data)
             if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
 
             data = await db.store.List(in_, proj)
-            for(let idx = 0; idx < data.length; idx++)
-            {
-                data[idx].StoreID = data[idx]._id
-                delete data[idx]._id    
-
-                let now_               = new Date()        
-                if(now_.is_now(data[idx].Time.Open, data[idx].Time.Close))
-                {
-                    if(!now_.is_today(data[idx].Status.SetOn)) 
-                    { data[idx].Status = states.Closed            }
-                    else
-                    { data[idx].Status = data[idx].Status.Current /* No action: set state as set by seller */ }
-                }
-                else { data[idx].Status = states.Closed }
-            }
             break
           case mode.Admin:
             proj    = { projection: project[verb.view][mode.Admin] }
@@ -383,24 +355,11 @@ function Store(data)
                 break
             }
             data = await db.store.List(query_, proj)
-                
-            for(let idx = 0; idx < data.length; idx++)
-            {
-                data[idx].StoreID = data[idx]._id
-                delete data[idx]._id    
-                let now_               = new Date()        
-                if(now_.is_now(data[idx].Time.Open, data[idx].Time.Close))
-                {
-                    if(!now_.is_today(data[idx].Status.SetOn)) 
-                    { data[idx].Status = states.Closed            }
-                    else
-                    { data[idx].Status = data[idx].Status.Current /* No action: set state as set by seller */ }
-                }
-                else { data[idx].Status = states.Closed }
-            }
-            
             break
         }
+
+        rinse[verb.list](data)
+
         console.log('store-list', { Stores : data, Mode: mode_ })
         return data
     }
