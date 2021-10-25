@@ -1,6 +1,6 @@
 const { states, query, message, task,
         gw, Err_, code, reason, qtype,
-        mode, command}          = require('../../system/models')
+        mode, command, verb}          = require('../../system/models')
     , otp                       = require('../../infra/otp')
     , jwt                       = require('../../infra/jwt')
     , { ObjectID }              = require('mongodb')
@@ -195,8 +195,7 @@ function Agent(data)
     {
         console.log('list-agents', { In : in_ })
 
-        let data, proj = { projection:  { _id   : 1, Name  : 1, Email : 1, Text: 1, 
-                Location : 1 , Status : 1, State : 1, MobileNo: 1 } }
+        let data, proj = { projection:  project[verb.view][mode.Admin] }
 
         switch(in_.SearchType)
         {

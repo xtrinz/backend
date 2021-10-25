@@ -2,7 +2,7 @@ const { ObjectID }           = require('mongodb')
     , otp                    = require('../../infra/otp')
     , { Err_, code, reason, limits
       , states, mode, qtype, command
-      , query, message, gw, task } = require('../../system/models')
+      , query, message, gw, task, verb } = require('../../system/models')
     , db                     = 
     {
           store   : require('../store/archive')
@@ -11,6 +11,7 @@ const { ObjectID }           = require('mongodb')
         , product : require('../product/archive')
     }
     , jwt                    = require('../../infra/jwt')
+    , project                = require('../../tools/project/store')
 
 function Store(data)
 {
@@ -323,7 +324,7 @@ function Store(data)
         switch(mode_)
         {
           case mode.User:
-            proj    = { projection: { _id   : 1, Name  : 1, Type : 1, Image : 1, Status: 1, Time: 1, Description: 1 } }
+            proj    = { projection: project[verb.view][mode.User] }
             in_.Query = 
             {
                   State   : states.Registered
@@ -351,9 +352,7 @@ function Store(data)
             }
             break
           case mode.Admin:
-            proj =
-            { _id   : 1, Name  : 1, Type : 1, Text: 1
-            , Image : 1, State : 1, Status: 1, Time: 1, Description: 1 }
+            proj    = { projection: project[verb.view][mode.Admin] }
             switch(in_.Type)
             {
                 case qtype.NearList:
