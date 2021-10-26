@@ -1,5 +1,10 @@
                   require('./lib/settings')
 const { Test, TestSuite } = require('./lib/driver')
+    , note      =
+    {
+        data  : require('./frames/note/data')
+      , story : require('./frames/note/story')
+    }
     , user      =
     {
         data  : require('./frames/user/data')
@@ -41,6 +46,7 @@ const { Test, TestSuite } = require('./lib/driver')
     }
 
   let admin_1       = new    user.data.User    ('Admin')
+    , note_         = new    note.data.Note    ()
     , client_1      = new    user.data.User    ('User')
     , agent_1       = new   agent.data.Agent   ('Agent')
     , store_1       = new   store.data.Store   ()
@@ -53,7 +59,8 @@ const { Test, TestSuite } = require('./lib/driver')
   let cases =
   [
          user.story.Std('Add Admin ',               admin_1.Name)
-    ,    user.story.Std('Add Client',              client_1.Name)         
+    ,    user.story.Std('Add Client',              client_1.Name)
+    ,    note.story.Std('Set Notes',                  note_.Name,   admin_1.Name, client_1.Name)         
     ,   agent.story.Std('Add Agent ',               agent_1.Name,   admin_1.Name)
     ,   store.story.Std('Add Seller',               store_1.Name,   admin_1.Name, client_1.Name)
     , product.story.Std('Add Product',              store_1.Name, product_1.Name, client_1.Name)

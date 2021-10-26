@@ -16,6 +16,7 @@ client.connect()
 
 const database  = client.db(process.env.DB_NAME)
 
+    , notes 	  = database.collection(set.note)
     , users 	  = database.collection(set.user)
     , agents 	  = database.collection(set.agent)
     , sockets 	= database.collection(set.socket)
@@ -33,6 +34,7 @@ const database  = client.db(process.env.DB_NAME)
   products.createIndex({ Location: '2dsphere' })
     stores.createIndex({ Name: "text", Description: "text" })
   products.createIndex({ Name: "text", Description: "text", Category: 'text' })
+     notes.createIndex({ Type: "text" })
 
 module.exports  =
 {
@@ -49,4 +51,5 @@ module.exports  =
   , transits
   , channels
   , tags
+  , notes
 }

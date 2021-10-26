@@ -84,6 +84,7 @@ module.exports =
 		, ResourceNotFound          : 'Resource Not Found'
 		, PermissionDenied          : 'Permission Denied'
 		, IncorrectInput 			: 'Incorrect Input'
+		, NoteNotFound				: 'Note not found'
 		},
 	text:
 	{
@@ -111,6 +112,7 @@ module.exports =
 		, TestNotEnabled            : 'Test disabled'
 		, PaymentInitiated          : 'Payment initiated'
 		, PayoutGWSet               : 'Payment Gateway Configured'
+		, NoteSet					: 'Note set'
 	},
 	code:
 	{
@@ -139,6 +141,12 @@ module.exports =
 		, ProductCount 			: 32			// Max count for cart elements
 		, SocketCount 			: 3
 		, CheckoutGracePeriod 	: 18
+	},
+	note:
+	{
+		  Terms 				: 'Terms and Conditions'  
+		, Policy 				: 'Policy Policy' 
+		, Help					: 'Help' 
 	},
 	paytm: 
 	{
@@ -337,7 +345,8 @@ module.exports =
 		, journal				: '/journal'
 		, transit				: '/transit'
 		, socket 				: '/socket'
-		, cloudinary 			: '/cloudinary'			
+		, cloudinary 			: '/cloudinary'	
+		, note 					: '/note'		
 	},
 	verb:
 	{
@@ -346,6 +355,7 @@ module.exports =
 		, view					: '/view'
 		, list					: '/list'
 		, modify				: '/modify'
+		, set 					: '/set'
 		, remove				: '/remove'
 		, insert				: '/insert'
 		, search				: '/search'
@@ -412,5 +422,6 @@ module.exports =
 		, transit				: 'transit'
 		, channel				: 'channel'
 		, tags 					: 'tags'
+		, note 					: 'note'
 	}
 }
