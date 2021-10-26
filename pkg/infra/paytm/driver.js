@@ -7,6 +7,18 @@ function PayTM()
 {
     this.CreateToken = async function(j_id, price, user_)
     {
+
+      const txn_i1 =
+      {
+          ID           : pgw.Order.format(String(j_id))
+        , Token        : "txnToken"
+        , Amount       : price.toFixed(2).toString()
+        , MID          : process.env.PAYTM_MID
+        , CallBackURL  : process.env.PAYTM_CB
+      }
+
+      return txn_i1
+      /** TODO blocked for testing */
         /**
          * Input : JournalID | NetPrice | User.Address/Email/Name/MobileNo
          */

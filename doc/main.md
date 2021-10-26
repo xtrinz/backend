@@ -13,3 +13,6 @@ Build essentials :
         Runs the server
     4. npm test
         Executes the test cases
+
+
+Paytm, Twilio, Google are blocked for testing

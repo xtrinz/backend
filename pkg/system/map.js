@@ -6,6 +6,10 @@ const axios                   = require('axios')
 
 const Distance = async function(data)
 {
+
+    /* TODO Blocked for testing */
+    return 2.459
+
     if((data.SrcLt == 0          &&
         data.SrcLt == data.DestLt && 
         data.SrcLn == data.DestLn ) ||

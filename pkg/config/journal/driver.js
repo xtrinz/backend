@@ -227,49 +227,10 @@ function Journal()
     {
       console.log('read-journal', { Input: data, Client: in_ })
       let query_, proj, data_
-      switch(mode_)
-      {
-        case mode.User :
 
-          query_ =
-          { 
-              _id        : ObjectId(data.JournalID)
-            , 'Buyer.ID' : ObjectId(in_._id)
-          }
-          break
-
-        case mode.Agent :
-
-          query_ = { 'Agent.ID' : ObjectId(in_._id) }
-
-          if(data.JournalID) query_._id = ObjectId(data.JournalID)
-          if((data.IsLive !== undefined) && (data.IsLive == true))
-          {
-            query_[ 'Transit.Status' ] = states.Running
-          }
-          break
-
-        case mode.Store :
-
-          query_ =
-          {
-              _id         : ObjectId(data.JournalID)
-            , 'Seller.ID' : ObjectId(in_._id)
-          }
-          break
-
-        case mode.Admin :
-
-          query_ =
-          {
-              _id         : ObjectId(data.JournalID)
-          }        
-          break
-      }
-
-      proj  = { projection : project[verb.view][mode_] }
-      data_ = await db.journal.Get(query_, proj)
-
+      query_ = filter[verb.view][mode_](data, in_)
+      proj   = { projection : project[verb.view][mode_] }
+      data_  = await db.journal.Get(query_, proj)
       rinse[verb.view][mode_](data_)
 
       return data_
@@ -280,23 +241,14 @@ function Journal()
       console.log('list-journal', { Input: data, Client: in_ })
       let query_, proj, data_, cond_
 
-      query_ =  filter[verb.list][mode_](in_)
-
-      if((data.IsLive !== undefined) && (data.IsLive == true))
-      query_[ 'Transit.Status' ] = states.Running
-      else if (data.IsLive !== undefined)
-      query_[ 'Transit.Status' ] = states.Closed
-
-      cond_   =
+      query_ =  filter[verb.list][mode_](data, in_)
+      cond_  =
       {
           Page  : data.Page.loc()
         , Limit : data.Limit.loc()
       }
-
       proj  = { projection : project[verb.view][mode_] }
-
       data_ = await db.journal.GetMany(query_, proj, cond_)
-
       rinse[verb.list][mode_](data_)
 
       return data_
