@@ -32,6 +32,7 @@ let Add = function(store_, product_)
                 , PricePerGV    : product.PricePerGV
                 , GroundVolume  : product.GroundVolume
                 , Unit          : product.Unit
+                , HasCOD        : product.HasCOD
             }
             , Header            : { Authorization: store.Token }
         }
@@ -198,7 +199,8 @@ let Modify = function(store_, product_)
               , Category    : product.Category
               , PricePerGV    : product.PricePerGV
               , GroundVolume  : product.GroundVolume
-              , Unit          : product.Unit              
+              , Unit          : product.Unit
+              , HasCOD        : product.HasCOD              
           }
           , Header            : { Authorization: store.Token }
       }

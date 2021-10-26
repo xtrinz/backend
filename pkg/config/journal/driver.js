@@ -7,15 +7,10 @@ const { ObjectID, ObjectId } = require('mongodb')
       , journal    : require('../journal/archive')
       , addr       : require('../address/archive')
     }
-    , { Err_
-      , code
-      , reason
-      , states
-      , channel
-      , query
-      , limits
-      , mode, 
-      verb}     = require('../../system/models')
+    , { Err_   , code
+      , reason , states
+      , channel, mode
+      , verb}      = require('../../system/models')
     , { Refund }   = require('../../infra/paytm/ind/refund')
     , { Payment }  = require('../../infra/paytm/ind/payment')
     , { PayTM }    = require('../../infra/paytm/driver')
@@ -24,111 +19,15 @@ const { ObjectID, ObjectId } = require('mongodb')
     , project      = require('../../tools/project/journal')
     , rinse        = require('../../tools/rinse/journal')
     , filter       = require('../../tools/filter/journal')
+    , template     = require('./template')
 
 function Journal()
 {
-    this.Data =
-    {
-        _id               : ''
-      , Date              : ''
-      , IsRetry           : false // Pressed checkout more than once
-      
-      , Buyer             :
-      {
-          ID              : ''
-        , Name            : ''
-        , Address         : {} // Lat / Lon / ID/ Other Dest details
-      }
-      , Seller            :
-      {
-          ID              : ''
-        , Name            : ''
-        , Longitude       : 0
-        , Latitude        : 0
-        , Address         : {}
-      }
-      , Agent             :
-      {
-          ID              : ''
-        , Name            : ''
-        , MobileNo        : ''
-      }
-      , Agents            : [] // { ID: , Earnings: { FirstMile | SecondMile | Penalty | ReasonForPenalty |  }}
-      , Order             :
-      {
-          Products        : [] // ProductID, Name, Price, Image, CategoryID, Quantity, Available, Flagged 
-        , Bill            : 
-        {
-            Total         : 0
-          , TransitCost   : 0
-          , Tax           : 0
-          , NetPrice      : 0
-        }
-      }
-      , Payment           :
-      {
-          Channel         : channel.Paytm
-        , TransactionID   : ''
-        , ChannelParams   : {}
-        , Amount          : ''
-        , Status          : states.Initiated
-        , TimeStamp       : ''      // Webhook entry time
-      }
-      , Transit           : 
-      {
-          ID              : ''
-        , State    : ''
-        , Status          : states.Running
-      }
-    }
-
-    this.SetBuyer = async function(user, addr_id)
-    {      
-      const addr = await db.addr.Read(user._id, addr_id)
-      delete addr.IsDefault
-      delete addr.Tag
-      this.Data.Buyer     = 
-      {
-          ID       : user._id
-        , Name     : user.Name
-        , MobileNo : user.MobileNo
-        , Address  : addr
-      }
-    }
-
-    this.SetSeller = async function(store_id)
-    {
-      const store   = await db.store.Get(store_id, query.ByID)
-      if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
-
-
-      const now_     = new Date()
-          , is_now   = now_.is_now(store.Time.Open, store.Time.Close)
-          , is_today = now_.is_today(store.Status.SetOn)        
-      if( !is_now || (is_today && store.Status === states.Closed) ||
-        ( is_now && now_.diff_in_m(store.Time.Close) < limits.CheckoutGracePeriod))
-      {
-        let reason_ = (is_now)? reason.GracePeriodExceeded: reason.StoreClosed
-        console.log('store-has-closed', { Store: store })
-        Err_(code.BAD_REQUEST, reason_)
-      }
-
-
-      this.Data.Seller    = 
-      {                 
-          ID        : store._id
-        , Name      : store.Name
-        , MobileNo  : store.MobileNo
-        , Image     : store.Image
-        , Longitude : store.Location.coordinates[0].toFixed(6)
-        , Latitude  : store.Location.coordinates[1].toFixed(6)
-        , Address   : store.Address
-      }
-    }
+    this.Data = template.Data
 
     this.SetOrder = async function(user_id, dest)
     {
-      const items = await db.cart.Read(user_id)
+      const items = await db.cart.List(user_id)
 
       if(!items.Products.length)
       Err_(code.BAD_REQUEST, reason.NoProductsFound)
@@ -146,7 +45,8 @@ function Journal()
       {
           Products      : items.Products //{ProductID,Name,Price,Image,CategoryID,Quantity,Available,Flagged}
         , JournalID     : items.JournalID
-        , StoreID       : items.StoreID               
+        , StoreID       : items.StoreID  
+        , HasCOD        : items.HasCOD
       }
  
       const src_loc  = await (new Store()).GetLoc(items.StoreID)
@@ -216,14 +116,15 @@ function Journal()
 
     this.New    = async function(data)
     {
-      // Set User Context
-      await this.SetBuyer(data.User, data.AddressID)
 
-      // Set Order
+      // Client Context
+      this.Data.Buyer   = await db.addr.Client(data.User, data.AddressID)
+
+      // Order Details
       let store_id = await this.SetOrder(data.User._id, this.Data.Buyer)
 
-      // Set Seller Context
-      await this.SetSeller(store_id)
+      // Seller Context
+      this.Data.Seller  = await db.store.Seller(store_id)
 
       // Set ID & Date
       this.Data._id  = (this.Data._id) ? this.Data._id  : new ObjectID()

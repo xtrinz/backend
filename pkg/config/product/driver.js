@@ -24,6 +24,7 @@ function Product(data)
         , GroundVolume : data.GroundVolume
         , Unit         : data.Unit
         , IsAvailable  : true
+        , HasCOD       : data.HasCOD
         , Variants     : 
         {
                 Id    : ''
@@ -109,6 +110,7 @@ function Product(data)
         prod.Variants.Id   = (data.VariantID)?      data.VariantID             : prod.Variants.Id
         prod.Variants.Type = (data.Type)?           data.Type                  : prod.Variants.Type
         prod.IsAvailable   = (data.IsAvailable != undefined)? data.IsAvailable : prod.IsAvailable
+        prod.HasCOD        = (data.HasCOD != undefined)? data.HasCOD           : prod.HasCOD
         prod.PricePerGV    = (data.PricePerGV)?    data.PricePerGV             : prod.PricePerGV
         prod.GroundVolume  = (data.GroundVolume)?  data.GroundVolume           : prod.GroundVolume 
         prod.Unit          = (data.Unit)?          data.Unit                   : prod.Unit

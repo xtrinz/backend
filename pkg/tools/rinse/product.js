@@ -16,6 +16,7 @@ module.exports =
     }
     , [verb.view]: async function(entity_, product)
     {
+        delete product.HasCOD // Only for User
         product.CountAtCart = 0
         let cart_ = await cart.Get(entity_.User._id, query.ByUserID)
         for(let jdx = 0; jdx < cart_.Products.length; jdx++)

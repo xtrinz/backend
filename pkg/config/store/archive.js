@@ -1,6 +1,12 @@
-const { ObjectId }                         = require('mongodb')
-    , { stores }                           = require('../../system/database')
-    , { Err_, code, reason, query, dbset } = require('../../system/models')
+const { ObjectId }  = require('mongodb')
+    , { stores }    = require('../../system/database')
+    , {   Err_
+        , code
+        , reason
+        , query
+        , dbset
+        , states
+        , limits }  = require('../../system/models')
 
 const Save       = async function(data)
 {
@@ -81,10 +87,41 @@ const GetStoreSockID = async function(store_id)
     return store.SockID
 }
 
+const Seller = async function(store_id)
+{
+    const store   = await Get(store_id, query.ByID)
+    if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+
+    const now_     = new Date()
+        , is_now   = now_.is_now(store.Time.Open, store.Time.Close)
+        , is_today = now_.is_today(store.Status.SetOn)        
+    if( !is_now || (is_today && store.Status === states.Closed) ||
+      ( is_now && now_.diff_in_m(store.Time.Close) < limits.CheckoutGracePeriod))
+    {
+      let reason_ = (is_now)? reason.GracePeriodExceeded: reason.StoreClosed
+      console.log('store-has-closed', { Store: store })
+      Err_(code.BAD_REQUEST, reason_)
+    }
+
+    const resp = 
+    {                 
+        ID        : store._id
+      , Name      : store.Name
+      , MobileNo  : store.MobileNo
+      , Image     : store.Image
+      , Longitude : store.Location.coordinates[0].toFixed(6)
+      , Latitude  : store.Location.coordinates[1].toFixed(6)
+      , Address   : store.Address
+    }
+    console.log('the-seller', { Seller : resp })
+    return resp
+}
+
 module.exports =
 {
       Save           : Save
     , Get            : Get
     , List           : List
     , GetStoreSockID : GetStoreSockID
+    , Seller         : Seller
 }
