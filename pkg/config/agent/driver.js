@@ -1,48 +1,50 @@
 const { states, query, message, task,
-        gw, Err_, code, reason, qtype,
-        mode, command, verb}          = require('../../system/models')
+        gw, Err_, code, reason,
+        mode, command, verb}    = require('../../system/models')
     , otp                       = require('../../infra/otp')
     , jwt                       = require('../../infra/jwt')
     , { ObjectID }              = require('mongodb')
     , db                        = require('../agent/archive')
+    , filter                    = require('../../tools/filter/agent')
     , project                   = require('../../tools/project/agent')
+    , rinse                     = require('../../tools/rinse/agent')
 
-function Agent(data)
+class Agent
 {
-    if(data)
-    this.Data =
+    constructor (data)
     {
-        MobileNo      : data.MobileNo
-      , Mode          : data.Mode
-      , _id           : ''
-      , Otp           : ''
-      , State         : states.None
-      , Status        : 
-      {
-            Current   : states.OffDuty
-          , SetOn     : 
-          {           
-                Day   : (new Date(0)).getDate()
-              , Month : (new Date(0)).getMonth()
-              , Year  : (new Date(0)).getFullYear()
-          }
-      }      
-      , Name          : ''
-      , Email         : ''
-      , Text          : ''
-      , SockID        : []
-      , AddressList   : []
-      , Location      :
-      {
-          type        : 'Point'
-        , coordinates : [0, 88] // [data.Longitude.loc(), data.Latitude.loc()]
-      }
-      , IsLive        : false
+
+        this._id           = new ObjectID()
+        this.MobileNo      = data.MobileNo
+        this.Mode          = data.Mode
+        this.Otp           = ''
+        this.State         = states.None
+        this.Status        = 
+        {
+              Current      : states.OffDuty
+            , SetOn        : 
+            {              
+                  Day      : (new Date(0)).getDate()
+                , Month    : (new Date(0)).getMonth()
+                , Year     : (new Date(0)).getFullYear()
+            }
+        }
+        this.Name          = ''
+        this.Email         = ''
+        this.Text          = ''
+        this.SockID        = []
+        this.Location      =
+        {
+            type           : 'Point'
+          , coordinates    : [0, 88]
+        }
+        this.IsLive        = false
+
     }
 
-    this.New      = async function ()
+    async Create()
     {
-        let agent_ = await db.Get(this.Data.MobileNo, query.ByMobileNo)
+        let agent_ = await db.Get(this.MobileNo, query.ByMobileNo)
         if (agent_ && ( agent_.State === states.Registered   ||
                         agent_.State === states.ToBeApproved ))
         {
@@ -56,57 +58,58 @@ function Agent(data)
             return
         }
         const otp_sms = new otp.OneTimePasswd({
-                        MobileNo: 	this.Data.MobileNo, 
+                        MobileNo: 	this.MobileNo, 
                         Body: 	message.OnAuth })
             , hash    = await otp_sms.Send(gw.SMS)
 
-        if(!agent_) { this.Data._id = new ObjectID() }
-        else { this.Data._id = agent_._id }
+        if(!agent_) { this._id = new ObjectID() }
+        else { this._id = agent_._id }
 
-        this.Data.Otp             = hash
-        this.Data.State           = states.New
-        await db.Save(this.Data)
-        console.log('agent-created', { Agent: this.Data})
+        this.Otp             = hash
+        this.State           = states.New
+        await db.Save(this)
+        console.log('agent-created', { Agent: this})
     }
 
-    this.ConfirmMobileNo   = async function (data)
+    static async Confirm(data)
     {
-        this.Data = await db.Get(data.MobileNo, query.ByMobileNo)
-        if (!this.Data) Err_(code.BAD_REQUEST, reason.AgentNotFound)
-
+        let agent_ = await db.Get(data.MobileNo, query.ByMobileNo)
+        if (!agent_) Err_(code.BAD_REQUEST, reason.AgentNotFound)
+    
         const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
-            , status = await otp_.Confirm(this.Data.Otp, data.OTP)
-
+            , status = await otp_.Confirm(agent_.Otp, data.OTP)
         if (!status) 
         {
             console.log('wrong-otp-on-agent-no-confirmation', { Data: data })
             Err_(code.BAD_REQUEST, reason.OtpRejected)
         }
-
-        const token = await jwt.Sign({ _id : this.Data._id, Mode : mode.Agent })
-
-        if (this.Data.State === states.Registered    ||
-            this.Data.State === states.ToBeApproved  ||
-            this.Data.State === states.ToBeCorrected )
+    
+        const token = await jwt.Sign({ _id : agent_._id, Mode : mode.Agent })
+    
+        if (agent_.State === states.Registered    ||
+            agent_.State === states.ToBeApproved  ||
+            agent_.State === states.ToBeCorrected )
         {
-            console.log('agent-exists-logging-in', { Agent: this.Data })            
+            console.log('agent-exists-logging-in', { Agent: agent_ })            
             return {
                   Token: token
                 , Command: command.LoggedIn
+                , Agent: agent_
             }
         }
-        this.Data.State = states.MobConfirmed
-        this.Data.Otp   = ''
-        await db.Save(this.Data)
-        console.log('agent-mobile-number-confirmed', { Agent: this.Data })
-
+        agent_.State = states.MobConfirmed
+        agent_.Otp   = ''
+        await db.Save(agent_)
+        console.log('agent-mobile-number-confirmed', { Agent: agent_ })
+    
         return {
             Token: token
           , Command: command.Register
+          , Agent: agent_
         }
     }
 
-    this.Register   = async function (data)
+    static async Register(data)
     {
         if (data.Agent.State !== states.MobConfirmed)
         Err_(code.BAD_REQUEST, reason.MobileNoNotConfirmed)
@@ -128,41 +131,37 @@ function Agent(data)
          , Email   : data.Email    })
     }
 
-    this.Approve   = async function (data)
+    static async Approve(data)
     {
         console.log('agent-approval', { Agent: data })
-
-        this.Data = await db.Get(data.AgentID, query.ByID)
-        if (!this.Data || this.Data.State !== states.ToBeApproved)
+    
+        let agent_ = await db.Get(data.AgentID, query.ByID)
+        if (!agent_ || agent_.State !== states.ToBeApproved)
         {
                       let reason_ = reason.StoreNotFound
-            if(this.Data) reason_ = reason.BadState
+            if(agent_) reason_ = reason.BadState
             Err_(code.BAD_REQUEST, reason_)
         }
-
         if(data.Action == task.Deny)
         {
-            this.Data.State  = states.ToBeCorrected
-            this.Data.Text   = data.Text
+            agent_.State  = states.ToBeCorrected
+            agent_.Text   = data.Text
         }
         else
         {
-            this.Data.State  = states.Registered
-            this.Data.Text   = ''
+            agent_.State  = states.Registered
+            agent_.Text   = ''
         }
-
-        await db.Save(this.Data)
-        console.log('agent-admin-response-marked', {Store: this.Data})
+    
+        await db.Save(agent_)
+        console.log('agent-admin-response-marked', {Agent: agent_})
     }
 
-    this.Edit   = async function (data)
+    static async Edit(data)
     {
-        if ( data.Agent.State !== states.Registered)
-        Err_(code.BAD_REQUEST, reason.IncompleteRegistration)
-
         let rcd = { _id : data.Agent._id }
 
-        if(data.Refeed && (data.Store.State != states.Registered))
+        if(data.Refeed && (data.Agent.State != states.Registered))
             rcd.State       = states.ToBeApproved
 
         if(data.Name ) rcd.Name  = data.Name 
@@ -192,59 +191,17 @@ function Agent(data)
         console.log('profile-updated', {Agent: rcd })
     }
 
-    this.List  = async function (in_)
+    static async List(in_)
     {
         console.log('list-agents', { In : in_ })
 
-        let data, proj = { projection:  project[verb.view][mode.Admin] }
+        let proj = { projection:  project[verb.view][mode.Admin] }
 
-        switch(in_.SearchType)
-        {
-            case qtype.NearList:
-            in_.Query = { Location: { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } } 
+        filter[verb.list](in_)
 
-            // TODO check unit of radius 2500
-
-            if(in_.Category) in_.Query.Type     = in_.Category
-            if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
-
-            break
-            case qtype.Pending:
-            in_.Query = { State : states.ToBeApproved }
-            break
-            case qtype.NearPending:
-            in_.Query = 
-            { 
-                Location  :
-                { 
-                    $near : { $geometry: 
-                        { 
-                                type          : 'Point'
-                            , coordinates   : [ in_.Longitude.loc(), in_.Latitude.loc() ] 
-                        } } 
-                },
-                State     : states.ToBeApproved
-            }
-            break
-        }
-        data = await db.List(in_, proj)
-            
-        let now_               = new Date()
-        for(let idx = 0; idx < data.length; idx++)
-        {
-            data[idx].AgentID = data[idx]._id
-            delete data[idx]._id
-
-            data[idx].Longitude = data[idx].Location.coordinates[0].toFixed(6)
-            data[idx].Latitude  = data[idx].Location.coordinates[1].toFixed(6)
-
-            delete data[idx].Location
-
-            if(!now_.is_today(data[idx].Status.SetOn)) 
-            { data[idx].Status = states.OffDuty       }
-            else
-            { data[idx].Status = data[idx].Status.Current /* No action: set state as set by seller */ }
-        }
+        let data = await db.List(in_, proj)
+        
+        rinse[verb.list](data)
             
         console.log('agent-list', { Agents : data })
         return data

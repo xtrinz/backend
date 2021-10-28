@@ -12,33 +12,30 @@ router.post('/register', async (req, res, next) =>
     {
       case task.New:
         agent = new Agent(req.body)
-        await agent.New()
+        await agent.Create()
         text_ = text.OTPSendToMobileNo.format(
                     req.body.MobileNo.slice(-4))
         break
 
       case task.ReadOTP:
-        agent = new Agent()
-        const resp = await agent.ConfirmMobileNo(req.body)
+        const resp = await Agent.Confirm(req.body)
         text_         = text.OTPConfirmed
-        info_         = agent.Data
+        info_         = resp.Agent
         info_.Command = resp.Command
         data_         = { Command : info_.Command }
         res.setHeader('authorization', resp.Token)
         break
 
       case task.Register:
-        agent         = new Agent()
         info_         = req.body.Agent
-        await agent.Register(req.body)
+        await Agent.Register(req.body)
         info_.Command = command.LoggedIn
         data_         = { Command : info_.Command }        
         text_         = text.Registered
         break
 
       case task.Approve:
-        store  = new Agent()
-        await store.Approve(req.body)
+        await Agent.Approve(req.body)
         text_ = text.Approved
         break
     }
@@ -96,8 +93,7 @@ router.get('/list', async (req, res, next) =>
 {
     try 
     {
-      const agent = new Agent()
-          , data  = await agent.List(req.query)
+      const data  = await Agent.List(req.query)
       
       return res.status(code.OK).json({
         Status  : status.Success,
@@ -111,8 +107,7 @@ router.put('/profile', async (req, res, next) =>
 {
   try 
   {
-    const agent  = new Agent()
-    await agent.Edit(req.body)
+    await Agent.Edit(req.body)
 
     return res.status(code.OK).json({
       Status  : status.Success,
