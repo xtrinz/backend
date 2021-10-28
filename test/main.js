@@ -75,6 +75,25 @@ const { Test, TestSuite } = require('./lib/driver')
   cases.forEach((test)=> suite_1.AddCase(test))
 
 
+  var suite_2 = new TestSuite('End to End Process - COD')
+  cases =
+  [
+         user.story.Std('Add Admin ',               admin_1.Name)
+    ,    user.story.Std('Add Client',              client_1.Name)
+    ,    note.story.Std('Set Notes',                  note_.Name,   admin_1.Name, client_1.Name)         
+    ,   agent.story.Std('Add Agent ',               agent_1.Name,   admin_1.Name)
+    ,   store.story.Std('Add Seller',               store_1.Name,   admin_1.Name, client_1.Name)
+    , product.story.Std('Add Product',              store_1.Name, product_1.Name, client_1.Name)
+    , address.story.Std('Set Client Address', client_1_addr.Name,  client_1.Name )
+    ,    cart.story.Std(client_1.Name, product_1.Name, client_1_addr.Name, store_1.Name)
+    , transit.story.Std(client_1.Name, client_1_addr.Name, agent_1.Name, store_1.Name)
+    , journal.story.Std(client_1.Name, store_1.Name, agent_1.Name, admin_1.Name, client_1_addr.Name)
+    ,    user.story.Disconnect(client_1.Name, admin_1.Name)
+    ,   agent.story.Disconnect(agent_1.Name)
+    ,   store.story.Disconnect(store_1.Name)
+  ]
+  cases.forEach((test)=> suite_2.AddCase(test))
+
 /*
 
   let user_4_owner  = new    user.data.User    ('User')
@@ -196,7 +215,7 @@ const { Test, TestSuite } = require('./lib/driver')
     ]
     cases.forEach((test)=> suite_9.AddCase(test))
 */
-    Test.AddTestSuite(suite_1)
+  Test.AddTestSuite(suite_1)
 //  Test.AddTestSuite(suite_2)
 //  Test.AddTestSuite(suite_3)
 //  Test.AddTestSuite(suite_4)

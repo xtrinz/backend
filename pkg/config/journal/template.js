@@ -55,5 +55,17 @@ module.exports =
       , State    : ''
       , Status          : states.Running
     }
+    , TrialHistory      : {}
+    , StaleFundEvents   : {}
+    /*
+      {
+          Channel       : channel.Paytm
+        , TransactionID : ''
+        , ChannelParams : {}
+        , Amount        : ''
+        , Status        : states.Initiated
+        , TimeStamp     : ''
+      }
+    */
   }
 }

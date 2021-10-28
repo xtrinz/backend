@@ -9,7 +9,7 @@ const { ObjectID, ObjectId } = require('mongodb')
     }
     , { Err_   , code
       , reason , states
-      , channel, mode
+      , channel, pgw
       , verb}      = require('../../system/models')
     , { Refund }   = require('../../infra/paytm/ind/refund')
     , { Payment }  = require('../../infra/paytm/ind/payment')
@@ -114,6 +114,43 @@ function Journal()
         return txn_i
     }
 
+    this.Payment = async function(IsCOD)
+    {
+      let details_
+        , price = this.Data.Order.Bill.NetPrice
+
+      // BLOCK : IF NOT COD
+      if(!IsCOD)
+      {
+          details_ = await this.SetPayment(this.Data._id, 
+              this.Data.Order.Bill.NetPrice, this.Data.Buyer)
+          return details_
+      }
+
+      // BLOCK : IF COD
+      if(!this.Data.Order.HasCOD)
+      Err_(code.CONFLICT, reason.HasItemsWithNoCOD)
+
+      if(this.Data.IsRetry)
+      {
+        this.Data.TrialHistory[this.Data.Payment.TransactionID] = this.Data.Payment
+        console.log('trial-history-set', { Journal : this.Data })
+      }
+
+      let time   = (new Date()).toISOString()
+      this.Data.Payment =
+      {
+          Channel       : channel.COD
+        , TransactionID : pgw.Order.format(String(this.Data._id))
+        , Token         : ''
+        , ChannelRefID  : ''
+        , Amount        : price.toFixed(2).toString()
+        , Status        : states.ToBeCollected
+        , TimeStamp     : { Token: time, Webhook: '' }
+      }
+      console.log('checkout-initiated', {Data : details_ })
+    }
+
     this.New    = async function(data)
     {
 
@@ -131,8 +168,16 @@ function Journal()
       this.Data.Date = (new Date()).toISOString()
 
       // Set Payment
-      const details_ = await this.SetPayment(this.Data._id, 
-                       this.Data.Order.Bill.NetPrice, this.Data.Buyer)
+      const details_ = await this.Payment(data.IsCOD)
+
+      if(data.IsCOD)
+      {
+        await (new Cart()).Flush(this.Data.Buyer.ID)
+
+        this.Data.Payment.Status = states.Success
+        this.Data.Transit.Status = states.Initiated
+        this.Data.Transit.ID 	   = new ObjectID()
+      }
 
       await db.journal.Save(this.Data)
 
@@ -143,7 +188,6 @@ function Journal()
     this.MarkPayment = async function(req)
     {
       console.log('mark-payment-status', { Body: req.body })
-
       const ind = new Payment(req.body)
 
       await ind.CheckSign(req.body)
@@ -209,8 +253,7 @@ function Journal()
       await tally.SettleAccounts(this.Data, state)
       
       const refuntAmount = this.Data.Account.Out.Dynamic.Refund.Buyer
-        if (refuntAmount > 0)
-        this.SetRefund(refuntAmount)
+      if (refuntAmount > 0) { await this.SetRefund(refuntAmount) }
 
       this.Data.Agent =
       {

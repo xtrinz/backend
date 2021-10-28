@@ -85,7 +85,8 @@ module.exports =
 		, PermissionDenied          : 'Permission Denied'
 		, IncorrectInput 			: 'Incorrect Input'
 		, NoteNotFound				: 'Note not found'
-		},
+		, HasItemsWithNoCOD			: 'Purchase has items with no cash on delivery availabe'
+	},
 	text:
 	{
 		OTPSendToMobileNo           : 'OTP has been send to number ending with {0}'
@@ -208,11 +209,17 @@ module.exports =
 	{
 		    Stripe 				: 'Stripe'
 		  , Paytm 				: 'Paytm'
+		  , COD 				: 'Cash On Delivery'
 	},
 	command:
 	{
 		  Register 				: 'Register'
 		, LoggedIn 				: 'LoggedIn'
+	},
+	refund:
+	{
+		    Legit 				: 'Legit Refund'
+		  , Stale 				: 'Stale Refund'
 	},
 	states:
 	{
@@ -235,6 +242,7 @@ module.exports =
 		, Failed 			    : 'Failed'
         , Initiated             : 'Initiated'
 		, TokenGenerated 		: 'TokenGenerated'
+		, ToBeCollected 		: 'ToBeCollected'
 
 		, OnDuty 				: 'OnDuty'
 		, OffDuty 				: 'OffDuty'

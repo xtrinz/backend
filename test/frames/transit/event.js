@@ -5,11 +5,12 @@ const { Method, Type }        = require('../../lib/medium')
     , alerts, task, paytm }   = require('../../../pkg/system/models')
     , PaytmChecksum           = require('paytmchecksum')
 
-let Checkout = function(user_, addr_, cart_) 
+let Checkout = function(user_, addr_, cart_, cod_) 
 {
   this.UserID  	 = user_
   this.AddressID = addr_
   this.CartID    = cart_
+  this.COD       = cod_
   this.Data      = function()
   {
     let user     = data.Get(data.Obj.User,    this.UserID)
@@ -28,6 +29,7 @@ let Checkout = function(user_, addr_, cart_)
             Longitude     : addr.Longitude
           , Latitude      : addr.Latitude
           , AddressID     : addr.ID
+          , IsCOD         : (this.COD)? true: false
         }                     
         , Header          : { Authorization: user.Token }
       }                       

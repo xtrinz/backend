@@ -9,10 +9,41 @@ const Std = function(user_, addr_, agent_, store_)
     let tc      = new TestCase('Transit Process')
     let steps =
     [
-          new event.Checkout       (user_, addr_, cart_)
+          new event.Checkout       (user_, addr_, cart_, false) // !COD
         , new event.ConfirmPayment (cart_)
         , new event.NewOrder       (store_, Obj.Store)
         , new event.NewOrder       (user_, Obj.User)
+
+        , new event.StoreAccept   (store_, agent_)
+        , new event.NewTransit    (agent_)
+        , new event.Accepted      (user_ , Obj.User)
+        , new event.Accepted      (store_, Obj.Store)
+        
+        , new event.AgentAccept   (agent_, store_)
+        , new event.AgentReady    (user_, Obj.User)
+        , new event.AgentReady    (store_, Obj.Store)
+        
+        , new event.StoreDespatch (store_, agent_)
+        , new event.EnRoute       (user_, Obj.User)        
+        , new event.EnRoute       (agent_, Obj.Agent)
+        
+        , new event.AgentComplete (agent_)
+        , new event.Delivered     (user_, Obj.User)
+        , new event.Delivered     (store_, Obj.Store)
+    ]
+    steps.forEach((step) => tc.AddStep(step))
+    return tc
+}
+
+const COD = function(user_, addr_, agent_, store_)
+{
+    let cart_   = user_
+    let tc      = new TestCase('Transit Process')
+    let steps =
+    [
+          new event.Checkout      (user_, addr_, cart_, true) // COD
+        , new event.NewOrder      (store_, Obj.Store)
+        , new event.NewOrder      (user_, Obj.User)
 
         , new event.StoreAccept   (store_, agent_)
         , new event.NewTransit    (agent_)
@@ -208,6 +239,7 @@ const IgnoredByLastAgent = function(user_, addr_, agent_, store_, admin_)
 module.exports =
 {
       Std                                       : Std
+    , COD                                       : COD
     , CancelByUser                              : CancelByUser
     , CancelByUserAfterAceptance                : CancelByUserAfterAceptance
     , CancelByUserAfterTransitAceptance         : CancelByUserAfterTransitAceptance
