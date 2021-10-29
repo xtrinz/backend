@@ -14,6 +14,14 @@ class Agent
     constructor (data)
     {
 
+        let date_ = new Date(0)
+        let date  =
+        {              
+            Day      : date_.getDate()
+          , Month    : date_.getMonth()
+          , Year     : date_.getFullYear()
+        }
+
         this._id           = new ObjectID()
         this.MobileNo      = data.MobileNo
         this.Mode          = data.Mode
@@ -22,12 +30,7 @@ class Agent
         this.Status        = 
         {
               Current      : states.OffDuty
-            , SetOn        : 
-            {              
-                  Day      : (new Date(0)).getDate()
-                , Month    : (new Date(0)).getMonth()
-                , Year     : (new Date(0)).getFullYear()
-            }
+            , SetOn        : date
         }
         this.Name          = ''
         this.Email         = ''
@@ -74,45 +77,55 @@ class Agent
     static async Confirm(data)
     {
         let agent_ = await db.Get(data.MobileNo, query.ByMobileNo)
-        if (!agent_) Err_(code.BAD_REQUEST, reason.AgentNotFound)
-    
+        if (!agent_)
+        {
+            console.log('agent-not-found', { Input: data })
+            Err_(code.BAD_REQUEST, reason.AgentNotFound)
+        }
+
         const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
             , status = await otp_.Confirm(agent_.Otp, data.OTP)
         if (!status) 
         {
-            console.log('wrong-otp-on-agent-no-confirmation', { Data: data })
+            console.log('wrong-otp-on-confirm-agent', { Data: data })
             Err_(code.BAD_REQUEST, reason.OtpRejected)
         }
-    
+
         const token = await jwt.Sign({ _id : agent_._id, Mode : mode.Agent })
-    
+        let ret_ =
+        {
+            Token   : token
+          , Command : ''
+          , Agent   : agent_
+        }
+
         if (agent_.State === states.Registered    ||
             agent_.State === states.ToBeApproved  ||
             agent_.State === states.ToBeCorrected )
         {
-            console.log('agent-exists-logging-in', { Agent: agent_ })            
-            return {
-                  Token: token
-                , Command: command.LoggedIn
-                , Agent: agent_
-            }
+            ret_.Command = command.LoggedIn
+            console.log('agent-exists', { Agent: agent_ })
         }
-        agent_.State = states.MobConfirmed
-        agent_.Otp   = ''
-        await db.Save(agent_)
-        console.log('agent-mobile-number-confirmed', { Agent: agent_ })
-    
-        return {
-            Token: token
-          , Command: command.Register
-          , Agent: agent_
+        else
+        {
+            agent_.State = states.MobConfirmed
+            agent_.Otp   = ''
+            ret_.Command = command.Register
+            await db.Save(agent_)
+            console.log('agent-confirmed', { Agent: agent_ })
         }
+
+        return ret_
     }
 
     static async Register(data)
     {
+
         if (data.Agent.State !== states.MobConfirmed)
-        Err_(code.BAD_REQUEST, reason.MobileNoNotConfirmed)
+        {
+            console.log('bad-state-for-register', { Agent : data.Agent })
+            Err_(code.BAD_REQUEST, reason.MobileNoNotConfirmed)
+        }
 
         data.Agent.Name     = data.Name
         data.Agent.Email    = data.Email        
@@ -121,14 +134,10 @@ class Agent
               type        : 'Point'
             , coordinates : [data.Longitude.loc(), data.Latitude.loc()]
         }
-        data.Agent.State  = states.ToBeApproved
-
+        data.Agent.State    = states.ToBeApproved
 
         await db.Save(data.Agent)
-        console.log('agent-scheduled-for-approval', 
-        {  AgentID  : data.Agent._id 
-         , Name    : data.Name       
-         , Email   : data.Email    })
+        console.log('set-agent-for-approval', { Agent : data.Agent})
     }
 
     static async Approve(data)
@@ -138,10 +147,12 @@ class Agent
         let agent_ = await db.Get(data.AgentID, query.ByID)
         if (!agent_ || agent_.State !== states.ToBeApproved)
         {
-                      let reason_ = reason.StoreNotFound
+            let reason_
             if(agent_) reason_ = reason.BadState
+            else       reason_ = reason.StoreNotFound
             Err_(code.BAD_REQUEST, reason_)
         }
+
         if(data.Action == task.Deny)
         {
             agent_.State  = states.ToBeCorrected
@@ -154,7 +165,7 @@ class Agent
         }
     
         await db.Save(agent_)
-        console.log('agent-admin-response-marked', {Agent: agent_})
+        console.log('agent-admin-response-marked', { Agent: agent_ })
     }
 
     static async Edit(data)
@@ -174,16 +185,17 @@ class Agent
         }
         if(data.Status)
         {
-            let now_ = new Date()
+            let now_   = new Date()
+              , date   =
+            {
+                Day    : now_.getDate()
+              , Month  : now_.getMonth()
+              , Year   : now_.getFullYear()
+            }
             rcd.Status = 
             {
-                  Current     : data.Status
-                , SetOn       :
-                {
-                    Day       : now_.getDate()
-                  , Month     : now_.getMonth()
-                  , Year      : now_.getFullYear()
-                }
+                  Current : data.Status
+                , SetOn   : date
             }
         }
 
@@ -204,6 +216,24 @@ class Agent
         rinse[verb.list](data)
             
         console.log('agent-list', { Agents : data })
+        return data
+    }    
+
+    static async View(in_)
+    {
+        console.log('view-agent', { In : in_ })
+
+        rinse[verb.view](in_)
+        const data = 
+        {
+            Name      : in_.Name
+          , MobileNo  : in_.MobileNo
+          , Email     : in_.Email
+          , Mode      : in_.Mode
+          , Status    : in_.Status
+        }
+
+        console.log('agent-data', { Agent : data })
         return data
     }    
 

@@ -18,7 +18,7 @@ router.post('/register', async (req, res, next) =>
         break
 
       case task.ReadOTP:
-        const resp = await Agent.Confirm(req.body)
+        const resp    = await Agent.Confirm(req.body)
         text_         = text.OTPConfirmed
         info_         = resp.Agent
         info_.Command = resp.Command
@@ -42,14 +42,9 @@ router.post('/register', async (req, res, next) =>
   
     if(info_ && (info_.State === states.Registered  ||
                 info_.State === states.ToBeApproved ))
-    data_ = 
     {
-        Name      : info_.Name
-      , MobileNo  : info_.MobileNo
-      , Email     : info_.Email
-      , Mode      : info_.Mode
-      , Command   : info_.Command
-//      , Status    : req.body.Agent.Status      
+      data_         = await Agent.View(info_)
+      data_.Command = info_.Command
     }
 
     return res.status(code.OK).json({
@@ -62,24 +57,9 @@ router.post('/register', async (req, res, next) =>
 
 // Read Profile
 router.get('/view', async (req, res, next) => {
-  try {
-
-    let now_ = new Date()
-    if(!now_.is_today(req.body.Agent.Status.SetOn))
-    { req.body.Agent.Status = states.OffDuty      }
-    else
-    {
-      req.body.Agent.Status = req.body.Agent.Status.Current
-      /* No action: set state as set by seller */
-    }
-    const data = 
-    {
-        Name      : req.body.Agent.Name
-      , MobileNo  : req.body.Agent.MobileNo
-      , Email     : req.body.Agent.Email
-      , Mode      : req.body.Agent.Mode
-      , Status    : req.body.Agent.Status
-    }
+  try
+  {
+    const data = await Agent.View(req.body.Agent)
 
     return res.status(code.OK).json({
       Status  : status.Success,
@@ -93,7 +73,7 @@ router.get('/list', async (req, res, next) =>
 {
     try 
     {
-      const data  = await Agent.List(req.query)
+      const data = await Agent.List(req.query)
       
       return res.status(code.OK).json({
         Status  : status.Success,
@@ -103,7 +83,7 @@ router.get('/list', async (req, res, next) =>
     } catch (err) { next(err) }
 })
 
-router.put('/profile', async (req, res, next) =>
+router.put('/edit', async (req, res, next) =>
 {
   try 
   {

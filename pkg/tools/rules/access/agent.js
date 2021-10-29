@@ -43,7 +43,7 @@ module.exports =
       , [task.Enabled] : true        
       }
     }
-  , [verb.profile]      :
+  , [verb.edit]      :
     {
         [method.put]    : 
         { 

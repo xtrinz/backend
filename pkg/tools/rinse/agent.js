@@ -1,10 +1,10 @@
-const { verb } = require('../../system/models')
+const { verb, states } = require('../../system/models')
 
 module.exports =
 {
     [verb.list]: function(data)
     {
-        console.log('rinse-agent-details', { Data: data })
+        console.log('rinse-agent-list', { Data: data })
         let now_               = new Date()
         for(let idx = 0; idx < data.length; idx++)
         {
@@ -22,4 +22,16 @@ module.exports =
             { data[idx].Status = data[idx].Status.Current /* No action: set state as set by seller */ }
         }
     }
+    , [verb.view]: function(in_)
+    {
+        console.log('rinse-agent-data', { Data: in_ })
+        let now_ = new Date()
+        if(!now_.is_today(in_.Status.SetOn))
+        { in_.Status = states.OffDuty      }
+        else
+        {
+          in_.Status = in_.Status.Current
+          /* No action: set state as set by seller */
+        }
+    }    
 }

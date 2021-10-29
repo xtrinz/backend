@@ -1,8 +1,9 @@
-const { task, code, status, text, command, qtype } = require('../../../pkg/system/models')
-    , { Method, Type }             = require('../../lib/medium')
-    , { read }                     = require('../../lib/driver')
-    , data                         = require('../data')
-    , jwt                          = require('../../../pkg/infra/jwt')
+const { task, code, status
+      , text, command, qtype } = require('../../../pkg/system/models')
+    , { Method, Type }         = require('../../lib/medium')
+    , { read }                 = require('../../lib/driver')
+    , data                     = require('../data')
+    , jwt                      = require('../../../pkg/infra/jwt')
 
 let RegisterNew = function(name) 
 {
@@ -131,6 +132,7 @@ let Register = function(name)
             , MobileNo    : agent.MobileNo
             , Email       : agent.Email
             , Mode        : agent.Mode
+            , Status      : 'OffDuty'            
             , Command     : command.LoggedIn
           }
         }
@@ -311,7 +313,7 @@ let ProfileEdit =  function(name)
       , Request         :
       {                   
           Method        : Method.PUT
-        , Path          : '/v1/agent/profile'
+        , Path          : '/v1/agent/edit'
         , Body          : 
         {                   
             Name        : agent.Name

@@ -25,7 +25,7 @@ module.exports =
         , 'headers.authorization' : [ [ 'requiredIf', 'body.Task', task.Approve ], 'string', [ 'length', 500, 8 ] ]                                        
       }
     }
-  , [verb.profile]      :
+  , [verb.edit]      :
     {
         [method.put]    : 
         {
