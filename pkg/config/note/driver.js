@@ -1,6 +1,6 @@
 const { ObjectID } = require('mongodb')
     , Model        = require('../../system/models')
-    , db           = require('../exports')[Model.segment.db][Model.resource.note]
+    , db           = require('../exports')[Model.segment.db]
 
 class Note
 {
@@ -14,7 +14,7 @@ class Note
     static async Read(type)
     {
         console.log('read-note', { Type: type })
-        const note = await db.Get(type)
+        const note = await db.note.Get(type)
         delete note._id
         return note
     }
@@ -29,7 +29,7 @@ class Note
             , Body : data.Body
         }
 
-        await db.Save(note)
+        await db.note.Save(note)
     }
 }
 

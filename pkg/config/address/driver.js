@@ -1,6 +1,6 @@
 const { ObjectId, ObjectID } = require('mongodb')
     , Model                  = require('../../system/models')
-    , db                     = require('../exports')[Model.segment.db][Model.resource.address]
+    , db                     = require('../exports')[Model.segment.db]
 
 class Address
 {
@@ -33,9 +33,9 @@ class Address
             Err_(code.INTERNAL_SERVER, reason.AddressLimitExceeded)
         }
 
-        if(this.IsDefault) await db.ResetDefault(user_id)
+        if(this.IsDefault) await db.address.ResetDefault(user_id)
 
-        await db.Insert(user_id, this)
+        await db.address.Insert(user_id, this)
 
         return this._id
     }
@@ -43,14 +43,14 @@ class Address
     static async Read(data)
     {
         console.log('read-address', data)
-        const addr = await db.Read(data.UserID, data.AddressID)
+        const addr = await db.address.Read(data.UserID, data.AddressID)
         return addr
     }
 
     static async List(user_id)
     {
         console.log('list-address', { UserID : user_id })
-        const list = await db.List(user_id)
+        const list = await db.address.List(user_id)
         return list
     }
 
@@ -61,12 +61,12 @@ class Address
         const user_id = data.User._id
         delete data.User
 
-        if(data.IsDefault) await db.ResetDefault(user_id)
+        if(data.IsDefault) await db.address.ResetDefault(user_id)
 
         data._id  = ObjectId(data.AddressID)
         delete data.AddressID
 
-        await db.Update(user_id, data)
+        await db.address.Update(user_id, data)
     }
 
     static async Remove(user_id, addr_id)
@@ -77,7 +77,7 @@ class Address
             , AddressID : addr_id
         })
 
-        await db.Remove(user_id, addr_id)
+        await db.address.Remove(user_id, addr_id)
     }
 }
 

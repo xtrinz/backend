@@ -3,7 +3,7 @@ const { Err_ }      = require('../../system/models')
     , Tool          = require('../../tools/export')[Model.resource.agent]
     , Infra         = require('../../infra/export')
     , { ObjectID }  = require('mongodb')
-    , db            = require('../exports')[Model.segment.db][Model.resource.agent]
+    , db            = require('../exports')[Model.segment.db]
 class Agent
 {
     constructor (data)
@@ -42,7 +42,7 @@ class Agent
 
     async Create()
     {
-        let agent_ = await db.Get(this.MobileNo, Model.query.ByMobileNo)
+        let agent_ = await db.agent.Get(this.MobileNo, Model.query.ByMobileNo)
         if (agent_ && ( agent_.State === Model.states.Registered   ||
                         agent_.State === Model.states.ToBeApproved ))
         {
@@ -52,7 +52,7 @@ class Agent
                 , hash    = await otp_sms.Send(Model.gw.SMS)
 
             agent_.Otp = hash
-            await db.Save(agent_)
+            await db.agent.Save(agent_)
             return
         }
         const otp_sms = new Infra.otp.OneTimePasswd({
@@ -65,13 +65,13 @@ class Agent
 
         this.Otp             = hash
         this.State           = Model.states.New
-        await db.Save(this)
+        await db.agent.Save(this)
         console.log('agent-created', { Agent: this})
     }
 
     static async Confirm(data)
     {
-        let agent_ = await db.Get(data.MobileNo, Model.query.ByMobileNo)
+        let agent_ = await db.agent.Get(data.MobileNo, Model.query.ByMobileNo)
         if (!agent_)
         {
             console.log('agent-not-found', { Input: data })
@@ -106,7 +106,7 @@ class Agent
             agent_.State = Model.states.MobConfirmed
             agent_.Otp   = ''
             ret_.Command = Model.command.Register
-            await db.Save(agent_)
+            await db.agent.Save(agent_)
             console.log('agent-confirmed', { Agent: agent_ })
         }
 
@@ -131,7 +131,7 @@ class Agent
         }
         data.Agent.State    = Model.states.ToBeApproved
 
-        await db.Save(data.Agent)
+        await db.agent.Save(data.Agent)
         console.log('set-agent-for-approval', { Agent : data.Agent})
     }
 
@@ -139,7 +139,7 @@ class Agent
     {
         console.log('agent-approval', { Agent: data })
     
-        let agent_ = await db.Get(data.AgentID, Model.query.ByID)
+        let agent_ = await db.agent.Get(data.AgentID, Model.query.ByID)
         if (!agent_ || agent_.State !== Model.states.ToBeApproved)
         {
             let reason_
@@ -159,7 +159,7 @@ class Agent
             agent_.Text   = ''
         }
     
-        await db.Save(agent_)
+        await db.agent.Save(agent_)
         console.log('agent-admin-response-marked', { Agent: agent_ })
     }
 
@@ -194,7 +194,7 @@ class Agent
             }
         }
 
-        await db.Save(rcd)
+        await db.agent.Save(rcd)
         console.log('profile-updated', {Agent: rcd })
     }
 
@@ -206,7 +206,7 @@ class Agent
 
         Tool.filter[Model.verb.list](in_)
 
-        let data = await db.List(in_, proj)
+        let data = await db.agent.List(in_, proj)
         
         Tool.rinse[Model.verb.list](data)
             

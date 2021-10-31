@@ -12,7 +12,8 @@ const Segments =
         , [Model.resource.transit] : require('./transit/archive' )
         , [Model.resource.user]    : require('./user/archive'    )   
         , [Model.resource.journal] : require('./journal/archive' )  
-        , [Model.resource.note]    : require('./note/archive' )                                
+        , [Model.resource.note]    : require('./note/archive'    )
+        , [Model.resource.socket]  : require('./socket/archive'  )        
     }
 }
 
