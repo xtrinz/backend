@@ -61,15 +61,16 @@ sce_.forEach((type) => process.on(type, adptr.GracefulExit))
 const server_ = () => console.log('server-started', {Port : port})
     , server  = https.createServer(options, app)
     , io      = require('socket.io')(server)
+    , socket  = require('../pkg/config/socket/handle')
     , event   = require('../pkg/engine/events')
 
       adptr.SetServer(server, io)
       event.SetChannel(io)
       server.listen(port, server_)
 
-io.on('connection', async (socket) =>
+io.on('connection', async (socket_) =>
 {
-    await event.Connect(socket)
-    const disc_ = async ()=> await event.Disconnect(socket)
-    socket.on('disconnect', disc_)
+    await socket.Connect(socket_)
+    const disc_ = async ()=> await socket.Disconnect(socket_)
+    socket_.on('disconnect', disc_)
 })
