@@ -1,9 +1,8 @@
-const {  ObjectId } 	     = require('mongodb')
-    , { Err_, code, reason
-    , states, event, query } = require('../../system/models')
-    , { Engine }             = require('../../engine/engine')
-    , Model                  = require('../../system/models')
-    , db                     = require('../exports')[Model.segment.db]
+const {  ObjectId } = require('mongodb')
+    , { Err_ }      = require('../../system/models')
+    , { Engine }    = require('../../engine/engine')
+    , Model         = require('../../system/models')
+    , db            = require('../exports')[Model.segment.db]
 
 function Transit (journal)
 {
@@ -44,9 +43,9 @@ function Transit (journal)
       , Admins          : []
       , History         : []
       , Return 	        : ''                            // Machine's prev-state for fallbacks
-      , State 		    : states.None                   // Machine init state
+      , State 		    : Model.states.None                   // Machine init state
       , IsLive          : true                          // Is it ongoing transit
-      , Event 		    : event.InitiationByUser        // Machine init event
+      , Event 		    : Model.event.InitiationByUser        // Machine init Model.event
       , MaxWT           : 35                            // Maximum Waiting Time (35min)
       , OrderedAt 	    : ''                            // Millis / https://currentmillis.com/
       , ETD   		    : 0                             // Estimated Time of Delivery
@@ -67,8 +66,8 @@ function Transit (journal)
 
     this.AuthzAgent       = async function(transit_id, user_id)
     {
-        this.Data = await db.transit.Get(transit_id, query.ByID)
-        if (!this.Data) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+        this.Data = await db.transit.Get(transit_id, Model.query.ByID)
+        if (!this.Data) Err_(Model.code.BAD_REQUEST, Model.reason.TransitNotFound)
 
         if(this.Data.Agent && (String(this.Data.Agent._id) === String(user_id)))
         {
@@ -85,7 +84,7 @@ function Transit (journal)
             }
         }
         console.log('agent-not-listed', { AgentID: user_id, Agents: this.Data.Agents })
-        Err_(code.UNAUTHORIZED, reason.Unauthorized)
+        Err_(Model.code.UNAUTHORIZED, Model.reason.Unauthorized)
     }
 }
 
