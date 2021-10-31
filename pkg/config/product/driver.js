@@ -1,5 +1,5 @@
 const { ObjectId, ObjectID } = require('mongodb')
-    , { Err_, code, reason, query, mode, verb } = require('../../system/models')
+    , { Err_ }               = require('../../system/models')
     , Model                  = require('../../system/models')
     , db                     = require('../exports')[Model.segment.db]
     , rinse                  = require('../../tools/rinse/product')
@@ -37,8 +37,8 @@ function Product(data)
                 StoreID : ObjectId(this.Data.StoreID)
             , Name    : this.Data.Name
         }
-        , product = await db.product.Get(key, query.Custom)
-        if (product) Err_(code.BAD_REQUEST, reason.ProductExists)
+        , product = await db.product.Get(key, Model.query.Custom)
+        if (product) Err_(Model.code.BAD_REQUEST, Model.reason.ProductExists)
          
         this.Data._id = new ObjectID()
          
@@ -50,8 +50,8 @@ function Product(data)
     {
         console.log('read-product', { ProductID : product_id })
 
-        const product = await db.product.Get(product_id, query.ByID)
-        if (!product) Err_(code.BAD_REQUEST, reason.ProductNotFound)
+        const product = await db.product.Get(product_id, Model.query.ByID)
+        if (!product) Err_(Model.code.BAD_REQUEST, Model.reason.ProductNotFound)
 
         product.IsAvailable        
         delete product.Location
@@ -60,8 +60,8 @@ function Product(data)
         delete product._id
 
         // Polulate count at from cart
-        if(entity_.Mode === mode.User)
-        await rinse[verb.view](entity_, product)
+        if(entity_.Mode === Model.mode.User)
+        await rinse[Model.verb.view](entity_, product)
 
         return product
     }
@@ -72,7 +72,7 @@ function Product(data)
         
         in_.Query = {}
 
-        if(entity_.Mode === mode.User) in_.Query.IsAvailable = true
+        if(entity_.Mode === Model.mode.User) in_.Query.IsAvailable = true
         if(in_.Latitude  !== undefined &&
            in_.Longitude !== undefined)
         { in_.Query.Location = { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } }
@@ -84,8 +84,8 @@ function Product(data)
         const data = await db.product.ReadAll(in_, entity_.Mode)
 
         // Polulate CountAtCart
-        if(entity_.Mode === mode.User)
-        await rinse[verb.list](entity_, data)
+        if(entity_.Mode === Model.mode.User)
+        await rinse[Model.verb.list](entity_, data)
 
         console.log('product-list', { Data : data })
 
@@ -96,8 +96,8 @@ function Product(data)
     {
         console.log('modify-product', { ProductID: data.ProductID })
 
-        prod = await db.product.Get(data.ProductID, query.ByID)
-        if (!prod) Err_(code.BAD_REQUEST, reason.ProductNotFound)
+        prod = await db.product.Get(data.ProductID, Model.query.ByID)
+        if (!prod) Err_(Model.code.BAD_REQUEST, Model.reason.ProductNotFound)
 
         prod.Name          = (data.Name)?           data.Name                  : prod.Name
         prod.Image         = (data.Image)?          data.Image                 : prod.Image

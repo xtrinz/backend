@@ -1,13 +1,11 @@
-const { ObjectID }           = require('mongodb')
-    , otp                    = require('../../infra/otp')
-    , { Err_, code, reason
-      , states, mode, qtype, command
-      , query, message, gw, task, verb } = require('../../system/models')
-    , Model                  = require('../../system/models')
-    , db                     = require('../exports')[Model.segment.db]
-    , jwt                    = require('../../infra/jwt')
-    , project                = require('../../tools/project/store')
-    , rinse                  = require('../../tools/rinse/store')
+const { ObjectID } = require('mongodb')
+    , otp          = require('../../infra/otp')
+    , { Err_ }     = require('../../system/models')
+    , Model        = require('../../system/models')
+    , db           = require('../exports')[Model.segment.db]
+    , jwt          = require('../../infra/jwt')
+    , project      = require('../../tools/project/store')
+    , rinse        = require('../../tools/rinse/store')
 class Store
 {
     constructor (data)
@@ -46,7 +44,7 @@ class Store
             , State       : ''
             , Country     : ''
         }
-        this.State        = states.New
+        this.State        = Model.states.New
         this.Time         =
         {
             Open          : { Hour: '', Minute: '' }
@@ -55,7 +53,7 @@ class Store
         this.IsLive       = false
         this.Status       =
         {
-              Current     : states.Closed
+              Current     : Model.states.Closed
             , SetOn       : date_
         }
     }
@@ -64,14 +62,14 @@ class Store
     {    
         // Check the mobile number already used
         const key2 = { MobileNo : this.MobileNo }
-        const store_ = await db.store.Get(key2, query.Custom)
-        if (store_ && ( store_.State === states.Registered   ||
-                        store_.State === states.ToBeApproved ))
+        const store_ = await db.store.Get(key2, Model.query.Custom)
+        if (store_ && ( store_.State === Model.states.Registered   ||
+                        store_.State === Model.states.ToBeApproved ))
         {
             const otp_sms = new otp.OneTimePasswd({
                             MobileNo: store_.MobileNo, 
-                            Body: 	  message.OnAuth })
-                , hash    = await otp_sms.Send(gw.SMS)
+                            Body: 	  Model.message.OnAuth })
+                , hash    = await otp_sms.Send(Model.gw.SMS)
 
             store_.Otp = hash
             await db.store.Save(store_)
@@ -80,15 +78,15 @@ class Store
     
         const otp_sms = new otp.OneTimePasswd({
                         MobileNo: 	this.MobileNo, 
-                        Body: 	message.OnAuth })
-            , hash    = await otp_sms.Send(gw.SMS)
+                        Body: 	Model.message.OnAuth })
+            , hash    = await otp_sms.Send(Model.gw.SMS)
 
         if(!store_) { this._id = new ObjectID() }
         else { this._id = store_._id }
 
         this.MobileNo   = this.MobileNo
         this.Otp        = hash
-        this.State      = states.New
+        this.State      = Model.states.New
         await db.store.Save(this)
     
         console.log('new-store-created', {Store: this})
@@ -97,8 +95,8 @@ class Store
     static async ConfirmMobileNo(data)
     {
         const key = { MobileNo : data.MobileNo }
-        let store_ = await db.store.Get(key, query.Custom)
-        if (!store_) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+        let store_ = await db.store.Get(key, Model.query.Custom)
+        if (!store_) Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
 
         const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
             , status = await otp_.Confirm(store_.Otp, data.OTP)
@@ -106,38 +104,38 @@ class Store
         if (!status) 
         {
             console.log('wrong-otp-on-store-no-confirmation', { Data: data })            
-            Err_(code.BAD_REQUEST, reason.OtpRejected)
+            Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
         }
 
-        const token = await jwt.Sign({ _id : store_._id, Mode : mode.Store })
+        const token = await jwt.Sign({ _id : store_._id, Mode : Model.mode.Store })
 
-        if (store_.State === states.Registered    ||
-            store_.State === states.ToBeApproved  ||
-            store_.State === states.ToBeCorrected )
+        if (store_.State === Model.states.Registered    ||
+            store_.State === Model.states.ToBeApproved  ||
+            store_.State === Model.states.ToBeCorrected )
         {
             console.log('user-exists-logging-in', { User: store_ })            
             return {
                   Token: token
-                , Command: command.LoggedIn
+                , Command: Model.command.LoggedIn
                 , Store: store_
             }
         }
-        store_.State = states.MobConfirmed
+        store_.State = Model.states.MobConfirmed
         store_.Otp   = ''
         await db.store.Save(store_)
         console.log('user-mobile-number-confirmed', { User: store_ })
 
         return {
             Token: token
-          , Command: command.Register
+          , Command: Model.command.Register
           , Store: store_          
         }
     }
 
     static async Register(data)
     {
-        if (data.Store.State !== states.MobConfirmed)
-        Err_(code.BAD_REQUEST, reason.MobileNoNotConfirmed)
+        if (data.Store.State !== Model.states.MobConfirmed)
+        Err_(Model.code.BAD_REQUEST, Model.reason.MobileNoNotConfirmed)
 
         data.Store.Email       = data.Email
         data.Store.Image       = data.Image
@@ -166,7 +164,7 @@ class Store
             Open          : { Hour: data.Time.Open.Hour,  Minute: data.Time.Open.Minute  }
           , Close         : { Hour: data.Time.Close.Hour, Minute: data.Time.Close.Minute }
         }      
-        data.Store.State  = states.ToBeApproved
+        data.Store.State  = Model.states.ToBeApproved
 
         await db.store.Save(data.Store)
         console.log('store-scheduled-for-approval', { Store  : data.Store })
@@ -176,22 +174,22 @@ class Store
     {
         console.log('store-approval', {Store: data})
 
-        let store_ = await db.store.Get(data.StoreID, query.ByID)
-        if (!store_ || store_.State !== states.ToBeApproved)
+        let store_ = await db.store.Get(data.StoreID, Model.query.ByID)
+        if (!store_ || store_.State !== Model.states.ToBeApproved)
         {
-                   let reason_ = reason.StoreNotFound
-            if(store_) reason_ = reason.BadState
-            Err_(code.BAD_REQUEST, reason_)
+                   let reason_ = Model.reason.StoreNotFound
+            if(store_) reason_ = Model.reason.BadState
+            Err_(Model.code.BAD_REQUEST, reason_)
         }
 
-        if(data.Action == task.Deny)
+        if(data.Action == Model.task.Deny)
         {
-            store_.State  = states.ToBeCorrected
+            store_.State  = Model.states.ToBeCorrected
             store_.Text   = data.Text
         }
         else
         {
-            store_.State  = states.Registered
+            store_.State  = Model.states.Registered
             store_.Text   = ''
         }
 
@@ -205,8 +203,8 @@ class Store
         let data, store_
         switch(in_.Mode)
         {
-          case mode.Store:
-          case mode.Admin:
+          case Model.mode.Store:
+          case Model.mode.Admin:
             store_ = in_.Store
             data =
             {
@@ -224,13 +222,13 @@ class Store
             }
 
             break
-          case mode.User:
+          case Model.mode.User:
 
-            store_ = await db.store.Get(in_.ID, query.ByID)
-            if (!store_) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+            store_ = await db.store.Get(in_.ID, Model.query.ByID)
+            if (!store_) Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
             
-            if (store_.State !== states.Registered)
-            Err_(code.FORBIDDEN, reason.PermissionDenied)
+            if (store_.State !== Model.states.Registered)
+            Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
             data =
             {
                 StoreID     : store_._id
@@ -246,7 +244,7 @@ class Store
             break
         }
 
-        rinse[verb.view][in_.Mode](data, store_)
+        rinse[Model.verb.view][in_.Mode](data, store_)
 
         console.log('store-read', { Store : data })
         return data
@@ -257,14 +255,14 @@ class Store
         console.log('list-store', { In : in_ })
         let data, proj
 
-        proj    = { projection: project[verb.view][mode_] }
+        proj    = { projection: project[Model.verb.view][mode_] }
 
         switch(mode_)
         {
-          case mode.User:
+          case Model.mode.User:
             in_.Query = 
             {
-                  State   : states.Registered
+                  State   : Model.states.Registered
                 , 'Address.Location': { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } 
             } 
 
@@ -272,10 +270,10 @@ class Store
             if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
 
             break
-          case mode.Admin:
+          case Model.mode.Admin:
             switch(in_.Type)
             {
-                case qtype.NearList:
+                case Model.qtype.NearList:
                 in_.Query = { 'Address.Location': { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } } 
 
                 // TODO check unit of radius 2500
@@ -284,10 +282,10 @@ class Store
                 if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
 
                 break
-                case qtype.Pending:
-                in_.Query = { State : states.ToBeApproved }
+                case Model.qtype.Pending:
+                in_.Query = { State : Model.states.ToBeApproved }
                 break
-                case qtype.NearPending:
+                case Model.qtype.NearPending:
                 in_.Query = 
                 { 
                     'Address.Location'  :
@@ -298,7 +296,7 @@ class Store
                                 , coordinates   : [ in_.Longitude.loc(), in_.Latitude.loc() ] 
                             } } 
                     },
-                    State     : states.ToBeApproved
+                    State     : Model.states.ToBeApproved
                 }
                 break
             }
@@ -307,7 +305,7 @@ class Store
 
         data = await db.store.List(in_, proj)
 
-        rinse[verb.list](data)
+        rinse[Model.verb.list](data)
 
         console.log('store-list', { Stores : data, Mode: mode_ })
         return data
@@ -320,8 +318,8 @@ class Store
         let rcd = { _id : data.Store._id }
 
         // Refeed for validation
-        if(data.Refeed && (data.Store.State != states.Registered))
-                             rcd.State       = states.ToBeApproved
+        if(data.Refeed && (data.Store.State != Model.states.Registered))
+                             rcd.State       = Model.states.ToBeApproved
         if(data.Email)       rcd.Email       = data.Email
         if(data.Image)       rcd.Image       = data.Image
         if(data.Certs)       rcd.Certs       = data.Certs

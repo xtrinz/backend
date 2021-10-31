@@ -1,6 +1,5 @@
 const { ObjectID, ObjectId } = require('mongodb')
-    , { Err_, code , reason
-    ,   query }              = require('../../system/models')
+    , { Err_ }               = require('../../system/models')
     , Model                  = require('../../system/models')
     , db                     = require('../exports')[Model.segment.db]
 
@@ -20,7 +19,7 @@ function Cart(user_id)
         console.log('create-cart', { Cart: this.Data })
         
         const resp = await db.cart.Get(this.Data.UserID
-                                , query.ByUserID )
+                                , Model.query.ByUserID )
         if(resp)
         {
           console.log('cart-exists', { Cart: resp })
@@ -56,8 +55,8 @@ function Cart(user_id)
    {
       console.log('flush-cart', { UserID : user_id })
 
-      let cart       = await db.cart.Get(user_id, query.ByUserID)
-      if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)
+      let cart       = await db.cart.Get(user_id, Model.query.ByUserID)
+      if (!cart) Err_(Model.code.BAD_REQUEST, Model.reason.CartNotFound)
 
       let items = []
       cart.Products.forEach((prod)=>

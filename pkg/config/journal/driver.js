@@ -1,10 +1,7 @@
 const { ObjectID } = require('mongodb')
     , Model        = require('../../system/models')
     , db           = require('../exports')[Model.segment.db]
-    , { Err_   , code
-      , reason , states
-      , channel, pgw
-      , verb}      = require('../../system/models')
+    , { Err_ }     = require('../../system/models')
     , { Refund }   = require('../../infra/paytm/ind/refund')
     , { Payment }  = require('../../infra/paytm/ind/payment')
     , { PayTM }    = require('../../infra/paytm/driver')
@@ -23,10 +20,10 @@ function Journal()
       const items = await db.cart.List(user_id)
 
       if(!items.Products.length)
-      Err_(code.BAD_REQUEST, reason.NoProductsFound)
+      Err_(Model.code.BAD_REQUEST, Model.reason.NoProductsFound)
 
       if(items.Flagged)
-      Err_(code.BAD_REQUEST, reason.CartFlagged)
+      Err_(Model.code.BAD_REQUEST, Model.reason.CartFlagged)
 
       if(items.JournalID)
       {
@@ -92,12 +89,12 @@ function Journal()
         }
         this.Data.Payment =
         {
-            Channel       : channel.Paytm
+            Channel       : Model.channel.Paytm
           , TransactionID : txn_i.ID
           , Token         : txn_i.Token
           , ChannelRefID  : ''
           , Amount        : txn_i.Amount
-          , Status        : states.TokenGenerated
+          , Status        : Model.states.TokenGenerated
           , TimeStamp     :
           {
               Token       : time
@@ -122,7 +119,7 @@ function Journal()
 
       // BLOCK : IF COD
       if(!this.Data.Order.HasCOD)
-      Err_(code.CONFLICT, reason.HasItemsWithNoCOD)
+      Err_(Model.code.CONFLICT, Model.reason.HasItemsWithNoCOD)
 
       if(this.Data.IsRetry)
       {
@@ -133,12 +130,12 @@ function Journal()
       let time   = (new Date()).toISOString()
       this.Data.Payment =
       {
-          Channel       : channel.COD
-        , TransactionID : pgw.Order.format(String(this.Data._id))
+          Channel       : Model.channel.COD
+        , TransactionID : Model.pgw.Order.format(String(this.Data._id))
         , Token         : ''
         , ChannelRefID  : ''
         , Amount        : price.toFixed(2).toString()
-        , Status        : states.ToBeCollected
+        , Status        : Model.states.ToBeCollected
         , TimeStamp     : { Token: time, Webhook: '' }
       }
       console.log('checkout-initiated', {Data : details_ })
@@ -167,8 +164,8 @@ function Journal()
       {
         await (new Cart()).Flush(this.Data.Buyer.ID)
 
-        this.Data.Payment.Status = states.Success
-        this.Data.Transit.Status = states.Initiated
+        this.Data.Payment.Status = Model.states.Success
+        this.Data.Transit.Status = Model.states.Initiated
         this.Data.Transit.ID 	   = new ObjectID()
       }
 
@@ -236,7 +233,7 @@ function Journal()
     this.PayOut = async function (ctxt)
     {
       this.Data = await db.journal.GetByID(ctxt.Data.JournalID)
-      if (!this.Data) Err_(code.BAD_REQUEST, reason.JournalNotFound)
+      if (!this.Data) Err_(Model.code.BAD_REQUEST, Model.reason.JournalNotFound)
 
       const state =
       {
@@ -254,7 +251,7 @@ function Journal()
           , Name      : ctxt.Data.Agent.Name
           , MobileNo  : ctxt.Data.Agent.MobileNo
       }
-      this.Data.Transit.Status = states.Closed
+      this.Data.Transit.Status = Model.states.Closed
       this.Data.Transit.State  = ctxt.Data.State
       await db.journal.Save(this.Data)
     }
@@ -264,10 +261,10 @@ function Journal()
       console.log('read-journal', { Input: data, Client: in_ })
       let query_, proj, data_
 
-      query_ = filter[verb.view][mode_](data, in_)
-      proj   = { projection : project[verb.view][mode_] }
+      query_ = filter[Model.verb.view][mode_](data, in_)
+      proj   = { projection : project[Model.verb.view][mode_] }
       data_  = await db.journal.Get(query_, proj)
-      rinse[verb.view][mode_](data_)
+      rinse[Model.verb.view][mode_](data_)
 
       return data_
     }
@@ -277,15 +274,15 @@ function Journal()
       console.log('list-journal', { Input: data, Client: in_ })
       let query_, proj, data_, cond_
 
-      query_ =  filter[verb.list][mode_](data, in_)
+      query_ =  filter[Model.verb.list][mode_](data, in_)
       cond_  =
       {
           Page  : data.Page.loc()
         , Limit : data.Limit.loc()
       }
-      proj  = { projection : project[verb.view][mode_] }
+      proj  = { projection : project[Model.verb.view][mode_] }
       data_ = await db.journal.GetMany(query_, proj, cond_)
-      rinse[verb.list][mode_](data_)
+      rinse[Model.verb.list][mode_](data_)
 
       return data_
     }
