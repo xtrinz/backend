@@ -1,6 +1,6 @@
 const { ObjectId, ObjectID } = require('mongodb')
-    , db                     = require('../address/archive')
     , Model                  = require('../../system/models')
+    , db                     = require('../exports')[Model.segment.db][Model.resource.address]
 
 class Address
 {

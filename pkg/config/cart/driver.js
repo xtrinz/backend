@@ -1,11 +1,8 @@
-const { ObjectID, ObjectId }  = require('mongodb')
+const { ObjectID, ObjectId } = require('mongodb')
     , { Err_, code , reason
-    ,   query }               = require('../../system/models')
-    , db                      = 
-    {
-          cart                : require('../cart/archive')
-        , product             : require('../product/archive')          
-    }
+    ,   query }              = require('../../system/models')
+    , Model                  = require('../../system/models')
+    , db                     = require('../exports')[Model.segment.db]
 
 function Cart(user_id)
 {

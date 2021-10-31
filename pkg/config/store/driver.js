@@ -3,13 +3,8 @@ const { ObjectID }           = require('mongodb')
     , { Err_, code, reason
       , states, mode, qtype, command
       , query, message, gw, task, verb } = require('../../system/models')
-    , db                     = 
-    {
-          store   : require('../store/archive')
-        , user    : require('../user/archive')
-        , journal : require('../journal/archive')
-        , product : require('../product/archive')
-    }
+    , Model                  = require('../../system/models')
+    , db                     = require('../exports')[Model.segment.db]
     , jwt                    = require('../../infra/jwt')
     , project                = require('../../tools/project/store')
     , rinse                  = require('../../tools/rinse/store')

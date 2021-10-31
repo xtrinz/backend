@@ -1,10 +1,10 @@
-const { states, query, message, gw,
-        Err_, code, reason, mode, command}          = require('../../system/models')
-    , otp                            = require('../../infra/otp')
-    , jwt                            = require('../../infra/jwt')
-    , { ObjectID }                   = require('mongodb')
-    , { Cart }                       = require('../cart/driver')
-    , db                             = require('../user/archive')
+const { Err_ }     = require('../../system/models')
+    , otp          = require('../../infra/otp')
+    , jwt          = require('../../infra/jwt')
+    , { ObjectID } = require('mongodb')
+    , { Cart }     = require('../cart/driver')
+    , Model        = require('../../system/models')
+    , db           = require('../exports')[Model.segment.db][Model.resource.user]
 
 function User(data)
 {
@@ -15,7 +15,7 @@ function User(data)
       , Mode          : data.Mode
       , _id           : ''
       , Otp           : ''
-      , State         : states.None
+      , State         : Model.states.None
       , Name          : ''
       , Email         : ''
       , CartID        : ''
@@ -31,84 +31,84 @@ function User(data)
 
     this.New      = async function ()
     {
-        let user = await db.Get(this.Data.MobileNo, query.ByMobileNo)
-        if (user && user.State === states.Registered)
+        let user = await db.Get(this.Data.MobileNo, Model.query.ByMobileNo)
+        if (user && user.State === Model.states.Registered)
         {
             const otp_sms = new otp.OneTimePasswd({
                             MobileNo: 	user.MobileNo, 
-                            Body: 	message.OnAuth })
-                , hash    = await otp_sms.Send(gw.SMS)
+                            Body: 	Model.message.OnAuth })
+                , hash    = await otp_sms.Send(Model.gw.SMS)
 
             user.Otp = hash
             await db.Save(user)
             return
         }
 
-        if(this.Data.Mode     === mode.Admin &&
+        if(this.Data.Mode     === Model.mode.Admin &&
             !process.env.ADMIN_MOB_NO.split(' ').includes(this.Data.MobileNo))
         {
             console.log('unmatched-mobile-no-seed-unknown-admin', { Admin: this.Data })
-            Err_(code.NOT_FOUND, reason.Unauthorized)
+            Err_(Model.code.NOT_FOUND, Model.reason.Unauthorized)
         }
 
         const otp_sms = new otp.OneTimePasswd({
                         MobileNo: 	this.Data.MobileNo, 
-                        Body: 	message.OnAuth })
-            , hash    = await otp_sms.Send(gw.SMS)
+                        Body: 	Model.message.OnAuth })
+            , hash    = await otp_sms.Send(Model.gw.SMS)
 
         if(!user) { this.Data._id = new ObjectID() }
         else { this.Data._id = user._id }
 
         this.Data.Otp             = hash
-        this.Data.State           = states.New
+        this.Data.State           = Model.states.New
         await db.Save(this.Data)
         console.log('user-created', { User: this.Data})
     }
 
     this.ConfirmMobileNo   = async function (data)
     {
-        this.Data = await db.Get(data.MobileNo, query.ByMobileNo)
-        if (!this.Data) Err_(code.BAD_REQUEST, reason.UserNotFound)
+        this.Data = await db.Get(data.MobileNo, Model.query.ByMobileNo)
+        if (!this.Data) Err_(Model.code.BAD_REQUEST, Model.reason.UserNotFound)
 
         const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
             , status = await otp_.Confirm(this.Data.Otp, data.OTP)
 
         if (!status) 
         {
-            Err_(code.BAD_REQUEST, reason.OtpRejected)
+            Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
         }
 
         const token = await jwt.Sign({ _id : this.Data._id, Mode : this.Data.Mode })
 
-        if (this.Data.State === states.Registered)
+        if (this.Data.State === Model.states.Registered)
         {
             console.log('user-exists-logging-in', { User: this.Data })            
             return {
                   Token: token
-                , Command: command.LoggedIn
+                , Command: Model.command.LoggedIn
             }
         }
-        this.Data.State = states.MobConfirmed
+        this.Data.State = Model.states.MobConfirmed
         this.Data.Otp   = ''
         await db.Save(this.Data)
         console.log('user-mobile-number-confirmed', { User: this.Data })
 
         return {
             Token: token
-          , Command: command.Register
+          , Command: Model.command.Register
         }
     }
 
     this.Register   = async function (data)
     {
-        if (data.User.State !== states.MobConfirmed)
-        Err_(code.BAD_REQUEST, reason.MobileNoNotConfirmed)
+        if (data.User.State !== Model.states.MobConfirmed)
+        Err_(Model.code.BAD_REQUEST, Model.reason.MobileNoNotConfirmed)
 
         const cart       = new Cart(data.User._id)
         data.User.CartID = await cart.Create()
         data.User.Name   = data.Name
         data.User.Email  = data.Email        
-        data.User.State  = states.Registered
+        data.User.State  = Model.states.Registered
 
         await db.Save(data.User)
         console.log('user-registered', 
@@ -119,8 +119,8 @@ function User(data)
 
     this.Edit   = async function (data)
     {
-        if ( data.User.State !== states.Registered)
-        Err_(code.BAD_REQUEST, reason.IncompleteRegistration)
+        if ( data.User.State !== Model.states.Registered)
+        Err_(Model.code.BAD_REQUEST, Model.reason.IncompleteRegistration)
 
         let rcd = { _id : data.User._id }
         if(data.Name ) rcd.Name  = data.Name 

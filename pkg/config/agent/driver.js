@@ -3,8 +3,7 @@ const { Err_ }      = require('../../system/models')
     , Tool          = require('../../tools/export')[Model.resource.agent]
     , Infra         = require('../../infra/export')
     , { ObjectID }  = require('mongodb')
-    , db            = require('../agent/archive')
-
+    , db            = require('../exports')[Model.segment.db][Model.resource.agent]
 class Agent
 {
     constructor (data)

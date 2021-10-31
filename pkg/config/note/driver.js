@@ -1,5 +1,6 @@
 const { ObjectID } = require('mongodb')
-    , db           = require('../note/archive')
+    , Model        = require('../../system/models')
+    , db           = require('../exports')[Model.segment.db][Model.resource.note]
 
 class Note
 {

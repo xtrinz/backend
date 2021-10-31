@@ -1,12 +1,6 @@
 const { ObjectID } = require('mongodb')
-    , db           =
-    {
-        cart       : require('../cart/archive')
-      , user       : require('../user/archive')
-      , store      : require('../store/archive')
-      , journal    : require('../journal/archive')
-      , addr       : require('../address/archive')
-    }
+    , Model        = require('../../system/models')
+    , db           = require('../exports')[Model.segment.db]
     , { Err_   , code
       , reason , states
       , channel, pgw
@@ -155,7 +149,7 @@ function Journal()
     {
 
       // Client Context
-      this.Data.Buyer   = await db.addr.Client(data.User, data.AddressID)
+      this.Data.Buyer   = await db.address.Client(data.User, data.AddressID)
 
       // Order Details
       let store_id = await this.SetOrder(data.User._id, this.Data.Buyer)

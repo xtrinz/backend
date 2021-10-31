@@ -1,11 +1,8 @@
-const { ObjectId, ObjectID }        = require('mongodb')
+const { ObjectId, ObjectID } = require('mongodb')
     , { Err_, code, reason, query, mode, verb } = require('../../system/models')
-    , db                            =
-    {
-        product : require('../product/archive')
-        , cart  : require('../cart/archive')
-    }
-    , rinse                         = require('../../tools/rinse/product')
+    , Model                  = require('../../system/models')
+    , db                     = require('../exports')[Model.segment.db]
+    , rinse                  = require('../../tools/rinse/product')
 
 function Product(data)
 {

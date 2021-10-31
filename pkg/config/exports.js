@@ -10,7 +10,9 @@ const Segments =
         , [Model.resource.product] : require('./product/archive' )
         , [Model.resource.store]   : require('./store/archive'   )
         , [Model.resource.transit] : require('./transit/archive' )
-        , [Model.resource.user]    : require('./user/archive'    )                
+        , [Model.resource.user]    : require('./user/archive'    )   
+        , [Model.resource.journal] : require('./journal/archive' )  
+        , [Model.resource.note]    : require('./note/archive' )                                
     }
 }
 
