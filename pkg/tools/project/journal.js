@@ -23,7 +23,6 @@ module.exports =
 
             , 'Seller.Name'          : 1  , 'Seller.MobileNo'   : 1
             , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
-            , 'Seller.Longitude'     : 1  , 'Seller.Latitude'   : 1
 
             , 'Buyer.Name'           : 1
             , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'    : 1
@@ -55,7 +54,6 @@ module.exports =
 
             , 'Seller.ID'            : 1  , 'Seller.Name'     : 1
             , 'Seller.Address'       : 1  , 'Seller.Image'    : 1
-            , 'Seller.Longitude'     : 1  , 'Seller.Latitude' : 1
             , 'Seller.MobileNo'      : 1
             
             , 'Agent.Name'           : 1  , 'Agent.MobileNo'  : 1

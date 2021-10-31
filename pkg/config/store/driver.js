@@ -8,58 +8,198 @@ const { ObjectID }           = require('mongodb')
     , jwt                    = require('../../infra/jwt')
     , project                = require('../../tools/project/store')
     , rinse                  = require('../../tools/rinse/store')
-
-function Store(data)
+class Store
 {
-    if (data)
-    this.Data             =
+    constructor (data)
     {
-          _id             : ''
-        , Email           : ''
-        , Image           : ''
-        , Certs           : []
-        , Type            : ''
 
-        , Name            : ''
-        , Description     : ''
-        , MobileNo        : data.MobileNo
-        , SockID          : []
-        , Location        :
+        let init_ = new Date(0)
+        let date_ =
         {
-              type        : 'Point'
-            , coordinates : [0, 88] // [data.Longitude.loc(), data.Latitude.loc()]
+            Minute  : init_.getMinutes()
+          , Hour    : init_.getHours()
+          , Day     : init_.getDate()
+          , Month   : init_.getMonth()
+          , Year    : init_.getFullYear()
         }
-        , Address         :
+
+        this._id          = new ObjectID()
+        this.Email        = ''
+        this.Image        = ''
+        this.Certs        = []
+        this.Type         = ''
+        this.Name         = ''
+        this.Description  = ''
+        this.MobileNo     = data.MobileNo
+        this.SockID       = []
+        this.Address      =
         {
-              Line1       : ''
+            Location      :
+            {
+                  type        : 'Point'
+                , coordinates : [0, 88]
+            }
+            , Line1       : ''
             , Line2       : ''
             , City        : ''
             , PostalCode  : ''
             , State       : ''
             , Country     : ''
         }
-        , State           : states.New
-        , Time            :
+        this.State        = states.New
+        this.Time         =
         {
             Open          : { Hour: '', Minute: '' }
           , Close         : { Hour: '', Minute: '' }
         }
-        , IsLive          : false
-        , Status          :
+        this.IsLive       = false
+        this.Status       =
         {
               Current     : states.Closed
-            , SetOn       : 
-            {
-                  Minute  : (new Date(0)).getMinutes()
-                , Hour    : (new Date(0)).getHours()
-                , Day     : (new Date(0)).getDate()
-                , Month   : (new Date(0)).getMonth()
-                , Year    : (new Date(0)).getFullYear()
-            }
+            , SetOn       : date_
         }
     }
 
-    this.Read = async function(in_)
+    async New()
+    {    
+        // Check the mobile number already used
+        const key2 = { MobileNo : this.MobileNo }
+        const store_ = await db.store.Get(key2, query.Custom)
+        if (store_ && ( store_.State === states.Registered   ||
+                        store_.State === states.ToBeApproved ))
+        {
+            const otp_sms = new otp.OneTimePasswd({
+                            MobileNo: store_.MobileNo, 
+                            Body: 	  message.OnAuth })
+                , hash    = await otp_sms.Send(gw.SMS)
+
+            store_.Otp = hash
+            await db.store.Save(store_)
+            return
+        }
+    
+        const otp_sms = new otp.OneTimePasswd({
+                        MobileNo: 	this.MobileNo, 
+                        Body: 	message.OnAuth })
+            , hash    = await otp_sms.Send(gw.SMS)
+
+        if(!store_) { this._id = new ObjectID() }
+        else { this._id = store_._id }
+
+        this.MobileNo   = this.MobileNo
+        this.Otp        = hash
+        this.State      = states.New
+        await db.store.Save(this)
+    
+        console.log('new-store-created', {Store: this})
+    }
+    
+    static async ConfirmMobileNo(data)
+    {
+        const key = { MobileNo : data.MobileNo }
+        let store_ = await db.store.Get(key, query.Custom)
+        if (!store_) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+
+        const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
+            , status = await otp_.Confirm(store_.Otp, data.OTP)
+
+        if (!status) 
+        {
+            console.log('wrong-otp-on-store-no-confirmation', { Data: data })            
+            Err_(code.BAD_REQUEST, reason.OtpRejected)
+        }
+
+        const token = await jwt.Sign({ _id : store_._id, Mode : mode.Store })
+
+        if (store_.State === states.Registered    ||
+            store_.State === states.ToBeApproved  ||
+            store_.State === states.ToBeCorrected )
+        {
+            console.log('user-exists-logging-in', { User: store_ })            
+            return {
+                  Token: token
+                , Command: command.LoggedIn
+                , Store: store_
+            }
+        }
+        store_.State = states.MobConfirmed
+        store_.Otp   = ''
+        await db.store.Save(store_)
+        console.log('user-mobile-number-confirmed', { User: store_ })
+
+        return {
+            Token: token
+          , Command: command.Register
+          , Store: store_          
+        }
+    }
+
+    static async Register(data)
+    {
+        if (data.Store.State !== states.MobConfirmed)
+        Err_(code.BAD_REQUEST, reason.MobileNoNotConfirmed)
+
+        data.Store.Email       = data.Email
+        data.Store.Image       = data.Image
+        data.Store.Certs       = data.Certs
+        data.Store.Type        = data.Type
+        data.Store.Name        = data.Name
+        data.Store.Description = data.Description
+        data.Store.MobileNo    = data.MobileNo
+        data.Store.SockID      = []
+        data.Store.Address     =
+        {
+              Line1       : data.Address.Line1
+            , Line2       : data.Address.Line2
+            , City        : data.Address.City
+            , Location    :
+            {
+                  type        : 'Point'
+                , coordinates : [data.Address.Longitude.loc(), data.Address.Latitude.loc()]
+            }
+            , PostalCode  : data.Address.PostalCode
+            , State       : data.Address.State
+            , Country     : data.Address.Country
+        }
+        data.Store.Time        =
+        {
+            Open          : { Hour: data.Time.Open.Hour,  Minute: data.Time.Open.Minute  }
+          , Close         : { Hour: data.Time.Close.Hour, Minute: data.Time.Close.Minute }
+        }      
+        data.Store.State  = states.ToBeApproved
+
+        await db.store.Save(data.Store)
+        console.log('store-scheduled-for-approval', { Store  : data.Store })
+    }
+
+    static async Approve(data)
+    {
+        console.log('store-approval', {Store: data})
+
+        let store_ = await db.store.Get(data.StoreID, query.ByID)
+        if (!store_ || store_.State !== states.ToBeApproved)
+        {
+                   let reason_ = reason.StoreNotFound
+            if(store_) reason_ = reason.BadState
+            Err_(code.BAD_REQUEST, reason_)
+        }
+
+        if(data.Action == task.Deny)
+        {
+            store_.State  = states.ToBeCorrected
+            store_.Text   = data.Text
+        }
+        else
+        {
+            store_.State  = states.Registered
+            store_.Text   = ''
+        }
+
+        await db.store.Save(store_)
+        console.log('store-admin-response-marked', { Store: store_ })
+    }
+
+    static async Read(in_)
     {
         console.log('read-store', { In: in_ })
         let data, store_
@@ -79,8 +219,6 @@ function Store(data)
               , Type        : store_.Type
               , Name        : store_.Name
               , MobileNo    : store_.MobileNo
-              , Longitude   : store_.Location.coordinates[0].toFixed(6)
-              , Latitude    : store_.Location.coordinates[1].toFixed(6)
               , Address     : store_.Address
               , Time        : store_.Time
             }
@@ -113,215 +251,32 @@ function Store(data)
         console.log('store-read', { Store : data })
         return data
     }
-
-    this.GetLoc = async function(store_id)
-    {
-        console.log('get-store-location', { StoreID: store_id })
-
-        this.Data = await db.store.Get(store_id, query.ByID)
-        if (!this.Data) Err_(code.BAD_REQUEST, reason.StoreNotFound)
-        let data =
-        {
-            Longitude : this.Data.Location.coordinates[0].toFixed(6)
-          , Latitude  : this.Data.Location.coordinates[1].toFixed(6)
-        }
-
-        console.log('store-location-found', { StoreID: store_id, Loc : data })
-        return data
-    }
     
-    this.Auth   = async function (token)
-    {
-        if (!token) Err_(code.BAD_REQUEST, reason.TokenMissing)
-
-        token       = token.slice(7) // cut 'Bearer <token>'
-        const res   = await jwt.Verify(token)
-        if (!res || !res._id) Err_(code.BAD_REQUEST, reason.UserNotFound)
-
-        if(res.Mode !== mode.Store)
-        Err_(code.BAD_REQUEST, reason.InvalidToken)
-
-        this.Data = await db.store.Get(res._id, query.ByID)
-        if (!this.Data)
-        {
-            console.log('store-not-found', {UserID: res._id})
-            Err_(code.BAD_REQUEST, reason.InvalidToken)
-        }
-        console.log('store-authenticated', {User: this.Data})
-    }
-
-    // Authz usr for product mgmt
-    this.Authz      = async function(StoreID, UserID) 
-    {
-        this.Data = await db.store.Get(StoreID, query.ByID)
-        if (!this.Data) Err_(code.BAD_REQUEST, reason.StoreNotFound)
-    
-        if(String(this.Data.AdminID) !== String(UserID))
-            Err_(code.BAD_REQUEST, reason.Unauthorized)
-    }
-    
-    this.New      = async function ()
-    {    
-        // Check the mobile number already used
-        const key2 = { MobileNo : this.Data.MobileNo }
-        const store_ = await db.store.Get(key2, query.Custom)
-        if (store_ && ( store_.State === states.Registered   ||
-                        store_.State === states.ToBeApproved ))
-        {
-            const otp_sms = new otp.OneTimePasswd({
-                            MobileNo: store_.MobileNo, 
-                            Body: 	  message.OnAuth })
-                , hash    = await otp_sms.Send(gw.SMS)
-
-            store_.Otp = hash
-            await db.store.Save(store_)
-            return
-        }
-    
-        const otp_sms = new otp.OneTimePasswd({
-                        MobileNo: 	this.Data.MobileNo, 
-                        Body: 	message.OnAuth })
-            , hash    = await otp_sms.Send(gw.SMS)
-
-        if(!store_) { this.Data._id = new ObjectID() }
-        else { this.Data._id = store_._id }
-
-        this.Data.MobileNo   = this.Data.MobileNo
-        this.Data.Otp        = hash
-        this.Data.State      = states.New
-        await db.store.Save(this.Data)
-    
-        console.log('new-store-created', {Store: this.Data})
-    }
-    
-    this.ConfirmMobileNo   = async function(data)
-    {
-        const key = { MobileNo : data.MobileNo }
-        this.Data = await db.store.Get(key, query.Custom)
-        if (!this.Data) Err_(code.BAD_REQUEST, reason.StoreNotFound)
-
-        const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
-            , status = await otp_.Confirm(this.Data.Otp, data.OTP)
-
-        if (!status) 
-        {
-            console.log('wrong-otp-on-store-no-confirmation', { Data: data })            
-            Err_(code.BAD_REQUEST, reason.OtpRejected)
-        }
-
-        const token = await jwt.Sign({ _id : this.Data._id, Mode : mode.Store })
-
-        if (this.Data.State === states.Registered    ||
-            this.Data.State === states.ToBeApproved  ||
-            this.Data.State === states.ToBeCorrected )
-        {
-            console.log('user-exists-logging-in', { User: this.Data })            
-            return {
-                  Token: token
-                , Command: command.LoggedIn
-            }
-        }
-        this.Data.State = states.MobConfirmed
-        this.Data.Otp   = ''
-        await db.store.Save(this.Data)
-        console.log('user-mobile-number-confirmed', { User: this.Data })
-
-        return {
-            Token: token
-          , Command: command.Register
-        }
-    }
-
-    this.Register   = async function (data)
-    {
-        if (data.Store.State !== states.MobConfirmed)
-        Err_(code.BAD_REQUEST, reason.MobileNoNotConfirmed)
-
-        data.Store.Email       = data.Email
-        data.Store.Image       = data.Image
-        data.Store.Certs       = data.Certs
-        data.Store.Type        = data.Type
-        data.Store.Name        = data.Name
-        data.Store.Description = data.Description
-        data.Store.MobileNo    = data.MobileNo
-        data.Store.SockID      = []
-        data.Store.Location    =
-        {
-              type        : 'Point'
-            , coordinates : [data.Longitude.loc(), data.Latitude.loc()]
-        }
-        data.Store.Address     =
-        {
-              Line1       : data.Address.Line1
-            , Line2       : data.Address.Line2
-            , City        : data.Address.City
-            , PostalCode  : data.Address.PostalCode
-            , State       : data.Address.State
-            , Country     : data.Address.Country
-        }
-        data.Store.Time        =
-        {
-            Open          : { Hour: data.Time.Open.Hour,  Minute: data.Time.Open.Minute  }
-          , Close         : { Hour: data.Time.Close.Hour, Minute: data.Time.Close.Minute }
-        }      
-        data.Store.State  = states.ToBeApproved
-
-        await db.store.Save(data.Store)
-        console.log('store-scheduled-for-approval', { Store  : data.Store })
-    }
-
-    this.Approve   = async function (data)
-    {
-        console.log('store-approval', {Store: data})
-
-        this.Data = await db.store.Get(data.StoreID, query.ByID)
-        if (!this.Data || this.Data.State !== states.ToBeApproved)
-        {
-                      let reason_ = reason.StoreNotFound
-            if(this.Data) reason_ = reason.BadState
-            Err_(code.BAD_REQUEST, reason_)
-        }
-
-        if(data.Action == task.Deny)
-        {
-            this.Data.State  = states.ToBeCorrected
-            this.Data.Text   = data.Text
-        }
-        else
-        {
-            this.Data.State  = states.Registered
-            this.Data.Text   = ''
-        }
-
-        await db.store.Save(this.Data)
-        console.log('store-admin-response-marked', {Store: this.Data})
-    }
-    
-    this.List  = async function (in_, mode_)
+    static async List (in_, mode_)
     {
         console.log('list-store', { In : in_ })
         let data, proj
+
+        proj    = { projection: project[verb.view][mode_] }
+
         switch(mode_)
         {
           case mode.User:
-            proj    = { projection: project[verb.view][mode.User] }
             in_.Query = 
             {
                   State   : states.Registered
-                , Location: { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } 
+                , 'Address.Location': { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } 
             } 
 
             if(in_.Category) in_.Query.Type     = in_.Category
             if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
 
-            data = await db.store.List(in_, proj)
             break
           case mode.Admin:
-            proj    = { projection: project[verb.view][mode.Admin] }
             switch(in_.Type)
             {
                 case qtype.NearList:
-                in_.Query = { Location: { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } } 
+                in_.Query = { 'Address.Location': { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } } 
 
                 // TODO check unit of radius 2500
 
@@ -335,7 +290,7 @@ function Store(data)
                 case qtype.NearPending:
                 in_.Query = 
                 { 
-                    Location  :
+                    'Address.Location'  :
                     { 
                         $near : { $geometry: 
                             { 
@@ -347,9 +302,10 @@ function Store(data)
                 }
                 break
             }
-            data = await db.store.List(query_, proj)
             break
         }
+
+        data = await db.store.List(in_, proj)
 
         rinse[verb.list](data)
 
@@ -357,7 +313,7 @@ function Store(data)
         return data
     }
 
-    this.Edit   = async function (data)
+    static async Edit (data)
     {
         console.log('edit-store', { Input : data})
 
@@ -373,32 +329,40 @@ function Store(data)
         if(data.Name)        rcd.Name        = data.Name
         if(data.Description) rcd.Description = data.Description        
         if(data.Longitude && data.Latitude)  
-                          rcd.Location = 
-                          { 
-                                type        : 'Point'
-                              , coordinates : [ data.Longitude.loc(), data.Latitude.loc() ]
-                          }
+                rcd[ 'Address.Location' ] = 
+                { 
+                        type        : 'Point'
+                    , coordinates : [ data.Longitude.loc(), data.Latitude.loc() ]
+                }
         if(data.Address)  rcd.Address  = data.Address
         if(data.Status)
         {
-            let now_ = new Date()
+            let now_  = new Date()
+            let date_ = 
+            {
+                Minute    : now_.getMinutes()
+              , Hour      : now_.getHours()
+              , Day       : now_.getDate()
+              , Month     : now_.getMonth()
+              , Year      : now_.getFullYear()
+            }
             rcd.Status = 
             {
-                  Current     : data.Status
-                , SetOn       :
-                {
-                    Minute    : now_.getMinutes()
-                  , Hour      : now_.getHours()
-                  , Day       : now_.getDate()
-                  , Month     : now_.getMonth()
-                  , Year      : now_.getFullYear()
-                }
+                  Current : data.Status
+                , SetOn   : date_
             }
         }
         if(data.Time)     rcd.Time     = data.Time
-        if(rcd.Location)
+        if(data.Longitude && data.Latitude)
         {
-            const data_ = { Location: rcd.Location }
+            const data_ = 
+            {
+                Location : 
+                {
+                        type      : 'Point'
+                    , coordinates : [ data.Longitude.loc(), data.Latitude.loc() ]
+                }
+            }
             await db.product.UpdateMany(rcd._id, data_)
         }
         // TODO MobileNo
@@ -406,7 +370,6 @@ function Store(data)
 
         console.log('store-updated', { Record: rcd })
     }
-    
 }
 
 module.exports =

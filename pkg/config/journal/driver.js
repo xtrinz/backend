@@ -8,7 +8,6 @@ const { ObjectID } = require('mongodb')
     , { Refund }   = require('../../infra/paytm/ind/refund')
     , { Payment }  = require('../../infra/paytm/ind/payment')
     , { PayTM }    = require('../../infra/paytm/driver')
-    , { Store }    = require('../../config/store/driver')
     , tally        = require('../../system/tally')
     , project      = require('../../tools/project/journal')
     , rinse        = require('../../tools/rinse/journal')
@@ -43,7 +42,7 @@ function Journal()
         , HasCOD        : items.HasCOD
       }
  
-      const src_loc  = await (new Store()).GetLoc(items.StoreID)
+      const src_loc  = await db.store.Location(items.StoreID)
           , dest_loc =
           {
               Latitude : dest.Address.Latitude

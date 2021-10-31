@@ -109,12 +109,29 @@ const Seller = async function(store_id)
       , Name      : store.Name
       , MobileNo  : store.MobileNo
       , Image     : store.Image
-      , Longitude : store.Location.coordinates[0].toFixed(6)
-      , Latitude  : store.Location.coordinates[1].toFixed(6)
       , Address   : store.Address
     }
+    resp.Address.Longitude = store.Address.Location.coordinates[0].toFixed(6)
+    resp.Address.Latitude  = store.Address.Location.coordinates[1].toFixed(6)
+    delete resp.Address.Location
     console.log('the-seller', { Seller : resp })
     return resp
+}
+
+const Location = async function(store_id)
+{
+    console.log('get-store-location', { StoreID: store_id })
+
+    store_ = await Get(store_id, query.ByID)
+    if (!store_) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+    let data =
+    {
+        Longitude : store_.Address.Location.coordinates[0].toFixed(6)
+      , Latitude  : store_.Address.Location.coordinates[1].toFixed(6)
+    }
+
+    console.log('store-location-found', { StoreID: store_id, Loc : data })
+    return data
 }
 
 module.exports =
@@ -124,4 +141,5 @@ module.exports =
     , List           : List
     , GetStoreSockID : GetStoreSockID
     , Seller         : Seller
+    , Location       : Location
 }

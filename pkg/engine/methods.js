@@ -82,8 +82,8 @@ const AcceptedByStore			=  async function(ctxt)
 	await Emit(alerts.Accepted, ctxt)	// To User: Emit irrespective of it turns to hold
 
 	const agents = await db.agent.NearbyAgents(
-			ctxt.Data.Store.Longitude,
-			ctxt.Data.Store.Latitude)
+			ctxt.Data.Store.Address.Longitude,
+			ctxt.Data.Store.Address.Latitude)
 	if(!agents)
 	{
 		console.log('no-agents-order-on-hold', ctxt.Data)
@@ -209,8 +209,8 @@ const RejectedByAgent		= async function(ctxt)
 	case states.TransitAccepted:
 
 		const agents = await db.agent.NearbyAgents(
-				ctxt.Data.Store.Longitude,
-				ctxt.Data.Store.Latitude)
+				ctxt.Data.Store.Address.Longitude,
+				ctxt.Data.Store.Address.Latitude)
 		if(!agents)
 		{
 			console.log('no-nearby-agents', ctxt.Data)

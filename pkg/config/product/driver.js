@@ -27,7 +27,7 @@ function Product(data)
                 Id    : ''
             , Type    : '' // COLOR / SIZE
         }
-        , Location    : data.Store.Location
+        , Location    : data.Store.Address.Location
     }
 
     this.Add      = async function ()
@@ -111,7 +111,7 @@ function Product(data)
         prod.PricePerGV    = (data.PricePerGV)?    data.PricePerGV             : prod.PricePerGV
         prod.GroundVolume  = (data.GroundVolume)?  data.GroundVolume           : prod.GroundVolume 
         prod.Unit          = (data.Unit)?          data.Unit                   : prod.Unit
-        prod.Location      = data.Store.Location
+        prod.Location      = data.Store.Address.Location
 
         let act = {}
         if(data.IsAvailable != undefined &&

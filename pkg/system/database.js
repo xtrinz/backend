@@ -28,7 +28,7 @@ const database  = client.db(process.env.DB_NAME)
     , channels 	= database.collection(set.channel)
     , tags    	= database.collection(set.tags)        
 
-    stores.createIndex({ Location: '2dsphere' })
+    stores.createIndex({ 'Address.Location': '2dsphere' })
      users.createIndex({ Location: '2dsphere' })
     agents.createIndex({ Location: '2dsphere' })     
   products.createIndex({ Location: '2dsphere' })

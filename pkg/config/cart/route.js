@@ -1,10 +1,11 @@
 const { ObjectId }           = require('mongodb')
     , { code, text, status } = require('../../system/models')
     , {Cart, CartEntry}      = require('../cart/driver')
-    , { Store }              = require('../store/driver')
     , { Address }            = require('../address/driver')
     , router 	               = require('express').Router()
     , tally                  = require('../../system/tally')
+    , Model                  = require('../../system/models')
+    , db                     = require('../exports')[Model.segment.db]
 
 // Insert product
 router.post('/insert', async (req, res, next) => {
@@ -39,7 +40,7 @@ router.get('/list', async (req, res, next) =>
         , AddressID : req.query.AddressID
       }
       data.Address  = await Address.Read(in_)
-      src_loc       = await (new Store()).GetLoc(data.StoreID)
+      src_loc       = await db.store.Location(data.StoreID)
       dest_loc      =
       {
           Latitude  : data.Address.Latitude

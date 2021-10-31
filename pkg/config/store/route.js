@@ -20,27 +20,24 @@ router.post('/register', async (req, res, next) =>
         break
 
       case task.ReadOTP:
-        store = new Store()
-        const resp = await store.ConfirmMobileNo(req.body)
+        const resp    = await Store.ConfirmMobileNo(req.body)
         text_         = text.OTPConfirmed
-        info_         = store.Data
+        info_         = resp.Store
         info_.Command = resp.Command
         data_         = { Command : info_.Command }
         res.setHeader('authorization', resp.Token)
         break
 
       case task.Register:
-        store         = new Store()
         info_         = req.body.Store
-        await store.Register(req.body)
+        await Store.Register(req.body)
         info_.Command = command.LoggedIn
         data_         = { Command : info_.Command }        
         text_         = text.Registered
         break
 
       case task.Approve:
-        store  = new Store()
-        await store.Approve(req.body)
+        await Store.Approve(req.body)
         text_ = text.Approved
         break
       }
@@ -48,14 +45,13 @@ router.post('/register', async (req, res, next) =>
     if(info_ && (info_.State === states.Registered   ||
                  info_.State === states.ToBeApproved ))
     {
-      const store = new Store()
       let in_ =
       {
           ID    : info_._id
         , Mode  : mode.Store
         , Store : info_
       }
-      data_ = await store.Read(in_)
+      data_ = await Store.Read(in_)
       data_.Command = info_.Command
     }
     
@@ -70,7 +66,6 @@ router.post('/register', async (req, res, next) =>
 router.get('/view', async (req, res, next) => {
     try 
     {
-      const store = new Store()
       let in_
       switch(req.body.Mode)
       {
@@ -91,7 +86,7 @@ router.get('/view', async (req, res, next) => {
           }          
           break
       }
-      const data  = await store.Read(in_)
+      const data  = await Store.Read(in_)
 
       return res.status(code.OK).json({
         Status  : status.Success,
@@ -105,8 +100,7 @@ router.get('/list', async (req, res, next) =>
 {
     try 
     {
-      const store = new Store()
-          , data  = await store.List(req.query, req.body.Mode)
+      const data  = await Store.List(req.query, req.body.Mode)
       
       return res.status(code.OK).json({
         Status  : status.Success,
@@ -120,8 +114,7 @@ router.put('/edit', async (req, res, next) =>
 {
   try 
   {
-    let  store = new Store()
-    await store.Edit(req.body)
+    await Store.Edit(req.body)
 
     return res.status(code.OK).json({
       Status  : status.Success,

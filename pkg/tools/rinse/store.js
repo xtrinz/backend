@@ -25,6 +25,8 @@ module.exports =
     {
         [mode.User] : function(data, store_)
         {
+            delete data.Address.Location
+
             let now_ = new Date()
             if(now_.is_now(store_.Time.Open, store_.Time.Close))
             {
@@ -39,6 +41,11 @@ module.exports =
 
         , [mode.Admin] : function(data, store_)
         {
+            data.Address.Longitude = store_.Address.Location.coordinates[0].toFixed(6)
+            data.Address.Latitude  = store_.Address.Location.coordinates[1].toFixed(6)
+
+            delete data.Address.Location
+            
             let now_ = new Date()
             if(now_.is_now(store_.Time.Open, store_.Time.Close))
             {
@@ -52,6 +59,11 @@ module.exports =
  
         , [mode.Store] : function(data, store_)
         {
+            data.Address.Longitude = store_.Address.Location.coordinates[0].toFixed(6)
+            data.Address.Latitude  = store_.Address.Location.coordinates[1].toFixed(6)
+
+            delete data.Address.Location
+            
             let now_ = new Date()
             if(now_.is_now(store_.Time.Open, store_.Time.Close))
             {

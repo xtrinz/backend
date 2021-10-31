@@ -138,8 +138,8 @@ let List = function(user_, store_, product_)
               StoreID       : store.ID
             , Page          : 1
             , Limit         : 8
-            , Longitude     : store.Longitude
-            , Latitude      : store.Latitude 
+            , Longitude     : store.Address.Longitude
+            , Latitude      : store.Address.Latitude 
             , Category      : product.Category 
             , Text          : product.Category                      
         }

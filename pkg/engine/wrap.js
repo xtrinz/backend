@@ -221,8 +221,8 @@ const PingAdmins = async function(st, ctxt)
     console.log('ping-admins', {State: st, Ctxt: ctxt})
 
 	const admins  = await db.user.NearbyAdmins(
-          ctxt.Data.Store.Longitude
-        , ctxt.Data.Store.Latitude)
+          ctxt.Data.Store.Address.Longitude
+        , ctxt.Data.Store.Address.Latitude)
     ctxt.Data.Admins = admins
     await Emit(alerts.NoAgents, ctxt)
     await Save(ctxt, st)

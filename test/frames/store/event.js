@@ -115,8 +115,6 @@ let Register = function(name)
             , Description     : store.Description
             , MobileNo        : store.MobileNo
             , Email           : store.Email
-            , Longitude       : store.Longitude
-            , Latitude        : store.Latitude
             , Time            :
             {
                 Open          : store.Time.Open
@@ -127,6 +125,8 @@ let Register = function(name)
                   Line1       : store.Address.Line1
                 , Line2       : store.Address.Line2
                 , City        : store.Address.City
+                , Longitude   : store.Address.Longitude
+                , Latitude    : store.Address.Latitude
                 , PostalCode  : store.Address.PostalCode
                 , State       : store.Address.State
                 , Country     : store.Address.Country
@@ -156,6 +156,8 @@ let Register = function(name)
                 Line1      : store.Address.Line1
               , Line2      : store.Address.Line2
               , City       : store.Address.City
+              , Longitude  : store.Address.Longitude
+              , Latitude   : store.Address.Latitude
               , PostalCode : store.Address.PostalCode
               , State      : store.Address.State
               , Country    : store.Address.Country
@@ -166,8 +168,6 @@ let Register = function(name)
               , Close      : store.Time.Close
             }
             , Email        : store.Email
-            , Longitude    : store.Longitude
-            , Latitude     : store.Latitude
             , State        : 'ToBeApproved'
             , Status       : states.Closed
             , Command      : command.LoggedIn

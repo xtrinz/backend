@@ -103,8 +103,6 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                     Name          : journal.Seller.Name
                   , Address       : journal.Seller.Address
                   , Image         : journal.Seller.Image
-                  , Longitude     : journal.Seller.Longitude
-                  , Latitude      : journal.Seller.Latitude
                   , MobileNo      : journal.Seller.MobileNo                  
                 }
                 , Penalty         : 0
@@ -135,8 +133,6 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                   , Name          : journal.Seller.Name
                   , Address       : journal.Seller.Address
                   , Image         : journal.Seller.Image
-                  , Longitude     : journal.Seller.Longitude
-                  , Latitude      : journal.Seller.Latitude
                   , MobileNo      : journal.Seller.MobileNo                  
                 }
                 , Agent           :
@@ -324,8 +320,6 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                     Name          : journal.Seller.Name
                   , Address       : journal.Seller.Address
                   , Image         : journal.Seller.Image
-                  , Longitude     : journal.Seller.Longitude
-                  , Latitude      : journal.Seller.Latitude
                   , MobileNo      : journal.Seller.MobileNo
                 }
                 , Penalty         : 0
@@ -356,8 +350,6 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                   , Name          : journal.Seller.Name
                   , Address       : journal.Seller.Address
                   , Image         : journal.Seller.Image
-                  , Longitude     : journal.Seller.Longitude
-                  , Latitude      : journal.Seller.Latitude
                   , MobileNo      : journal.Seller.MobileNo                  
                 }
                 , Agent           :
