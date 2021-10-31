@@ -18,8 +18,8 @@ const SecInput = async function(req, res, next)
 {
   try 
   {
-
-    const objs = req.url.path()
+    let path = req.url
+    const objs = path.path()
         , inst = new input.Controller()
 
     await inst.IsHonest(req, objs[0], objs[1], req.method)
@@ -33,7 +33,8 @@ const Authnz = async function (req, res, next)
   try 
   {    
 
-    const objs      = req.url.path()
+    let path = req.url
+    const objs      = path.path()
         , acc_ctrlr = new rbac.Controller()
         , task_     = (req.body && req.body.Task)? req.body.Task: 'None'
         , mode_     = acc_ctrlr.HasAccess(objs[0], objs[1], req.method, task_)

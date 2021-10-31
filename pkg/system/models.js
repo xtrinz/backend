@@ -336,50 +336,50 @@ module.exports =
 	},
 	version:
 	{
-		v1 						: '/v1'
+		v1 						: 'v1'
 	},
 	resource:
 	{
 		  root					: '/'
-		, test					: '/test'
-		, user					: '/user'
-		, agent					: '/agent'		
-		, paytm					: '/paytm'
-		, store					: '/store'
-		, product				: '/product'
-		, cart					: '/cart'
-		, address				: '/address'
-		, checkout				: '/checkout'
-		, journal				: '/journal'
-		, transit				: '/transit'
-		, socket 				: '/socket'
-		, cloudinary 			: '/cloudinary'	
-		, note 					: '/note'		
+		, test					: 'test'
+		, user					: 'user'
+		, agent					: 'agent'		
+		, paytm					: 'paytm'
+		, store					: 'store'
+		, product				: 'product'
+		, cart					: 'cart'
+		, address				: 'address'
+		, checkout				: 'checkout'
+		, journal				: 'journal'
+		, transit				: 'transit'
+		, socket 				: 'socket'
+		, cloudinary 			: 'cloudinary'	
+		, note 					: 'note'		
 	},
 	verb:
 	{
 		  root					: '/'
-		, add					: '/add'
-		, view					: '/view'
-		, list					: '/list'
-		, modify				: '/modify'
-		, set 					: '/set'
-		, remove				: '/remove'
-		, insert				: '/insert'
-		, search				: '/search'
-		, payment				: '/payment'
-		, refund				: '/refund'
-		, register				: '/register'
-		, edit					: '/edit'
-		, login					: '/login'
-		, passwd				: '/passwd'
-		, profile				: '/profile'
-		, user					: '/user'
-		, store					: '/store'
-		, agent					: '/agent'
-		, admin					: '/admin'
-		, connect 				: '/connect'
-		, disconnect 			: '/disconnect'	
+		, add					: 'add'
+		, view					: 'view'
+		, list					: 'list'
+		, modify				: 'modify'
+		, set 					: 'set'
+		, remove				: 'remove'
+		, insert				: 'insert'
+		, search				: 'search'
+		, payment				: 'payment'
+		, refund				: 'refund'
+		, register				: 'register'
+		, edit					: 'edit'
+		, login					: 'login'
+		, passwd				: 'passwd'
+		, profile				: 'profile'
+		, user					: 'user'
+		, store					: 'store'
+		, agent					: 'agent'
+		, admin					: 'admin'
+		, connect 				: 'connect'
+		, disconnect 			: 'disconnect'	
 	},
 	task:
 	{
@@ -431,5 +431,10 @@ module.exports =
 		, channel				: 'channel'
 		, tags 					: 'tags'
 		, note 					: 'note'
+	},
+	segment:
+	{
+		    db 					: 'db'
+		  , route 				: 'route'
 	}
 }

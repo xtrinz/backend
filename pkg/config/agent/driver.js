@@ -1,13 +1,9 @@
-const { states, query, message, task,
-        gw, Err_, code, reason,
-        mode, command, verb}    = require('../../system/models')
-    , otp                       = require('../../infra/otp')
-    , jwt                       = require('../../infra/jwt')
-    , { ObjectID }              = require('mongodb')
-    , db                        = require('../agent/archive')
-    , filter                    = require('../../tools/filter/agent')
-    , project                   = require('../../tools/project/agent')
-    , rinse                     = require('../../tools/rinse/agent')
+const { Err_ }      = require('../../system/models')
+    , Model         = require('../../system/models')
+    , Tool          = require('../../tools/export')[Model.resource.agent]
+    , Infra         = require('../../infra/export')
+    , { ObjectID }  = require('mongodb')
+    , db            = require('../agent/archive')
 
 class Agent
 {
@@ -26,10 +22,10 @@ class Agent
         this.MobileNo      = data.MobileNo
         this.Mode          = data.Mode
         this.Otp           = ''
-        this.State         = states.None
+        this.State         = Model.states.None
         this.Status        = 
         {
-              Current      : states.OffDuty
+              Current      : Model.states.OffDuty
             , SetOn        : date
         }
         this.Name          = ''
@@ -47,51 +43,51 @@ class Agent
 
     async Create()
     {
-        let agent_ = await db.Get(this.MobileNo, query.ByMobileNo)
-        if (agent_ && ( agent_.State === states.Registered   ||
-                        agent_.State === states.ToBeApproved ))
+        let agent_ = await db.Get(this.MobileNo, Model.query.ByMobileNo)
+        if (agent_ && ( agent_.State === Model.states.Registered   ||
+                        agent_.State === Model.states.ToBeApproved ))
         {
-            const otp_sms = new otp.OneTimePasswd({
+            const otp_sms = new Infra.otp.OneTimePasswd({
                             MobileNo: agent_.MobileNo, 
-                            Body: 	  message.OnAuth })
-                , hash    = await otp_sms.Send(gw.SMS)
+                            Body: 	  Model.message.OnAuth })
+                , hash    = await otp_sms.Send(Model.gw.SMS)
 
             agent_.Otp = hash
             await db.Save(agent_)
             return
         }
-        const otp_sms = new otp.OneTimePasswd({
+        const otp_sms = new Infra.otp.OneTimePasswd({
                         MobileNo: 	this.MobileNo, 
-                        Body: 	message.OnAuth })
-            , hash    = await otp_sms.Send(gw.SMS)
+                        Body: 	Model.message.OnAuth })
+            , hash    = await otp_sms.Send(Model.gw.SMS)
 
         if(!agent_) { this._id = new ObjectID() }
         else { this._id = agent_._id }
 
         this.Otp             = hash
-        this.State           = states.New
+        this.State           = Model.states.New
         await db.Save(this)
         console.log('agent-created', { Agent: this})
     }
 
     static async Confirm(data)
     {
-        let agent_ = await db.Get(data.MobileNo, query.ByMobileNo)
+        let agent_ = await db.Get(data.MobileNo, Model.query.ByMobileNo)
         if (!agent_)
         {
             console.log('agent-not-found', { Input: data })
-            Err_(code.BAD_REQUEST, reason.AgentNotFound)
+            Err_(Model.code.BAD_REQUEST, Model.reason.AgentNotFound)
         }
 
-        const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
+        const otp_   = new Infra.otp.OneTimePasswd({MobileNo: '', Body: ''})
             , status = await otp_.Confirm(agent_.Otp, data.OTP)
         if (!status) 
         {
             console.log('wrong-otp-on-confirm-agent', { Data: data })
-            Err_(code.BAD_REQUEST, reason.OtpRejected)
+            Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
         }
 
-        const token = await jwt.Sign({ _id : agent_._id, Mode : mode.Agent })
+        const token = await Infra.jwt.Sign({ _id : agent_._id, Mode : Model.mode.Agent })
         let ret_ =
         {
             Token   : token
@@ -99,18 +95,18 @@ class Agent
           , Agent   : agent_
         }
 
-        if (agent_.State === states.Registered    ||
-            agent_.State === states.ToBeApproved  ||
-            agent_.State === states.ToBeCorrected )
+        if (agent_.State === Model.states.Registered    ||
+            agent_.State === Model.states.ToBeApproved  ||
+            agent_.State === Model.states.ToBeCorrected )
         {
-            ret_.Command = command.LoggedIn
+            ret_.Command = Model.command.LoggedIn
             console.log('agent-exists', { Agent: agent_ })
         }
         else
         {
-            agent_.State = states.MobConfirmed
+            agent_.State = Model.states.MobConfirmed
             agent_.Otp   = ''
-            ret_.Command = command.Register
+            ret_.Command = Model.command.Register
             await db.Save(agent_)
             console.log('agent-confirmed', { Agent: agent_ })
         }
@@ -121,10 +117,10 @@ class Agent
     static async Register(data)
     {
 
-        if (data.Agent.State !== states.MobConfirmed)
+        if (data.Agent.State !== Model.states.MobConfirmed)
         {
             console.log('bad-state-for-register', { Agent : data.Agent })
-            Err_(code.BAD_REQUEST, reason.MobileNoNotConfirmed)
+            Err_(Model.code.BAD_REQUEST, Model.reason.MobileNoNotConfirmed)
         }
 
         data.Agent.Name     = data.Name
@@ -134,7 +130,7 @@ class Agent
               type        : 'Point'
             , coordinates : [data.Longitude.loc(), data.Latitude.loc()]
         }
-        data.Agent.State    = states.ToBeApproved
+        data.Agent.State    = Model.states.ToBeApproved
 
         await db.Save(data.Agent)
         console.log('set-agent-for-approval', { Agent : data.Agent})
@@ -144,23 +140,23 @@ class Agent
     {
         console.log('agent-approval', { Agent: data })
     
-        let agent_ = await db.Get(data.AgentID, query.ByID)
-        if (!agent_ || agent_.State !== states.ToBeApproved)
+        let agent_ = await db.Get(data.AgentID, Model.query.ByID)
+        if (!agent_ || agent_.State !== Model.states.ToBeApproved)
         {
             let reason_
-            if(agent_) reason_ = reason.BadState
-            else       reason_ = reason.StoreNotFound
-            Err_(code.BAD_REQUEST, reason_)
+            if(agent_) reason_ = Model.reason.BadState
+            else       reason_ = Model.reason.StoreNotFound
+            Err_(Model.code.BAD_REQUEST, reason_)
         }
 
-        if(data.Action == task.Deny)
+        if(data.Action == Model.task.Deny)
         {
-            agent_.State  = states.ToBeCorrected
+            agent_.State  = Model.states.ToBeCorrected
             agent_.Text   = data.Text
         }
         else
         {
-            agent_.State  = states.Registered
+            agent_.State  = Model.states.Registered
             agent_.Text   = ''
         }
     
@@ -172,8 +168,8 @@ class Agent
     {
         let rcd = { _id : data.Agent._id }
 
-        if(data.Refeed && (data.Agent.State != states.Registered))
-            rcd.State       = states.ToBeApproved
+        if(data.Refeed && (data.Agent.State != Model.states.Registered))
+            rcd.State       = Model.states.ToBeApproved
 
         if(data.Name ) rcd.Name  = data.Name 
         if(data.Email) rcd.Email = data.Email
@@ -207,13 +203,13 @@ class Agent
     {
         console.log('list-agents', { In : in_ })
 
-        let proj = { projection:  project[verb.view][mode.Admin] }
+        let proj = { projection:  Tool.project[Model.verb.view][Model.mode.Admin] }
 
-        filter[verb.list](in_)
+        Tool.filter[Model.verb.list](in_)
 
         let data = await db.List(in_, proj)
         
-        rinse[verb.list](data)
+        Tool.rinse[Model.verb.list](data)
             
         console.log('agent-list', { Agents : data })
         return data
@@ -223,7 +219,7 @@ class Agent
     {
         console.log('view-agent', { In : in_ })
 
-        rinse[verb.view](in_)
+        Tool.rinse[Model.verb.view](in_)
         const data = 
         {
             Name      : in_.Name
