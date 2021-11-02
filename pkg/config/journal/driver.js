@@ -232,13 +232,13 @@ function Journal()
 
     this.PayOut = async function (ctxt)
     {
-      this.Data = await db.journal.GetByID(ctxt.Data.JournalID)
+      this.Data = await db.journal.GetByID(ctxt.JournalID)
       if (!this.Data) Err_(Model.code.BAD_REQUEST, Model.reason.JournalNotFound)
 
       const state =
       {
-          Current   : ctxt.Data.State
-        , Previous  : ctxt.Data.Return
+          Current   : ctxt.State
+        , Previous  : ctxt.Return
       }
       await tally.SettleAccounts(this.Data, state)
       
@@ -247,12 +247,12 @@ function Journal()
 
       this.Data.Agent =
       {
-            ID        : ctxt.Data.Agent._id
-          , Name      : ctxt.Data.Agent.Name
-          , MobileNo  : ctxt.Data.Agent.MobileNo
+            ID        : ctxt.Agent._id
+          , Name      : ctxt.Agent.Name
+          , MobileNo  : ctxt.Agent.MobileNo
       }
       this.Data.Transit.Status = Model.states.Closed
-      this.Data.Transit.State  = ctxt.Data.State
+      this.Data.Transit.State  = ctxt.State
       await db.journal.Save(this.Data)
     }
 

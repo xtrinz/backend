@@ -9,58 +9,58 @@ const { Emit }  = require('./events')
 // Notify | UpdateState | Payout | OTP
 const InitiatedByUser		= async function(ctxt)
 {
-	console.log('process-cargo-init', ctxt.Data)
+	console.log('process-cargo-init', ctxt)
 	await Emit(Model.alerts.NewOrder, ctxt)
 
 	await Task.Save(ctxt, Model.states.CargoInitiated)
-	console.log('cargo-initialised', ctxt.Data)
+	console.log('cargo-initialised', ctxt)
 }
 
 const CancelledByUser		=  async function(ctxt)
 {
-	console.log('process-cargo-cancellation', ctxt.Data)
+	console.log('process-cargo-cancellation', ctxt)
 	await Emit(Model.alerts.Cancelled, ctxt)
 
-	ctxt.Data.IsLive = false
+	ctxt.IsLive = false
 	await Task.Save(ctxt, Model.states.CargoCancelled)
 
 	await Task.PayOut(ctxt)
 
-	await Task.ResetProduct(ctxt.Data.JournalID)
+	await Task.ResetProduct(ctxt.JournalID)
 
-	console.log('cargo-cancelled', ctxt.Data)
+	console.log('cargo-cancelled', ctxt)
 }
 
 const RejectedByStore		= async function(ctxt)
 {
-	console.log('process-order-rejection', ctxt.Data)
+	console.log('process-order-rejection', ctxt)
 	await Emit(Model.alerts.Rejected, ctxt)
 
-	ctxt.Data.IsLive = false
+	ctxt.IsLive = false
 	await Task.Save(ctxt, Model.states.OrderRejected)
 
 	await Task.PayOut(ctxt)
 
-	await Task.ResetProduct(ctxt.Data.JournalID)
+	await Task.ResetProduct(ctxt.JournalID)
 
-	console.log('order-rejected', ctxt.Data)
+	console.log('order-rejected', ctxt)
 }
 
 const ResendOTP			 	= async function(ctxt)
 {
-	console.log('resend-otp', { Transit: ctxt.Data })
-	switch (ctxt.Data.State)
+	console.log('resend-otp', { Transit: ctxt })
+	switch (ctxt.State)
 	{
 		case Model.states.OrderDespatched:
 			// To Authz-User
-			ctxt.Data.User.Otp 	= await Task.SendOTP(ctxt.Data.User.MobileNo)
+			ctxt.User.Otp 	= await Task.SendOTP(ctxt.User.MobileNo)
 		break
 		case Model.states.TransitAccepted:
 			// To Authz@Shop
-			ctxt.Data.Agent.Otp = await Task.SendOTP(ctxt.Data.Agent.MobileNo)			
+			ctxt.Agent.Otp = await Task.SendOTP(ctxt.Agent.MobileNo)			
 		break
 	}
-	await db.transit.Save(ctxt.Data)	
+	await db.transit.Save(ctxt)	
 }
 
 const TimeoutByStore		= async function(ctxt)
@@ -73,66 +73,66 @@ const TimeoutByStore		= async function(ctxt)
 
 const AcceptedByStore			=  async function(ctxt)
 {
-	console.log('process-order-acceptance', ctxt.Data)
+	console.log('process-order-acceptance', ctxt)
 	await Emit(Model.alerts.Accepted, ctxt)	// To User: Emit irrespective of it turns to hold
 
 	const agent = await db.agent.NearbyAgent(
-			ctxt.Data.Store.Address.Longitude,
-			ctxt.Data.Store.Address.Latitude)
+			ctxt.Store.Address.Longitude,
+			ctxt.Store.Address.Latitude)
 	if(!agent)
 	{
-		console.log('no-agents-order-on-hold', ctxt.Data)
+		console.log('no-agents-order-on-hold', ctxt)
 		await Task.PingAdmins(Model.states.OrderIgnored, ctxt)
 		return
 	}
-	ctxt.Data.Agents = [ agent ]
+	ctxt.Agents = [ agent ]
 	await Emit(Model.alerts.NewTransit, ctxt)	// To Agents
 
 	await Task.Save(ctxt, Model.states.OrderAccepted)
-	console.log('order-accepted-by-shop', ctxt.Data)
+	console.log('order-accepted-by-shop', ctxt)
 }
 
 const ProcessedByStore			=  async function(ctxt)
 {
-	console.log('process-order-readiness', ctxt.Data)
+	console.log('process-order-readiness', ctxt)
 	await Emit(Model.alerts.Processed, ctxt)
 
 	await Task.Save(ctxt, Model.states.OrderProcessed)
-	console.log('order-processed-by-shop', ctxt.Data)
+	console.log('order-processed-by-shop', ctxt)
 }
 
 const DespatchedByStore		= async function(ctxt)
 {
-	console.log('process-order-despatchment', ctxt.Data)
-	await Task.ConfirmOTP(ctxt.Data.Agent.Otp, ctxt.Data.Store.Otp)
+	console.log('process-order-despatchment', ctxt)
+	await Task.ConfirmOTP(ctxt.Agent.Otp, ctxt.Store.Otp)
 	
 	await Emit(Model.alerts.EnRoute, ctxt)
 
-	ctxt.Data.User.Otp 	= await Task.SendOTP(ctxt.Data.User.MobileNo)
+	ctxt.User.Otp 	= await Task.SendOTP(ctxt.User.MobileNo)
 
-		delete ctxt.Data.Agent.Otp
-		delete ctxt.Data.Store.Otp
+		delete ctxt.Agent.Otp
+		delete ctxt.Store.Otp
 	await Task.Save(ctxt, Model.states.OrderDespatched)
-	console.log('order-despatched', ctxt.Data)
+	console.log('order-despatched', ctxt)
 }
 
 const IgnoredByAgent		= async function(ctxt)
 {
-	for (idx = 0; idx < ctxt.Data.Agents.length; idx++) 
+	for (idx = 0; idx < ctxt.Agents.length; idx++) 
 	{
-		if (String(ctxt.Data.Agents[idx]._id) === String(ctxt.Data.Agent._id)) 
-		{ ctxt.Data.Agents.pop(ctxt.Data.Agents[idx]); break }
+		if (String(ctxt.Agents[idx]._id) === String(ctxt.Agent._id)) 
+		{ ctxt.Agents.pop(ctxt.Agents[idx]); break }
 	}
-	if(!ctxt.Data.Agents.length)
+	if(!ctxt.Agents.length)
 	{
-		console.log('on-hold-transit-ignored', ctxt.Data)
+		console.log('on-hold-transit-ignored', ctxt)
 		await Task.PingAdmins(Model.states.TransitIgnored, ctxt)
 		return	
 	}
 	Task.SetHistory(ctxt)
-	ctxt.Data.Agent = Task.ResetAgent // Cleared temp data
-	ctxt.Data.Event = ''
-	await db.transit.Save(ctxt.Data)
+	ctxt.Agent = Task.ResetAgent // Cleared temp data
+	ctxt.Event = ''
+	await db.transit.Save(ctxt)
 }
 
 const TimeoutByAgent		= async function(ctxt)
@@ -142,82 +142,82 @@ const TimeoutByAgent		= async function(ctxt)
 
 const LockedByAdmin		= async function(ctxt)
 {
-	console.log('process-lock-by-admin', ctxt.Data)
+	console.log('process-lock-by-admin', ctxt)
 	await Emit(Model.alerts.Locked, ctxt)
 
 	let state_
-	switch(ctxt.Data.State)
+	switch(ctxt.State)
 	{
-		case Model.states.OrderIgnored	  : state_ = Model.states.OrderOnHold	  ; break
-		case Model.states.TransitIgnored	  : state_ = Model.states.TransitOnHold ; break
-		case Model.states.TransitAbandoned  : state_ = Model.states.TransitOnHold ; break
+		case Model.states.OrderIgnored	  	: state_ = Model.states.OrderOnHold	  ; break
+		case Model.states.TransitIgnored	: state_ = Model.states.TransitOnHold ; break
+		case Model.states.TransitAbandoned 	: state_ = Model.states.TransitOnHold ; break
 		// Accepted by agent then rejected and we could not filter new agent pool
 	}
 
-	ctxt.Data.Admins = []
+	ctxt.Admins = []
 	await Task.Save(ctxt, state_)
-	console.log('transit-locked-by-admin', ctxt.Data)
+	console.log('transit-locked-by-admin', ctxt)
 }
 
 const AssignedByAdmin		= async function(ctxt)
 {
-	console.log('agent-assignment-by-admin', ctxt.Data)
+	console.log('agent-assignment-by-admin', ctxt)
 
 	const agent   = new Agent()
-	const agent_  = await agent.Get(ctxt.Data.Agent.MobileNo, Model.query.ByMobileNo)
+	const agent_  = await agent.Get(ctxt.Agent.MobileNo, Model.query.ByMobileNo)
 	if(!agent_) Err_(Model.code.NOT_FOUND, Model.reason.AgentNotFound)
-	ctxt.Data.Agents = []
-	ctxt.Data.Agent  = Task.SetAgent(agent_)
+	ctxt.Agents = []
+	ctxt.Agent  = Task.SetAgent(agent_)
 
 	await Emit(Model.alerts.Assigned,   ctxt)
 	await Emit(Model.alerts.AgentReady, ctxt)
 
 	// To Authz@Shop
-	ctxt.Data.Agent.Otp = await Task.SendOTP(agent_.MobileNo)
+	ctxt.Agent.Otp = await Task.SendOTP(agent_.MobileNo)
 
 	await Task.Save(ctxt, Model.states.TransitAccepted)
-	console.log('agent-assigned-by-admin', ctxt.Data)
+	console.log('agent-assigned-by-admin', ctxt)
 }
 
 const TerminatedByAdmin		= async function(ctxt)
 {
-	console.log('process-termination-by-admin', ctxt.Data)
+	console.log('process-termination-by-admin', ctxt)
 	await Emit(Model.alerts.Terminated, ctxt)
 
-	ctxt.Data.IsLive = false
+	ctxt.IsLive = false
 	await Task.Save(ctxt, Model.states.TransitTerminated)
 
 	await Task.PayOut(ctxt) // ? Handle loops
 
-	await Task.ResetProduct(ctxt.Data.JournalID)
+	await Task.ResetProduct(ctxt.JournalID)
 
-	console.log('transit-completed', ctxt.Data)
+	console.log('transit-completed', ctxt)
 }
 
 const AcceptedByAgent		= async function(ctxt)
 {
-	console.log('process-transit-acceptace', ctxt.Data)
+	console.log('process-transit-acceptace', ctxt)
 	await Emit(Model.alerts.AgentReady, ctxt)
 
-	ctxt.Data.Agent.Otp = await Task.SendOTP(ctxt.Data.Agent.MobileNo)// To Authz@Shop
-	ctxt.Data.Agents	= []
+	ctxt.Agent.Otp = await Task.SendOTP(ctxt.Agent.MobileNo)// To Authz@Shop
+	ctxt.Agents	= []
 	
 	await Task.Save(ctxt, Model.states.TransitAccepted)
-	console.log('transit-accepted', ctxt.Data)
+	console.log('transit-accepted', ctxt)
 }
 
 const RejectedByAgent		= async function(ctxt)
 {
-	switch(ctxt.Data.State)
+	switch(ctxt.State)
 	{
 	case Model.states.TransitAccepted:
 
 		const agent = await db.agent.NearbyAgent(
-				ctxt.Data.Store.Address.Longitude,
-				ctxt.Data.Store.Address.Latitude)
+				ctxt.Store.Address.Longitude,
+				ctxt.Store.Address.Latitude)
 		if(!agent)
 		{
-			console.log('no-nearby-agents', ctxt.Data)
+			console.log('no-nearby-agents', ctxt)
 			await Task.PingAdmins(Model.states.TransitAbandoned, ctxt)
 			return
 		}
@@ -226,14 +226,14 @@ const RejectedByAgent		= async function(ctxt)
 		// Create new state, Check delay, if it had grown high assign to admin
 		// Then give admin an api to filter near by agents to that perticular store
 		await Emit(Model.alerts.NewTransit, ctxt)
-			ctxt.Data.Agents = [ agent ]
-			ctxt.Data.Agent  = Task.ResetAgent
+			ctxt.Agents = [ agent ]
+			ctxt.Agent  = Task.ResetAgent
 		await Task.Save(ctxt, Model.states.TransitRejected)
 		return
 
 	case Model.states.OrderDespatched:
 		/** TO-DO: Set 911 ops */
-		ctxt.Data.Agent = Task.ResetAgent
+		ctxt.Agent = Task.ResetAgent
 		await Task.Save(ctxt, Model.states.TransitOnDrift)
 		return
 	}
@@ -241,17 +241,17 @@ const RejectedByAgent		= async function(ctxt)
 
 const CompletedByAgent		= async function(ctxt)
 {
-	console.log('process-transit-completion', ctxt.Data)
-	await Task.ConfirmOTP(ctxt.Data.User.Otp, ctxt.Data.Agent.Otp)
+	console.log('process-transit-completion', ctxt)
+	await Task.ConfirmOTP(ctxt.User.Otp, ctxt.Agent.Otp)
 	
 	await Emit(Model.alerts.Delivered, ctxt)
-		delete ctxt.Data.Agent.Otp
-		delete ctxt.Data.User.Otp
-		ctxt.Data.IsLive = false
+		delete ctxt.Agent.Otp
+		delete ctxt.User.Otp
+		ctxt.IsLive = false
 	await Task.Save(ctxt, Model.states.TranistCompleted)
 
 	await Task.PayOut(ctxt)
-	console.log('transit-completed', ctxt.Data)
+	console.log('transit-completed', ctxt)
 }
 
 module.exports = 

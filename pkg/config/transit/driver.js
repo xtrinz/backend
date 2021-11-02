@@ -1,3 +1,4 @@
+
 const { Err_ }      = require('../../system/models')
     , { Engine }    = require('../../engine/engine')
     , Model         = require('../../system/models')
@@ -38,9 +39,9 @@ function Transit (journal)
       , Admins          : []
       , History         : []
       , Return 	        : ''                            // Machine's prev-state for fallbacks
-      , State 		    : Model.states.None                   // Machine init state
+      , State 		    : Model.states.None             // Machine init state
       , IsLive          : true                          // Is it ongoing transit
-      , Event 		    : Model.event.InitiationByUser        // Machine init Model.event
+      , Event 		    : Model.event.InitiationByUser  // Machine init Model.event
       , MaxWT           : 35                            // Maximum Waiting Time (35min)
       , OrderedAt 	    : ''                            // Millis / https://currentmillis.com/
       , ETD   		    : 0                             // Estimated Time of Delivery
@@ -55,7 +56,7 @@ function Transit (journal)
         this.Data.OrderedAt    = (new Date()).toISOString()
 
         let engine = new Engine()
-        await engine.Transition(this)
+        await engine.Transition(this.Data)
         console.log('transit-initialised', { Data: this.Data })
     }
 

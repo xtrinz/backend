@@ -93,7 +93,7 @@ const Engine 				 = function()
 
 	, this.Transition = async function (ctxt)
 	{
-		let method_ = this.GetHandler(ctxt.Data.State, ctxt.Data.Event)
+		let method_ = this.GetHandler(ctxt.State, ctxt.Event)
 		if (!method_) Err_(code.BAD_REQUEST,  reason.NoHandlerFound)
 		await method_(ctxt)
 	}

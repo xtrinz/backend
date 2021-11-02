@@ -8,44 +8,44 @@ const Emit = async function(alert, ctxt)
   let to = []
   switch(alert)
   {
-    case alerts.NewOrder        : to = [...ctxt.Data.User.SockID, ...ctxt.Data.Store.SockID];         break
-    case alerts.Cancelled       : to.push(...ctxt.Data.Store.SockID)
-                                  switch(ctxt.Data.State)
+    case alerts.NewOrder        : to = [...ctxt.User.SockID, ...ctxt.Store.SockID];         break
+    case alerts.Cancelled       : to.push(...ctxt.Store.SockID)
+                                  switch(ctxt.State)
                                   {
                                       case states.TransitAccepted : 
-                                          to.push(...ctxt.Data.Agent.SockID);                         break
+                                          to.push(...ctxt.Agent.SockID);                         break
                                       case states.OrderAccepted   : 
-                                          ctxt.Data.Agents.forEach((agent)=> {
+                                          ctxt.Agents.forEach((agent)=> {
                                             to.push(...agent.SockID) });                              break
                                   };                                                                  break
-    case alerts.Rejected        : to.push(...ctxt.Data.User.SockID)                               
-                                  switch(ctxt.Data.State)
+    case alerts.Rejected        : to.push(...ctxt.User.SockID)                               
+                                  switch(ctxt.State)
                                   {
                                       case states.TransitAccepted : 
-                                          to.push(...ctxt.Data.Agent.SockID);                         break
+                                          to.push(...ctxt.Agent.SockID);                         break
                                       case states.OrderAccepted   : 
-                                          ctxt.Data.Agents.forEach((agent)=> { 
+                                          ctxt.Agents.forEach((agent)=> { 
                                           to.push(...agent.SockID) });                                break
                                   };                                                                  break
-    case alerts.NoAgents        : ctxt.Data.Admins.forEach((admin)=> { to.push(...admin.SockID) });   break
+    case alerts.NoAgents        : ctxt.Admins.forEach((admin)=> { to.push(...admin.SockID) });   break
     case alerts.Locked          :
-                                  ctxt.Data.Admins.forEach((admin) =>
+                                  ctxt.Admins.forEach((admin) =>
                                   { 
-                                      if (String(admin._id) !== String(ctxt.Data.Admin._id)) 
+                                      if (String(admin._id) !== String(ctxt.Admin._id)) 
                                       to.push(...admin.SockID)
                                   });                                                                 break
-    case alerts.Terminated      : to.push(...ctxt.Data.User.SockID);
-                                  to.push(...ctxt.Data.Store.SockID); to.push(...ctxt.Data.Agent.SockID)
-                                  ctxt.Data.Agents.forEach((agent)=> { to.push(...agent.SockID) });   break // If any
-    case alerts.Assigned        : to.push(...ctxt.Data.Agent.SockID);                                 break
-    case alerts.Accepted        : to = [...ctxt.Data.User.SockID, ...ctxt.Data.Store.SockID];         break
-    case alerts.Processed       : to = [...ctxt.Data.User.SockID, ...ctxt.Data.Agent.SockID];         break
-    case alerts.NewTransit      : ctxt.Data.Agents.forEach((agent)=>{ to.push(...agent.SockID)});     break
-    case alerts.EnRoute         : to = [...ctxt.Data.Agent.SockID, ...ctxt.Data.User.SockID];         break
-    case alerts.AgentReady      : to = [...ctxt.Data.Store.SockID, ...ctxt.Data.User.SockID]
-                                      ctxt.Data.Agents.forEach((agent)=>
-                                  { if (String(agent._id) !== String(ctxt.Data.Agent._id)) to.push(...agent.SockID)}); break
-    case alerts.Delivered       : to = [...ctxt.Data.Store.SockID, ...ctxt.Data.User.SockID];         break      
+    case alerts.Terminated      : to.push(...ctxt.User.SockID);
+                                  to.push(...ctxt.Store.SockID); to.push(...ctxt.Agent.SockID)
+                                  ctxt.Agents.forEach((agent)=> { to.push(...agent.SockID) });   break // If any
+    case alerts.Assigned        : to.push(...ctxt.Agent.SockID);                                 break
+    case alerts.Accepted        : to = [...ctxt.User.SockID, ...ctxt.Store.SockID];         break
+    case alerts.Processed       : to = [...ctxt.User.SockID, ...ctxt.Agent.SockID];         break
+    case alerts.NewTransit      : ctxt.Agents.forEach((agent)=>{ to.push(...agent.SockID)});     break
+    case alerts.EnRoute         : to = [...ctxt.Agent.SockID, ...ctxt.User.SockID];         break
+    case alerts.AgentReady      : to = [...ctxt.Store.SockID, ...ctxt.User.SockID]
+                                      ctxt.Agents.forEach((agent)=>
+                                  { if (String(agent._id) !== String(ctxt.Agent._id)) to.push(...agent.SockID)}); break
+    case alerts.Delivered       : to = [...ctxt.Store.SockID, ...ctxt.User.SockID];         break      
   }
 
   const Ind =
@@ -54,7 +54,7 @@ const Emit = async function(alert, ctxt)
     , Msg : 
     {
         Type: alert
-      , Data: { TransitID : ctxt.Data._id }
+      , Data: { TransitID : ctxt._id }
     }
   }
 

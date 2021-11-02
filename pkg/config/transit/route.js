@@ -11,15 +11,14 @@ router.post('/user', async (req, res, next) =>
 {
     try
     {
-        let trans  = new Transit()
-          , query_ =
+        let query_ =
           {
               'User._id' : ObjectId(req.body.User._id),
               _id  : ObjectId(req.body.TransitID)
           }
           , text_ , event_
-        trans.Data = await db.Get(query_, Model.query.Custom)
-        if (!trans.Data) Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
+          , trans_ = await db.Get(query_, Model.query.Custom)
+        if (!trans_) Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
 
         switch(req.body.Task)
         {
@@ -29,9 +28,9 @@ router.post('/user', async (req, res, next) =>
             break
         }
 
-        trans.Data.Event = event_
-        let engine       = new Engine()
-        await engine.Transition(trans)
+        trans_.Event = event_
+        let engine   = new Engine()
+        await engine.Transition(trans_)
 
         return res.status(Model.code.OK).json({
             Status  : Model.status.Success,
@@ -46,9 +45,8 @@ router.post('/store', async (req, res, next) =>
     try
     {
         const query_ = { _id   : ObjectId(req.body.TransitID) }
-        let trans  = new Transit()
-        trans.Data = await db.Get(query_, Model.query.Custom)
-        if (!trans.Data) Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
+        let trans_   = await db.Get(query_, Model.query.Custom)
+        if (!trans_) Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
 
         let event_, text_
         switch(req.body.Task)
@@ -69,15 +67,15 @@ router.post('/store', async (req, res, next) =>
             break            
 
           case Model.task.Despatch:
-            trans.Data.Store.Otp = req.body.OTP
+            trans_.Store.Otp = req.body.OTP
             event_ = Model.event.DespatchmentByStore
             text_  = Model.alerts.EnRoute
             break
         }
 
-        trans.Data.Event = event_
-        let engine       = new Engine()
-        await engine.Transition(trans)
+        trans_.Event = event_
+        let engine   = new Engine()
+        await engine.Transition(trans_)
 
         return res.status(Model.code.OK).json({
             Status  : Model.status.Success,
@@ -94,6 +92,7 @@ router.post('/agent', async (req, res, next) =>
         let trans  = new Transit()
         await trans.AuthzAgent(req.body.TransitID, req.body.Agent._id)
 
+        let trans_ = trans.Data
         let event_, text_
         switch(req.body.Task)
         {
@@ -108,13 +107,13 @@ router.post('/agent', async (req, res, next) =>
             break
 
           case Model.task.Ignore:
-            trans.Data.Agent._id = req.body.User._id
+            trans_.Agent._id = req.body.User._id
             event_ = Model.event.IgnoranceByAgent
             text_  = Model.alerts.Ignored
             break
 
           case Model.task.Accept:
-            trans.Data.Agent =
+            trans_.Agent =
             {
                 _id      : req.body.Agent._id
               , SockID   : req.body.Agent.SockID
@@ -126,14 +125,14 @@ router.post('/agent', async (req, res, next) =>
             break
 
           case Model.task.Complete:
-            trans.Data.Agent.Otp = req.body.OTP
+            trans_.Agent.Otp = req.body.OTP
             event_ = Model.event.CompletionByAgent
             text_  = Model.alerts.Delivered
             break            
         }
-        trans.Data.Event = event_
+        trans_.Event = event_
         let engine       = new Engine()
-        await engine.Transition(trans)
+        await engine.Transition(trans_)
 
         return res.status(Model.code.OK).json({
             Status  : Model.status.Success,
@@ -149,15 +148,14 @@ router.post('/admin', async (req, res, next) =>
     {
         
         const query_ = { _id   : ObjectId(req.body.TransitID) }
-        let trans  = new Transit()
-        trans.Data = await db.Get(query_, Model.query.Custom)
-        if (!trans.Data) Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
+            , trans_ = await db.Get(query_, Model.query.Custom)
+        if (!trans_) Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
         
         let event_, text_
         switch(req.body.Task)
         {
           case Model.task.Accept:
-            trans.Data.Admin =
+            trans_.Admin =
             {
                 _id      : req.body.User._id
               , SockID   : req.body.User.SockID
@@ -169,7 +167,7 @@ router.post('/admin', async (req, res, next) =>
             break 
           
           case Model.task.Assign:
-            trans.Data.Agent =
+            trans_.Agent =
             {
                 MobileNo : req.body.MobileNo
             }
@@ -182,9 +180,9 @@ router.post('/admin', async (req, res, next) =>
             text_  = Model.alerts.Terminated
             break          
         }
-        trans.Data.Event = event_
+        trans_.Event = event_
         let engine       = new Engine()
-        await engine.Transition(trans)
+        await engine.Transition(trans_)
 
         return res.status(Model.code.OK).json({
             Status  : Model.status.Success,

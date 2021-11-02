@@ -6,14 +6,14 @@ const Set = async function(ctxt)
 {
 	let rcd =
 	{
-		  Index		: ctxt.Data.History.length + 1
+		  Index		: ctxt.History.length + 1
 		, Time		: Date(Date.now()).toString()
-		, Event 	: ctxt.Data.Event
+		, Event 	: ctxt.Event
 		, State 	:
 		{
-		  Start 	: ctxt.Data.Return
-		, End   	: ctxt.Data.State
-		, HasChange : (ctxt.Data.Return === ctxt.Data.State)? false : true
+		  Start 	: ctxt.Return
+		, End   	: ctxt.State
+		, HasChange : (ctxt.Return === ctxt.State)? false : true
 		}
 		, Subject	:
 		{
@@ -22,13 +22,13 @@ const Set = async function(ctxt)
 			, Name  : ''
 		}
 	}
-	switch (ctxt.Data.Event)
+	switch (ctxt.Event)
 	{
 		case Model.event.InitiationByUser:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Paytm
-				, UID	: ctxt.Data.JournalID
+				, UID	: ctxt.JournalID
 				, Name  : 'Journal'
 			}
 			break
@@ -36,16 +36,16 @@ const Set = async function(ctxt)
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.User
-				, UID	: ctxt.Data.User._id
-				, Name  : ctxt.Data.User.Name
+				, UID	: ctxt.User._id
+				, Name  : ctxt.User.Name
 			}
 			break
 		case Model.event.RejectionByStore:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Store
-				, UID	: ctxt.Data.Store._id
-				, Name  : ctxt.Data.Store.Name
+				, UID	: ctxt.Store._id
+				, Name  : ctxt.Store.Name
 			}
 			break
 		case Model.event.TimeoutByStore:
@@ -60,64 +60,64 @@ const Set = async function(ctxt)
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Store
-				, UID	: ctxt.Data.Store._id
-				, Name  : ctxt.Data.Store.Name
+				, UID	: ctxt.Store._id
+				, Name  : ctxt.Store.Name
 			}
 			break
 		case Model.event.ProcessByStore:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Store
-				, UID	: ctxt.Data.Store._id
-				, Name  : ctxt.Data.Store.Name
+				, UID	: ctxt.Store._id
+				, Name  : ctxt.Store.Name
 			}
 			break			
 		case Model.event.DespatchmentByStore:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Store
-				, UID	: ctxt.Data.Store._id
-				, Name  : ctxt.Data.Store.Name
+				, UID	: ctxt.Store._id
+				, Name  : ctxt.Store.Name
 			}
 			break
 		case Model.event.IgnoranceByAgent:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Agent
-				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent.Name
+				, UID	: ctxt.Agent._id
+				, Name  : ctxt.Agent.Name
 			}
 			break
 		case Model.event.LockByAdmin:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Admin
-				, UID	: ctxt.Data.Admin._id
-				, Name  : ctxt.Data.Admin.Name
+				, UID	: ctxt.Admin._id
+				, Name  : ctxt.Admin.Name
 			}
 			break
 		case Model.event.AssignmentByAdmin:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Admin
-				, UID	: ctxt.Data.Admin._id
-				, Name  : ctxt.Data.Admin.Name
+				, UID	: ctxt.Admin._id
+				, Name  : ctxt.Admin.Name
 			}
 			break
 		case Model.event.TerminationByAdmin:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Admin
-				, UID	: ctxt.Data.Admin._id
-				, Name  : ctxt.Data.Admin.Name
+				, UID	: ctxt.Admin._id
+				, Name  : ctxt.Admin.Name
 			}
 			break
 		case Model.event.ScheduleByAdmin:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Admin
-				, UID	: ctxt.Data.Admin._id
-				, Name  : ctxt.Data.Admin.Name
+				, UID	: ctxt.Admin._id
+				, Name  : ctxt.Admin.Name
 			}
 			break
 		case Model.event.TimeoutByAgent:
@@ -132,44 +132,44 @@ const Set = async function(ctxt)
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Admin
-				, UID	: ctxt.Data.Admin._id
-				, Name  : ctxt.Data.Admin.Name
+				, UID	: ctxt.Admin._id
+				, Name  : ctxt.Admin.Name
 			}
 			break
 		case Model.event.AcceptanceByAgent:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Agent
-				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent.Name
+				, UID	: ctxt.Agent._id
+				, Name  : ctxt.Agent.Name
 			}
 			break
 		case Model.event.RejectionByAgent:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Agent
-				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent.Name
+				, UID	: ctxt.Agent._id
+				, Name  : ctxt.Agent.Name
 			}
 			break
 		case Model.event.CompletionByAgent:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Agent
-				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent.Name
+				, UID	: ctxt.Agent._id
+				, Name  : ctxt.Agent.Name
 			}
 			break
 		case Model.event.ResendOTP:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Agent
-				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent.Name
+				, UID	: ctxt.Agent._id
+				, Name  : ctxt.Agent.Name
 			}
 			break
 	}
-	ctxt.Data.History.push(rcd)
+	ctxt.History.push(rcd)
 }
 
 module.exports = { Set }

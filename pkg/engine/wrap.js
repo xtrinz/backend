@@ -34,21 +34,21 @@ const SendOTP 	 = async function(mobile_no)
 
 const Save = async function(ctxt, state_)
 {
-	ctxt.Data.Return = ctxt.Data.State
-	ctxt.Data.State  = state_
+	ctxt.Return = ctxt.State
+	ctxt.State  = state_
 	history.Set(ctxt)
 	// Clear Event Only After History Update
-	ctxt.Data.Event  = ''
+	ctxt.Event  = ''
 
 	let upsert = (state_ === Model.states.CargoInitiated)
 
-	await db.transit.Save(ctxt.Data, upsert)
+	await db.transit.Save(ctxt, upsert)
 
 	if(!( state_ === Model.states.CargoCancelled 	  || // For these Model.states PayOut
 		  state_ === Model.states.OrderRejected 	  || // handle updates DB
 		  state_ === Model.states.TransitTerminated ||
 		  state_ === Model.states.TranistCompleted  ))
-	await db.journal.Save({ _id: ctxt.Data.JournalID, 'Transit.State': state_ })
+	await db.journal.Save({ _id: ctxt.JournalID, 'Transit.State': state_ })
 }
 
 const PingAdmins = async function(st, ctxt)
@@ -56,9 +56,9 @@ const PingAdmins = async function(st, ctxt)
     console.log('ping-admins', {State: st, Ctxt: ctxt})
 
 	const admins  = await db.user.NearbyAdmins(
-          ctxt.Data.Store.Address.Longitude
-        , ctxt.Data.Store.Address.Latitude)
-    ctxt.Data.Admins = admins
+          ctxt.Store.Address.Longitude
+        , ctxt.Store.Address.Latitude)
+    ctxt.Admins = admins
     await Emit(alerts.NoAgents, ctxt)
     await Save(ctxt, st)
 }
