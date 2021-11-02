@@ -60,7 +60,7 @@ const NearbyAgent = async function(ln, lt)
                     , $maxDistance : maxDist }
             }
             , 'Status.Current'     : Model.states.OnDuty
-            , 'Status.SetOn.Day'   : date_.getDate()
+            , 'Status.SetOn.Day'   : date_.getDay()
             , 'Status.SetOn.Month' : date_.getMonth()
             , 'Status.SetOn.Year'  : date_.getFullYear()
         }
