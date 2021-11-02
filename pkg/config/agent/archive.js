@@ -1,6 +1,7 @@
 const { agents }            = require('../../system/database')
-    , { query, mode, dbset,
+    , { query, dbset,
         Err_, code, reason} = require('../../system/models')
+    , Model                 = require('../../system/models')
     , { ObjectId }          = require('mongodb')
 
 const Save       = async function(data)
@@ -38,13 +39,14 @@ const Get = async function(param, qType)
     return agent
 }
 
-const NearbyAgents = async function(ln, lt)
+const NearbyAgent = async function(ln, lt)
 {
     ln = ln.loc()
-    lt = lt.loc()    
+    lt = lt.loc()
+    let date_ = new Date()
+
     console.log('list-nearby-live-agents', {Location: [ln, lt]} )
-    const cnt     = 10
-        , maxDist = 5000
+    const maxDist = 5000
         , proj    = { projection: { _id: 1, Name: 1, SockID: 1 } }
         , query   =
         { 
@@ -57,19 +59,19 @@ const NearbyAgents = async function(ln, lt)
                     }
                     , $maxDistance : maxDist }
             }
-            , IsLive  : true
-            , Mode    : mode.Agent
+            , 'Status.Current'     : Model.states.OnDuty
+            , 'Status.SetOn.Day'   : date_.getDate()
+            , 'Status.SetOn.Month' : date_.getMonth()
+            , 'Status.SetOn.Year'  : date_.getFullYear()
         }
-    const agents_ = await agents.find(query, proj)
-                              .limit(cnt)
-                              .toArray()
-    if (!agents_.length)
+    const agent_ = await agents.findOne(query, proj)
+    if (!agent_)
     {
-        console.log('no-agents-found', { Location: [ln, lt]})
+        console.log('no-agent-found', { Location: [ln, lt]})
         return
     }
-    console.log('agents-found', { Agents: agents_})
-    return agents_
+    console.log('agent-found', { Agent: agent_})
+    return agent_
 }
 
 const List = async function(data, proj)
@@ -112,9 +114,9 @@ const GetAgentSockID = async function(agent_id)
 
 module.exports =
 {
-      Save                : Save
-    , Get                 : Get
-    , List                : List
-    , NearbyAgents        : NearbyAgents
-    , GetAgentSockID       : GetAgentSockID
+      Save               : Save
+    , Get                : Get
+    , List               : List
+    , NearbyAgent        : NearbyAgent
+    , GetAgentSockID     : GetAgentSockID
 }

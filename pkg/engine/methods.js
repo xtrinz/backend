@@ -81,16 +81,16 @@ const AcceptedByStore			=  async function(ctxt)
 	console.log('process-order-acceptance', ctxt.Data)
 	await Emit(alerts.Accepted, ctxt)	// To User: Emit irrespective of it turns to hold
 
-	const agents = await db.agent.NearbyAgents(
+	const agent = await db.agent.NearbyAgent(
 			ctxt.Data.Store.Address.Longitude,
 			ctxt.Data.Store.Address.Latitude)
-	if(!agents)
+	if(!agent)
 	{
 		console.log('no-agents-order-on-hold', ctxt.Data)
 		await PingAdmins(states.OrderIgnored, ctxt)
 		return
 	}
-	ctxt.Data.Agents = agents
+	ctxt.Data.Agents = [ agent ]
 	await Emit(alerts.NewTransit, ctxt)	// To Agents
 
 	await Save(ctxt, states.OrderAccepted)
@@ -208,10 +208,10 @@ const RejectedByAgent		= async function(ctxt)
 	{
 	case states.TransitAccepted:
 
-		const agents = await db.agent.NearbyAgents(
+		const agent = await db.agent.NearbyAgent(
 				ctxt.Data.Store.Address.Longitude,
 				ctxt.Data.Store.Address.Latitude)
-		if(!agents)
+		if(!agent)
 		{
 			console.log('no-nearby-agents', ctxt.Data)
 			await PingAdmins(states.TransitAbandoned, ctxt)
@@ -222,7 +222,7 @@ const RejectedByAgent		= async function(ctxt)
 		// Create new state, Check delay, if it had grown high assign to admin
 		// Then give admin an api to filter near by agents to that perticular store
 		await Emit(alerts.NewTransit, ctxt)
-			ctxt.Data.Agents = agents
+			ctxt.Data.Agents = [ agent ]
 			ctxt.Data.Agent  = ResetAgent
 		await Save(ctxt, states.TransitRejected)
 		return

@@ -8,7 +8,7 @@ module.exports =
         [mode.Admin]: function(data, in_)
         {
             let query_ = 
-            { '$or': // TODO $lookup cross transit status
+            { '$or':
               [
                   {  'Admin.ID' : in_._id }
                 , { 'Admins.ID' : in_._id }
