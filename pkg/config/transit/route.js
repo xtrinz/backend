@@ -1,10 +1,11 @@
-const { ObjectId } 				            = require('mongodb')
-    , router                          = require('express').Router()
-    , { Transit }                     = require('../transit/driver')
-    , { Engine }                      = require('../../engine/engine')
-    , { alerts, event, query, task,
-        Err_, code, status, reason }  = require('../../system/models')
-    , db                              = require('../transit/archive')
+
+const { ObjectId } = require('mongodb')
+    , router       = require('express').Router()
+    , { Transit }  = require('../transit/driver')
+    , { Engine }   = require('../../engine/engine')
+    , { Err_  }    = require('../../system/models')
+    , Model        = require('../../system/models')
+    , db           = require('../transit/archive')
 
 router.post('/user', async (req, res, next) =>
 {
@@ -17,14 +18,14 @@ router.post('/user', async (req, res, next) =>
               _id  : ObjectId(req.body.TransitID)
           }
           , text_ , event_
-        trans.Data = await db.Get(query_, query.Custom)
-        if (!trans.Data) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+        trans.Data = await db.Get(query_, Model.query.Custom)
+        if (!trans.Data) Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
 
         switch(req.body.Task)
         {
-          case task.Cancel:
-            event_ = event.CancellationByUser
-            text_  = alerts.Cancelled
+          case Model.task.Cancel:
+            event_ = Model.event.CancellationByUser
+            text_  = Model.alerts.Cancelled
             break
         }
 
@@ -32,8 +33,8 @@ router.post('/user', async (req, res, next) =>
         let engine       = new Engine()
         await engine.Transition(trans)
 
-        return res.status(code.OK).json({
-            Status  : status.Success,
+        return res.status(Model.code.OK).json({
+            Status  : Model.status.Success,
             Text    : text_,
             Data    : {}
         })
@@ -46,31 +47,31 @@ router.post('/store', async (req, res, next) =>
     {
         const query_ = { _id   : ObjectId(req.body.TransitID) }
         let trans  = new Transit()
-        trans.Data = await db.Get(query_, query.Custom)
-        if (!trans.Data) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+        trans.Data = await db.Get(query_, Model.query.Custom)
+        if (!trans.Data) Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
 
         let event_, text_
         switch(req.body.Task)
         {
-          case task.Reject:
-            event_ = event.RejectionByStore
-            text_  = alerts.Rejected
+          case Model.task.Reject:
+            event_ = Model.event.RejectionByStore
+            text_  = Model.alerts.Rejected
             break
 
-          case task.Accept:
-            event_ = event.AcceptanceByStore
-            text_  = alerts.Accepted          
+          case Model.task.Accept:
+            event_ = Model.event.AcceptanceByStore
+            text_  = Model.alerts.Accepted          
             break
 
-          case task.Processed:
-            event_ = event.ProcessByStore
-            text_  = alerts.Processed          
+          case Model.task.Processed:
+            event_ = Model.event.ProcessByStore
+            text_  = Model.alerts.Processed          
             break            
 
-          case task.Despatch:
+          case Model.task.Despatch:
             trans.Data.Store.Otp = req.body.OTP
-            event_ = event.DespatchmentByStore
-            text_  = alerts.EnRoute
+            event_ = Model.event.DespatchmentByStore
+            text_  = Model.alerts.EnRoute
             break
         }
 
@@ -78,8 +79,8 @@ router.post('/store', async (req, res, next) =>
         let engine       = new Engine()
         await engine.Transition(trans)
 
-        return res.status(code.OK).json({
-            Status  : status.Success,
+        return res.status(Model.code.OK).json({
+            Status  : Model.status.Success,
             Text    : text_,
             Data    : {}
         })
@@ -96,23 +97,23 @@ router.post('/agent', async (req, res, next) =>
         let event_, text_
         switch(req.body.Task)
         {
-          case task.ResendOTP:
-            event_ = event.ResendOTP
-            text_  = alerts.OTPSend
+          case Model.task.ResendOTP:
+            event_ = Model.event.ResendOTP
+            text_  = Model.alerts.OTPSend
             break
 
-          case task.Reject:
-            event_ = event.RejectionByAgent
-            text_  = alerts.Rejected
+          case Model.task.Reject:
+            event_ = Model.event.RejectionByAgent
+            text_  = Model.alerts.Rejected
             break
 
-          case task.Ignore:
+          case Model.task.Ignore:
             trans.Data.Agent._id = req.body.User._id
-            event_ = event.IgnoranceByAgent
-            text_  = alerts.Ignored
+            event_ = Model.event.IgnoranceByAgent
+            text_  = Model.alerts.Ignored
             break
 
-          case task.Accept:
+          case Model.task.Accept:
             trans.Data.Agent =
             {
                 _id      : req.body.Agent._id
@@ -120,22 +121,22 @@ router.post('/agent', async (req, res, next) =>
               , Name     : req.body.Agent.Name
               , MobileNo : req.body.Agent.MobileNo
             }
-            event_ = event.AcceptanceByAgent
-            text_  = alerts.Accepted          
+            event_ = Model.event.AcceptanceByAgent
+            text_  = Model.alerts.Accepted          
             break
 
-          case task.Complete:
+          case Model.task.Complete:
             trans.Data.Agent.Otp = req.body.OTP
-            event_ = event.CompletionByAgent
-            text_  = alerts.Delivered
+            event_ = Model.event.CompletionByAgent
+            text_  = Model.alerts.Delivered
             break            
         }
         trans.Data.Event = event_
         let engine       = new Engine()
         await engine.Transition(trans)
 
-        return res.status(code.OK).json({
-            Status  : status.Success,
+        return res.status(Model.code.OK).json({
+            Status  : Model.status.Success,
             Text    : text_,
             Data    : {}
         })
@@ -149,13 +150,13 @@ router.post('/admin', async (req, res, next) =>
         
         const query_ = { _id   : ObjectId(req.body.TransitID) }
         let trans  = new Transit()
-        trans.Data = await db.Get(query_, query.Custom)
-        if (!trans.Data) Err_(code.BAD_REQUEST, reason.TransitNotFound)
+        trans.Data = await db.Get(query_, Model.query.Custom)
+        if (!trans.Data) Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
         
         let event_, text_
         switch(req.body.Task)
         {
-          case task.Accept:
+          case Model.task.Accept:
             trans.Data.Admin =
             {
                 _id      : req.body.User._id
@@ -163,30 +164,30 @@ router.post('/admin', async (req, res, next) =>
               , Name     : req.body.User.Name
               , MobileNo : req.body.User.MobileNo
             }
-            event_ = event.LockByAdmin
-            text_  = alerts.Locked          
+            event_ = Model.event.LockByAdmin
+            text_  = Model.alerts.Locked          
             break 
           
-          case task.Assign:
+          case Model.task.Assign:
             trans.Data.Agent =
             {
                 MobileNo : req.body.MobileNo
             }
-            event_ = event.AssignmentByAdmin
-            text_  = alerts.Assigned
+            event_ = Model.event.AssignmentByAdmin
+            text_  = Model.alerts.Assigned
             break
 
-          case task.Termiate:
-            event_ = event.TerminationByAdmin
-            text_  = alerts.Terminated
+          case Model.task.Terminate:
+            event_ = Model.event.TerminationByAdmin
+            text_  = Model.alerts.Terminated
             break          
         }
         trans.Data.Event = event_
         let engine       = new Engine()
         await engine.Transition(trans)
 
-        return res.status(code.OK).json({
-            Status  : status.Success,
+        return res.status(Model.code.OK).json({
+            Status  : Model.status.Success,
             Text    : text_,
             Data    : {}
         })

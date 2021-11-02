@@ -1,179 +1,14 @@
-const   otp 				 	 = require('../infra/otp')
-	  , { Err_ , code, reason, mode, states, query,
-		  message, gw, event }  = require('../system/models')
-	  , { Journal } 		 	 = require('../config/journal/driver')
-	  , db 						 = 
-	  {
-			  transit 			 : require('../config/transit/archive')
-			, user 				 : require('../config/user/archive')
-			, journal 			 : require('../config/journal/archive')
-			, product 			 : require('../config/product/archive')
-	  }
-	  , { Emit }				= require('./events')
+
+
+const   otp 	    = require('../infra/otp')
+	  , { Err_ }    = require('../system/models')
+	  , Model	    = require('../system/models')
+	  , { Journal } = require('../config/journal/driver')
+	  , history 	= require('./history')
+	  , db 			= require('../config/exports')[Model.segment.db]
+	  , { Emit }	= require('./events')
 
 // Notify | UpdateState | Payout | OTP
-
-const SetHistory = async function(ctxt)
-{
-	let rcd =
-	{
-		  Index		: ctxt.Data.History.length + 1
-		, Time		: Date(Date.now()).toString()
-		, Event 	: ctxt.Data.Event
-		, State 	:
-		{
-		  Start 	: ctxt.Data.Return
-		, End   	: ctxt.Data.State
-		, HasChange : (ctxt.Data.Return === ctxt.Data.State)? false : true
-		}
-		, Subject	:
-		{
-			  Type 	: ''
-			, UID	: ''
-			, Name  : ''
-		}
-	}
-	switch (ctxt.Data.Event)
-	{
-		case event.InitiationByUser:
-			rcd.Subject =
-			{
-				  Type 	: mode.Paytm
-				, UID	: ctxt.Data.JournalID
-				, Name  : 'Journal'
-			}
-			break
-		case event.CancellationByUser:
-			rcd.Subject =
-			{
-				  Type 	: mode.User
-				, UID	: ctxt.Data.User._id
-				, Name  : ctxt.Data.User.Name
-			}
-			break
-		case event.RejectionByStore:
-			rcd.Subject =
-			{
-				  Type 	: mode.Store
-				, UID	: ctxt.Data.Store._id
-				, Name  : ctxt.Data.Store.Name
-			}
-			break
-		case event.TimeoutByStore:
-			rcd.Subject =
-			{
-				  Type 	: mode.System
-				, UID	: ''
-				, Name  : mode.System
-			}
-			break
-		case event.AcceptanceByStore:
-			rcd.Subject =
-			{
-				  Type 	: mode.Store
-				, UID	: ctxt.Data.Store._id
-				, Name  : ctxt.Data.Store.Name
-			}
-			break
-		case event.DespatchmentByStore:
-			rcd.Subject =
-			{
-				  Type 	: mode.Store
-				, UID	: ctxt.Data.Store._id
-				, Name  : ctxt.Data.Store.Name
-			}
-			break
-		case event.IgnoranceByAgent:
-			rcd.Subject =
-			{
-				  Type 	: mode.Agent
-				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent.Name
-			}
-			break
-		case event.LockByAdmin:
-			rcd.Subject =
-			{
-				  Type 	: mode.Admin
-				, UID	: ctxt.Data.Admin._id
-				, Name  : ctxt.Data.Admin.Name
-			}
-			break
-		case event.AssignmentByAdmin:
-			rcd.Subject =
-			{
-				  Type 	: mode.Admin
-				, UID	: ctxt.Data.Admin._id
-				, Name  : ctxt.Data.Admin.Name
-			}
-			break
-		case event.TerminationByAdmin:
-			rcd.Subject =
-			{
-				  Type 	: mode.Admin
-				, UID	: ctxt.Data.Admin._id
-				, Name  : ctxt.Data.Admin.Name
-			}
-			break
-		case event.ScheduleByAdmin:
-			rcd.Subject =
-			{
-				  Type 	: mode.Admin
-				, UID	: ctxt.Data.Admin._id
-				, Name  : ctxt.Data.Admin.Name
-			}
-			break
-		case event.TimeoutByAgent:
-			rcd.Subject =
-			{
-				  Type 	: mode.System
-				, UID	: ''
-				, Name  : mode.System
-			}
-			break
-		case event.RefeedByAdmin:
-			rcd.Subject =
-			{
-				  Type 	: mode.Admin
-				, UID	: ctxt.Data.Admin._id
-				, Name  : ctxt.Data.Admin.Name
-			}
-			break
-		case event.AcceptanceByAgent:
-			rcd.Subject =
-			{
-				  Type 	: mode.Agent
-				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent.Name
-			}
-			break
-		case event.RejectionByAgent:
-			rcd.Subject =
-			{
-				  Type 	: mode.Agent
-				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent.Name
-			}
-			break
-		case event.CompletionByAgent:
-			rcd.Subject =
-			{
-				  Type 	: mode.Agent
-				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent.Name
-			}
-			break
-		case event.ResendOTP:
-			rcd.Subject =
-			{
-				  Type 	: mode.Agent
-				, UID	: ctxt.Data.Agent._id
-				, Name  : ctxt.Data.Agent.Name
-			}
-			break
-	}
-	ctxt.Data.History.push(rcd)
-}
 
 const PayOut	 = async function(ctxt)
 {
@@ -185,15 +20,15 @@ const ConfirmOTP = async function(o1, o2)
 {
 	const otp_ 	  = new otp.OneTimePasswd({MobileNo: '', Body: ''})
 		, status_ = await otp_.Confirm(o1, o2)
-	if  (!status_)  Err_(code.BAD_REQUEST, reason.OtpRejected)
+	if  (!status_)  Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
 }
 
 const SendOTP 	 = async function(mobile_no)
 {
 	let otp_sms = new otp.OneTimePasswd(
 		{ MobileNo : 	mobile_no, 
-		  Body  : 	message.ForPkg })
-		, hash 		= await otp_sms.Send(gw.SMS)
+		  Body  : 	Model.message.ForPkg })
+		, hash 		= await otp_sms.Send(Model.gw.SMS)
 	return hash
 }
 
@@ -201,18 +36,18 @@ const Save = async function(ctxt, state_)
 {
 	ctxt.Data.Return = ctxt.Data.State
 	ctxt.Data.State  = state_
-	SetHistory(ctxt)
+	history.Set(ctxt)
 	// Clear Event Only After History Update
 	ctxt.Data.Event  = ''
 
-	let upsert = (state_ === states.CargoInitiated)
+	let upsert = (state_ === Model.states.CargoInitiated)
 
 	await db.transit.Save(ctxt.Data, upsert)
 
-	if(!( state_ === states.CargoCancelled 	  || // For these states PayOut
-		  state_ === states.OrderRejected 	  || // handle updates DB
-		  state_ === states.TransitTerminated ||
-		  state_ === states.TranistCompleted  ))
+	if(!( state_ === Model.states.CargoCancelled 	  || // For these Model.states PayOut
+		  state_ === Model.states.OrderRejected 	  || // handle updates DB
+		  state_ === Model.states.TransitTerminated ||
+		  state_ === Model.states.TranistCompleted  ))
 	await db.journal.Save({ _id: ctxt.Data.JournalID, 'Transit.State': state_ })
 }
 
@@ -241,7 +76,7 @@ const SetAgent   = function(agent_)
 const ResetProduct = async function(Journal_id)
 {
 	console.log('reset-product-count-on-order-diffusion', { JournalID: Journal_id })
-	let journal_ = await db.journal.Get(Journal_id, query.ByID)
+	let journal_ = await db.journal.Get(Journal_id, Model.query.ByID)
 	await db.product.IncProdCount(journal_.Order.Products)
 }
 
@@ -254,6 +89,5 @@ module.exports =
     , PingAdmins   : PingAdmins
     , ResetAgent   : ResetAgent
 	, SetAgent 	   : SetAgent
-	, SetHistory   : SetHistory
 	, ResetProduct : ResetProduct
 }

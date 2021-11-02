@@ -406,7 +406,7 @@ module.exports =
 		, Reject 				: 'Reject'
 		, Accept 				: 'Accept'
 		, Assign 				: 'Assign'
-		, Termiate 				: 'Terminate'
+		, Terminate 			: 'Terminate'
 		, Despatch 				: 'Despatch'
 		, Ignore 				: 'Ignore'
 		, Complete 				: 'Complete'
