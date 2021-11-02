@@ -89,10 +89,8 @@ router.post('/agent', async (req, res, next) =>
 {
     try
     {
-        let trans  = new Transit()
-        await trans.AuthzAgent(req.body.TransitID, req.body.Agent._id)
+        let trans_  = await Transit.AuthzAgent(req.body.TransitID, req.body.Agent._id)
 
-        let trans_ = trans.Data
         let event_, text_
         switch(req.body.Task)
         {

@@ -4,82 +4,81 @@ const { Err_ }      = require('../../system/models')
     , Model         = require('../../system/models')
     , db            = require('../exports')[Model.segment.db]
 
-function Transit (journal)
+class Transit
 {
-    if(journal)
-    this.Data   =
+    constructor(journal)
     {
-        _id 		    : ''
-      , JournalID       : journal._id
-      , Store 		    :
+      this._id 		    = ''
+      this.JournalID    = journal._id
+      this.Store 		=
       {                  
-        _id             : journal.Seller.ID
+          _id           : journal.Seller.ID
         , SockID        : []
         , Name          : journal.Seller.Name
         , MobileNo      : journal.Seller.MobileNo
         , Address       : journal.Seller.Address
-      }                  
-      , User 		    : 
+      } 
+      this.User 		= 
       {                  
-        _id             : journal.Buyer.ID
+          _id           : journal.Buyer.ID
         , SockID        : []
         , Name          : journal.Buyer.Name
         , MobileNo      : journal.Buyer.MobileNo
         , Address       : journal.Buyer.Address
       }                  
-      , Agent           :
+      this.Agent        =
       {                 
           _id           : ''
         , SockID        : []
         , Name          : ''         
         , MobileNo      : ''
       }                 
-      , Agents          : []                            // Pool of live agents filtered for transit
-      , Admin           : {}
-      , Admins          : []
-      , History         : []
-      , Return 	        : ''                            // Machine's prev-state for fallbacks
-      , State 		    : Model.states.None             // Machine init state
-      , IsLive          : true                          // Is it ongoing transit
-      , Event 		    : Model.event.InitiationByUser  // Machine init Model.event
-      , MaxWT           : 35                            // Maximum Waiting Time (35min)
-      , OrderedAt 	    : ''                            // Millis / https://currentmillis.com/
-      , ETD   		    : 0                             // Estimated Time of Delivery
+      this.Agents       = []                            // Pool of live agents filtered for transit
+      this.Admin        = {}
+      this.Admins       = []
+      this.History      = []
+      this.Return 	    = ''                            // Machine's prev-state for fallbacks
+      this.State 		= Model.states.None             // Machine init state
+      this.IsLive       = true                          // Is it ongoing transit
+      this.Event 		= Model.event.InitiationByUser  // Machine init Model.event
+      this.MaxWT        = 35                            // Maximum Waiting Time (35min)
+      this.OrderedAt 	= ''                            // Millis / https://currentmillis.com/
+      this.ETD   		= 0                             // Estimated Time of Delivery
     }
 
-    this.Init       = async function(_id)
+    async Init(_id)
     {
 
-        this.Data.User.SockID  = await db.user.GetUserSockID(this.Data.User._id)
-        this.Data.Store.SockID = await db.store.GetStoreSockID(this.Data.Store._id)
-        this.Data._id          = _id
-        this.Data.OrderedAt    = (new Date()).toISOString()
+        this.User.SockID  = await db.user.GetUserSockID(this.User._id)
+        this.Store.SockID = await db.store.GetStoreSockID(this.Store._id)
+        this._id          = _id
+        this.OrderedAt    = (new Date()).toISOString()
 
         let engine = new Engine()
-        await engine.Transition(this.Data)
-        console.log('transit-initialised', { Data: this.Data })
+        await engine.Transition(this)
+        console.log('transit-initialised', { Data: this })
     }
 
-    this.AuthzAgent       = async function(transit_id, user_id)
+    static async AuthzAgent (transit_id, user_id)
     {
-        this.Data = await db.transit.Get(transit_id, Model.query.ByID)
-        if (!this.Data) Err_(Model.code.BAD_REQUEST, Model.reason.TransitNotFound)
+        let transit_ = await db.transit.Get(transit_id, Model.query.ByID)
+        if (!transit_) Err_(Model.code.BAD_REQUEST, Model.reason.TransitNotFound)
 
-        if(this.Data.Agent && (String(this.Data.Agent._id) === String(user_id)))
+        if(transit_.Agent && (String(transit_.Agent._id) === String(user_id)))
         {
-            console.log('agent-authorized', this.Data.Agent)
-            return
+            console.log('agent-authorized', transit_.Agent)
+            return transit_
         }
-        for (let i = 0; i < this.Data.Agents.length; i++)
+        for (let i = 0; i < transit_.Agents.length; i++)
         {
-            let agent = this.Data.Agents[i]
+            let agent = transit_.Agents[i]
             if(String(agent._id) === String(user_id))
             {
                 console.log('agent-authorized', {Agent : agent })
-                return
+                return transit_
             }
         }
-        console.log('agent-not-listed', { AgentID: user_id, Agents: this.Data.Agents })
+        console.log('agent-not-listed', { AgentID: user_id, Agents: transit_.Agents })
         Err_(Model.code.UNAUTHORIZED, Model.reason.Unauthorized)
     }
 }
