@@ -16,7 +16,7 @@ const Save       = async function(data)
         , opt   = { upsert : true }
 
     const resp  = await stores.updateOne(query, act, opt)
-    if (!resp.result.ok)
+    if (!resp.acknowledged)
     {
         console.log('store-save-failed',
         { 

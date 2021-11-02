@@ -23,7 +23,7 @@ const Save       = async function(data)
         , act   = { $set   : data      }
         , opt   = { upsert : true      }
     const resp  = await notes.updateOne(query, act, opt)
-    if (!resp.result.ok)
+    if (!resp.acknowledged)
     {
         console.log('note-save-failed', { 
             Query   : query

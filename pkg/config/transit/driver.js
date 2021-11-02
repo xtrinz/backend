@@ -10,24 +10,20 @@ function Transit (journal)
     this.Data   =
     {
         _id 		    : ''
-      , JournalID       : ObjectId(journal._id)
+      , JournalID       : journal._id
       , Store 		    :
       {                  
-        _id             : ObjectId(journal.Seller.ID)
+        _id             : journal.Seller.ID
         , SockID        : []
         , Name          : journal.Seller.Name
-        , Longitude     : journal.Seller.Longitude
-        , Latitude      : journal.Seller.Latitude
         , MobileNo      : journal.Seller.MobileNo
         , Address       : journal.Seller.Address
       }                  
       , User 		    : 
       {                  
-        _id             : ObjectId(journal.Buyer.ID)
+        _id             : journal.Buyer.ID
         , SockID        : []
         , Name          : journal.Buyer.Name
-        , Longitude     : journal.Buyer.Longitude
-        , Latitude      : journal.Buyer.Latitude          
         , MobileNo      : journal.Buyer.MobileNo
         , Address       : journal.Buyer.Address
       }                  

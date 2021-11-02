@@ -10,7 +10,7 @@ const Save       = async function(data)
         , act   = { $set   : data }
         , opt   = { upsert : true }
     const resp  = await users.updateOne(query, act, opt)
-    if (!resp.result.ok)
+    if (!resp.acknowledged)
     {
         console.log('user-save-failed', { User: data, Result: resp.result})
         Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)

@@ -12,7 +12,7 @@ const Save      = async function(data)
         , opt   = { upsert : true }
     const resp  = await products.updateOne(key, act, opt)
 
-    if (!resp.result.ok)
+    if (!resp.acknowledged)
     {
         console.log('product-save-failed', { 
             Key         : key
@@ -31,7 +31,7 @@ const Update      = async function(Id, act)
     const key   = { _id    : Id }
 
     const resp  = await products.updateOne(key, act)
-    if (!resp.result.ok)
+    if (!resp.acknowledged)
     {
         console.log('product-save-failed', { 
             Key         : key
@@ -109,7 +109,7 @@ const DecProdCount         = async function (prod)
         })
     })
     const resp = await products.bulkWrite(qry_)
-    if (!resp.result.ok)
+    if (!resp.acknowledged)
     {
         console.log('product-count-decrement-failed', { Query : qry_ })
         return
@@ -132,7 +132,7 @@ const IncProdCount         = async function (prod)
         })
     })
     const resp = await products.bulkWrite(qry_)
-    if (!resp.result.ok)
+    if (!resp.acknowledged)
     {
         console.log('product-count-increment-failed', { Query : qry_ })
         return
@@ -147,7 +147,7 @@ const UpdateMany = async function (store_id, data)
       , op   = { $set: data }
 
     const resp = await products.updateMany(qry_, op)
-    if (!resp.result.ok)
+    if (!resp.acknowledged)
     {
         console.log('product-updation-failed', { Query : qry_ })
         Err_(code.INTERNAL_SERVER, reason.DBUpdationFailed)

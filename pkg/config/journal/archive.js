@@ -58,7 +58,7 @@ const Save       = async function(data)
         , act   = { $set   : data     }
         , opt   = { upsert : true     }
     const resp  = await journals.updateOne(query, act, opt)
-    if (!resp.result.ok)
+    if (!resp.acknowledged)
     {
         console.log('journal-save-failed', { 
             Query   : query

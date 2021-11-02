@@ -6,7 +6,7 @@ const Insert = async function(_id, mode_, sock_id)
 {
     const rcd_  = { Entity: ObjectId(_id), Mode: mode_, SockID: sock_id }
     , resp  = await sockets.insertOne(rcd_)
-    if (resp.insertedCount !== 1)
+    if (!resp.acknowledged)
     {
         console.log('socket-insertion-failed', {Scoket : rcd_})
         Err_(code.INTERNAL_SERVER, reason.DBInsertionFailed)

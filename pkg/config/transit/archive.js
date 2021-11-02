@@ -31,7 +31,7 @@ const Save       = async function(data, upsert)
         , act  = { $set   : data     }
         , opt  = { upsert : upsert   }
         , resp = await transits.updateOne(key, act, opt)
-    if (!resp.result.ok)
+    if (!resp.acknowledged)
     {
         console.log('transit-save-failed',
         { 
@@ -50,7 +50,7 @@ const SetAgentSockID  = async function(user_id, sock_id)
     const key1  = { 'Agent._id' : ObjectId(user_id), IsLive : true }
         , act1  = { $push       : { 'Agent.SockID' : sock_id } }
         , resp1 = await transits.updateMany(key1, act1)
-    if (!resp1.result.ok)
+    if (!resp1.acknowledged)
     {
         console.log('set-agent-socket-id-failed',
         { 
@@ -68,7 +68,7 @@ const SetUserSockID  = async function(user_id, sock_id)
     const key1  = { 'User._id' : ObjectId(user_id), IsLive : true }
         , act1  = { $push       : { 'User.SockID' : sock_id } }
         , resp1 = await transits.updateMany(key1, act1)
-    if (!resp1.result.ok)
+    if (!resp1.acknowledged)
     {
         console.log('set-user-socket-id-failed',
         { 
@@ -86,7 +86,7 @@ const SetStoreSockID  = async function(store_id, sock_id)
     const key3  = { 'Store._id' : ObjectId(store_id), IsLive : true }
         , act3  = { $push      : { 'Store.SockID' : sock_id } }
         , resp3 = await transits.updateMany(key3, act3)
-    if (!resp3.result.ok)
+    if (!resp3.acknowledged)
     {
         console.log('set-socket-id-failed',
         { 
@@ -104,7 +104,7 @@ const SetAdminSockID  = async function(admin_id, sock_id)
     const key3  = { 'Admin._id' : ObjectId(admin_id), IsLive : true }
         , act3  = { $push      : { 'Admin.SockID' : sock_id } }
         , resp3 = await transits.updateMany(key3, act3)
-    if (!resp3.result.ok)
+    if (!resp3.acknowledged)
     {
         console.log('set-socket-id-failed',
         { 
@@ -123,7 +123,7 @@ const UnsetAgentSockID  = async function(user_id, sock_id)
     const key1  = { 'Agent._id' : ObjectId(user_id), IsLive : true }
         , act1  = { $pull       : { 'Agent.SockID' : sock_id } }
         , resp1 = await transits.updateMany(key1, act1)
-    if (!resp1.result.ok)
+    if (!resp1.acknowledged)
     {
         console.log('pop-socket-id-failed',
         { 
@@ -141,7 +141,7 @@ const UnsetUserSockID  = async function(user_id, sock_id)
     const key2  = { 'User._id' : ObjectId(user_id), IsLive : true }
         , act2  = { $pull      : { 'User.SockID' : sock_id } }
         , resp2 = await transits.updateMany(key2, act2)
-    if (!resp2.result.ok)
+    if (!resp2.acknowledged)
     {
         console.log('pop-socket-id-failed',
         { 
@@ -159,7 +159,7 @@ const UnsetStoreSockID  = async function(store_id, sock_id)
     const key3  = { 'Store._id' : ObjectId(store_id), IsLive : true }
         , act3  = { $pull       : { 'Store.SockID' : sock_id } }
         , resp3 = await transits.updateMany(key3, act3)
-    if (!resp3.result.ok)
+    if (!resp3.acknowledged)
     {
         console.log('pop-socket-id-failed',
         { 
@@ -177,7 +177,7 @@ const UnsetAdminSockID  = async function(admin_id, sock_id)
     const key3  = { 'Admin._id' : ObjectId(admin_id), IsLive : true }
         , act3  = { $pull       : { 'Admin.SockID' : sock_id } }
         , resp3 = await transits.updateMany(key3, act3)
-    if (!resp3.result.ok)
+    if (!resp3.acknowledged)
     {
         console.log('pop-socket-id-failed',
         { 

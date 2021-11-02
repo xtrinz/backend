@@ -10,7 +10,7 @@ const Save       = async function(data)
         , act   = { $set : data    }
         , opt   = { upsert : true  }
     const resp  = await carts.updateOne(key, act, opt)
-    if (!resp.result.ok)
+    if (!resp.acknowledged)
     {
         console.log('cart-save-failed',
         { Key: key, Action: act, Option: opt, Result: resp.result})
@@ -155,7 +155,7 @@ const Insert     = async function (cart_id, data)
     , act   = { $set : { Products : [] }    }
     , opt   = { upsert : false  }
   const resp2  = await carts.updateOne(key2, act, opt)
-  if (!resp2.result.ok)
+  if (!resp2.acknowledged)
   {
       console.log('multi-store-purchase-clearance-failed',
       { Key: key2, Option: opt, Result: resp2.result})
