@@ -254,6 +254,7 @@ module.exports =
 		, OrderRejected 		: 'OrderRejected' 				// Order rejected by the shop 								#Exit By Store
 		, OrderTimeExceeded 	: 'OrderTimeExceeded'			// Order acceptance time limit for shop has been exceeded	#Exit By User
 		, OrderAccepted 		: 'OrderAccepted'				// Order accpeted by shop
+		, OrderProcessed		: 'OrderProcessed'				// Order processed by shop
 		, OrderOnHold 			: 'OrderOnHold'					// Order on hold due to no nearby live agents
 		, OrderIgnored 			: 'OrderIgnored'
 		, OrderDespatched 		: 'OrderDespatched'				// Order gave to agent by shop
@@ -282,6 +283,7 @@ module.exports =
 		, RejectionByStore		: 'RejectionByStore'			// event order rejection by shop
 		, TimeoutByStore		: 'RespTimeoutByStore'			// event order acceptance timeout
 		, AcceptanceByStore		: 'AcceptanceByStore'			// event order acception by shop
+		, ProcessByStore		: 'ProcessByStore'
 		, DespatchmentByStore	: 'DespatchmentByStore'			// event order despatchment by shop
 		, IgnoranceByAgent		: 'IgnoranceByAgent'			// event transit ignorance by agent
 		, LockByAdmin			: 'LockByAdmin'					// event tranist under ctrl of admin
@@ -301,6 +303,7 @@ module.exports =
 		, Rejected 				: 'Rejected'					// to user 		   on rejection by shop
 		, Cancelled 			: 'Cancelled'					// to shop 		   on cancel by user
 		, Accepted 				: 'Accepted'					// to user 		   on acceptance from shop
+		, Processed 			: 'Processed'					// to agent/user   on readiness from shop
 		, AutoCancelled 		: 'Auto_Cancelled'				// to user/shop    on outstanding delay
 		, NewTransit 			: 'New_Transit'					// to agents 	   on acceptance from shop
 		, AgentReady 			: 'Agent_Ready'					// to shop/user    on acceptance from agent 
@@ -396,6 +399,7 @@ module.exports =
 		, Request				: 'Request'
 		, Cancel 				: 'Cancel'
 		, Accept 				: 'Accept'
+		, Processed 			: 'Processed'
 		, Deny 					: 'Deny'
 		, Revoke 				: 'Revoke'
 		, Relieve 				: 'Relieve'

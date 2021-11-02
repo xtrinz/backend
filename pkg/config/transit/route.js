@@ -62,6 +62,11 @@ router.post('/store', async (req, res, next) =>
             text_  = alerts.Accepted          
             break
 
+          case task.Processed:
+            event_ = event.ProcessByStore
+            text_  = alerts.Processed          
+            break            
+
           case task.Despatch:
             trans.Data.Store.Otp = req.body.OTP
             event_ = event.DespatchmentByStore

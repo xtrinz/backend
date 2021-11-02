@@ -27,7 +27,15 @@ const Engine 				 = function()
 			, [event.TimeoutByAgent] 		: method.TimeoutByAgent
 			, [event.RejectionByStore] 		: method.RejectedByStore
 			, [event.AcceptanceByAgent] 	: method.AcceptedByAgent
+			, [event.ProcessByStore]		: method.ProcessedByStore
 		}											
+		, [states.OrderProcessed] 			:
+		{ 											
+			  [event.CancellationByUser] 	: method.CancelledByUser
+			, [event.IgnoranceByAgent] 		: method.IgnoredByAgent
+			, [event.TimeoutByAgent] 		: method.TimeoutByAgent
+			, [event.AcceptanceByAgent] 	: method.AcceptedByAgent
+		}													
 		, [states.OrderIgnored] 			:
 		{ 											
 			  [event.LockByAdmin] 			: method.LockedByAdmin
