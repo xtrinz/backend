@@ -4,6 +4,7 @@ const { Emit }  = require('./events')
 	, Model 	= require('../system/models')
 	, { Agent } = require('../config/agent/driver')
 	, Task 	   	= require('./wrap')
+	, history 	= require('./history')
 	, db        = require('../config/exports')[Model.segment.db]
 
 // Notify | UpdateState | Payout | OTP
@@ -129,7 +130,7 @@ const IgnoredByAgent		= async function(ctxt)
 		await Task.PingAdmins(Model.states.TransitIgnored, ctxt)
 		return	
 	}
-	Task.SetHistory(ctxt)
+	history.Set(ctxt)
 	ctxt.Agent = Task.ResetAgent // Cleared temp data
 	ctxt.Event = ''
 	await db.transit.Save(ctxt)
