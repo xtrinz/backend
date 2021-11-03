@@ -46,7 +46,7 @@ const Controller 		 = function()
         , [mode.Admin] 	 : false
         , [mode.Enabled] : true
         , [task.Enabled] : false
-        , [states.State]: [ states.ToBeApproved, states.Registered ]        
+        , [states.State]: [ states.MobConfirmed, states.ToBeApproved, states.Registered ]        
         }
       }
     }
