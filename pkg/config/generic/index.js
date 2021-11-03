@@ -30,7 +30,7 @@ router.post('/checkout', async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-router.get("/cloudinary", async (req, res, next) =>
+router.post("/cloudinary", async (req, res, next) =>
 {
   const sign = await cloudinary.utils.api_sign_request(req.query, sec_key)
       , data =

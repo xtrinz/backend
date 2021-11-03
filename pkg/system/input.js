@@ -21,6 +21,18 @@ const Controller 		 = function()
   , [rsrc.paytm]          : require('../tools/rules/input/paytm')
 
   // TODO Cloudinary
+  , [rsrc.cloudinary]     : // TODO correct it root as rsrc and checkout as verb
+    {
+      [verb.root]                :
+      {
+        [method.post]            : 
+        {
+            'query'                 : [ 'required', 'object' ]
+          , 'headers'               : [ 'required', 'object' ]            
+          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        }
+      }
+    }
   // Checkout
   , [rsrc.checkout]              : // TODO correct it root as rsrc and checkout as verb
     {

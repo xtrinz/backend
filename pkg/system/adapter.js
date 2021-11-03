@@ -64,7 +64,7 @@ const Authnz = async function (req, res, next)
 
         if (!mode_.State.includes(store.State))
         {
-          console.log('state-mismatch-for-store-auth', { Store: store })
+          console.log('state-mismatch-for-store-auth', { Store: store, ModeState : mode_.State })
           Err_(code.UNAUTHORIZED, reason.RegIncomplete)
         }
 

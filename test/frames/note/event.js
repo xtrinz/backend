@@ -73,8 +73,38 @@ let Set = function(admin_, note_)
   }
 }
 
+let Cloudinary = function(store_)
+{
+  this.StoreID  = store_
+  this.Data     = function()
+  {
+    let store = data.Get(data.Obj.Store, this.StoreID)
+    let templ =
+    {
+        Type                 : Type.Rest
+      , Describe             : 'Get Image Signature'
+      , Request              :
+      {
+            Method           : Method.POST
+          , Path             : '/v1/cloudinary'
+          , Query            : {}
+          , Body             : {}
+          , Header           : { Authorization: store.Token }
+      }
+      , Skip                 : [ 'Data' ]
+      , Response             :
+      {
+          Code               : code.OK
+        , Status             : status.Success
+        , Text               : ''
+        , Data               : {}
+      }
+    }
+    return templ
+  }
+}
 
 module.exports =
 {
-    View, Set
+    View, Set, Cloudinary
 }
