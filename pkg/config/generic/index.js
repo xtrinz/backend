@@ -32,10 +32,15 @@ router.post('/checkout', async (req, res, next) =>
 
 router.post("/cloudinary", async (req, res, next) =>
 {
+  const now           = new Date()
+      , ts            = Math.round(now.getTime()/1000)
+
+  req.query.timestamp = ts
+
   const sign = await cloudinary.utils.api_sign_request(req.query, sec_key)
       , data =
   {
-      Time : Date.now()
+      Time : ts
     , Sign : sign
     , Key  : pub_key
   }
