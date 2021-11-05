@@ -27,7 +27,8 @@ const Emit = async function(alert, ctxt)
                                           ctxt.Agents.forEach((agent)=> { 
                                           to.push(...agent.SockID) });                                break
                                   };                                                                  break
-    case alerts.NoAgents        : ctxt.Admins.forEach((admin)=> { to.push(...admin.SockID) });   break
+    case alerts.NoAgents        : ctxt.Admins.forEach((admin)=> { to.push(...admin.SockID) });        break
+    case alerts.StoreTimeout    : ctxt.Admins.forEach((admin)=> { to.push(...admin.SockID) });        break
     case alerts.Locked          :
                                   ctxt.Admins.forEach((admin) =>
                                   { 

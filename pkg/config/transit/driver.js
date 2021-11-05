@@ -1,8 +1,8 @@
 
-const { Err_ }      = require('../../system/models')
-    , { Engine }    = require('../../engine/engine')
-    , Model         = require('../../system/models')
-    , db            = require('../exports')[Model.segment.db]
+const { Err_ } = require('../../system/models')
+    , engine   = require('../../engine/engine')
+    , Model    = require('../../system/models')
+    , db       = require('../exports')[Model.segment.db]
 
 class Transit
 {
@@ -54,7 +54,6 @@ class Transit
         this._id          = _id
         this.OrderedAt    = (new Date()).toISOString()
 
-        let engine = new Engine()
         await engine.Transition(this)
         console.log('transit-initialised', { Data: this })
     }

@@ -5,6 +5,9 @@ const { Err_ } = require('../../system/models')
   , jwt        = require('../../infra/jwt')
   , input      = require('../../system/input')
 
+let Channel
+const SetChannel = (io_) => { Channel = io_ }
+
 const Connect = async function(socket_)
 {
   try
@@ -176,4 +179,5 @@ module.exports =
 {
       Connect     :   Connect
     , Disconnect  :   Disconnect
+    , SetChannel  :   SetChannel
 }

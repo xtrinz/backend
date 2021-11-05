@@ -271,11 +271,12 @@ module.exports =
 		, TransitTerminated 	: 'TransitTerminated'			// 															#Exit By Store
 		, TranistCompleted 		: 'TranistCompleted'			// The package delivered									#End
 	},
-	delay:
+	delay:	// In Minutes
 	{
-		  StoreRespLimit		: 4								// Order acceptace delay for shops
+		  StoreRespLimit		: 5								// Order acceptace delay for shops
 		, AgentRespLimit 		: 3 							// Transit acceptace delay for agents
 		, AgentFilterLimit 		: 8 							// Time upper limit to find an agent for delivery
+		, AdminRespLimit 		: 5
 	},
 	event:
 	{
@@ -283,6 +284,8 @@ module.exports =
 		, CancellationByUser	: 'CancellationByUser'			// event cargo cancellation by user
 		, RejectionByStore		: 'RejectionByStore'			// event order rejection by shop
 		, TimeoutByStore		: 'RespTimeoutByStore'			// event order acceptance timeout
+		, TimeoutByAdmin		: 'TimeoutByAdmin'
+		, TimeoutBySystem		: 'TimeoutBySystem'
 		, AcceptanceByStore		: 'AcceptanceByStore'			// event order acception by shop
 		, ProcessByStore		: 'ProcessByStore'
 		, DespatchmentByStore	: 'DespatchmentByStore'			// event order despatchment by shop
@@ -312,6 +315,7 @@ module.exports =
 		, Delivered 			: 'Delivered'					// to user/shop    on delivery
 		, Ignored 				: 'Ignored'						// to none		   
 		, NoAgents 				: 'No_Agents'					// to admin 	   on absents of live agents
+		, StoreTimeout			: 'Timeout_By_Store'
 		, Locked 				: 'Admin_Locked'				// to other admins on an admin choose a ticket
 		, Assigned 				: 'Agent_Assigned'
 		, Terminated			: 'Order_Terminated'

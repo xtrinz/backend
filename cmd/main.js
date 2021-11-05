@@ -66,6 +66,7 @@ const server_ = () => console.log('server-started', {Port : port})
 
       adptr.SetServer(server, io)
       event.SetChannel(io)
+      socket.SetChannel(io)      
       server.listen(port, server_)
 
 io.on('connection', async (socket_) =>

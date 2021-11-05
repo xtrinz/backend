@@ -51,7 +51,7 @@ const Save = async function(ctxt, state_)
 	await db.journal.Save({ _id: ctxt.JournalID, 'Transit.State': state_ })
 }
 
-const PingAdmins = async function(st, ctxt)
+const PingAdmins = async function(ctxt, st, alert_)
 {
     console.log('ping-admins', {State: st, Ctxt: ctxt})
 
@@ -59,7 +59,7 @@ const PingAdmins = async function(st, ctxt)
           ctxt.Store.Address.Longitude
         , ctxt.Store.Address.Latitude)
     ctxt.Admins = admins
-    await Emit(alerts.NoAgents, ctxt)
+    await Emit(alert_, ctxt)
     await Save(ctxt, st)
 }
 

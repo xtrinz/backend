@@ -2,7 +2,7 @@
 const { ObjectId } = require('mongodb')
     , router       = require('express').Router()
     , { Transit }  = require('../transit/driver')
-    , { Engine }   = require('../../engine/engine')
+    , engine       = require('../../engine/engine')
     , { Err_  }    = require('../../system/models')
     , Model        = require('../../system/models')
     , db           = require('../transit/archive')
@@ -29,7 +29,6 @@ router.post('/user', async (req, res, next) =>
         }
 
         trans_.Event = event_
-        let engine   = new Engine()
         await engine.Transition(trans_)
 
         return res.status(Model.code.OK).json({
@@ -74,7 +73,6 @@ router.post('/store', async (req, res, next) =>
         }
 
         trans_.Event = event_
-        let engine   = new Engine()
         await engine.Transition(trans_)
 
         return res.status(Model.code.OK).json({
@@ -129,7 +127,6 @@ router.post('/agent', async (req, res, next) =>
             break            
         }
         trans_.Event = event_
-        let engine       = new Engine()
         await engine.Transition(trans_)
 
         return res.status(Model.code.OK).json({
@@ -179,7 +176,6 @@ router.post('/admin', async (req, res, next) =>
             break          
         }
         trans_.Event = event_
-        let engine       = new Engine()
         await engine.Transition(trans_)
 
         return res.status(Model.code.OK).json({

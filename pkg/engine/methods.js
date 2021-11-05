@@ -15,6 +15,8 @@ const InitiatedByUser		= async function(ctxt)
 
 	await Task.Save(ctxt, Model.states.CargoInitiated)
 	console.log('cargo-initialised', ctxt)
+
+	// Machine will set timeout monitor
 }
 
 const CancelledByUser		=  async function(ctxt)
@@ -66,10 +68,17 @@ const ResendOTP			 	= async function(ctxt)
 
 const TimeoutByStore		= async function(ctxt)
 {
-	// TODO Trigger a timer from InitByUser
-	// Set voice Model.alerts thrice
-	// on no action from store auto reject the order
-	await Task.Save(ctxt, Model.states.TransitAcceptanceTimeout)
+	console.log('process-order-timeout', ctxt)
+
+	// TODO [LOW] Ring voice alert
+
+	await Task.PingAdmins(ctxt
+		, Model.states.OrderTimeExceeded
+		, Model.alerts.StoreTimeout)
+
+	// Machine will set timeout monitor
+
+	console.log('order-timout-processed', ctxt)
 }
 
 const AcceptedByStore			=  async function(ctxt)
@@ -83,7 +92,9 @@ const AcceptedByStore			=  async function(ctxt)
 	if(!agent)
 	{
 		console.log('no-agents-order-on-hold', ctxt)
-		await Task.PingAdmins(Model.states.OrderIgnored, ctxt)
+		await Task.PingAdmins(ctxt
+			, Model.states.OrderIgnored
+			, Model.alerts.NoAgents)
 		return
 	}
 	ctxt.Agents = [ agent ]
@@ -127,7 +138,9 @@ const IgnoredByAgent		= async function(ctxt)
 	if(!ctxt.Agents.length)
 	{
 		console.log('on-hold-transit-ignored', ctxt)
-		await Task.PingAdmins(Model.states.TransitIgnored, ctxt)
+		await Task.PingAdmins(ctxt
+			, Model.states.TransitIgnored
+			, Model.alerts.NoAgents)
 		return	
 	}
 	history.Set(ctxt)
@@ -219,7 +232,9 @@ const RejectedByAgent		= async function(ctxt)
 		if(!agent)
 		{
 			console.log('no-nearby-agents', ctxt)
-			await Task.PingAdmins(Model.states.TransitAbandoned, ctxt)
+			await Task.PingAdmins(ctxt
+				, Model.states.TransitAbandoned
+				, Model.alerts.NoAgents)
 			return
 		}
 		// ? TODO Resolve the loop, 'auto cancel' on ultra delay
