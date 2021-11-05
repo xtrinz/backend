@@ -114,6 +114,7 @@ module.exports =
 		, PaymentInitiated          : 'Payment initiated'
 		, PayoutGWSet               : 'Payment Gateway Configured'
 		, NoteSet					: 'Note set'
+		, Deleted					: 'Deleted'
 	},
 	code:
 	{
