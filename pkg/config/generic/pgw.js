@@ -1,9 +1,9 @@
 
-const { code, status } = require('../../system/models')
-    , router 	         = require('express').Router()
-    , { Journal }      = require('../journal/driver')
-    , { Transit }      = require('../transit/driver')
-    , db               = require('../journal/archive')
+const Model       = require('../../system/models')
+    , router 	    = require('express').Router()
+    , { Journal } = require('../journal/driver')
+    , { Transit } = require('../transit/driver')
+    , db          = require('../journal/archive')
 
 // Payment status indication
 router.post('/payment', async (req, res, next) =>
@@ -19,8 +19,8 @@ router.post('/payment', async (req, res, next) =>
       await transit.Init(transit_id)
     }
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : '',
       Data    : {}
     })
@@ -42,8 +42,8 @@ router.post('/refund', async (req, res, next) =>
     }*/
     await db.Save(journal.Data)
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : '',
       Data    : {}
     })

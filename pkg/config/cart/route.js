@@ -1,11 +1,10 @@
-const { ObjectId }           = require('mongodb')
-    , { code, text, status } = require('../../system/models')
-    , {Cart, CartEntry}      = require('../cart/driver')
-    , { Address }            = require('../address/driver')
-    , router 	               = require('express').Router()
-    , tally                  = require('../../system/tally')
-    , Model                  = require('../../system/models')
-    , db                     = require('../exports')[Model.segment.db]
+const { ObjectId }       = require('mongodb')
+    , {Cart, CartEntry}  = require('../cart/driver')
+    , { Address }        = require('../address/driver')
+    , router 	           = require('express').Router()
+    , tally              = require('../../system/tally')
+    , Model              = require('../../system/models')
+    , db                 = require('../exports')[Model.segment.db]
 
 // Insert product
 router.post('/insert', async (req, res, next) => {
@@ -14,9 +13,9 @@ router.post('/insert', async (req, res, next) => {
     const entry = new CartEntry(req.body)
     await entry.Insert(req.body.User.CartID)
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.ProductAdded,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.ProductAdded,
       Data    : {}
     })
   } catch (err) { next(err) }
@@ -50,8 +49,8 @@ router.get('/list', async (req, res, next) =>
 
     await tally.SetBill(data, src_loc, dest_loc)
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : '',
       Data    : data
     })
@@ -67,9 +66,9 @@ router.post('/modify', async (req, res, next) => {
                         ObjectId(req.body.ProductID),
                         req.body.Quantity)
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.ProductUpdated,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.ProductUpdated,
       Data    : {}
     })
   } catch (err) { next(err) }
@@ -84,9 +83,9 @@ router.delete('/remove', async (req, res, next) =>
     await entry.Remove( ObjectId(req.body.User.CartID),
                         ObjectId(req.body.ProductID))
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.ProductRemoved,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.ProductRemoved,
       Data    : {}
     })
   } catch (err) { next(err) }

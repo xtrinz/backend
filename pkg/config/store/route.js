@@ -124,4 +124,19 @@ router.put('/edit', async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
+router.delete('/delete', async (req, res, next) =>
+{
+  try
+  {
+    await Store.Delete(req.body)
+
+    return res.status(code.OK).json({
+      Status  : status.Success,
+      Text    : text.Deleted,
+      Data    : {}
+    })
+  }
+  catch (err) { next(err) }
+})
+
 module.exports = router

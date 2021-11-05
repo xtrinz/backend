@@ -6,6 +6,7 @@ const { ObjectID } = require('mongodb')
     , jwt          = require('../../infra/jwt')
     , project      = require('../../tools/project/store')
     , rinse        = require('../../tools/rinse/store')
+    , filter       = require('../../tools/filter/store')
 class Store
 {
     constructor (data)
@@ -255,53 +256,9 @@ class Store
         console.log('list-store', { In : in_ })
         let data, proj
 
-        proj    = { projection: project[Model.verb.view][mode_] }
+        proj = { projection: project[Model.verb.view][mode_] }
 
-        switch(mode_)
-        {
-          case Model.mode.User:
-            in_.Query = 
-            {
-                  State   : Model.states.Registered
-                , 'Address.Location': { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } 
-            } 
-
-            if(in_.Category) in_.Query.Type     = in_.Category
-            if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
-
-            break
-          case Model.mode.Admin:
-            switch(in_.Type)
-            {
-                case Model.qtype.NearList:
-                in_.Query = { 'Address.Location': { $geoWithin: { $center: [ [ in_.Latitude.loc(), in_.Longitude.loc()], 2500 ] } } } 
-
-                // TODO check unit of radius 2500
-
-                if(in_.Category) in_.Query.Type     = in_.Category
-                if(in_.Text)     in_.Query['$text'] = { $search: in_.Text }
-
-                break
-                case Model.qtype.Pending:
-                in_.Query = { State : Model.states.ToBeApproved }
-                break
-                case Model.qtype.NearPending:
-                in_.Query = 
-                { 
-                    'Address.Location'  :
-                    { 
-                        $near : { $geometry: 
-                            { 
-                                  type          : 'Point'
-                                , coordinates   : [ in_.Longitude.loc(), in_.Latitude.loc() ] 
-                            } } 
-                    },
-                    State     : Model.states.ToBeApproved
-                }
-                break
-            }
-            break
-        }
+        filter[Model.verb.list][mode_](in_)
 
         data = await db.store.List(in_, proj)
 
@@ -368,6 +325,36 @@ class Store
 
         console.log('store-updated', { Record: rcd })
     }
+
+    // delete store
+    static async Delete (in_)
+    {
+        console.log('delete-store', { In : in_ })
+
+        // workout later
+        /*
+
+        switch(in_.Mode)
+        {
+          case Model.mode.Store:
+          case Model.mode.Admin:
+            store_ = in_.Store
+            break
+          case Model.mode.User:
+            store_ = await db.store.Get(in_.ID, Model.query.ByID)
+            if (!store_) Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
+            break
+        }
+
+        if (store_.State !== Model.states.Registered)
+        Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
+
+        await db.store.Delete(store_)
+
+        */
+        console.log('store-deleted', { Store : store_ })
+    }
+
 }
 
 module.exports =

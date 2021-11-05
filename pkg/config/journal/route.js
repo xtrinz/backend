@@ -1,6 +1,6 @@
-const { code, status, mode } = require('../../system/models')
-    , router 	               = require('express').Router()
-    , { Journal }            = require('./driver')
+const Model       = require('../../system/models')
+    , router 	    = require('express').Router()
+    , { Journal } = require('./driver')
 
 // List Journals
 router.get('/list', async (req, res, next) =>
@@ -9,14 +9,14 @@ router.get('/list', async (req, res, next) =>
   {
     let in_
     switch (req.body.Mode) {
-      case mode.Store: in_ = req.body.Store; break
-      case mode.Agent: in_ = req.body.Agent; break
+      case Model.mode.Store: in_ = req.body.Store; break
+      case Model.mode.Agent: in_ = req.body.Agent; break
       default: in_ = req.body.User;          break
     }
     const journal = new Journal()
         , data    = await journal.List(req.query, in_, req.body.Mode)
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : '',
       Data    : data
     })
@@ -30,15 +30,15 @@ router.get('/view', async (req, res, next) =>
   {
     let in_
     switch (req.body.Mode) {
-      case mode.Store: in_ = req.body.Store; break
-      case mode.Agent: in_ = req.body.Agent; break
+      case Model.mode.Store: in_ = req.body.Store; break
+      case Model.mode.Agent: in_ = req.body.Agent; break
       default: in_ = req.body.User;          break
     }    
     const journal = new Journal()
         , data    = await journal.Read(req.query, in_, req.body.Mode)
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : '',
       Data    : data
     })

@@ -134,6 +134,21 @@ const Location = async function(store_id)
     return data
 }
 
+// delete store
+const Delete = async function(store_id)
+{
+    console.log('delete-store', { StoreID: store_id })
+
+    const query = { _id: ObjectId(store_id) }
+    const resp  = await stores.deleteOne(query)
+    if (!resp.deletedCount)
+    {
+        console.log('store-delete-failed', { Query : query })
+        Err_(code.BAD_REQUEST, reason.StoreNotFound)
+    }
+    console.log('store-deleted', { StoreID: store_id })
+}
+
 module.exports =
 {
       Save           : Save
@@ -142,4 +157,5 @@ module.exports =
     , GetStoreSockID : GetStoreSockID
     , Seller         : Seller
     , Location       : Location
+    , Delete         : Delete
 }

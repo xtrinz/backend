@@ -1,7 +1,5 @@
 const router      = require('express').Router()
-    , { text
-    ,   code
-    ,   status }  = require('../../system/models')
+    , Model       = require('../../system/models')
     , { Journal } = require('../journal/driver')
     , { Transit } = require('../transit/driver')
     , cloudinary  = require('cloudinary').v2
@@ -22,9 +20,9 @@ router.post('/checkout', async (req, res, next) =>
       await transit.Init(journal.Transit.ID)
     }
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.PaymentInitiated,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.PaymentInitiated,
       Data    : data
     })
   } catch (err) { next(err) }
@@ -44,8 +42,8 @@ router.post("/cloudinary", async (req, res, next) =>
     , Sign : sign
     , Key  : pub_key
   }
-  return res.status(code.OK).json({
-    Status  : status.Success,
+  return res.status(Model.code.OK).json({
+    Status  : Model.status.Success,
     Text    : '',
     Data    : data
   })
