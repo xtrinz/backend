@@ -47,7 +47,7 @@ const NearbyAgent = async function(ln, lt)
 
     console.log('list-nearby-live-agents', {Location: [ln, lt]} )
     const maxDist = 5000
-        , proj    = { projection: { _id: 1, Name: 1, SockID: 1 } }
+        , proj    = { projection: { _id: 1, Name: 1, SockID: 1, MobileNo: 1 } }
         , query   =
         { 
               Location  :
@@ -60,7 +60,7 @@ const NearbyAgent = async function(ln, lt)
                     , $maxDistance : maxDist }
             }
             , 'Status.Current'     : Model.states.OnDuty
-            , 'Status.SetOn.Day'   : date_.getDay()
+            , 'Status.SetOn.Day'   : date_.getDate()
             , 'Status.SetOn.Month' : date_.getMonth()
             , 'Status.SetOn.Year'  : date_.getFullYear()
         }

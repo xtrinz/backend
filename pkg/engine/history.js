@@ -24,7 +24,7 @@ const Set = async function(ctxt)
 	}
 	switch (ctxt.Event)
 	{
-		case Model.event.InitiationByUser:
+		case Model.event.Init:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Paytm
@@ -32,7 +32,7 @@ const Set = async function(ctxt)
 				, Name  : 'Journal'
 			}
 			break
-		case Model.event.CancellationByUser:
+		case Model.event.Cancel:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.User
@@ -40,7 +40,7 @@ const Set = async function(ctxt)
 				, Name  : ctxt.User.Name
 			}
 			break
-		case Model.event.RejectionByStore:
+		case Model.event.Reject:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Store
@@ -48,15 +48,7 @@ const Set = async function(ctxt)
 				, Name  : ctxt.Store.Name
 			}
 			break
-		case Model.event.TimeoutByStore:
-			rcd.Subject =
-			{
-				  Type 	: Model.mode.System
-				, UID	: ''
-				, Name  : Model.mode.System
-			}
-			break
-		case Model.event.AcceptanceByStore:
+		case Model.event.Accept:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Store
@@ -64,7 +56,7 @@ const Set = async function(ctxt)
 				, Name  : ctxt.Store.Name
 			}
 			break
-		case Model.event.ProcessByStore:
+		case Model.event.Ready:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Store
@@ -72,7 +64,7 @@ const Set = async function(ctxt)
 				, Name  : ctxt.Store.Name
 			}
 			break			
-		case Model.event.DespatchmentByStore:
+		case Model.event.Despatch:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Store
@@ -80,7 +72,7 @@ const Set = async function(ctxt)
 				, Name  : ctxt.Store.Name
 			}
 			break
-		case Model.event.IgnoranceByAgent:
+		case Model.event.Ignore:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Agent
@@ -88,7 +80,7 @@ const Set = async function(ctxt)
 				, Name  : ctxt.Agent.Name
 			}
 			break
-		case Model.event.LockByAdmin:
+		case Model.event.Terminate:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Admin
@@ -96,7 +88,7 @@ const Set = async function(ctxt)
 				, Name  : ctxt.Admin.Name
 			}
 			break
-		case Model.event.AssignmentByAdmin:
+		case Model.event.Assign:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Admin
@@ -104,39 +96,7 @@ const Set = async function(ctxt)
 				, Name  : ctxt.Admin.Name
 			}
 			break
-		case Model.event.TerminationByAdmin:
-			rcd.Subject =
-			{
-				  Type 	: Model.mode.Admin
-				, UID	: ctxt.Admin._id
-				, Name  : ctxt.Admin.Name
-			}
-			break
-		case Model.event.ScheduleByAdmin:
-			rcd.Subject =
-			{
-				  Type 	: Model.mode.Admin
-				, UID	: ctxt.Admin._id
-				, Name  : ctxt.Admin.Name
-			}
-			break
-		case Model.event.TimeoutByAgent:
-			rcd.Subject =
-			{
-				  Type 	: Model.mode.System
-				, UID	: ''
-				, Name  : Model.mode.System
-			}
-			break
-		case Model.event.RefeedByAdmin:
-			rcd.Subject =
-			{
-				  Type 	: Model.mode.Admin
-				, UID	: ctxt.Admin._id
-				, Name  : ctxt.Admin.Name
-			}
-			break
-		case Model.event.AcceptanceByAgent:
+		case Model.event.Commit:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Agent
@@ -144,7 +104,7 @@ const Set = async function(ctxt)
 				, Name  : ctxt.Agent.Name
 			}
 			break
-		case Model.event.RejectionByAgent:
+		case Model.event.Quit:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Agent
@@ -152,7 +112,7 @@ const Set = async function(ctxt)
 				, Name  : ctxt.Agent.Name
 			}
 			break
-		case Model.event.CompletionByAgent:
+		case Model.event.Done:
 			rcd.Subject =
 			{
 				  Type 	: Model.mode.Agent

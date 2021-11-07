@@ -12,7 +12,7 @@ class Agent
         let date_ = new Date(0)
         let date  =
         {              
-            Day      : date_.getDay()
+            Day      : date_.getDate()
           , Month    : date_.getMonth()
           , Year     : date_.getFullYear()
         }
@@ -183,7 +183,7 @@ class Agent
             let now_   = new Date()
               , date   =
             {
-                Day    : now_.getDay()
+                Day    : now_.getDate()
               , Month  : now_.getMonth()
               , Year   : now_.getFullYear()
             }

@@ -38,47 +38,13 @@ const Get = async function(param, qType)
     return user
 }
 
-const NearbyAgents = async function(ln, lt)
+const NearbyAdmin = async function(ln, lt)
 {
     ln = ln.loc()
     lt = lt.loc()
-    console.log('list-nearby-live-agents', {Location: [ln, lt]} )
-    const cnt     = 10
-        , maxDist = 5000
-        , proj    = { projection: { _id: 1, Name: 1, SockID: 1 } }
-        , query   =
-        { 
-              Location  :
-            {
-                $near : { $geometry    : 
-                    { 
-                          type: 'Point'
-                        , coordinates: [ln, lt] 
-                    }
-                    , $maxDistance : maxDist }
-            }
-            , IsLive  : true
-            , Mode    : mode.Agent
-        }
-    const agents = await users.find(query, proj)
-                              .limit(cnt)
-                              .toArray()
-    if (!agents.length)
-    {
-        console.log('no-agents-found', { Location: [ln, lt]})
-        return
-    }
-    console.log('agents-found', { Agents: agents})
-    return agents
-}
 
-const NearbyAdmins = async function(ln, lt)
-{
-    ln = ln.loc()
-    lt = lt.loc()
-    console.log('list-nearby-admins', {Location: [ln, lt]})
-    const cnt     = 5
-        , proj    = { projection: { _id: 1, Name: 1, SockID: 1 } }
+    console.log('get-nearest-admin', {Location: [ln, lt]} )
+    const proj    = { projection: { _id: 1, Name: 1, SockID: 1, MobileNo: 1 } }
         , query   =
         { 
             Location  :
@@ -87,11 +53,15 @@ const NearbyAdmins = async function(ln, lt)
             }
             , Mode    : mode.Admin
         }
-    const admins = await users.find(query, proj)
-                              .limit(cnt)
-                              .toArray()
-    console.log('admins-filtered', { Admin: admins})
-    return admins
+
+    const admin_ = await users.findOne(query, proj)
+    if (!admin_)
+    {
+        console.log('no-admin-found', { Location: [ln, lt]})
+        return
+    }
+    console.log('admin-found', { Admin: admin_ })
+    return admin_
 }
 
 const GetUserSockID = async function(user_id)
@@ -112,9 +82,8 @@ const GetUserSockID = async function(user_id)
 
 module.exports =
 {
-      Save                : Save
-    , Get                 : Get
-    , NearbyAgents        : NearbyAgents
-    , NearbyAdmins        : NearbyAdmins
-    , GetUserSockID       : GetUserSockID
+      Save          : Save
+    , Get           : Get
+    , NearbyAdmin   : NearbyAdmin
+    , GetUserSockID : GetUserSockID
 }

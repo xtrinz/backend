@@ -13,20 +13,16 @@ const Std = function(user_, addr_, agent_, store_)
         , new event.ConfirmPayment (cart_)
         , new event.NewOrder       (store_, Obj.Store)
         , new event.NewOrder       (user_, Obj.User)
-
         , new event.StoreAccept   (store_, agent_)
-        , new event.NewTransit    (agent_)
         , new event.Accepted      (user_ , Obj.User)
         , new event.Accepted      (store_, Obj.Store)
-        
+        , new event.NewTransit    (agent_)
         , new event.AgentAccept   (agent_, store_)
         , new event.AgentReady    (user_, Obj.User)
         , new event.AgentReady    (store_, Obj.Store)
-        
         , new event.StoreDespatch (store_, agent_)
         , new event.EnRoute       (user_, Obj.User)        
         , new event.EnRoute       (agent_, Obj.Agent)
-        
         , new event.AgentComplete (agent_)
         , new event.Delivered     (user_, Obj.User)
         , new event.Delivered     (store_, Obj.Store)

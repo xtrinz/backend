@@ -77,7 +77,7 @@ Date.prototype.is_today = function(date_)
 
 Date.prototype.diff_in_m = function(time_)
 {
-    const now = new Date
+    const now = new Date()
         , end = new Date( now.getFullYear()
                         , now.getMonth()
                         , now.getDate()

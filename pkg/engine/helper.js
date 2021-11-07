@@ -40,37 +40,50 @@ const Save = async function(ctxt, state_)
 	// Clear Event Only After History Update
 	ctxt.Event  = ''
 
-	let upsert = (state_ === Model.states.CargoInitiated)
+	let upsert = (state_ === Model.states.Initiated)
 
 	await db.transit.Save(ctxt, upsert)
 
-	if(!( state_ === Model.states.CargoCancelled 	  || // For these Model.states PayOut
-		  state_ === Model.states.OrderRejected 	  || // handle updates DB
-		  state_ === Model.states.TransitTerminated ||
-		  state_ === Model.states.TranistCompleted  ))
+	if(!( state_ === Model.states.Cancelled  || // For these Model.states PayOut
+		  state_ === Model.states.Rejected 	 || // handle updates DB
+		  state_ === Model.states.Terminated ||
+		  state_ === Model.states.Completed  ))
 	await db.journal.Save({ _id: ctxt.JournalID, 'Transit.State': state_ })
 }
 
-const PingAdmins = async function(ctxt, st, alert_)
+const PingAdmin = async function(ctxt, st, alert_)
 {
     console.log('ping-admins', {State: st, Ctxt: ctxt})
 
-	const admins  = await db.user.NearbyAdmins(
+	const admin = await db.user.NearbyAdmin(
           ctxt.Store.Address.Longitude
         , ctxt.Store.Address.Latitude)
-    ctxt.Admins = admins
+    ctxt.Admin 	= admin
     await Emit(alert_, ctxt)
     await Save(ctxt, st)
 }
 
 const ResetAgent = 
-{   _id  : '' , SockID   : []
-, Name : '' , MobileNo : '' }
+{   
+	  _id  	   : '' 
+	, SockID   : []
+	, Name 	   : '' 
+	, MobileNo : '' 
+}
 
-const SetAgent   = function(agent_)
+const SetAgent   = async function(ctxt)
 {
-	return {  _id 	: agent_._id  , SockID   : agent_.SockID
-		, Name	: agent_.Name , MobileNo : agent_.MobileNo  }
+	const agent_  = await db.agent.Get(ctxt.Agent.MobileNo, Model.query.ByMobileNo)
+	if(!agent_) Err_(Model.code.NOT_FOUND, Model.reason.AgentNotFound)
+	
+	let agent = 
+	{
+		_id 		: agent_._id
+	  , SockID   	: agent_.SockID
+	  , Name		: agent_.Name
+	  , MobileNo 	: agent_.MobileNo  
+	}
+	return agent
 }
 
 const ResetProduct = async function(Journal_id)
@@ -86,7 +99,7 @@ module.exports =
     , ConfirmOTP   : ConfirmOTP
     , SendOTP      : SendOTP
     , Save         : Save
-    , PingAdmins   : PingAdmins
+    , PingAdmin   : PingAdmin
     , ResetAgent   : ResetAgent
 	, SetAgent 	   : SetAgent
 	, ResetProduct : ResetProduct

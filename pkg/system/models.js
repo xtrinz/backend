@@ -248,28 +248,26 @@ module.exports =
 		, OnDuty 				: 'OnDuty'
 		, OffDuty 				: 'OffDuty'
 
+
+
 		, None 					: 'None'						// None
-		, CargoInitiated 		: 'CargoInitiated'				// Payment had succeeded
-		, CargoCancelled 		: 'CargoCancelled'				// Order canceled by user 									#Exit By User
-
-		, OrderRejected 		: 'OrderRejected' 				// Order rejected by the shop 								#Exit By Store
-		, OrderTimeExceeded 	: 'OrderTimeExceeded'			// Order acceptance time limit for shop has been exceeded	#Exit By User
-		, OrderAccepted 		: 'OrderAccepted'				// Order accpeted by shop
-		, OrderProcessed		: 'OrderProcessed'				// Order processed by shop
-		, OrderOnHold 			: 'OrderOnHold'					// Order on hold due to no nearby live agents
-		, OrderIgnored 			: 'OrderIgnored'
-		, OrderDespatched 		: 'OrderDespatched'				// Order gave to agent by shop
-
-		, TransitIgnored 		: 'TransitIgnored'				// Agent manually ingored the transit
-		, TransitTimeout 		: 'TransitTimeout'				// Agent transit acceptance deadline exceeded
-		, TransitOnHold 		: 'TransitOnHold'
-		, TransitAccepted 		: 'TransitAccepted'				// Agent accepted the transit
-		, TransitAbandoned		: 'TransitAbandoned'
-		, TransitRejected 		: 'TransitRejected'				// Agent droped/rejected the transit after acceptance
-		, TransitEnroute 		: 'TransitEnroute'				// The package is on the way.[state in hold, not decided]
-		, TransitOnDrift 		: 'TransitOnDrift'				// Agent needs help on the way of delivery
-		, TransitTerminated 	: 'TransitTerminated'			// 															#Exit By Store
-		, TranistCompleted 		: 'TranistCompleted'			// The package delivered									#End
+		, Initiated 			: 'Initiated'				// Payment had succeeded
+		, Cancelled 			: 'Cancelled'				// Order canceled by user 									#Exit By User
+		, Rejected 				: 'Rejected' 				// Order rejected by the shop 								#Exit By Store
+		, Assigned 				: 'Assigned' 				// Order assigned to the agent
+		, TimeExceeded 			: 'TimeExceeded'			// Order acceptance time limit for shop has been exceeded	#Exit By User
+		, Accepted 				: 'Accepted'				// Order accpeted by shop
+		, Processed				: 'Processed'				// Order processed by shop
+		, OnHold 				: 'OnHold'					// Order on hold due to no nearby live agents
+		, Despatched 			: 'Despatched'				// Order gave to agent by shop
+		, Ignored 				: 'Ignored'				// Agent manually ingored the transit
+		, Timeout 				: 'Timeout'				// Agent transit acceptance deadline exceeded
+		, Abandoned				: 'Abandoned'
+		, Rejected 				: 'Rejected'				// Agent droped/rejected the transit after acceptance
+		, Enroute 				: 'Enroute'				// The package is on the way.[state in hold, not decided]
+		, OnDrift 				: 'OnDrift'				// Agent needs help on the way of delivery
+		, Terminated 			: 'Terminated'			// 															#Exit By Store
+		, Completed 			: 'Completed'			// The package delivered									#End
 	},
 	delay:	// In Minutes
 	{
@@ -280,26 +278,20 @@ module.exports =
 	},
 	event:
 	{
-		  InitiationByUser		: 'InitiationByUser'			// event cargo initiated by user
-		, CancellationByUser	: 'CancellationByUser'			// event cargo cancellation by user
-		, RejectionByStore		: 'RejectionByStore'			// event order rejection by shop
-		, TimeoutByStore		: 'RespTimeoutByStore'			// event order acceptance timeout
-		, TimeoutByAdmin		: 'TimeoutByAdmin'
-		, TimeoutBySystem		: 'TimeoutBySystem'
-		, AcceptanceByStore		: 'AcceptanceByStore'			// event order acception by shop
-		, ProcessByStore		: 'ProcessByStore'
-		, DespatchmentByStore	: 'DespatchmentByStore'			// event order despatchment by shop
-		, IgnoranceByAgent		: 'IgnoranceByAgent'			// event transit ignorance by agent
-		, LockByAdmin			: 'LockByAdmin'					// event tranist under ctrl of admin
-		, AssignmentByAdmin		: 'AssignmentByAdmin'
-		, TerminationByAdmin	: 'TerminationByAdmin'
-		, ScheduleByAdmin 		: 'ScheduleByAdmin'		
-		, TimeoutByAgent		: 'RespTimeoutByAgent'			// event transit acceptance timeout
-		, RefeedByAdmin			: 'RefeedAgentsByAdmin'			// event re-initiate search for agents 
-		, AcceptanceByAgent		: 'AcceptanceByAgent'			// event transit acception by agent
-		, RejectionByAgent		: 'RejectionByAgent'			// event transit rejection by agent
-		, CompletionByAgent		: 'CompletionByAgent'			// event tranist completion by agent
-		, ResendOTP 			: 'ResendOTP'
+		  Init		: 'Init'			// event cargo initiated by user
+		, Cancel	: 'Cancel'			// event cargo cancellation by user
+		, Reject	: 'Reject'			// event order rejection by shop
+		, Timeout	: 'Timeout'			// event order acceptance timeout
+		, Accept	: 'Accept'			// event order acception by shop
+		, Commit	: 'Commit'			// event order committed by agent
+		, Ready		: 'Ready'
+		, Despatch	: 'Despatch'			// event order despatchment by shop
+		, Ignore	: 'Ignore'			// event transit ignorance by agent
+		, Assign	: 'Assign'
+		, Quit		: 'Quit'
+		, Terminate	: 'Terminate'
+		, Done		: 'Done'			// event tranist completion by agent
+		, ResendOTP : 'ResendOTP'
 	},
 	alerts:
 	{

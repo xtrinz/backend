@@ -17,7 +17,7 @@ class Store
         {
             Minute  : init_.getMinutes()
           , Hour    : init_.getHours()
-          , Day     : init_.getDay()
+          , Day     : init_.getDate()
           , Month   : init_.getMonth()
           , Year    : init_.getFullYear()
         }
@@ -297,7 +297,7 @@ class Store
             {
                 Minute    : now_.getMinutes()
               , Hour      : now_.getHours()
-              , Day       : now_.getDay()
+              , Day       : now_.getDate()
               , Month     : now_.getMonth()
               , Year      : now_.getFullYear()
             }

@@ -1,99 +1,64 @@
 const { Err_ } 	   = require('../system/models')
 	, Model 	   = require('../system/models')
-	, method	   = require('./methods')
+	, m	   		   = require('./methods'), e = Model.event, s = Model.states
 	, db           = require('../config/exports')[Model.segment.db]
 	, { ObjectId } = require('mongodb')
 
 var Handler =
 {
-	[Model.states.None] 					:
-	{											
-			[Model.event.InitiationByUser] 	: method.InitiatedByUser
-	}											
-	, [Model.states.CargoInitiated] 		:
-	{ 											
-		  [Model.event.CancellationByUser] 	: method.CancelledByUser
-		, [Model.event.RejectionByStore] 	: method.RejectedByStore
-		, [Model.event.TimeoutByStore]		: method.TimeoutByStore
-		, [Model.event.AcceptanceByStore]	: method.AcceptedByStore
+	  [s.None] 		 	: { [e.Init] : m.Init }								
+	, [s.Initiated]  	: 
+	{ 
+		  [e.Cancel] 	: m.Cancel
+		, [e.Reject] 	: m.Reject
+		, [e.Accept] 	: m.Accept 
+	}								
+	, [s.Assigned] 	 	:
+	{ 								
+		  [e.Cancel] 	: m.Cancel
+		, [e.Ignore] 	: m.Ignore
+		, [e.Reject] 	: m.Reject
+		, [e.Commit] 	: m.Commit
+		, [e.Ready]	 	: m.Ready
+	}								
+	, [s.Accepted] 	 	:
+	{								
+		  [e.Cancel] 	: m.Cancel
+		, [e.Ignore] 	: m.Ignore
+		, [e.Reject] 	: m.Reject
+		, [e.Despatch]	: m.Despatch		
+		, [e.ResendOTP]	: m.OTP
+		, [e.Ready]	 	: m.Ready
+	}									
+	, [s.OnHold] 	 	: 
+	{ 
+		  [e.Terminate] : m.Terminate
+		, [e.Assign] 	: m.Assign
+		, [e.Ready]	 	: m.Ready 
+		, [e.Reject] 	: m.Reject		
+	}								
+	, [s.Despatched] 	:
+	{ 
+		  [e.Quit] 		: m.Quit
+		, [e.ResendOTP] : m.OTP
+		, [e.Done]	 	: m.Complete 	
 	}
-	, [Model.states.CargoCancelled] 		: {}
-	, [Model.states.OrderRejected] 			: {}
-	, [Model.states.OrderTimeExceeded] 		: {}
-	, [Model.states.OrderAccepted] 			:
-	{ 											
-		  [Model.event.CancellationByUser] 	: method.CancelledByUser
-		, [Model.event.IgnoranceByAgent] 	: method.IgnoredByAgent
-		, [Model.event.TimeoutByAgent] 		: method.TimeoutByAgent
-		, [Model.event.RejectionByStore] 	: method.RejectedByStore
-		, [Model.event.AcceptanceByAgent] 	: method.AcceptedByAgent
-		, [Model.event.ProcessByStore]		: method.ProcessedByStore
-	}											
-	, [Model.states.OrderProcessed] 		:
-	{ 											
-		  [Model.event.CancellationByUser] 	: method.CancelledByUser
-		, [Model.event.IgnoranceByAgent] 	: method.IgnoredByAgent
-		, [Model.event.TimeoutByAgent] 		: method.TimeoutByAgent
-		, [Model.event.AcceptanceByAgent] 	: method.AcceptedByAgent
-	}													
-	, [Model.states.OrderIgnored] 			:
-	{ 											
-			[Model.event.LockByAdmin] 		: method.LockedByAdmin
-	}											
-	, [Model.states.TransitIgnored] 		:
-	{											
-			[Model.event.LockByAdmin] 		: method.LockedByAdmin
-	}										
-	, [Model.states.TransitAbandoned] 		:
-	{											
-		  [Model.event.TerminationByAdmin] 	: method.TerminatedByAdmin
-		, [Model.event.AssignmentByAdmin] 	: method.AssignedByAdmin
-		, [Model.event.LockByAdmin] 		: method.LockedByAdmin
-	}										
-	, [Model.states.OrderOnHold] 			:
-	{ 											
-		  [Model.event.TerminationByAdmin] 	: method.TerminatedByAdmin
-		, [Model.event.AssignmentByAdmin] 	: method.AssignedByAdmin
-	}											
-	, [Model.states.TransitOnHold] 			:
-	{											
-		  [Model.event.TerminationByAdmin] 	: method.TerminatedByAdmin
-		, [Model.event.AssignmentByAdmin] 	: method.AssignedByAdmin
-	}													
-	, [Model.states.TransitTimeout] 		: {}
-	, [Model.states.TransitAccepted] 		:
-	{											
-		  [Model.event.CancellationByUser] 	: method.CancelledByUser
-		, [Model.event.RejectionByAgent] 	: method.RejectedByAgent 
-		, [Model.event.RejectionByStore]  	: method.RejectedByStore
-		, [Model.event.DespatchmentByStore] : method.DespatchedByStore
-		, [Model.event.ResendOTP] 			: method.ResendOTP
-	}											
-	, [Model.states.OrderDespatched] 		:
-	{											
-		  [Model.event.RejectionByAgent] 	: method.RejectedByAgent 
-		, [Model.event.CompletionByAgent] 	: method.CompletedByAgent
-		, [Model.event.ResendOTP] 			: method.ResendOTP			
-	}											
-	, [Model.states.TransitRejected] 		:
-	{											
-		  [Model.event.AcceptanceByAgent] 	: method.AcceptedByAgent
-		, [Model.event.IgnoranceByAgent] 	: method.IgnoredByAgent
-	}											
-	, [Model.states.TranistCompleted] 		: {}
+	, [s.Completed]  	: {}
+	, [s.Rejected] 	 	: {}
+	, [s.Cancelled]  	: {}	
 }
 
 var Timer =
 {
-	  [Model.event.InitiationByUser] 		:
+	  [e.Init] 		:
 	{
 		  Timeout	: Model.delay.StoreRespLimit
-		, Event  	: Model.event.TimeoutByStore
+		, Event  	: e.TimeoutByStore
 	}
-	, [Model.event.TimeoutByStore] 			:
+	, [e.Timeout] 			:
 	{
 		  Timeout	: Model.delay.AdminRespLimit
-		, Event  	: Model.event.TimeoutByAdmin
+		, Event  	: e.TimeoutByAdmin
 	}
 }
 
@@ -184,7 +149,7 @@ var Transition = async function (ctxt)
 			, Event 	   : event_
 			, EventContext : eve_  
 		})
-		await TimerHandler(ctxt._id, event_)
+		//await TimerHandler(ctxt._id, event_)
 	}
 
 	console.log('transition-completed', { Transit: ctxt })
