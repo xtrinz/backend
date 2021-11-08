@@ -185,7 +185,7 @@ let RegisterApprove =  function(admin_, store_)
   this.Data     = function()
   {
     let store = data.Get(data.Obj.Store, this.StoreID)
-    let admin = data.Get(data.Obj.User, this.AdminID)
+    let admin = data.Get(data.Obj.Admin, this.AdminID)
     let templ =
     {
         Type            : Type.Rest

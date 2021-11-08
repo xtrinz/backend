@@ -19,6 +19,7 @@ const database  = client.db(process.env.DB_NAME)
     , notes 	  = database.collection(set.note)
     , users 	  = database.collection(set.user)
     , agents 	  = database.collection(set.agent)
+    , admins 	  = database.collection(set.admin)    
     , sockets 	= database.collection(set.socket)
     , stores 	  = database.collection(set.store)
     , products 	= database.collection(set.product)
@@ -43,6 +44,7 @@ module.exports  =
 
   , users
   , agents
+  , admins
   , sockets
   , stores
   , products

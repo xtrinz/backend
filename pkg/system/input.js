@@ -10,6 +10,7 @@ const Controller 		 = function()
 	{
     [rsrc.user]           : require('../tools/rules/input/user')
   , [rsrc.agent]          : require('../tools/rules/input/agent')   
+  , [rsrc.admin]          : require('../tools/rules/input/admin')     
   , [rsrc.store]          : require('../tools/rules/input/store')
   , [rsrc.product]        : require('../tools/rules/input/product')
   , [rsrc.cart]           : require('../tools/rules/input/cart')

@@ -6,6 +6,7 @@ const Segments =
     {
           [Model.resource.address] : require('./address/archive' )
         , [Model.resource.agent]   : require('./agent/archive'   )
+        , [Model.resource.admin]   : require('./admin/archive'   )        
         , [Model.resource.cart]    : require('./cart/archive'    )
         , [Model.resource.product] : require('./product/archive' )
         , [Model.resource.store]   : require('./store/archive'   )

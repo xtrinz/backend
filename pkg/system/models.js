@@ -292,6 +292,15 @@ module.exports =
 		, Terminate	: 'Terminate'
 		, Done		: 'Done'			// event tranist completion by agent
 		, ResendOTP : 'ResendOTP'
+
+
+		, Create 	: 'Create'			// event entity creation
+		, Confirm 	: 'Confirm'			// event mobile number confirmation
+		, Register 	: 'Register'		// event user registration
+		, Edit 		: 'Edit'			// event user edit
+		, View 		: 'View'			// event user view
+
+		, List 		: 'List'			// event list
 	},
 	alerts:
 	{
@@ -343,7 +352,8 @@ module.exports =
 		  root					: '/'
 		, test					: 'test'
 		, user					: 'user'
-		, agent					: 'agent'		
+		, agent					: 'agent'
+		, admin 				: 'admin'		
 		, paytm					: 'paytm'
 		, store					: 'store'
 		, product				: 'product'
@@ -422,7 +432,8 @@ module.exports =
 	set:
 	{
 		  user					: 'user'
-		, agent					: 'agent'			  
+		, agent					: 'agent'
+		, admin					: 'admin'			  
 		, socket				: 'socket'
 		, store					: 'store'
 		, product				: 'product'

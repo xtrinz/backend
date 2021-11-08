@@ -7,6 +7,7 @@ const Controller 		 = function()
 	{
       [rsrc.user]        : require('../tools/rules/access/user')
     , [rsrc.agent]       : require('../tools/rules/access/agent')
+    , [rsrc.admin]       : require('../tools/rules/access/admin')    
     , [rsrc.store]       : require('../tools/rules/access/store')
     , [rsrc.product]     : require('../tools/rules/access/product')
     , [rsrc.cart]        : require('../tools/rules/access/cart')

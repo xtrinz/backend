@@ -5,7 +5,8 @@ const { Err, Err_, code, status
     {
         store                             : require('../config/store/archive')
       , user                              : require('../config/user/archive')
-      , agent                             : require('../config/agent/archive')      
+      , agent                             : require('../config/agent/archive')
+      , admin                             : require('../config/admin/archive')            
     }
     , jwt                                 = require('../infra/jwt')
     , rbac                                = require('../system/rbac')
@@ -94,7 +95,29 @@ const Authnz = async function (req, res, next)
 
         console.log('agent-authenticated', { Agent: agent })    
         break
-      default:
+
+      case mode.Admin:
+
+        let admin = await db.admin.Get(resp._id, query.ByID)
+        if (!admin)
+        {
+            console.log('agent-not-found', { AdminID: resp._id })
+            Err_(code.UNAUTHORIZED, reason.InvalidToken)
+        }
+
+        if (!mode_.State.includes(admin.State))
+        {
+          console.log('state-mismatch-for-admin-auth', { Admin: admin })
+          Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+        }
+
+        req.body.Admin = admin
+        req.body.Mode  = mode.Admin
+
+        console.log('admin-authenticated', { Admin: admin })    
+        break        
+
+      case mode.User:
 
         let user = await db.user.Get(resp._id, query.ByID)
         if (!user)
@@ -112,11 +135,11 @@ const Authnz = async function (req, res, next)
         req.body.User = user
         req.body.Mode = user.Mode
 
-        console.log('user-authenticated', { User: user })
-      break
+        console.log('user-authenticated', { User: user })  
+        break
     }
  
-    if(mode_[req.body.Mode])  
+    if(req.body.Mode && mode_[req.body.Mode])  
       next()
     else
     {

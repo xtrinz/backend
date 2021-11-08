@@ -12,7 +12,7 @@ module.exports =
                   [mode.User]   : true
                 , [mode.Agent]  : true
                 , [mode.Store]  : false
-                , [mode.Admin]  : true
+                , [mode.Admin]  : false
                 , [mode.Enabled]: false
             }
             , [task.ReadOTP]  : 
@@ -20,7 +20,7 @@ module.exports =
                   [mode.User]   : true
                 , [mode.Agent]  : true
                 , [mode.Store]  : false
-                , [mode.Admin] 	: true
+                , [mode.Admin] 	: false
                 , [mode.Enabled]: false
             }
             , [task.Register] : 
@@ -28,7 +28,7 @@ module.exports =
                   [mode.User]   : true
                 , [mode.Agent]  : true
                 , [mode.Store]  : false
-                , [mode.Admin] 	: true
+                , [mode.Admin] 	: false
                 , [mode.Enabled]: true
                 , [states.State]: [ states.MobConfirmed ]
             }
@@ -42,7 +42,7 @@ module.exports =
                 [mode.User]   : true
             , [mode.Agent]  : true
             , [mode.Store]  : false
-            , [mode.Admin] 	: true
+            , [mode.Admin] 	: false
             , [mode.Enabled]: true
             , [task.Enabled]: false                    
         }
@@ -51,7 +51,7 @@ module.exports =
               [mode.User]     : true
             , [mode.Agent]    : true
             , [mode.Store]    : false
-            , [mode.Admin] 	  : true
+            , [mode.Admin] 	  : false
             , [mode.Enabled]  : true
             , [task.Enabled]  : false        
         } 

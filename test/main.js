@@ -15,6 +15,11 @@ const { Test, TestSuite } = require('./lib/driver')
         data  : require('./frames/agent/data')
       , story : require('./frames/agent/story')
     }    
+    , admin     =
+    {
+        data  : require('./frames/admin/data')
+      , story : require('./frames/admin/story')
+    }        
     , store     =
     {
         data  : require('./frames/store/data')
@@ -45,7 +50,7 @@ const { Test, TestSuite } = require('./lib/driver')
       , story   : require('./frames/journal/story')        
     }
 
-  let admin_1       = new    user.data.User    ('Admin')
+  let admin_1       = new   admin.data.Admin   ('Admin')
     , note_         = new    note.data.Note    ()
     , client_1      = new    user.data.User    ('User')
     , agent_1       = new   agent.data.Agent   ('Agent')
@@ -58,7 +63,7 @@ const { Test, TestSuite } = require('./lib/driver')
   var suite_1 = new TestSuite('End to End Process')
   let cases =
   [
-         user.story.Std('Add Admin ',               admin_1.Name)
+        admin.story.Std('Add Admin ',               admin_1.Name)
     ,    user.story.Std('Add Client',              client_1.Name)
     ,   agent.story.Std('Add Agent ',               agent_1.Name,   admin_1.Name)
     ,   store.story.Std('Add Seller',               store_1.Name,   admin_1.Name,     client_1.Name)
@@ -68,8 +73,9 @@ const { Test, TestSuite } = require('./lib/driver')
     ,    cart.story.Std(client_1.Name,            product_1.Name, client_1_addr.Name,                 store_1.Name)
     , transit.story.Std(client_1.Name,        client_1_addr.Name, agent_1.Name,                       store_1.Name)
     , journal.story.Std(client_1.Name,              store_1.Name, agent_1.Name, admin_1.Name, client_1_addr.Name)
-    ,    user.story.Disconnect(client_1.Name, admin_1.Name)
+    ,    user.story.Disconnect(client_1.Name)
     ,   agent.story.Disconnect(agent_1.Name)
+    ,   admin.story.Disconnect(admin_1.Name)    
     ,   store.story.Disconnect(store_1.Name)
   ]
   cases.forEach((test)=> suite_1.AddCase(test))

@@ -1,5 +1,5 @@
 const { users }             = require('../../system/database')
-    , { query, mode,
+    , { query,
         Err_, code, reason} = require('../../system/models')
     , { ObjectId }          = require('mongodb')
 
@@ -38,32 +38,6 @@ const Get = async function(param, qType)
     return user
 }
 
-const NearbyAdmin = async function(ln, lt)
-{
-    ln = ln.loc()
-    lt = lt.loc()
-
-    console.log('get-nearest-admin', {Location: [ln, lt]} )
-    const proj    = { projection: { _id: 1, Name: 1, SockID: 1, MobileNo: 1 } }
-        , query   =
-        { 
-            Location  :
-            {
-                $near : { $geometry    : { type: 'Point', coordinates: [ln, lt] } }
-            }
-            , Mode    : mode.Admin
-        }
-
-    const admin_ = await users.findOne(query, proj)
-    if (!admin_)
-    {
-        console.log('no-admin-found', { Location: [ln, lt]})
-        return
-    }
-    console.log('admin-found', { Admin: admin_ })
-    return admin_
-}
-
 const GetUserSockID = async function(user_id)
 {
     console.log('get-user-sock-id', { UserID: user_id })
@@ -84,6 +58,5 @@ module.exports =
 {
       Save          : Save
     , Get           : Get
-    , NearbyAdmin   : NearbyAdmin
     , GetUserSockID : GetUserSockID
 }

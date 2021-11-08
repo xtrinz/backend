@@ -44,7 +44,7 @@ let Set = function(admin_, note_)
   this.NoteID   = note_
   this.Data     = function()
   {
-    let admin  = data.Get(data.Obj.User, this.AdminID)
+    let admin  = data.Get(data.Obj.Admin, this.AdminID)
     let note   = data.Get(data.Obj.Note, this.NoteID)
     let templ =
     {

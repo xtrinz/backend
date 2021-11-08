@@ -17,7 +17,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
     {
       let journal = data.Get(data.Obj.Journal , this.JournalID)
       let user    = data.Get(data.Obj.User    , this.UserID)
-      let admin   = data.Get(data.Obj.User    , this.AdminID)      
+      let admin   = data.Get(data.Obj.Admin   , this.AdminID)      
       let agent   = data.Get(data.Obj.Agent   , this.AgentID)
       let cart    = data.Get(data.Obj.Cart    , this.CartID)
       let store   = data.Get(data.Obj.Store   , journal.Seller.Name)
@@ -235,7 +235,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
     {
       let journal = data.Get(data.Obj.Journal , this.JournalID)
       let user    = data.Get(data.Obj.User    , this.UserID)
-      let admin   = data.Get(data.Obj.User    , this.AdminID)      
+      let admin   = data.Get(data.Obj.Admin    , this.AdminID)      
       let agent   = data.Get(data.Obj.Agent   , this.AgentID)
       let cart    = data.Get(data.Obj.Cart    , this.CartID)
       let store   = data.Get(data.Obj.Store   , journal.Seller.Name)

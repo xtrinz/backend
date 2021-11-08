@@ -420,7 +420,7 @@ let NoAgents = function(admin_)
   this.AdminID = admin_
   this.Data    = function()
   {
-    let admin   = data.Get(data.Obj.User, this.AdminID)
+    let admin   = data.Get(data.Obj.Admin, this.AdminID)
     let templ  =      
     {
         Type          : Type.Event

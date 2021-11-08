@@ -148,7 +148,7 @@ let RegisterApprove =  function(agent_, admin_)
   this.Data     = function()
   {
     let agent = data.Get(data.Obj.Agent, this.AgentID)
-    let admin = data.Get(data.Obj.User, this.AdminID)
+    let admin = data.Get(data.Obj.Admin, this.AdminID)
     let templ =
     {
         Type            : Type.Rest
@@ -257,7 +257,7 @@ let List = function(agent_, admin_)
   this.Data     = function()
   {
     let agent = data.Get(data.Obj.Agent, this.AgentID)
-    let admin = data.Get(data.Obj.User, this.AdminID)
+    let admin = data.Get(data.Obj.Admin, this.AdminID)
     let templ =
     {
         Type            : Type.Rest

@@ -54,8 +54,23 @@ const Connect = async function(socket_)
           await db.agent.Save(data)
           break
 
+      case Model.mode.Admin:  
+          data = await db.admin.Get(resp._id, Model.query.ByID)
+          if (!data)
+          {
+              console.log('admin-not-found', { AdminID: resp._id })
+              Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
+          }
+          data.SockID.push(socket_.id)
+  
+          if(data.SockID.length > Model.limits.SocketCount)
+            sock_id = data.SockID[0]
+  
+          data.IsLive = true    
+          await db.admin.Save(data)
+          break
+
       case Model.mode.User:
-      case Model.mode.Admin:
 
         data = await db.user.Get(resp._id, Model.query.ByID)
         if (!data)
@@ -142,8 +157,24 @@ const Disconnect = async function(socket_)
           await db.agent.Save(data)
           break
 
-      case Model.mode.User:
       case Model.mode.Admin:
+
+        data = await db.admin.Get(sckt.Entity, Model.query.ByID)
+        if (!data)
+        {
+            console.log('admin-not-found', { AdminID: sckt.Entity })
+            Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
+        }
+        index = await data.SockID.indexOf(String(socket_.id))
+        if (index > -1) { data.SockID.splice(index, 1) }
+
+        if(data.SockID.length === 0)
+          data.IsLive = false    
+  
+        await db.admin.Save(data)
+        break
+
+      case Model.mode.User:
 
         data = await db.user.Get(sckt.Entity, Model.query.ByID)
         if (!data)

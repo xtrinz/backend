@@ -44,13 +44,6 @@ function User(data)
             return
         }
 
-        if(this.Data.Mode     === Model.mode.Admin &&
-            !process.env.ADMIN_MOB_NO.split(' ').includes(this.Data.MobileNo))
-        {
-            console.log('unmatched-mobile-no-seed-unknown-admin', { Admin: this.Data })
-            Err_(Model.code.NOT_FOUND, Model.reason.Unauthorized)
-        }
-
         const otp_sms = new otp.OneTimePasswd({
                         MobileNo: 	this.Data.MobileNo, 
                         Body: 	Model.message.OnAuth })

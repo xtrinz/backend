@@ -55,7 +55,7 @@ const PingAdmin = async function(ctxt, st, alert_)
 {
     console.log('ping-admins', {State: st, Ctxt: ctxt})
 
-	const admin = await db.user.NearbyAdmin(
+	const admin = await db.admin.NearbyAdmin(
           ctxt.Store.Address.Longitude
         , ctxt.Store.Address.Latitude)
     ctxt.Admin 	= admin
