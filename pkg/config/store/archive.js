@@ -1,12 +1,6 @@
-const { ObjectId }  = require('mongodb')
-    , { stores }    = require('../../system/database')
-    , {   Err_
-        , code
-        , reason
-        , query
-        , dbset
-        , states
-        , limits }  = require('../../system/models')
+const { ObjectId } = require('mongodb')
+    , { stores }   = require('../../system/database')
+    , Model        = require('../../system/models')
 
 const Save       = async function(data)
 {
@@ -25,7 +19,7 @@ const Save       = async function(data)
             , Option    : opt
             , Result    : resp.result
         })
-        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
+        Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.DBAdditionFailed)
     }
     console.log('store-saved', { Store : data })
 }
@@ -36,8 +30,8 @@ const Get = async function(param, qType)
     let query_
     switch (qType)
     {
-        case query.ByID   : query_ = { _id: ObjectId(param) } ; break;
-        case query.Custom : query_ = param                    ; break;
+        case Model.query.ByID   : query_ = { _id: ObjectId(param) } ; break;
+        case Model.query.Custom : query_ = param                    ; break;
     }
     let store = await stores.findOne(query_)
     if (!store)
@@ -55,7 +49,7 @@ const List = async function(data, proj)
     data.Page   = data.Page.loc()
     const query = data.Query
         , skip  = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
-        , lmt   = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
+        , lmt   = (data.Limit > Model.dbset.Limit)? Model.dbset.Limit : data.Limit
 
     const data_ = await stores.find(query, proj)
                               .skip(skip)
@@ -71,36 +65,34 @@ const List = async function(data, proj)
     return data_
 }
 
-const GetStoreSockID = async function(store_id)
+const Delete = async function(store_id)
 {
-    console.log('get-store-sock-id', { StoreID: store_id })
+    console.log('delete-store', { StoreID: store_id })
 
-    const query = { _id: ObjectId(store_id), IsLive: true }
-
-    let store = await stores.findOne(query)
-    if(!store)
+    const query = { _id: ObjectId(store_id) }
+    const resp  = await stores.deleteOne(query)
+    if (!resp.deletedCount)
     {
-        console.log('store-not-found', query)
-        return []
+        console.log('store-delete-failed', { Query : query })
+        Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
     }
-    console.log('store-found', { User : store })
-    return store.SockID
+    console.log('store-deleted', { StoreID: store_id })
 }
 
 const Seller = async function(store_id)
 {
-    const store   = await Get(store_id, query.ByID)
-    if (!store) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+    const store   = await Get(store_id, Model.query.ByID)
+    if (!store) Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
 
     const now_     = new Date()
         , is_now   = now_.is_now(store.Time.Open, store.Time.Close)
         , is_today = now_.is_today(store.Status.SetOn)        
-    if( !is_now || (is_today && store.Status === states.Closed) ||
-      ( is_now && now_.diff_in_m(store.Time.Close) < limits.CheckoutGracePeriod))
+    if( !is_now || (is_today && store.Status === Model.states.Closed) ||
+      ( is_now && now_.diff_in_m(store.Time.Close) < Model.limits.CheckoutGracePeriod))
     {
-      let reason_ = (is_now)? reason.GracePeriodExceeded: reason.StoreClosed
+      let reason_ = (is_now)? Model.reason.GracePeriodExceeded: Model.reason.StoreClosed
       console.log('store-has-closed', { Store: store })
-      Err_(code.BAD_REQUEST, reason_)
+      Model.Err_(Model.code.BAD_REQUEST, reason_)
     }
 
     const resp = 
@@ -118,12 +110,28 @@ const Seller = async function(store_id)
     return resp
 }
 
+const SockID = async function(store_id)
+{
+    console.log('get-store-sock-id', { StoreID: store_id })
+
+    const query = { _id: ObjectId(store_id), IsLive: true }
+
+    let store = await stores.findOne(query)
+    if(!store)
+    {
+        console.log('store-not-found', query)
+        return []
+    }
+    console.log('store-found', { User : store })
+    return store.SockID
+}
+
 const Location = async function(store_id)
 {
     console.log('get-store-location', { StoreID: store_id })
 
-    store_ = await Get(store_id, query.ByID)
-    if (!store_) Err_(code.BAD_REQUEST, reason.StoreNotFound)
+    store_ = await Get(store_id, Model.query.ByID)
+    if (!store_) Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
     let data =
     {
         Longitude : store_.Address.Location.coordinates[0].toFixed(6)
@@ -134,28 +142,10 @@ const Location = async function(store_id)
     return data
 }
 
-// delete store
-const Delete = async function(store_id)
-{
-    console.log('delete-store', { StoreID: store_id })
-
-    const query = { _id: ObjectId(store_id) }
-    const resp  = await stores.deleteOne(query)
-    if (!resp.deletedCount)
-    {
-        console.log('store-delete-failed', { Query : query })
-        Err_(code.BAD_REQUEST, reason.StoreNotFound)
-    }
-    console.log('store-deleted', { StoreID: store_id })
-}
-
 module.exports =
 {
-      Save           : Save
-    , Get            : Get
-    , List           : List
-    , GetStoreSockID : GetStoreSockID
-    , Seller         : Seller
-    , Location       : Location
-    , Delete         : Delete
+      Save     , Get    
+    , List     , Delete
+    , SockID   , Seller
+    , Location   
 }

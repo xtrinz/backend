@@ -10,7 +10,8 @@ const Model    = require('../system/models')
     }
     , [Model.resource.store]:
     {
-          project  : require('./project/store'   )
+          filter   : require('./filter/store'    )      
+        , project  : require('./project/store'   )
         , rinse    : require('./rinse/store'     )
     }    
     , [Model.resource.journal]:

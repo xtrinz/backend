@@ -38,7 +38,7 @@ const Get = async function(param, qType)
     return user
 }
 
-const GetUserSockID = async function(user_id)
+const SockID = async function(user_id)
 {
     console.log('get-user-sock-id', { UserID: user_id })
 
@@ -54,9 +54,4 @@ const GetUserSockID = async function(user_id)
     return user.SockID
 }
 
-module.exports =
-{
-      Save          : Save
-    , Get           : Get
-    , GetUserSockID : GetUserSockID
-}
+module.exports = { Save, Get, SockID }

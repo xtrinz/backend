@@ -23,7 +23,7 @@ class Socket
 
         await db.socket.Remove(data._id, mode_, sock_id)
 
-        await db.transit.ClearSockID(data._id, sock_id)
+        await db.transit.ClearSockID(mode_, data._id, sock_id)
 
         console.log('sock-id-poped', opt)
     }

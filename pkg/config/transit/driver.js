@@ -50,8 +50,8 @@ class Transit
     async Init(_id)
     {
 
-        this.User.SockID  = await db.user.GetUserSockID(this.User._id)
-        this.Store.SockID = await db.store.GetStoreSockID(this.Store._id)
+        this.User.SockID  = await db.user.SockID(this.User._id)
+        this.Store.SockID = await db.store.SockID(this.Store._id)
         this._id          = _id
         this.OrderedAt    = (new Date()).toISOString()
 
