@@ -23,8 +23,20 @@ module.exports =
 
     , [verb.view]: 
     {
-        [mode.User] : function(data, store_)
+        [mode.User] : function(store_)
         {
+            let data =
+            {
+                StoreID     : store_._id
+              , Name        : store_.Name
+              , Image       : store_.Image
+              , Description : store_.Description              
+              , Certs       : store_.Certs
+              , Type        : store_.Type
+              , Address     : store_.Address
+              , Time        : store_.Time
+            }
+            
             delete data.Address.Location
 
             let now_ = new Date()
@@ -37,10 +49,27 @@ module.exports =
                 { data.Status = store_.Status.Current }
             }
             else { data.Status = states.Closed }
+
+            return data
         }
 
-        , [mode.Admin] : function(data, store_)
-        {
+        , [mode.Admin] : function(store_)
+        {            
+            let data =
+            {
+                StoreID     : store_._id
+              , Email       : store_.Email
+              , State       : store_.State
+              , Image       : store_.Image
+              , Certs       : store_.Certs
+              , Description : store_.Description
+              , Type        : store_.Type
+              , Name        : store_.Name
+              , MobileNo    : store_.MobileNo
+              , Address     : store_.Address
+              , Time        : store_.Time
+            }
+
             data.Address.Longitude = store_.Address.Location.coordinates[0].toFixed(6)
             data.Address.Latitude  = store_.Address.Location.coordinates[1].toFixed(6)
 
@@ -57,8 +86,23 @@ module.exports =
             else { data.Status = states.Closed }
         }       
  
-        , [mode.Store] : function(data, store_)
+        , [mode.Store] : function(store_)
         {
+            let data =
+            {
+                StoreID     : store_._id
+              , Email       : store_.Email
+              , State       : store_.State
+              , Image       : store_.Image
+              , Certs       : store_.Certs
+              , Description : store_.Description
+              , Type        : store_.Type
+              , Name        : store_.Name
+              , MobileNo    : store_.MobileNo
+              , Address     : store_.Address
+              , Time        : store_.Time
+            }
+
             data.Address.Longitude = store_.Address.Location.coordinates[0].toFixed(6)
             data.Address.Latitude  = store_.Address.Location.coordinates[1].toFixed(6)
 
@@ -73,6 +117,8 @@ module.exports =
                 { data.Status = store_.Status.Current }
             }
             else { data.Status = states.Closed }
+
+            return data
         }                
     }
 }

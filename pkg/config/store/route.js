@@ -1,62 +1,45 @@
-const router 	               = require('express').Router()
-    , { code, text, status, states, command
-    , task, mode }           = require('../../system/models')
-    , { Store }              = require('../store/driver')
+const router 	= require('express').Router()
+    , Model   = require('../../system/models')
+    , Method  = require('./methods')
+    , Handler = require('./handler')
 
 router.post('/register', async (req, res, next) =>
 {
   try
   {
-    console.log('register-shop',req.body)
-    let text_ = '', data_ = {}, store, info_
+
+    let text_ = '', data_ = {}, event_
+    let ctxt  = await Method.Context(req.body, res)
 
     switch (req.body.Task)
     {
-      case task.New:
-        store = new Store(req.body)
-        await store.New()
-        text_ = text.OTPSendToMobileNo.format(
-                    req.body.MobileNo.slice(-4))
+      case Model.task.New:
+        event_ = Model.event.Create
+        text_  = Model.text.OTPSendToMobileNo.format(
+          req.body.MobileNo.slice(-4))
         break
 
-      case task.ReadOTP:
-        const resp    = await Store.ConfirmMobileNo(req.body)
-        text_         = text.OTPConfirmed
-        info_         = resp.Store
-        info_.Command = resp.Command
-        data_         = { Command : info_.Command }
-        res.setHeader('authorization', resp.Token)
+      case Model.task.ReadOTP:
+        event_ = Model.event.Confirm
+        text_  = Model.text.OTPConfirmed
         break
 
-      case task.Register:
-        info_         = req.body.Store
-        await Store.Register(req.body)
-        info_.Command = command.LoggedIn
-        data_         = { Command : info_.Command }        
-        text_         = text.Registered
+      case Model.task.Register:
+        event_ = Model.event.Register
+        text_  = Model.text.Registered
         break
 
-      case task.Approve:
-        await Store.Approve(req.body)
-        text_ = text.Approved
+      case Model.task.Approve:
+        event_ = Model.event.Approve
+        text_  = Model.text.Approved
         break
-      }
-
-    if(info_ && (info_.State === states.Registered   ||
-                 info_.State === states.ToBeApproved ))
-    {
-      let in_ =
-      {
-          ID    : info_._id
-        , Mode  : mode.Store
-        , Store : info_
-      }
-      data_ = await Store.Read(in_)
-      data_.Command = info_.Command
     }
+
+    ctxt.Event =  event_
+    data_      = await Handler.Transition(ctxt)
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : text_,
       Data    : data_
     })
@@ -69,7 +52,7 @@ router.get('/view', async (req, res, next) => {
       let in_
       switch(req.body.Mode)
       {
-        case mode.Store:
+        case Model.mode.Store:
           in_ =
           {
               ID    : req.body.Store._id
@@ -86,24 +69,25 @@ router.get('/view', async (req, res, next) => {
           }          
           break
       }
-      const data  = await Store.Read(in_)
+      const data  = await Method.Get(in_)
 
-      return res.status(code.OK).json({
-        Status  : status.Success,
+      return res.status(Model.code.OK).json({
+        Status  : Model.status.Success,
         Text    : '',
         Data    : data
       })
     } catch (err) { next(err) }
 })
 
+
 router.get('/list', async (req, res, next) =>
 {
     try 
     {
-      const data  = await Store.List(req.query, req.body.Mode)
+      const data  = await Method.List(req.query, req.body.Mode)
       
-      return res.status(code.OK).json({
-        Status  : status.Success,
+      return res.status(Model.code.OK).json({
+        Status  : Model.status.Success,
         Text    : '',
         Data    : data
       })
@@ -114,29 +98,15 @@ router.put('/edit', async (req, res, next) =>
 {
   try 
   {
-    await Store.Edit(req.body)
+    await Method.Edit(req.body)
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.ProfileUpdated,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.ProfileUpdated,
       Data    : {}
     })
   } catch (err) { next(err) }
 })
 
-router.delete('/delete', async (req, res, next) =>
-{
-  try
-  {
-    await Store.Delete(req.body)
-
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.Deleted,
-      Data    : {}
-    })
-  }
-  catch (err) { next(err) }
-})
 
 module.exports = router

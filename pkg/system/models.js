@@ -296,13 +296,13 @@ module.exports =
 		, ResendOTP : 'ResendOTP'
 
 
-		, Create 	: 'Create'			// event entity creation
-		, Confirm 	: 'Confirm'			// event mobile number confirmation
-		, Register 	: 'Register'		// event user registration
-		, Edit 		: 'Edit'			// event user edit
-		, View 		: 'View'			// event user view
-
-		, List 		: 'List'			// event list
+		, Create 	: 'Create'
+		, Confirm 	: 'Confirm'
+		, Register 	: 'Register'
+		, Edit 		: 'Edit'
+		, View 		: 'View'
+		, Approve 	: 'Approve'
+		, List 		: 'List'
 	},
 	alerts:
 	{

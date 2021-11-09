@@ -31,6 +31,7 @@ const Get = async function(param, qType)
     switch (qType)
     {
         case Model.query.ByID   : query_ = { _id: ObjectId(param) } ; break;
+        case Model.query.ByMobileNo : query_ = { MobileNo: param }  ; break;        
         case Model.query.Custom : query_ = param                    ; break;
     }
     let store = await stores.findOne(query_)
@@ -63,20 +64,6 @@ const List = async function(data, proj)
 
     console.log('near-by-stores', { Stores: data_ })
     return data_
-}
-
-const Delete = async function(store_id)
-{
-    console.log('delete-store', { StoreID: store_id })
-
-    const query = { _id: ObjectId(store_id) }
-    const resp  = await stores.deleteOne(query)
-    if (!resp.deletedCount)
-    {
-        console.log('store-delete-failed', { Query : query })
-        Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
-    }
-    console.log('store-deleted', { StoreID: store_id })
 }
 
 const Seller = async function(store_id)
@@ -145,7 +132,6 @@ const Location = async function(store_id)
 module.exports =
 {
       Save     , Get    
-    , List     , Delete
-    , SockID   , Seller
-    , Location   
+    , List     , SockID   
+    , Seller   , Location   
 }
