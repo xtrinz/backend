@@ -284,7 +284,4 @@ function Journal()
     }
 }
 
-module.exports =
-{
-  Journal: Journal
-}
+module.exports = Journal

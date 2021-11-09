@@ -1,8 +1,8 @@
 
-const Model       = require('../../system/models')
-    , router 	    = require('express').Router()
-    , { Journal } = require('../journal/driver')
-    , { Transit } = require('../transit/driver')
+const Model   = require('../../system/models')
+    , router 	= require('express').Router()
+    , Journal = require('../journal/driver')
+    , Transit = require('../transit/driver')
 
 // Payment status indication
 router.post('/payment', async (req, res, next) =>

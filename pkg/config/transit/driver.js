@@ -61,7 +61,4 @@ class Transit
 
 }
 
-module.exports =
-{
-    Transit	: Transit
-}
+module.exports = Transit

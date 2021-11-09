@@ -1,12 +1,11 @@
 
 
-const   otp 	    = require('../infra/otp')
-	  , { Err_ }    = require('../system/models')
-	  , Model	    = require('../system/models')
-	  , { Journal } = require('../config/journal/driver')
-	  , history 	= require('./history')
-	  , db 			= require('../config/exports')[Model.segment.db]
-	  , { Emit }	= require('./events')
+const   otp 	 = require('../infra/otp')
+	  , Model	 = require('../system/models')
+	  , Journal  = require('../config/journal/driver')
+	  , history  = require('./history')
+	  , db 		 = require('../config/exports')[Model.segment.db]
+	  , { Emit } = require('./events')
 
 // Notify | UpdateState | Payout | OTP
 
@@ -20,7 +19,7 @@ const ConfirmOTP = async function(o1, o2)
 {
 	const otp_ 	  = new otp.OneTimePasswd({MobileNo: '', Body: ''})
 		, status_ = await otp_.Confirm(o1, o2)
-	if  (!status_)  Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
+	if  (!status_)  Model.Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
 }
 
 const SendOTP 	 = async function(mobile_no)
@@ -74,7 +73,7 @@ const ResetAgent =
 const SetAgent   = async function(ctxt)
 {
 	const agent_  = await db.agent.Get(ctxt.Agent.MobileNo, Model.query.ByMobileNo)
-	if(!agent_) Err_(Model.code.NOT_FOUND, Model.reason.AgentNotFound)
+	if(!agent_) Model.Err_(Model.code.NOT_FOUND, Model.reason.AgentNotFound)
 	
 	let agent = 
 	{
