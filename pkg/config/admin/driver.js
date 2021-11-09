@@ -23,7 +23,4 @@ class Admin
     }
 }
 
-module.exports =
-{
-    Admin : Admin
-}
+module.exports = Admin

@@ -1,7 +1,6 @@
-const { code, status, states
-    ,   text, task, command } = require('../../system/models')
-    , router                  = require('express').Router()
-    , { Agent }               = require('../agent/driver')
+const Model  = require('../../system/models')
+    , router = require('express').Router()
+    , Agent  = require('../agent/driver')
 
 router.post('/register', async (req, res, next) => 
 {
@@ -10,45 +9,45 @@ router.post('/register', async (req, res, next) =>
     let text_ = '', data_ = {}, agent, info_
     switch (req.body.Task)
     {
-      case task.New:
+      case Model.task.New:
         agent = new Agent(req.body)
         await agent.Create()
-        text_ = text.OTPSendToMobileNo.format(
+        text_ = Model.text.OTPSendToMobileNo.format(
                     req.body.MobileNo.slice(-4))
         break
 
-      case task.ReadOTP:
+      case Model.task.ReadOTP:
         const resp    = await Agent.Confirm(req.body)
-        text_         = text.OTPConfirmed
+        text_         = Model.text.OTPConfirmed
         info_         = resp.Agent
         info_.Command = resp.Command
         data_         = { Command : info_.Command }
         res.setHeader('authorization', resp.Token)
         break
 
-      case task.Register:
+      case Model.task.Register:
         info_         = req.body.Agent
         await Agent.Register(req.body)
-        info_.Command = command.LoggedIn
+        info_.Command = Model.command.LoggedIn
         data_         = { Command : info_.Command }        
-        text_         = text.Registered
+        text_         = Model.text.Registered
         break
 
-      case task.Approve:
+      case Model.task.Approve:
         await Agent.Approve(req.body)
-        text_ = text.Approved
+        text_ = Model.text.Approved
         break
     }
   
-    if(info_ && (info_.State === states.Registered  ||
-                info_.State === states.ToBeApproved ))
+    if(info_ && (info_.State === Model.states.Registered  ||
+                info_.State === Model.states.ToBeApproved ))
     {
       data_         = await Agent.View(info_)
       data_.Command = info_.Command
     }
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : text_,
       Data    : data_ })
 
@@ -61,8 +60,8 @@ router.get('/view', async (req, res, next) => {
   {
     const data = await Agent.View(req.body.Agent)
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : '',
       Data    : data
     })
@@ -75,8 +74,8 @@ router.get('/list', async (req, res, next) =>
     {
       const data = await Agent.List(req.query)
       
-      return res.status(code.OK).json({
-        Status  : status.Success,
+      return res.status(Model.code.OK).json({
+        Status  : Model.status.Success,
         Text    : '',
         Data    : data
       })
@@ -89,9 +88,9 @@ router.put('/edit', async (req, res, next) =>
   {
     await Agent.Edit(req.body)
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.ProfileUpdated,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.ProfileUpdated,
       Data    : {}
     })
   } catch (err) { next(err) }

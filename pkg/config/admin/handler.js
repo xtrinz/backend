@@ -1,8 +1,7 @@
-const { Err_ } = require('../../system/models')
-	, Model    = require('../../system/models')
-	, m	   	   = require('./methods')
-    , e        = Model.event
-    , s        = Model.states
+const Model = require('../../system/models')
+	, m	   	= require('./methods')
+    , e     = Model.event
+    , s     = Model.states
 
 var Handler =
 {
@@ -44,7 +43,7 @@ var Transition = async function (ctxt)
 	if(!method_)
 	{
 		console.log('no-handler-found', { Event: event_, State: state_ })
-		Err_(Model.code.BAD_REQUEST,  Model.reason.NoHandlerFound)
+		Model.Err_(Model.code.BAD_REQUEST,  Model.reason.NoHandlerFound)
 	}
 	let data_ = await method_(ctxt)
 

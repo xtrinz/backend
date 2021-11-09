@@ -1,8 +1,6 @@
-const { agents }            = require('../../system/database')
-    , { query, dbset,
-        Err_, code, reason} = require('../../system/models')
-    , Model                 = require('../../system/models')
-    , { ObjectId }          = require('mongodb')
+const { agents }   = require('../../system/database')
+    , Model        = require('../../system/models')
+    , { ObjectId } = require('mongodb')
 
 const Save       = async function(data)
 {
@@ -13,8 +11,11 @@ const Save       = async function(data)
     const resp  = await agents.updateOne(query, act, opt)
     if (!resp.acknowledged)
     {
-        console.log('agent-save-failed', { Agent: data, Result: resp.result})
-        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
+        console.log('agent-save-failed', 
+        { Agent: data, Result: resp.result})
+
+        Model.Err_(Model.code.INTERNAL_SERVER
+                 , Model.reason.DBAdditionFailed)
     }
     console.log('agent-saved', { Agent : data })
 }
@@ -25,9 +26,9 @@ const Get = async function(param, qType)
     let query_
     switch (qType)
     {
-        case query.ByID       : query_ = { _id: ObjectId(param) } ; break;
-        case query.ByMobileNo : query_ = { MobileNo: param }      ; break;
-        case query.ByMail     : query_ = { Email: param }         ; break;
+        case Model.query.ByID       : query_ = { _id: ObjectId(param) } ; break;
+        case Model.query.ByMobileNo : query_ = { MobileNo: param }      ; break;
+        case Model.query.ByMail     : query_ = { Email: param }         ; break;
     }
     let agent = await agents.findOne(query_)
     if (!agent)
@@ -39,7 +40,7 @@ const Get = async function(param, qType)
     return agent
 }
 
-const NearbyAgent = async function(ln, lt)
+const Nearby = async function(ln, lt)
 {
     ln = ln.loc()
     lt = lt.loc()
@@ -80,7 +81,7 @@ const List = async function(data, proj)
     data.Page   = data.Page.loc()
     const query = data.Query
         , skip  = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
-        , lmt   = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
+        , lmt   = (data.Limit > Model.dbset.Limit)? Model.dbset.Limit : data.Limit
 
     const data_ = await agents.find(query, proj)
                               .skip(skip)
@@ -96,27 +97,8 @@ const List = async function(data, proj)
     return data_
 }
 
-const GetAgentSockID = async function(agent_id)
-{
-    console.log('get-agent-sock-id', { AgentID: agent_id })
-
-    const query = { _id: ObjectId(agent_id), IsLive: true }
-
-    let agent = await agents.findOne(query)
-    if(!agent)
-    {
-        console.log('agent-not-found', query)
-        return []
-    }
-    console.log('agent-found', { Agent : agent })
-    return agent.SockID
-}
-
 module.exports =
 {
-      Save               : Save
-    , Get                : Get
-    , List               : List
-    , NearbyAgent        : NearbyAgent
-    , GetAgentSockID     : GetAgentSockID
+      Save, Get
+    , List, Nearby
 }

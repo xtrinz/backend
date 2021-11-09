@@ -1,9 +1,8 @@
-const { Err_ }      = require('../../system/models')
-    , Model         = require('../../system/models')
-    , Tool          = require('../../tools/export')[Model.resource.agent]
-    , Infra         = require('../../infra/export')
-    , { ObjectID }  = require('mongodb')
-    , db            = require('../exports')[Model.segment.db]
+const Model        = require('../../system/models')
+    , Tool         = require('../../tools/export')[Model.resource.agent]
+    , Infra        = require('../../infra/export')
+    , { ObjectId } = require('mongodb')
+    , db           = require('../exports')[Model.segment.db]
 class Agent
 {
     constructor (data)
@@ -17,7 +16,7 @@ class Agent
           , Year     : date_.getFullYear()
         }
 
-        this._id           = new ObjectID()
+        this._id           = new ObjectId()
         this.MobileNo      = data.MobileNo
         this.Mode          = data.Mode
         this.Otp           = ''
@@ -60,7 +59,7 @@ class Agent
                         Body: 	Model.message.OnAuth })
             , hash    = await otp_sms.Send(Model.gw.SMS)
 
-        if(!agent_) { this._id = new ObjectID() }
+        if(!agent_) { this._id = new ObjectId() }
         else { this._id = agent_._id }
 
         this.Otp             = hash
@@ -75,7 +74,7 @@ class Agent
         if (!agent_)
         {
             console.log('agent-not-found', { Input: data })
-            Err_(Model.code.BAD_REQUEST, Model.reason.AgentNotFound)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.AgentNotFound)
         }
 
         const otp_   = new Infra.otp.OneTimePasswd({MobileNo: '', Body: ''})
@@ -83,7 +82,7 @@ class Agent
         if (!status) 
         {
             console.log('wrong-otp-on-confirm-agent', { Data: data })
-            Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
         }
 
         const token = await Infra.jwt.Sign({ _id : agent_._id, Mode : Model.mode.Agent })
@@ -119,7 +118,7 @@ class Agent
         if (data.Agent.State !== Model.states.MobConfirmed)
         {
             console.log('bad-state-for-register', { Agent : data.Agent })
-            Err_(Model.code.BAD_REQUEST, Model.reason.MobileNoNotConfirmed)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.MobileNoNotConfirmed)
         }
 
         data.Agent.Name     = data.Name
@@ -145,7 +144,7 @@ class Agent
             let reason_
             if(agent_) reason_ = Model.reason.BadState
             else       reason_ = Model.reason.StoreNotFound
-            Err_(Model.code.BAD_REQUEST, reason_)
+            Model.Err_(Model.code.BAD_REQUEST, reason_)
         }
 
         if(data.Action == Model.task.Deny)
@@ -234,7 +233,4 @@ class Agent
 
 }
 
-module.exports =
-{
-    Agent : Agent
-}
+module.exports = Agent

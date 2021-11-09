@@ -1,10 +1,10 @@
-const router      = require('express').Router()
-    , Model       = require('../../system/models')
-    , { Journal } = require('../journal/driver')
-    , { Transit } = require('../transit/driver')
-    , cloudinary  = require('cloudinary').v2
-    , pub_key     = process.env.CLOUDINARY_KEY
-    , sec_key     = process.env.CLOUDINARY_SEC
+const router     = require('express').Router()
+    , Model      = require('../../system/models')
+    , Journal    = require('../journal/driver')
+    , Transit    = require('../transit/driver')
+    , cloudinary = require('cloudinary').v2
+    , pub_key    = process.env.CLOUDINARY_KEY
+    , sec_key    = process.env.CLOUDINARY_SEC
 
 router.post('/checkout', async (req, res, next) =>
 {

@@ -67,7 +67,7 @@ const Accept			=  async function(ctxt)
 	console.log('process-order-acceptance', ctxt)
 	await Emit(Model.alerts.Accepted, ctxt)	// To User: Emit irrespective of it turns to hold
 
-	const agent = await db.agent.NearbyAgent(
+	const agent = await db.agent.Nearby(
 			ctxt.Store.Address.Longitude,
 			ctxt.Store.Address.Latitude)				// TODO set filed for not in list
 	if(!agent)
