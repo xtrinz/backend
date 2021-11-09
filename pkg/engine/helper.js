@@ -1,11 +1,11 @@
 
 
-const   otp 	 = require('../infra/otp')
-	  , Model	 = require('../system/models')
-	  , Journal  = require('../config/journal/driver')
-	  , history  = require('./history')
-	  , db 		 = require('../config/exports')[Model.segment.db]
-	  , { Emit } = require('./events')
+const  otp 	 	= require('../infra/otp')
+	, Model	 	= require('../system/models')
+	, Journal	= require('../config/journal/driver')
+	, history	= require('./history')
+	, db 		= require('../config/exports')[Model.segment.db]
+	, { Emit } 	= require('./events')
 
 // Notify | UpdateState | Payout | OTP
 
@@ -54,7 +54,7 @@ const PingAdmin = async function(ctxt, st, alert_)
 {
     console.log('ping-admins', {State: st, Ctxt: ctxt})
 
-	const admin = await db.admin.NearbyAdmin(
+	const admin = await db.admin.Nearby(
           ctxt.Store.Address.Longitude
         , ctxt.Store.Address.Latitude)
     ctxt.Admin 	= admin

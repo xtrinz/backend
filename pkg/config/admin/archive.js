@@ -37,7 +37,7 @@ const Get = async function(param, qType)
     return admin
 }
 
-const NearbyAdmin = async function(ln, lt)
+const Nearby = async function(ln, lt)
 {
     ln = ln.loc()
     lt = lt.loc()
@@ -65,7 +65,7 @@ const NearbyAdmin = async function(ln, lt)
 
 module.exports =
 {
-      Save          : Save
-    , Get           : Get
-    , NearbyAdmin   : NearbyAdmin
+      Save   : Save
+    , Get    : Get
+    , Nearby : Nearby
 }

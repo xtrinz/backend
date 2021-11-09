@@ -1,9 +1,8 @@
-const { Err_ } = require('../../system/models')
-  , Model      = require('../../system/models')
-  , { Socket } = require('../socket/driver')
-  , db         = require('../exports')[Model.segment.db]
-  , jwt        = require('../../infra/jwt')
-  , input      = require('../../system/input')
+const Model  = require('../../system/models')
+    , socket = require('../socket/driver')
+    , db     = require('../exports')[Model.segment.db]
+    , jwt    = require('../../infra/jwt')
+    , input  = require('../../system/input')
 
 let Channel
 const SetChannel = (io_) => { Channel = io_ }
@@ -27,7 +26,7 @@ const Connect = async function(socket_)
         if (!data)
         {
             console.log('store-not-found', { StoreID: resp._id })
-            Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
         }
         data.SockID.push(socket_.id)
         
@@ -43,7 +42,7 @@ const Connect = async function(socket_)
           if (!data)
           {
               console.log('agent-not-found', { AgentID: resp._id })
-              Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
+              Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
           }
           data.SockID.push(socket_.id)
   
@@ -59,7 +58,7 @@ const Connect = async function(socket_)
           if (!data)
           {
               console.log('admin-not-found', { AdminID: resp._id })
-              Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
+              Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
           }
           data.SockID.push(socket_.id)
   
@@ -76,7 +75,7 @@ const Connect = async function(socket_)
         if (!data)
         {
             console.log('user-not-found', { UserID: resp._id })
-            Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
         }
         data.SockID.push(socket_.id)
 
@@ -88,10 +87,9 @@ const Connect = async function(socket_)
         break
       default:
         console.log('connection-failed-invalid-mode', { Token : resp })
-        Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)        
+        Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)        
         break
     }
-    const socket = new Socket()
     await socket.Insert(data, resp.Mode, socket_.id)
     
     if(data.SockID.length > Model.limits.SocketCount)
@@ -129,7 +127,7 @@ const Disconnect = async function(socket_)
         if (!data)
         {
             console.log('store-not-found', { StoreID: sckt.Entity })
-            Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
         }
         index = await data.SockID.indexOf(String(socket_.id))
         if (index > -1) { data.SockID.splice(index, 1) }
@@ -146,7 +144,7 @@ const Disconnect = async function(socket_)
           if (!data)
           {
               console.log('agent-not-found', { AgentID: sckt.Entity })
-              Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
+              Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
           }
           index = await data.SockID.indexOf(String(socket_.id))
           if (index > -1) { data.SockID.splice(index, 1) }
@@ -163,7 +161,7 @@ const Disconnect = async function(socket_)
         if (!data)
         {
             console.log('admin-not-found', { AdminID: sckt.Entity })
-            Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
         }
         index = await data.SockID.indexOf(String(socket_.id))
         if (index > -1) { data.SockID.splice(index, 1) }
@@ -180,7 +178,7 @@ const Disconnect = async function(socket_)
         if (!data)
         {
             console.log('user-not-found', { UserID: sckt.Entity })
-            Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)
         }
         index = await data.SockID.indexOf(String(socket_.id))
         if (index > -1) { data.SockID.splice(index, 1) }
@@ -192,11 +190,10 @@ const Disconnect = async function(socket_)
         break
       default:
         console.log('disconnection-failed-invalid-mode', { Data : sckt })
-        Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)        
+        Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidToken)        
         break        
     }
 
-    const socket = new Socket()
     await socket.Remove(data, sckt.Mode, socket_.id)
 
     console.info('client-disconnected', { Client : data, SockID : socket_.id })
