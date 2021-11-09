@@ -3,7 +3,6 @@ const Model       = require('../../system/models')
     , router 	    = require('express').Router()
     , { Journal } = require('../journal/driver')
     , { Transit } = require('../transit/driver')
-    , db          = require('../journal/archive')
 
 // Payment status indication
 router.post('/payment', async (req, res, next) =>
@@ -32,15 +31,9 @@ router.post('/refund', async (req, res, next) =>
 {
   try
   {
+
     let   journal = new Journal()
-    const status_ = await journal.MarkRefund(req)
-    /*if (status_ === states.StripeSucess)
-    {
-      let transit = new Transit(journal.Data)
-      await transit.Init()
-      journal.Data.Transit.ID = transit.Data._id
-    }*/
-    await db.Save(journal.Data)
+    await journal.MarkRefund(req)
 
     return res.status(Model.code.OK).json({
       Status  : Model.status.Success,

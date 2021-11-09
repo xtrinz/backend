@@ -1,14 +1,13 @@
-const checksum               = require("paytmchecksum")
-    , { Err_, code, reason
-	, paytm: pgw }         	 = require('../../../system/models')
-	, journal				 = require('../../../config/journal/archive')
+const checksum = require("paytmchecksum")
+    , Model    = require('../../system/models')	
+	, journal  = require('../../config/journal/archive')
 
 function Refund(data, signature)
 {
     if(data)
     this.Data =
     {
-          JournalID    : data.orderId.slice( pgw.Order.length - 3)
+          JournalID    : data.orderId.slice( Model.paytm.Order.length - 3)
 	    , TxnId 	   : data.txnId
         , RefundId     : data.refundId
         , TxnDate 	   : data.txnTimestamp
@@ -24,7 +23,7 @@ function Refund(data, signature)
         if(!sign)
         {
             console.log('refund-ind-unmatched-signature', { Body : body, Hash: this.Data.Checksum })
-            Err_(code.BAD_REQUEST, reason.InvalidChecksum)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidChecksum)
         }
         console.log('refund-ind-unmatched-signature', { Req : body })
 	}
@@ -35,14 +34,14 @@ function Refund(data, signature)
 		if( process.env.PAYTM_MID !== this.Data.MId )
 		{
 			console.log('refund-ind-with-wrong-mid', { Ind : this.Data })
-            Err_(code.BAD_REQUEST, reason.InvalidMid)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidMid)
 		}
 
 		let rcd = await journal.GetByID(this.Data.JournalID)
 		if( !rcd )
 		{
 			console.log('journal-not-found', { Ind : this.Data })
-            Err_(code.BAD_REQUEST, reason.JournalNotFound)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.JournalNotFound)
 		}
 
 		// TODO : Match Price
@@ -50,28 +49,19 @@ function Refund(data, signature)
 
 	this.Store 	  = async function(rcd)
 	{
-		/*
-		rcd.Payment.TimeStamp.Webhook = Date.now()
+		rcd.Refund.TimeStamp.Webhook 	= Date.now()
+		rcd.Refund.TxnId  				= this.Data.txnId
 		switch (this.Data.Status)
 		{
-		case pgw.TxnSuccess:
+			case Model.paytm.RefundSuccess:
+			rcd.Refund.Status = states.Success
+			break
 
-		  await (new Cart()).Flush(rcd.Buyer.ID)
-
-		  rcd.Payment.Status = states.Success
-		  rcd.Transit.Status = states.Initiated
-		  rcd.Transit.ID 	 = new ObjectID()
-		  break
-
-		case pgw.TxnFailure:
-
-		  rcd.Payment.Status = states.Failed		  
-		  break
+			case Model.paytm.RefundFailure:
+			rcd.Refund.Status = states.Failed
+			break
 		}
-
-		await journal.Save(j_rcd)
-		return rcd.Transit.ID
-		*/
+		await journal.Save(rcd)
 	}
 }
 

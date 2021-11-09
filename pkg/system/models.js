@@ -162,8 +162,10 @@ module.exports =
 		, TxnSuccess 			: 'TXN_SUCCESS'
 		, TxnFailure			: 'TXN_FAILURE'
 		, TxnPending			: 'PENDING'
+
 		, RefundPending 		: 'PENDING'
-		, RefundFailure 		: 'TXN_FAILURE'
+		, RefundFailure 		: 'FAILED'
+		, RefundSuccess 		: 'SUCCESS'
 
 		, Type 					:
 		{

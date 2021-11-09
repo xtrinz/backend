@@ -1,17 +1,16 @@
-const checksum               = require("paytmchecksum")
-    , { Err_, code, reason, channel
-	,   paytm: pgw, states } = require('../../../system/models')
-	, journal				 = require('../../../config/journal/archive')
-	, { Cart } 				 = require('../../../config/cart/driver')
-	, { ObjectID }			 = require('mongodb')
-	, { PayTM } 			 = require('../driver')
+const checksum      = require("paytmchecksum")
+    , Model  		= require('../../system/models')
+	, journal		= require('../../config/journal/archive')
+	, { Cart } 		= require('../../config/cart/driver')
+	, { ObjectId }	= require('mongodb')
+	, paytm 		= require('./driver')
 
 function Payment(data)
 {
     if(data)
     this.Data =
     {
-	      JournalID   : data.ORDERID.slice( pgw.Order.length - 3)
+	      JournalID   : data.ORDERID.slice( Model.paytm.Order.length - 3)
 	    , TxnId 	  : data.TXNID
 	    , TxnDate 	  : data.TXNDATE
 	    , Status 	  : data.STATUS
@@ -28,7 +27,7 @@ function Payment(data)
         if(!sign)
         {
             console.log('payment-ind-unmatched-signature', { Body : body, Hash: this.Data.Checksum })
-            Err_(code.BAD_REQUEST, reason.InvalidChecksum)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidChecksum)
         }
         console.log('payment-ind-signature-matched', { Req : body })
 	}
@@ -39,14 +38,14 @@ function Payment(data)
 		if( process.env.PAYTM_MID !== this.Data.MId )
 		{
 			console.log('payment-ind-with-wrong-mid', { Ind : this.Data })
-            Err_(code.BAD_REQUEST, reason.InvalidMid)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidMid)
 		}
 
 		let rcd = await journal.GetByID(this.Data.JournalID)
 		if( !rcd )
 		{
 			console.log('journal-not-found', { Ind : this.Data })
-            Err_(code.BAD_REQUEST, reason.JournalNotFound)
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.JournalNotFound)
 		}
 
 		// TODO : Match Price IMPORTANT if prices are not matching some malpractic had happened
@@ -61,25 +60,25 @@ function Payment(data)
 		rcd.Payment.TimeStamp.Webhook = this.Data.TXNDATE
 		rcd.Payment.ChannelRefID 	  = this.Data.TXNID
 
-		if(!rcd.Payment || (rcd.Payment && (rcd.Payment.Status == states.Success)))	// To avoid COD/Payment collitions
+		if(!rcd.Payment || (rcd.Payment && (rcd.Payment.Status == Model.states.Success)))	// To avoid COD/Payment collitions
 		{																			// or any other collitions
 			// TODO Test it, it is Critical
 			rcd.StaleFundEvents[fund.TransactionID] = 
 			{
 				Payment: 
 				{
-					  Channel       : channel.Paytm
-					, TransactionID : pgw.Order.format(String(this.Data.JournalID))
+					  Channel       : Model.channel.Paytm
+					, TransactionID : Model.paytm.Order.format(String(this.Data.JournalID))
 					, Token         : ''
 					, ChannelRefID  : this.Data.BankTxnId
 					, Amount        : this.Data.Amount
-					, Status        : (this.Data.Status == pgw.TxnSuccess)? states.Success: states.Failed
+					, Status        : (this.Data.Status == Model.paytm.TxnSuccess)? Model.states.Success: Model.states.Failed
 					, TimeStamp     : { Token: '', Webhook: (new Date()).toISOString() }
 				}
 			}
 			await journal.Save(rcd)	// SAFE COMMIT
 
-			if(this.Data.Status != pgw.TxnSuccess) return	// Event noted, No refund
+			if(this.Data.Status != Model.paytm.TxnSuccess) return	// Event noted, No refund
 
 			const refunt_     =
 			{
@@ -88,11 +87,10 @@ function Payment(data)
 			  , Amount       : this.Data.Amount
 			}
 			console.log('refund-on-state-indication', { Journal : refunt_ })			
-			const paytm_      = new PayTM()
-				, txn_i       = await paytm_.Refund(refunt_)
+			const txn_i       = await paytm.Refund(refunt_)
 			rcd.StaleFundEvents[fund.TransactionID]['Refund'] =
 			{
-				Channel       : channel.Paytm
+				Channel       : Model.channel.Paytm
 			  , TransactionID : txn_i.ID
 			  , ChannelRefID  : txn_i.TxnID
 			  , Amount        : txn_i.Amount
@@ -110,18 +108,18 @@ function Payment(data)
 		{
 			switch (this.Data.Status)
 			{
-				case pgw.TxnSuccess:
+				case Model.paytm.TxnSuccess:
 
 					await (new Cart()).Flush(rcd.Buyer.ID)
 
-					rcd.Payment.Status = states.Success
-					rcd.Transit.Status = states.Initiated
-					rcd.Transit.ID 	 = new ObjectID()
+					rcd.Payment.Status = Model.states.Success
+					rcd.Transit.Status = Model.states.Initiated
+					rcd.Transit.ID 	 = new ObjectId()
 					break
 
-				case pgw.TxnFailure:
+				case Model.paytm.TxnFailure:
 
-					rcd.Payment.Status = states.Failed		  
+					rcd.Payment.Status = Model.states.Failed		  
 					break
 			}
 			await journal.Save(rcd)			

@@ -1,14 +1,11 @@
-const { ObjectID } = require('mongodb')
+const { ObjectId } = require('mongodb')
     , Model        = require('../../system/models')
     , db           = require('../exports')[Model.segment.db]
-    , { Err_ }     = require('../../system/models')
-    , { Refund }   = require('../../infra/paytm/ind/refund')
-    , { Payment }  = require('../../infra/paytm/ind/payment')
-    , { PayTM }    = require('../../infra/paytm/driver')
+    , { Refund }   = require('../../infra/paytm/refund')
+    , { Payment }  = require('../../infra/paytm/payment')
+    , paytm        = require('../../infra/paytm/driver')
     , tally        = require('../../system/tally')
-    , project      = require('../../tools/project/journal')
-    , rinse        = require('../../tools/rinse/journal')
-    , filter       = require('../../tools/filter/journal')
+    , Tool         = require('../../tools/export')
     , template     = require('./template')
 
 function Journal()
@@ -20,10 +17,12 @@ function Journal()
       const items = await db.cart.List(user_id)
 
       if(!items.Products.length)
-      Err_(Model.code.BAD_REQUEST, Model.reason.NoProductsFound)
+      Model.Err_(Model.code.BAD_REQUEST
+               , Model.reason.NoProductsFound)
 
       if(items.Flagged)
-      Err_(Model.code.BAD_REQUEST, Model.reason.CartFlagged)
+      Model.Err_(Model.code.BAD_REQUEST
+               , Model.reason.CartFlagged)
 
       if(items.JournalID)
       {
@@ -76,15 +75,13 @@ function Journal()
           }
           else
           {
-            const paytm_ = new PayTM()
-                  txn_i  = await paytm_.CreateToken(j_id, price, user)
+                  txn_i  = await paytm.CreateToken(j_id, price, user)
                   time   = (new Date()).toISOString()
           }
         }
         else
         {
-          const paytm_ = new PayTM()
-                txn_i  = await paytm_.CreateToken(j_id, price, user)
+                txn_i  = await paytm.CreateToken(j_id, price, user)
                 time   = (new Date()).toISOString()
         }
         this.Data.Payment =
@@ -119,7 +116,7 @@ function Journal()
 
       // BLOCK : IF COD
       if(!this.Data.Order.HasCOD)
-      Err_(Model.code.CONFLICT, Model.reason.HasItemsWithNoCOD)
+      Model.Err_(Model.code.CONFLICT, Model.reason.HasItemsWithNoCOD)
 
       if(this.Data.IsRetry)
       {
@@ -154,7 +151,7 @@ function Journal()
       this.Data.Seller  = await db.store.Seller(store_id)
 
       // Set ID & Date
-      this.Data._id  = (this.Data._id) ? this.Data._id  : new ObjectID()
+      this.Data._id  = (this.Data._id) ? this.Data._id  : new ObjectId()
       this.Data.Date = (new Date()).toISOString()
 
       // Set Payment
@@ -166,7 +163,7 @@ function Journal()
 
         this.Data.Payment.Status = Model.states.Success
         this.Data.Transit.Status = Model.states.Initiated
-        this.Data.Transit.ID 	   = new ObjectID()
+        this.Data.Transit.ID 	   = new ObjectId()
       }
 
       await db.journal.Save(this.Data)
@@ -217,8 +214,7 @@ function Journal()
         , ChannelRefID : this.Data.Payment.ChannelRefID
         , Amount       : refuntAmount
       }
-      const paytm_      = new PayTM()
-          , txn_i       = await paytm_.Refund(refunt_)
+      const txn_i       = await paytm.Refund(refunt_)
       this.Data.Refund  =
       {
           TransactionID : txn_i.ID
@@ -233,7 +229,7 @@ function Journal()
     this.PayOut = async function (ctxt)
     {
       this.Data = await db.journal.GetByID(ctxt.JournalID)
-      if (!this.Data) Err_(Model.code.BAD_REQUEST, Model.reason.JournalNotFound)
+      if (!this.Data) Model.Err_(Model.code.BAD_REQUEST, Model.reason.JournalNotFound)
 
       const state =
       {
@@ -242,9 +238,6 @@ function Journal()
       }
       await tally.SettleAccounts(this.Data, state)
       
-      const refuntAmount = this.Data.Account.Out.Dynamic.Refund.Buyer
-      if (refuntAmount > 0) { await this.SetRefund(refuntAmount) }
-
       this.Data.Agent =
       {
             ID        : ctxt.Agent._id
@@ -254,6 +247,9 @@ function Journal()
       this.Data.Transit.Status = Model.states.Closed
       this.Data.Transit.State  = ctxt.State
       await db.journal.Save(this.Data)
+      
+      const refuntAmount = this.Data.Account.Out.Dynamic.Refund.Buyer
+      if (refuntAmount > 0) { await this.SetRefund(refuntAmount) }
     }
 
     this.Read = async function(data, in_, mode_)
@@ -261,10 +257,10 @@ function Journal()
       console.log('read-journal', { Input: data, Client: in_ })
       let query_, proj, data_
 
-      query_ = filter[Model.verb.view][mode_](data, in_)
-      proj   = { projection : project[Model.verb.view][mode_] }
+      query_ = Tool.filter[Model.verb.view][mode_](data, in_)
+      proj   = { projection : Tool.project[Model.verb.view][mode_] }
       data_  = await db.journal.Get(query_, proj)
-      rinse[Model.verb.view][mode_](data_)
+      Tool.rinse[Model.verb.view][mode_](data_)
 
       return data_
     }
@@ -274,15 +270,15 @@ function Journal()
       console.log('list-journal', { Input: data, Client: in_ })
       let query_, proj, data_, cond_
 
-      query_ =  filter[Model.verb.list][mode_](data, in_)
+      query_ =  Tool.filter[Model.verb.list][mode_](data, in_)
       cond_  =
       {
           Page  : data.Page.loc()
         , Limit : data.Limit.loc()
       }
-      proj  = { projection : project[Model.verb.view][mode_] }
+      proj  = { projection : Tool.project[Model.verb.view][mode_] }
       data_ = await db.journal.GetMany(query_, proj, cond_)
-      rinse[Model.verb.list][mode_](data_)
+      Tool.rinse[Model.verb.list][mode_](data_)
 
       return data_
     }
