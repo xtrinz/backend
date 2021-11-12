@@ -1,60 +1,54 @@
 const map         = require('../system/map')
     , { states }  = require('../system/models')
 
-// Volumetric Charges
-let FeePerKg       = .01    // in rs
-  , FeePerMCube    = 1      // in rs
-
-// Prodcut Profit Share
-let TypeVSMargin   =        // in %
+/**
+ * Context of price per for unit subjects
+ * TYPE     : UNIT
+ * ---------------
+ * Distance : KM 
+ */
+const Price    = 
 {
-      Food         : { Business : 10, Agent : 5, Net: 15 }
-    , Electronics  : { Business : 15, Agent : 5, Net: 20 }
-    , Cloth        : { Business : 20, Agent : 5, Net: 25 }
-}
-
-// Transit Effort Charges
-let EffortFeePerKM = 3      // in rs
-  , PetrolFeePerKM = 2      // in rs
-  , CostPerKM      = EffortFeePerKM + PetrolFeePerKM
-
-const SetBill      = async function(data, src_loc, dest_loc)
-{
-
-    data.Bill = 
-    { 
-        Total       : 0
-      , TransitCost : 0
-      , Tax         : 0
-      , NetPrice    : 0
-    }
-
-    // Product Price
-    data.Products.forEach((prod) => 
-    { data.Bill.Total += ( prod.Price * prod.Quantity ) })
-
-    // Transit Charge
-    let cord =
+    Product    : {} // TODO - PLAN PRODUCT MARGIN
+  , Transit    : 
     {
-          SrcLt  : src_loc.Latitude
-        , SrcLn  : src_loc.Longitude
-        , DestLt : dest_loc.Latitude
-        , DestLn : dest_loc.Longitude
+        Fuel   : 2 
+      , Effort : 3
+      , Total  : 5
     }
-    let dist = await map.Distance(cord)
-    data.Bill.TransitCost = dist * CostPerKM
-
-    // Charge Tax
-    data.Bill.Tax = .18 * data.Bill.TransitCost
-                  // + 0
-
-    // Net Price
-    data.Bill.NetPrice = data.Bill.TransitCost
-                       + data.Bill.Total
-                       + data.Bill.Tax
 }
 
-const SettleAccounts = async function(data, state)
+const Bill      = async function(order_, cords_)
+{
+
+    let bill = 
+    {
+        Product : 0
+      , Transit : 0
+      , Tax     : 0
+      , Total   : 0
+    }
+    for(let i = 0; i < order_.Products.length; i++)
+    {
+        let item      = order_.Products[i]
+        bill.Product += item.Quantity * item.Price
+    }
+
+    let km       = await map.Distance(cords_)
+    bill.Transit = km * Price.Transit.Total
+
+    bill.Tax     = .18 * bill.Transit
+
+    bill.Total   =  bill.Product
+                  + bill.Transit
+                  + bill.Tax
+
+    bill.Total   = bill.Total.round()
+
+    return bill
+}
+
+const Settle = async function(data, state)
 {
   data.Account =
   {
@@ -233,8 +227,4 @@ const SettleAccounts = async function(data, state)
   }
 }
 
-module.exports = 
-{ 
-           SetBill : SetBill
-  , SettleAccounts : SettleAccounts
-}
+module.exports = { Bill, Settle }

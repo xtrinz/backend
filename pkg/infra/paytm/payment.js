@@ -128,7 +128,4 @@ function Payment(data)
 	}
 }
 
-module.exports =
-{
-    Payment : Payment
-}
+module.exports = Payment

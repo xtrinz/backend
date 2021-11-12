@@ -4,24 +4,24 @@ const axios                   = require('axios')
     , api_key                 = process.env.GOOGLE_KEY
     , { Err_, code , reason } = require('../system/models')
 
-const Distance = async function(data)
+const Distance = async function(cords_)
 {
 
     /* TODO Blocked for testing */
     return 2.459
 
-    if((data.SrcLt == 0          &&
-        data.SrcLt == data.DestLt && 
-        data.SrcLn == data.DestLn ) ||
-      ( data.SrcLt == data.DestLt && 
-        data.SrcLn == data.DestLn ))
+    if((cords_.Src.Latitude   == 0                       &&
+        cords_.Src.Latitude   == cords_.Dest.Latitude    && 
+        cords_.Src.Longitude  == cords_.Dest.Longitude ) ||
+      ( cords_.Src.Latitude   == cords_.Dest.Latitude    && 
+        cords_.Src.Longitude  == cords_.Dest.Longitude   ))
       {
-        if(data.SrcLt == 0)
-        console.log('unset-cordinates', { Data: data })
+
+        if(cords_.Src.Latitude == 0)
+        console.log('unset-cordinates', { Data: cords_ })
         else
-        {
-          console.log('equal-src-and-destn', { Data: data })
-        }
+        console.log('equal-src-and-destn', { Data: cords_ })
+
         return 0
       }
     const in_     =
@@ -30,17 +30,17 @@ const Distance = async function(data)
         , Domain  : 'https://maps.googleapis.com'
         , Path    : '/maps/api/distancematrix/json'
         , Port    : 80
-        , Query   : '?origins={0}%2C{1}&destinations={2}%2C{3}&key={4}'.format(data.SrcLt //
-                                                                             , data.SrcLn
-                                                                             , data.DestLt //
-                                                                             , data.DestLn
+        , Query   : '?origins={0}%2C{1}&destinations={2}%2C{3}&key={4}'.format(cords_.Src.Latitude
+                                                                             , cords_.Src.Longitude
+                                                                             , cords_.Dest.Latitude
+                                                                             , cords_.Dest.Longitude
                                                                              , api_key) 
     }
     const config = 
     {
-      method: in_.Method,
-      url: in_.Domain + in_.Path + in_.Query, 
-      headers: { }
+      method  : in_.Method,
+      url     : in_.Domain + in_.Path + in_.Query,
+      headers : {}
     }
     console.log('google-map-distance-query', { Query: config })
     let res = await axios(config)
@@ -66,17 +66,11 @@ const Distance = async function(data)
     Err_(code.INTERNAL_SERVER, reason.MapQueryFailed)
 }
 
-let cord =
+const cord = 
 {
-      SrcLt  : 11.060447
-    , SrcLn  : 75.935870
-    , DestLt : 11.045950
-    , DestLn : 75.940163
+      Src  : { Latitude  : 11.060447, Longitude : 75.935870 }
+    , Dest : { Latitude  : 11.045950, Longitude : 75.940163 }
 }
-
 // Distance(cord)
 
-module.exports =
-{
-    Distance     : Distance
-}
+module.exports = { Distance }

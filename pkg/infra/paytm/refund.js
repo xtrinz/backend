@@ -65,7 +65,4 @@ function Refund(data, signature)
 	}
 }
 
-module.exports =
-{
-    Refund : Refund
-}
+module.exports = Refund

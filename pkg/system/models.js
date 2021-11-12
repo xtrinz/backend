@@ -86,6 +86,8 @@ module.exports =
 		, IncorrectInput 			: 'Incorrect Input'
 		, NoteNotFound				: 'Note not found'
 		, HasItemsWithNoCOD			: 'Purchase has items with no cash on delivery availabe'
+		, StoreClosed				: 'Store Closed'
+		, NoJournal					: 'No Journal'
 	},
 	text:
 	{
@@ -172,6 +174,7 @@ module.exports =
 			REFUND				: 'REFUND'
 		}
 		, ReadTimeout 			: 80000
+		, TokenExpiry			: 15 	// 15 minutes
 	},
 	tags:
 	{
@@ -228,6 +231,7 @@ module.exports =
 	{
 		  Running 				: 'Running'
 		, Closed 				: 'Closed'
+		, Pending 				: 'Pending'
 		, State 				: 'State'
 
 		, None 					: 'None'

@@ -86,3 +86,26 @@ Date.prototype.diff_in_m = function(time_)
     const diff  = (end - now) / ( 1000 * 60 )
     return diff
 }
+
+Number.prototype.cmp = function(str_)
+{
+    const x = this
+        , y = parseFloat(str_)
+    return x == y
+}
+
+// round to 2 decimal places
+Number.prototype.round = function()
+{
+    const x = this
+        , y = Math.pow(10, 2)
+    return Math.round(x * y) / y
+}
+
+Date.prototype.diff_in = function(iso_, min)
+{
+    const now = new Date()
+        , end = new Date( iso_ )
+    const diff  = (end - now) / ( 1000 * 60 )
+    return diff < min
+}

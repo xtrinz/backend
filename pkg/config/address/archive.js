@@ -105,29 +105,9 @@ const Remove      = async function (user_id, addr_id)
     console.log('address-removed', { Query: query, Options: opts })
 }
 
-const Client     = async function (user, addr_id)
-{
-    const addr = await Read(user._id, addr_id)
-    delete addr.IsDefault
-    delete addr.Tag
-    const client =
-    {
-        ID       : user._id
-      , Name     : user.Name
-      , MobileNo : user.MobileNo
-      , Address  : addr
-    }
-    console.log('the-client', { Client : client })
-    return client
-}
-
 module.exports = 
 {
-      Insert       : Insert
-    , Read         : Read
-    , List         : List
-    , Update       : Update
-    , ResetDefault : ResetDefault
-    , Remove       : Remove
-    , Client       : Client
+      Insert        , Read
+    , List          , Update
+    , ResetDefault  , Remove
 }

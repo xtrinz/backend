@@ -8,11 +8,11 @@ class PayTM
 
       const txn_i1 =
       {
-          ID           : Model.paytm.Order.format(String(j_id))
-        , Token        : "txnToken"
-        , Amount       : price.toFixed(2).toString()
-        , MID          : process.env.PAYTM_MID
-        , CallBackURL  : process.env.PAYTM_CB
+          ID      : Model.paytm.Order.format(String(j_id))
+        , Token   : "txnToken"
+        , Amount  : price.toString()
+        , MID     : process.env.PAYTM_MID
+        , CB      : process.env.PAYTM_CB
       }
 
       return txn_i1
@@ -24,7 +24,7 @@ class PayTM
 
         const channelId = paytm.EChannelId.WEB
             , orderId   = Model.paytm.Order.format(String(j_id))
-            , amnt      = price.toFixed(2).toString()
+            , amnt      = price.toString()
 
             , txnAmount = paytm.Money.constructWithCurrencyAndValue(paytm.EnumCurrency.INR, amnt)
 
@@ -61,11 +61,11 @@ class PayTM
 
         const txn_i =
         {
-            ID           : orderId
-          , Token        : txnToken
-          , Amount       : amnt
-          , MID          : process.env.PAYTM_MID
-          , CallBackURL  : process.env.PAYTM_CB
+            ID     : orderId
+          , Token  : txnToken
+          , Amount : amnt
+          , MID    : process.env.PAYTM_MID
+          , CB     : process.env.PAYTM_CB
         }
 
         return txn_i
@@ -110,7 +110,7 @@ class PayTM
             , refId        = Model.paytm.Refund.format(String(data.JournalID))
             , txnId        = data.ChannelRefID
             , txnType      = Model.paytm.Type.REFUND
-            , refundAmount = data.Amount.toFixed(2).toString()
+            , refundAmount = data.Amount.toString()
 
         let refund       = new paytm.RefundDetailBuilder(orderId, refId, txnId, txnType, refundAmount)
           , refundDetail = refund.setReadTimeout(Model.paytm.ReadTimeout).build()

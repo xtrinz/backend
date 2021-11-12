@@ -656,6 +656,52 @@ let Delivered = function(name_, mode_)
   }
 }
 
+let Refund = function(cart_) 
+{
+  this.CartID    = cart_
+  this.Data      = async function()
+  {
+    let cart        = data.Get(data.Obj.Cart, this.CartID)
+
+    let templ =
+    {
+        Type     : Type.Rest
+      , Describe : 'Confirm Refund'
+      , Request  :
+      {              
+          Method : Method.POST
+        , Path   : '/v1/paytm/refund'
+        , Body   : 
+        {
+            orderId       : cart.Paytm.OrderID
+          , txnId         : '12345'
+          , refundId      : paytm.Order.format(data.orderId.slice( cart.Paytm.OrderID.length - 3))
+          , txnTimestamp  : String(Date.now())
+          , status        : paytm.RefundSuccess
+          , mid           : cart.Paytm.MID
+          , refundAmount  : cart.Paytm.Amount
+        }
+        , Header : 
+        {
+          signature: '--pre-set--'
+        }
+      }              
+      , Response :
+      {              
+          Code   : code.OK
+        , Status : status.Success
+        , Text   : ''
+        , Data   : {}
+      }
+    }
+
+    var paytmChecksum = await PaytmChecksum.generateSignature(templ.Request.Body, process.env.PAYTM_KEY)
+    templ.Header.signature = paytmChecksum
+
+    return templ
+  }
+}
+
 module.exports =
 {
       Checkout
@@ -676,4 +722,5 @@ module.exports =
     , EnRoute
     , AgentComplete
     , Delivered
+    , Refund
 }

@@ -81,53 +81,6 @@ const Read        = async function (user_id)
   return data
 }
 
-const List        = async function (user_id)
-{
-
-  let cart = await Get(user_id, query.ByUserID)
-  if (!cart) Err_(code.BAD_REQUEST, reason.CartNotFound)
-
-  let data = 
-  {
-      Products  : []
-    , Flagged   : false
-    , StoreID   : ''
-    , HasCOD    : true
-    , JournalID : cart.JournalID 
-  }
-
-  for (let i = 0; i < cart.Products.length; i++)
-  {
-    const item    = cart.Products[i]
-        , product = await prod.Get(item.ProductID, query.ByID)
-
-    if (!product) Err_(code.BAD_REQUEST, reason.ProductNotFound)
-
-    let flag      = false
-    if (item.Quantity > product.Quantity || !product.IsAvailable)
-    { flag = true ; data.Flagged = true }
-
-    if(!product.HasCOD) data.HasCOD = false
-
-    const node = 
-    {
-        ProductID  : item.ProductID
-      , Name       : product.Name
-      , Price      : product.Price
-      , Image      : product.Image
-      , Category   : product.Category
-      , Quantity   : item.Quantity
-      , Available  : product.Quantity
-      , Flagged    : flag
-    }
-    data.Products.push(node)
-    data.StoreID = product.StoreID
-  }
-
-  console.log('cart-read', data)
-  return data
-}
-
 const Delete      = async function (user_id)
 {
     const key   = { UserID: ObjectId(user_id) }
@@ -262,13 +215,8 @@ const Remove  = async function (cart_id, product_id)
 
 module.exports = 
 {
-    Save   : Save
-  , Get    : Get
-  , Read   : Read
-  , Delete : Delete
-  , List   : List
-
-  , Insert : Insert
-  , Update : Update
-  , Remove : Remove
+    Save    , Get     
+  , Read    , Delete
+  , Insert  , Update
+  , Remove
 }

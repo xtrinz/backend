@@ -244,15 +244,25 @@ const Get      = async function (in_)
 
       case Model.mode.Admin:
         store_ = await db.store.Get(in_.ID, Model.query.ByID)
-        if (!store_) Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
+        if (!store_) 
+        {
+            console.log('store-not-found', { In: in_ })
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
+        }
         break
 
       case Model.mode.User:
         store_ = await db.store.Get(in_.ID, Model.query.ByID)
-        if (!store_) Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
-
+        if (!store_)
+        {
+            console.log('store-not-found', { In: in_ })
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
+        }
         if (store_.State !== Model.states.Registered)
-        Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)            
+        {
+            console.log('store-has-not-registered', { In: in_ })
+            Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
+        }
         break
     }
 
