@@ -20,7 +20,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
       let admin   = data.Get(data.Obj.Admin   , this.AdminID)      
       let agent   = data.Get(data.Obj.Agent   , this.AgentID)
       let cart    = data.Get(data.Obj.Cart    , this.CartID)
-      let store   = data.Get(data.Obj.Store   , journal.Seller.Name)
+      let store   = data.Get(data.Obj.Store   , journal.Store.Name)
         , data_, src_, token
 
       let address = { ...data.Get(data.Obj.Address , this.AddressID)}
@@ -54,12 +54,12 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                 JournalID       : cart.Paytm.OrderID.slice(6)
               , Date            : ''
               , Buyer           : { Address: address }
-              , Seller          : 
+              , Store           :
               { 
                   ID            : store.ID
-                , Name          : journal.Seller.Name
-                , Address       : journal.Seller.Address
-                , Image         : journal.Seller.Image
+                , Name          : journal.Store.Name
+                , Address       : journal.Store.Address
+                , Image         : journal.Store.Image
               }
               , Agent           :
               {
@@ -69,12 +69,12 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
               , Order           :
               { 
                   Products      : prod
-                , Bill          : journal.Order.Bill
               }
+              , Bill            : journal.Order.Bill
               , Payment         : 
               { 
                   Channel       : journal.Payment.Channel
-                , Amount        : journal.Order.Bill.NetPrice.toFixed(2).toString()
+                , Amount        : journal.Order.Bill.Total.toFixed(2).toString()
                 , Status        : journal.Payment.Status
                 , TimeStamp     : '' 
               }
@@ -82,7 +82,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
               { 
                   ID            : journal.Transit.ID
                 , Status        : 'Closed'
-                , State  : 'TranistCompleted'
+                , State         : 'Completed'
               }
             }
             break;
@@ -98,20 +98,20 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                   , Address       : address
                   , MobileNo      : journal.Buyer.MobileNo                  
                 }
-                , Seller          : 
+                , Store          : 
                 { 
-                    Name          : journal.Seller.Name
-                  , Address       : journal.Seller.Address
-                  , Image         : journal.Seller.Image
-                  , MobileNo      : journal.Seller.MobileNo                  
+                    Name          : journal.Store.Name
+                  , Address       : journal.Store.Address
+                  , Image         : journal.Store.Image
+                  , MobileNo      : journal.Store.MobileNo                  
                 }
                 , Penalty         : 0
-                , Income          : .75 * journal.Order.Bill.TransitCost
+                , Income          : (.75 * journal.Order.Bill.Transit).toFixed(2).toString()
                 , Transit         : 
                 { 
                     ID            : journal.Transit.ID
                   , Status        : 'Closed'
-                  , State  : 'TranistCompleted'
+                  , State         : 'Completed'
                 }
               }
             break;
@@ -127,13 +127,13 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                   , Address       : address
                   , MobileNo      : journal.Buyer.MobileNo              
                 }
-                , Seller          : 
+                , Store          : 
                 { 
                     ID            : store.ID
-                  , Name          : journal.Seller.Name
-                  , Address       : journal.Seller.Address
-                  , Image         : journal.Seller.Image
-                  , MobileNo      : journal.Seller.MobileNo                  
+                  , Name          : journal.Store.Name
+                  , Address       : journal.Store.Address
+                  , Image         : journal.Store.Image
+                  , MobileNo      : journal.Store.MobileNo                  
                 }
                 , Agent           :
                 {
@@ -148,7 +148,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                 , Payment         : 
                 { 
                     Channel       : journal.Payment.Channel
-                  , Amount        : journal.Order.Bill.NetPrice.toFixed(2).toString()
+                  , Amount        : journal.Order.Bill.Total.toFixed(2).toString()
                   , Status        : journal.Payment.Status
                   , TimeStamp     : '' 
                 }
@@ -158,7 +158,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                 { 
                     ID            : journal.Transit.ID
                   , Status        : 'Closed'
-                  , State  : 'TranistCompleted'
+                  , State         : 'Completed'
                 }
               }
             break;
@@ -183,7 +183,7 @@ let View = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
               { 
                   ID            : journal.Transit.ID
                 , Status        : 'Closed'
-                , State  : 'TranistCompleted'
+                , State         : 'Completed'
               }                
               , Penalty         : 0
               , Income          : journal.Order.Bill.Total
@@ -238,7 +238,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
       let admin   = data.Get(data.Obj.Admin    , this.AdminID)      
       let agent   = data.Get(data.Obj.Agent   , this.AgentID)
       let cart    = data.Get(data.Obj.Cart    , this.CartID)
-      let store   = data.Get(data.Obj.Store   , journal.Seller.Name)
+      let store   = data.Get(data.Obj.Store   , journal.Store.Name)
         , data_, token
 
       journal.Transit = { ID : user.TransitID }
@@ -271,12 +271,12 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                 JournalID       : cart.Paytm.OrderID.slice(6)
               , Date            : ''
               , Buyer           : { Address: address }
-              , Seller          : 
+              , Store          : 
               { 
                   ID            : store.ID
-                , Name          : journal.Seller.Name
-                , Address       : journal.Seller.Address
-                , Image         : journal.Seller.Image
+                , Name          : journal.Store.Name
+                , Address       : journal.Store.Address
+                , Image         : journal.Store.Image
               }
               , Agent           :
               {
@@ -299,7 +299,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
               { 
                   ID            : journal.Transit.ID
                 , Status        : 'Closed'
-                , State         : 'TranistCompleted'
+                , State         : 'Completed'
               }
             }
             break;
@@ -315,12 +315,12 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                   , Address       : address
                   , MobileNo      : journal.Buyer.MobileNo                  
                 }
-                , Seller          : 
+                , Store          : 
                 { 
-                    Name          : journal.Seller.Name
-                  , Address       : journal.Seller.Address
-                  , Image         : journal.Seller.Image
-                  , MobileNo      : journal.Seller.MobileNo
+                    Name          : journal.Store.Name
+                  , Address       : journal.Store.Address
+                  , Image         : journal.Store.Image
+                  , MobileNo      : journal.Store.MobileNo
                 }
                 , Penalty         : 0
                 , Income          : .75 * journal.Order.Bill.TransitCost
@@ -328,7 +328,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                 { 
                     ID            : journal.Transit.ID
                   , Status        : 'Closed'
-                  , State  : 'TranistCompleted'
+                  , State         : 'Completed'
                 }
               }
             break;
@@ -344,13 +344,13 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                   , Address       : address
                   , MobileNo      : journal.Buyer.MobileNo
                 }
-                , Seller          : 
+                , Store           : 
                 { 
                     ID            : store.ID
-                  , Name          : journal.Seller.Name
-                  , Address       : journal.Seller.Address
-                  , Image         : journal.Seller.Image
-                  , MobileNo      : journal.Seller.MobileNo                  
+                  , Name          : journal.Store.Name
+                  , Address       : journal.Store.Address
+                  , Image         : journal.Store.Image
+                  , MobileNo      : journal.Store.MobileNo                  
                 }
                 , Agent           :
                 {
@@ -375,7 +375,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
                 { 
                     ID            : journal.Transit.ID
                   , Status        : 'Closed'
-                  , State  : 'TranistCompleted'
+                  , State         : 'Completed'
                 }
               }
             break;
@@ -400,7 +400,7 @@ let List = function(journal_, user_, store_, agent_, cart_, admin_, mode_, addr_
               { 
                   ID            : journal.Transit.ID
                 , Status        : 'Closed'
-                , State  : 'TranistCompleted'
+                , State         : 'Completed'
               }                
               , Penalty         : 0
               , Income          : journal.Order.Bill.Total

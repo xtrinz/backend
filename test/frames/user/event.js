@@ -1,7 +1,7 @@
-const { task, code, status, text, command } = require('../../../pkg/system/models')
-    , { Method, Type }             = require('../../lib/medium')
-    , { read }                     = require('../../lib/driver')
-    , data                         = require('../data')
+const Model            = require('../../../pkg/system/models')
+    , { Method, Type } = require('../../lib/medium')
+    , { read }         = require('../../lib/driver')
+    , data             = require('../data')
 
 let RegisterNew = function(name) 
 {
@@ -19,18 +19,17 @@ let RegisterNew = function(name)
           , Path       : '/v1/user/register'
           , Body       : 
           {
-              Task     : task.New
+              Task     : Model.task.New
             , MobileNo : user.MobileNo
-            , Mode     : user.Mode       
           }
           , Header     : {}
         }
         , Skip         : []
         , Response     :
         {
-            Code       : code.OK
-          , Status     : status.Success
-          , Text       : text.OTPSendToMobileNo.format(
+            Code       : Model.code.OK
+          , Status     : Model.status.Success
+          , Text       : Model.text.OTPSendToMobileNo.format(
                           user.MobileNo.substr(
                           user.MobileNo.length - 4))
           , Data       : {}
@@ -64,7 +63,7 @@ let RegisterReadOTP = function(name)
           , Path       : '/v1/user/register'
           , Body       : 
           {
-              Task     : task.ReadOTP
+              Task     : Model.task.ReadOTP
             , MobileNo : user.MobileNo
             , OTP      : user.OTP
           }
@@ -73,10 +72,10 @@ let RegisterReadOTP = function(name)
         , Skip         : [ 'Token' ]
         , Response     :
         {
-            Code       : code.OK
-          , Status     : status.Success
-          , Text       : text.OTPConfirmed
-          , Data       : { Token: '', Command: command.Register }
+            Code       : Model.code.OK
+          , Status     : Model.status.Success
+          , Text       : Model.text.OTPConfirmed
+          , Data       : { Token: '', Command: Model.command.Register }
         }
       }
       return templ
@@ -105,7 +104,7 @@ let Register = function(name)
           , Path          : '/v1/user/register'
           , Body          : 
           {
-              Task        : task.Register
+              Task        : Model.task.Register
             , MobileNo    : user.MobileNo
             , Name        : user.Name
             , Email       : user.Email
@@ -117,16 +116,16 @@ let Register = function(name)
         }
         , Response        :
         {
-            Code          : code.OK
-          , Status        : status.Success
-          , Text          : text.Registered
+            Code          : Model.code.OK
+          , Status        : Model.status.Success
+          , Text          : Model.text.Registered
           , Data          :
           {
               Name        : user.Name
             , MobileNo    : user.MobileNo
             , Email       : user.Email
             , Mode        : user.Mode
-            , Command     : command.LoggedIn
+            , Command     : Model.command.LoggedIn
           }
         }
       }
@@ -184,8 +183,8 @@ let ProfileGet = function(name)
       }
       , Response        :
       {
-          Code          : code.OK
-        , Status        : status.Success
+          Code          : Model.code.OK
+        , Status        : Model.status.Success
         , Text          : ''
         , Data          : 
         {
@@ -228,9 +227,9 @@ let ProfileEdit =  function(name)
       }                   
       , Response        :
       {                   
-          Code          : code.OK
-        , Status        : status.Success
-        , Text          : text.ProfileUpdated
+          Code          : Model.code.OK
+        , Status        : Model.status.Success
+        , Text          : Model.text.ProfileUpdated
         , Data          : {}
       }                   
     }
@@ -260,11 +259,7 @@ let Disconnect = function(name)
 
 module.exports =
 {
-      RegisterNew
-    , RegisterReadOTP
-    , Register
-    , Connect
-    , ProfileGet
-    , ProfileEdit
+      RegisterNew   , RegisterReadOTP  , Register
+    , Connect       , ProfileGet       , ProfileEdit
     , Disconnect
 }

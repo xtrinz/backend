@@ -110,10 +110,10 @@ let List = function(user_, cart_, addr_, store_)
               }
               , Bill          : 
               {
-                  Total       : cart.Bill.Total
-                , TransitCost : cart.Bill.TransitCost
+                  Product     : cart.Bill.Product
+                , Transit     : cart.Bill.Transit
                 , Tax         : cart.Bill.Tax
-                , NetPrice    : cart.Bill.NetPrice
+                , Total       : cart.Bill.Total
               }
           }
       }
@@ -123,11 +123,12 @@ let List = function(user_, cart_, addr_, store_)
 
 }
 
-let Update = function(user_, product_) 
+let Update = function(user_, product_, inc_) 
 {
   this.UserID  	 = user_
   this.ProductID = product_
-  this.Data     = function()
+  this.IsInc     = inc_
+  this.Data      = function()
   {
     let user    = data.Get(data.Obj.User,    this.UserID)
     let product = data.Get(data.Obj.Product, this.ProductID)
@@ -143,7 +144,7 @@ let Update = function(user_, product_)
         , Body          : 
         {
             ProductID   : product.ID
-          , Quantity    : 5
+          , IsInc       : this.IsInc
         }
         , Header        : { Authorization: user.Token }
       }
@@ -161,9 +162,9 @@ let Update = function(user_, product_)
 
 let Remove = function(user_, product_) 
 {
-  this.UserID  	 = user_
-  this.ProductID = product_
-  this.Data     = function()
+  this.UserID  	  = user_
+  this.ProductID  = product_
+  this.Data       = function()
   {
     let user    = data.Get(data.Obj.User,    this.UserID)
     let product = data.Get(data.Obj.Product, this.ProductID)
@@ -198,5 +199,6 @@ let Remove = function(user_, product_)
 
 module.exports =
 {
-    Insert, List, Update, Remove
+    Insert, List,
+    Update, Remove
 }

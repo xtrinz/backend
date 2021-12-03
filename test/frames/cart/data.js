@@ -3,17 +3,18 @@ const { Product } = require('../product/data')
 let Cart = function(user)
 {
   Cart.Count++
-  this.ID           = ''
-  this.UserName     = user
-  this.Products     = [] // { ProductID, Name, Image, Price, Quantity } 
-  this.Bill         = 
-  {                 
-        Total       : 0
-      , TransitCost : 2.459 * 5
-      , Tax         : 2.2131
-      , NetPrice    : 0
+
+  this.ID         = ''
+  this.UserName   = user
+  this.Products   = [] // { ProductID, Name, Image, Price, Quantity } 
+  this.Bill       = 
+  {               
+        Total     : 14.51
+      , Transit   : 12.30
+      , Tax       :  2.21
+      , Product   : 0
   }
-  this.Paytm        = 
+  this.Paytm      = 
   {
       Token       : ''
     , OrderID     : ''
@@ -39,12 +40,10 @@ let Cart = function(user)
     }
 
     this.Products.push(prod)
+    this.Bill.Product     += prod.Price * prod.Quantity
+    this.Bill.Product      = this.Bill.Product.round()
     this.Bill.Total       += prod.Price * prod.Quantity
-    // this.Bill.TransitCost  = 
-    // this.Bill.Tax          =     
-    this.Bill.NetPrice     = this.Bill.Total 
-                           + this.Bill.TransitCost
-                           + this.Bill.Tax
+    this.Bill.Total        = this.Bill.Total.round()
 
     Cart.Carts[this.UserName] = this
   }
@@ -67,12 +66,8 @@ let Cart = function(user)
     }
 
     this.Products.pop(prod)
+    this.Bill.Product     -= prod.Price * prod.Quantity
     this.Bill.Total       -= prod.Price * prod.Quantity
-    // this.Bill.TransitCost  = 
-    // this.Bill.Tax          =     
-    this.Bill.NetPrice     = this.Bill.Total 
-                           + this.Bill.TransitCost
-                           + this.Bill.Tax
 
     Cart.Carts[this.UserName] = this
   }

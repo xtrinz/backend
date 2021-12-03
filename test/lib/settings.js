@@ -11,3 +11,11 @@ String.prototype.format = function()
     }
     return a
 }
+
+// round to 2 decimal places
+Number.prototype.round = function()
+{
+    const x = this
+        , y = Math.pow(10, 2)
+    return Math.round(x * y) / y
+}
