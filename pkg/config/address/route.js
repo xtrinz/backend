@@ -1,18 +1,19 @@
-const { Address }            = require('../address/driver')
-    , router 	               = require('express').Router()
-    , { code, status, text } = require('../../system/models')
+const router 	= require('express').Router()
+    , Model   = require('../../system/models')
+    , Address = require('./model')
+    , addr    = require('./driver')
 
 // Add address
 router.post('/add', async (req, res, next) => {
   try
   {
     const entry = new Address(req.body)
-        , Id    = await entry.Insert(req.body.User._id
-                        , req.body.User.AddressList)
+        , Id    = await addr.Insert(req.body.User._id
+              , req.body.User.AddressList.length, entry)
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.AddressAdded,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.AddressAdded,
       Data    : { AddressID: Id }
     })
   } catch (err) { next(err) }
@@ -24,10 +25,10 @@ router.get('/view', async (req, res, next) =>
   try
   {
     req.query.UserID  = req.body.User._id
-    const data        = await Address.Read(req.query)
+    const data        = await addr.Read(req.query)
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : '',
       Data    : data
     })
@@ -39,10 +40,10 @@ router.get('/list', async (req, res, next) =>
 {
   try
   {
-    const data = await Address.List(req.body.User._id)
+    const data = await addr.List(req.body.User._id)
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : '',
       Data    : data
     })
@@ -53,11 +54,11 @@ router.get('/list', async (req, res, next) =>
 router.post('/modify', async (req, res, next) => {
   try
   {
-    await Address.Update(req.body)
+    await addr.Update(req.body)
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.AddressUpdated,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.AddressUpdated,
       Data    : {}
     })
   } catch (err) { next(err) }
@@ -68,12 +69,12 @@ router.delete('/remove', async (req, res, next) =>
 {
   try
   {
-    await Address.Remove( req.body.User._id,
+    await addr.Remove( req.body.User._id,
                         req.body.AddressID)
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.AddressRemoved,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.AddressRemoved,
       Data    : {}
     })
   } catch (err) { next(err) }

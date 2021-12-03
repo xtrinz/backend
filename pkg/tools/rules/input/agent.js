@@ -15,7 +15,6 @@ module.exports =
         , 'body.MobileNo'         : [ [ 'requiredIf', 'body.Task', task.ReadOTP ],
                                       [ 'requiredIf', 'body.Task', task.New ],
                                       [ 'requiredIf', 'body.Task', task.Register], 'string', [ 'length', 15, 2 ] ]
-        , 'body.Mode'             : [ [ 'requiredIf', 'body.Task', task.New      ], 'string' , [ 'in', mode.User, mode.Agent, mode.Admin ] ]
         , 'body.OTP'              : [ [ 'requiredIf', 'body.Task', task.ReadOTP  ], 'integer', [ 'between', 000000, 999999 ] ]
         , 'body.Name'             : [ [ 'requiredIf', 'body.Task', task.Register ], 'string' , [ 'length', 50, 2 ] ]
         , 'body.Email'            : [ 'email' ]

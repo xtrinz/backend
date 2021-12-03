@@ -166,7 +166,7 @@ const Order = async function(client)
         {
               ProductID  : item.ProductID   , Name       : product.Name    
             , Price      : product.Price    , Image      : product.Image
-            , Category   : product.Categor  , Quantity   : item.Quantity
+            , Category   : product.Category , Quantity   : item.Quantity
             , Available  : product.Quantity , Flagged    : false
         }
         order_.Products.push(node)

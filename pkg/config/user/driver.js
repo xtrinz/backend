@@ -1,8 +1,8 @@
 const { Err_ }     = require('../../system/models')
     , otp          = require('../../infra/otp')
     , jwt          = require('../../infra/jwt')
-    , { ObjectID } = require('mongodb')
-    , { Cart }     = require('../cart/driver')
+    , { ObjectId } = require('mongodb')
+    , cart         = require('../cart/driver')
     , Model        = require('../../system/models')
     , db           = require('../exports')[Model.segment.db][Model.resource.user]
 
@@ -12,7 +12,7 @@ function User(data)
     this.Data =
     {
         MobileNo      : data.MobileNo
-      , Mode          : data.Mode
+      , Mode          : Model.mode.User
       , _id           : ''
       , Otp           : ''
       , State         : Model.states.None
@@ -49,7 +49,7 @@ function User(data)
                         Body: 	Model.message.OnAuth })
             , hash    = await otp_sms.Send(Model.gw.SMS)
 
-        if(!user) { this.Data._id = new ObjectID() }
+        if(!user) { this.Data._id = new ObjectId() }
         else { this.Data._id = user._id }
 
         this.Data.Otp             = hash
@@ -97,8 +97,7 @@ function User(data)
         if (data.User.State !== Model.states.MobConfirmed)
         Err_(Model.code.BAD_REQUEST, Model.reason.MobileNoNotConfirmed)
 
-        const cart       = new Cart(data.User._id)
-        data.User.CartID = await cart.Create()
+        data.User.CartID = await cart.Create(data.User._id)
         data.User.Name   = data.Name
         data.User.Email  = data.Email        
         data.User.State  = Model.states.Registered

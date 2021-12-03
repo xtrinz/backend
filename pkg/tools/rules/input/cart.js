@@ -28,10 +28,10 @@ module.exports =
     {
       [method.post]            : 
       {
-          'body'               : [ 'required', 'object' ]
+          'body'                  : [ 'required', 'object' ]
         , 'headers'               : [ 'required', 'object' ]            
-        , 'body.ProductID'     : [ 'mongoId']
-        , 'body.Quantity'      : [ 'integer', [ 'min', -50 ], [ 'max', 50 ] ]
+        , 'body.ProductID'        : [ 'required', 'mongoId']
+        , 'body.IsInc'            : [ 'required', 'boolean' ]
         , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
       }
     }

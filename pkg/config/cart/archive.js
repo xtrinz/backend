@@ -154,8 +154,13 @@ const Insert     = async function (cart_id, data)
   console.log('product-inserted', { Product: data})
 }
 
-const Update     = async function (cart_id, product_id, qnty)
+const Update     = async function (data)
 {
+  let cart_id = data.CartID
+  let product_id = data.ProductID
+  let is_inc = data.IsInc
+  let qnty = is_inc ? 1 : -1
+
   let key1  = 
   {
     _id      : ObjectId(cart_id),

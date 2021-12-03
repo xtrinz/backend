@@ -1,32 +1,29 @@
-const { 
-        resource: rsrc, verb,
-        method, Err_, code, reason
-      }               = require('../system/models')
-    , niv             = require('node-input-validator')
+const Model = require('../system/models')
+    , niv   = require('node-input-validator')
 
 const Controller 		 = function()
 {
 	this.Controller =
 	{
-    [rsrc.user]           : require('../tools/rules/input/user')
-  , [rsrc.agent]          : require('../tools/rules/input/agent')   
-  , [rsrc.admin]          : require('../tools/rules/input/admin')     
-  , [rsrc.store]          : require('../tools/rules/input/store')
-  , [rsrc.product]        : require('../tools/rules/input/product')
-  , [rsrc.cart]           : require('../tools/rules/input/cart')
-  , [rsrc.note]           : require('../tools/rules/input/note')
-  , [rsrc.address]        : require('../tools/rules/input/address')
-  , [rsrc.journal]        : require('../tools/rules/input/journal')
-  , [rsrc.transit]        : require('../tools/rules/input/transit')
-  , [rsrc.socket]         : require('../tools/rules/input/socket')
-  , [rsrc.paytm]          : require('../tools/rules/input/paytm')
+    [Model.resource.user]           : require('../tools/rules/input/user')
+  , [Model.resource.agent]          : require('../tools/rules/input/agent')   
+  , [Model.resource.admin]          : require('../tools/rules/input/admin')     
+  , [Model.resource.store]          : require('../tools/rules/input/store')
+  , [Model.resource.product]        : require('../tools/rules/input/product')
+  , [Model.resource.cart]           : require('../tools/rules/input/cart')
+  , [Model.resource.note]           : require('../tools/rules/input/note')
+  , [Model.resource.address]        : require('../tools/rules/input/address')
+  , [Model.resource.journal]        : require('../tools/rules/input/journal')
+  , [Model.resource.transit]        : require('../tools/rules/input/transit')
+  , [Model.resource.socket]         : require('../tools/rules/input/socket')
+  , [Model.resource.paytm]          : require('../tools/rules/input/paytm')
 
   // TODO Cloudinary
-  , [rsrc.cloudinary]     : // TODO correct it root as rsrc and checkout as verb
+  , [Model.resource.cloudinary]     : // TODO correct it root as rsrc and checkout as verb
     {
-      [verb.root]                :
+      [Model.verb.root]                :
       {
-        [method.post]            : 
+        [Model.method.post]            : 
         {
             'query'                 : [ 'required', 'object' ]
           , 'headers'               : [ 'required', 'object' ]            
@@ -35,11 +32,11 @@ const Controller 		 = function()
       }
     }
   // Checkout
-  , [rsrc.checkout]              : // TODO correct it root as rsrc and checkout as verb
+  , [Model.resource.checkout]              : // TODO correct it root as rsrc and checkout as verb
     {
-      [verb.root]                :
+      [Model.verb.root]                :
       {
-        [method.post]            : 
+        [Model.method.post]            : 
         {
             'body'               : [ 'required', 'object' ]
           , 'headers'               : [ 'required', 'object' ]            
@@ -93,21 +90,21 @@ const Controller 		 = function()
         if(!verbs)
         {
             console.log('iv-resouce-not-found', opt_)
-            Err_(code.FORBIDDEN, reason.PermissionDenied)
+            Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
         }
 
         const methods = verbs[vrb]
         if(!methods)
         {
             console.log('iv-verb-not-found', { Opts: opt_, Verb: verbs })
-            Err_(code.FORBIDDEN, reason.PermissionDenied)
+            Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
         }
 
         const rules     = methods[mthd]
         if(!rules)
         {
             console.log('iv-method-not-found', { Opts: opt_, Methods: methods })
-            Err_(code.FORBIDDEN, reason.PermissionDenied)
+            Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
         }
 
         const err_    = this.SetErr(rules)
@@ -117,7 +114,7 @@ const Controller 		 = function()
         if(!matched)
         {
             console.log('iv-incorrect-input', { Opts: opt_, Rule: rules, Err: v.errors })
-            Err_(code.FORBIDDEN, reason.PermissionDenied)
+            Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
         }      
     }
 }

@@ -39,11 +39,13 @@ const Bill      = async function(order_, cords_)
 
     bill.Tax     = .18 * bill.Transit
 
+    bill.Product = bill.Product.round()
+    bill.Transit = bill.Transit.round()
+    bill.Tax     = bill.Tax.round()
+
     bill.Total   =  bill.Product
                   + bill.Transit
                   + bill.Tax
-
-//    bill.Total   = bill.Total.round()
 
     console.log('bill-genereted', { Bill: bill, Order: order_ , Cords: cords_ })
 

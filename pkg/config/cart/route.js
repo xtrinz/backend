@@ -1,18 +1,18 @@
-const { ObjectId }       = require('mongodb')
-    , {Cart, CartEntry}  = require('../cart/driver')
-    , { Address }        = require('../address/driver')
-    , router 	           = require('express').Router()
-    , tally              = require('../../system/tally')
-    , Model              = require('../../system/models')
-    , db                 = require('../exports')[Model.segment.db]
+const cart      = require('../cart/driver')
+    , addr      = require('../address/driver')
+    , { Entry } = require('./model')
+    , router 	  = require('express').Router()
+    , tally     = require('../../system/tally')
+    , Model     = require('../../system/models')
+    , db        = require('../exports')[Model.segment.db]
 
 // Insert product
 router.post('/insert', async (req, res, next) => {
   try
   {
-    const entry = new CartEntry(req.body)
-    await entry.Insert(req.body.User.CartID)
-    
+    const entry = new Entry(req.body)
+    await cart.Insert(req.body.User.CartID, entry)
+
     return res.status(Model.code.OK).json({
       Status  : Model.status.Success,
       Text    : Model.text.ProductAdded,
@@ -28,7 +28,7 @@ router.get('/list', async (req, res, next) =>
   {
     let data, src_loc, dest_loc
     
-    data = await (new Cart()).Read(req.body.User._id)
+    data = await cart.Read(req.body.User._id)
     dest_loc = src_loc  = { Latitude : 0, Longitude : 0 }
 
     if(req.query.AddressID)
@@ -38,7 +38,7 @@ router.get('/list', async (req, res, next) =>
           UserID    : req.body.User._id
         , AddressID : req.query.AddressID
       }
-      data.Address  = await Address.Read(in_)
+      data.Address  = await addr.Read(in_)
       src_loc       = await db.store.Location(data.StoreID)
       dest_loc      =
       {
@@ -65,10 +65,14 @@ router.get('/list', async (req, res, next) =>
 router.post('/modify', async (req, res, next) => {
   try
   {
-    const entry = new CartEntry()
-    await entry.Update( ObjectId(req.body.User.CartID),
-                        ObjectId(req.body.ProductID),
-                        req.body.Quantity)
+
+    let data_ =
+    {
+        CartID    : req.body.User.CartID
+      , ProductID : req.body.ProductID 
+      , IsInc     : req.body.IsInc      
+    }
+    await cart.Update(data_)
     
     return res.status(Model.code.OK).json({
       Status  : Model.status.Success,
@@ -83,9 +87,9 @@ router.delete('/remove', async (req, res, next) =>
 {
   try
   {
-    const entry = new CartEntry()
-    await entry.Remove( ObjectId(req.body.User.CartID),
-                        ObjectId(req.body.ProductID))
+
+    await cart.Remove(req.body.User.CartID,
+                      req.body.ProductID)
     
     return res.status(Model.code.OK).json({
       Status  : Model.status.Success,

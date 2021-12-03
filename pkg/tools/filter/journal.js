@@ -41,7 +41,7 @@ module.exports =
         {
             let query_ = 
             {
-                'Seller.ID'      : ObjectId(in_._id)
+                'Store.ID'      : ObjectId(in_._id)
               , 'Payment.Status' : { $nin: [ states.Initiated, states.Failed ] }
             }
             
@@ -87,7 +87,7 @@ module.exports =
         {
             return {
                 _id         : ObjectId(data.JournalID)
-              , 'Seller.ID' : ObjectId(in_._id)
+              , 'Store.ID' : ObjectId(in_._id)
             }
         }
         , [mode.Agent]: function(data, in_)

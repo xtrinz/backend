@@ -18,7 +18,7 @@ class Agent
 
         this._id           = new ObjectId()
         this.MobileNo      = data.MobileNo
-        this.Mode          = data.Mode
+        this.Mode          = Model.mode.Agent
         this.Otp           = ''
         this.State         = Model.states.None
         this.Status        = 

@@ -66,37 +66,6 @@ const List = async function(data, proj)
     return data_
 }
 
-const Seller = async function(store_id)
-{
-    const store   = await Get(store_id, Model.query.ByID)
-    if (!store) Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
-
-    const now_     = new Date()
-        , is_now   = now_.is_now(store.Time.Open, store.Time.Close)
-        , is_today = now_.is_today(store.Status.SetOn)        
-    if( !is_now || (is_today && store.Status === Model.states.Closed) ||
-      ( is_now && now_.diff_in_m(store.Time.Close) < Model.limits.CheckoutGracePeriod))
-    {
-      let reason_ = (is_now)? Model.reason.GracePeriodExceeded: Model.reason.StoreClosed
-      console.log('store-has-closed', { Store: store })
-      Model.Err_(Model.code.BAD_REQUEST, reason_)
-    }
-
-    const resp = 
-    {                 
-        ID        : store._id
-      , Name      : store.Name
-      , MobileNo  : store.MobileNo
-      , Image     : store.Image
-      , Address   : store.Address
-    }
-    resp.Address.Longitude = store.Address.Location.coordinates[0].toFixed(6)
-    resp.Address.Latitude  = store.Address.Location.coordinates[1].toFixed(6)
-    delete resp.Address.Location
-    console.log('the-seller', { Seller : resp })
-    return resp
-}
-
 const SockID = async function(store_id)
 {
     console.log('get-store-sock-id', { StoreID: store_id })
@@ -133,5 +102,5 @@ module.exports =
 {
       Save     , Get    
     , List     , SockID   
-    , Seller   , Location   
+    , Location   
 }

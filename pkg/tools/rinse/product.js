@@ -1,11 +1,18 @@
 const cart            = require('../../config/cart/archive')
-    , { verb, query } = require('../../system/models')
+    , { verb, query,
+        Err_, code,
+        reason }      = require('../../system/models')
 
 module.exports =
 {
     [verb.list]: async function(entity_, data)
     {
         let cart_ = await cart.Get(entity_.User._id, query.ByUserID)
+        if(!cart_)
+        {
+            console.log('No cart found for user', { UserID: entity_.User._id})
+            Err_(code.NOT_FOUND, reason.CartNotFound)
+        }
         for(let idx = 0; idx < data.length; idx++)
         {
             data[idx].CountAtCart = 0 // TODO Test it
@@ -19,6 +26,11 @@ module.exports =
         delete product.HasCOD // Only for User
         product.CountAtCart = 0
         let cart_ = await cart.Get(entity_.User._id, query.ByUserID)
+        if(!cart_)
+        {
+            console.log('No cart found for user', { UserID: entity_.User._id})
+            Err_(code.NOT_FOUND, reason.CartNotFound)
+        }
         for(let jdx = 0; jdx < cart_.Products.length; jdx++)
         if(String(product.ProductID) === String(cart_.Products[jdx].ProductID))
         product.CountAtCart = cart_.Products[jdx].Quantity

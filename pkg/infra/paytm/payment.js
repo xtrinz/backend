@@ -1,9 +1,7 @@
-const checksum      = require("paytmchecksum")
-    , Model  		= require('../../system/models')
-	, journal		= require('../../config/journal/archive')
-	, { Cart } 		= require('../../config/cart/driver')
-	, { ObjectId }	= require('mongodb')
-	, paytm 		= require('./driver')
+const checksum  = require("paytmchecksum")
+    , Model  	= require('../../system/models')
+	, journal	= require('../../config/journal/archive')
+	, cart 		= require('../../config/cart/driver')
 
 function Payment(data)
 {
@@ -64,7 +62,7 @@ function Payment(data)
 		{
 			case Model.paytm.TxnSuccess:
 
-				await (new Cart()).Flush(rcd.Buyer.ID)
+				await cart.Flush(rcd.Buyer.ID)
 
 				rcd.Payment.Status = Model.states.Success
 				rcd.Transit.Status = Model.states.Initiated

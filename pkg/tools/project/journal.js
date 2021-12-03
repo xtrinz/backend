@@ -29,8 +29,8 @@ module.exports =
        {
                 _id                   : 1  , 'Date'              : 1
 
-            , 'Seller.Name'          : 1  , 'Seller.MobileNo'   : 1
-            , 'Seller.Address'       : 1  , 'Seller.Image'      : 1
+            , 'Store.Name'          : 1    , 'Store.MobileNo'   : 1
+            , 'Store.Address'       : 1    , 'Store.Image'      : 1
 
             , 'Buyer.Name'           : 1
             , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'    : 1
@@ -60,9 +60,9 @@ module.exports =
             , 'Buyer.Name'           : 1
             , 'Buyer.Address'        : 1  , 'Buyer.MobileNo'  : 1
 
-            , 'Seller.ID'            : 1  , 'Seller.Name'     : 1
-            , 'Seller.Address'       : 1  , 'Seller.Image'    : 1
-            , 'Seller.MobileNo'      : 1
+            , 'Store.ID'            : 1  , 'Store.Name'     : 1
+            , 'Store.Address'       : 1  , 'Store.Image'    : 1
+            , 'Store.MobileNo'      : 1
             
             , 'Agent.Name'           : 1  , 'Agent.MobileNo'  : 1
 
