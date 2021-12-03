@@ -1,6 +1,6 @@
 const router     = require('express').Router()
     , Model      = require('../../system/models')
-    , Journal    = require('../journal/driver')
+    , journal    = require('../journal/handlers')
     , Transit    = require('../transit/driver')
     , cloudinary = require('cloudinary').v2
     , pub_key    = process.env.CLOUDINARY_KEY
@@ -11,19 +11,18 @@ router.post('/checkout', async (req, res, next) =>
   try
   {
 
-    const journal = new Journal() 
-        , data    = await journal.New(req.body)
+    const ret = await journal.Create(req.body)
 
     if(req.body.IsCOD)
     {
-      let transit = new Transit(journal.Data)
-      await transit.Init(journal.Transit.ID)
+      let transit = new Transit(ret.Journal)
+      await transit.Init(ret.Journal.Transit.ID)
     }
 
     return res.status(Model.code.OK).json({
       Status  : Model.status.Success,
       Text    : Model.text.PaymentInitiated,
-      Data    : data
+      Data    : ret.Response
     })
   } catch (err) { next(err) }
 })

@@ -264,6 +264,19 @@ const Get      = async function (in_)
             Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
         }
         break
+      case Model.mode.System:
+        store_ = await db.store.Get(in_.ID, Model.query.ByID)
+        if (!store_)
+        {
+            console.log('store-not-found', { In: in_ })
+            Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
+        }
+        if (store_.State !== Model.states.Registered)
+        {
+            console.log('store-has-not-registered', { In: in_ })
+            Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
+        }
+        break        
     }
 
     data = Tool.rinse[Model.verb.view][in_.Mode](store_)

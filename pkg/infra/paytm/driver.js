@@ -108,7 +108,7 @@ class PayTM
 
         const orderId      = Model.paytm.Order.format(String(data.JournalID))
             , refId        = Model.paytm.Refund.format(String(data.JournalID))
-            , txnId        = data.ChannelRefID
+            , txnId        = data.RefID
             , txnType      = Model.paytm.Type.REFUND
             , refundAmount = data.Amount.toString()
 
@@ -137,7 +137,7 @@ class PayTM
         const txn_i =
         {
             ID     : refId
-          , TxnID  : body.getRefundId()
+          , RefID  : body.getRefundId()
           , Amount : refundAmount 
           , State  : Model.paytm.RefundPending
         }

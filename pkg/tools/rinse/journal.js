@@ -89,6 +89,9 @@ module.exports =
         {
             data_.JournalID = data_._id
             delete data_._id
+
+            data_.Payment.TimeStamp = data_.Payment.Time.Webhook
+            delete data_.Payment.Time            
         }
         , [mode.Store]: function(data_)
         {

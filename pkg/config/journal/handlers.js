@@ -8,26 +8,22 @@ const { ObjectId } = require('mongodb')
     }
     , paytm        = require('../../infra/paytm/driver')
     , tally        = require('../../system/tally')
-    , Tool         = require('../../tools/export')
+    , Tool         = require('../../tools/export')[Model.resource.journal]
+    , { Cart }     = require('../cart/driver')
+    , StoreM       = require('../store/methods')
 
 const Context = async function(data)
 {
+    console.log('generate-context', { Data : data })
 
     let query_ =
     {
         $and : [
-          { 'Buyer.ID' : data.User._id },
-        , {
-            Payment : 
-            { 
-                  $exists   : true
-                , Status : { $ne : { $or: [ Model.states.Success, Model.states.ToBeCollected ] } } 
-            }
-          }
+              { 'Buyer.ID'       : data.User._id        }
+            , { 'Transit.Status' : Model.states.Pending }
         ]
     }
-
-    let ctxt = await db.journal.Get(query_)
+    let ctxt = await db.journal.Find(query_)
     if(!ctxt)
     {
         console.log('no-previous-context-framing-new', { Query : query_ })
@@ -62,9 +58,13 @@ const Context = async function(data)
     {
           ID     : new ObjectId()
         , Status : Model.states.Pending
+        , State  : Model.states.Pending
     }
-    ctxt.Agent   = {}                   // Not yet set
-    ctxt.Admin   = {}                   // Not yet set
+    ctxt.Agent   = {}
+    ctxt.Admin   = {}                   // Not yet set  
+
+    // Set tranist and journal ctxts with 
+    // equivalent filed and dirclty set it on payout
 
     return ctxt
 }
@@ -94,11 +94,11 @@ const Store = async function(order)
     let in_ =
     {
         ID    : order.StoreID
-      , Mode  : Model.mode.User
+      , Mode  : Model.mode.System
       , Store : {}
     }
 
-    let out    = await store.Get(in_)
+    let out    = await StoreM.Get(in_)
 
     if(out.Status == Model.states.Closed)
     {
@@ -108,8 +108,9 @@ const Store = async function(order)
 
     let store =
     {
-          ID       : out.SotreID
+          ID       : out.StoreID
         , Name     : out.Name
+        , Image    : out.Image
         , MobileNo : out.MobileNo
         , Address  : out.Address
     }
@@ -121,7 +122,7 @@ const Store = async function(order)
 const Order = async function(client)
 {
 
-    let cart = await db.cart.Get(client.ID, query.ByUserID)
+    let cart = await db.cart.Get(client.ID, Model.query.ByUserID)
 
     if (!cart) 
     {
@@ -146,7 +147,7 @@ const Order = async function(client)
     {
 
         const item    = cart.Products[i]
-            , product = await db.product.Get(item.ProductID, query.ByID)
+            , product = await db.product.Get(item.ProductID, Model.query.ByID)
 
         if (!product) 
         {
@@ -176,7 +177,7 @@ const Order = async function(client)
     return order_
 }
 
-const Paytm = async function(retry, bill, history)
+const Paytm = async function(retry, bill, history, client, j_id)
 {
     let txn_i, time, date = new Date()
     // On retry, if amnt is same and token 
@@ -197,7 +198,7 @@ const Paytm = async function(retry, bill, history)
     }
     else
     {
-        txn_i  = await paytm.CreateToken(j_id, price, user)
+        txn_i  = await paytm.CreateToken(j_id, bill.Total, client)
         time   = date.toISOString()
     }
     const payment_ =
@@ -221,9 +222,9 @@ const Paytm = async function(retry, bill, history)
 }
 
 
-const COD = async function(order, bill, retry, history)
+const COD = async function(order, bill, retry, history, j_id)
 {
-    let time, date = new Date()
+    let date = new Date(), time = date.toISOString()
 
     if(!order.HasCOD)
     {
@@ -231,11 +232,10 @@ const COD = async function(order, bill, retry, history)
         Model.Err_(Model.code.CONFLICT, Model.reason.HasItemsWithNoCOD)
     }
 
-    let time       = date.toISOString()
     const payment_ =
     {
           Channel : Model.channel.COD
-        , OrderID : history.OrderID
+        , OrderID : Model.paytm.Order.format(String(j_id))
         , Token   : ''
         , RefID   : ''
         , Amount  : bill.Total.toString()
@@ -252,7 +252,7 @@ const COD = async function(order, bill, retry, history)
     return ret_
 }
 
-const Payment = async function(client, store, order, cod, retry, history)
+const Payment = async function(client, store, order, cod, retry, history, j_id)
 {
     const cords = 
     {
@@ -269,7 +269,7 @@ const Payment = async function(client, store, order, cod, retry, history)
     }
     else
     {
-        ctxt_ = await Paytm(retry, bill, history)
+        ctxt_ = await Paytm(retry, bill, history, client, j_id)
         path_ = Model.channel.Paytm
     }
     const ret_ =
@@ -282,7 +282,7 @@ const Payment = async function(client, store, order, cod, retry, history)
     return ret_
 }
 
-const Create    = async function(journal, data)
+const Create    = async function(data)
 {
     let journal   = await Context (data)
 
@@ -292,7 +292,7 @@ const Create    = async function(journal, data)
       , payment   = await Payment (   client, store, order
                                     , data.IsCOD
                                     , journal.IsRetry
-                                    , journal.Trail)
+                                    , journal.Trail, journal._id)
 
     journal.Buyer   = client
     journal.Order   = order
@@ -301,9 +301,13 @@ const Create    = async function(journal, data)
     journal.Payment = payment.Frame.Payment
     journal.Trial   = payment.Frame.Trail
 
-    let ret = {}
+    let ret = 
+    {
+            Journal  : journal
+          , Response : {}
+    }
     if (payment.Path == Model.channel.Paytm)
-    {     ret = payment.Frame.Txn          }
+    {     ret.Response = payment.Frame.Txn          }
     else 
     {
         console.log('cod-context', { Details : payment.Frame })
@@ -358,16 +362,16 @@ const Refund = async function(journal, refuntAmount)
     // TODO add agent info, if terminated by admin/store
     const refunt_     =
     {
-          JournalID    : journal._id
-        , ChannelRefID : journal.Payment.ChannelRefID
-        , Amount       : refuntAmount
+          JournalID : journal._id
+        , RefID     : journal.Payment.RefID
+        , Amount    : refuntAmount
     }
 
     const txn_i     = await paytm.Refund(refunt_)
     journal.Refund  =
     {
           RefundID  : txn_i.ID
-        , RefID     : txn_i.TxnID
+        , RefID     : txn_i.RefID
         , Amount    : txn_i.Amount
         , Status    : txn_i.State
         , Time      : { Token : time, Webhook : '' }
@@ -400,10 +404,10 @@ const Payout = async function (ctxt)
     journal.Transit.Status = Model.states.Closed
     journal.Transit.State  = ctxt.State
 
-    await db.journal.Save(journal)
-
     const refuntAmount = journal.Account.Out.Dynamic.Refund.Buyer
     if (refuntAmount > 0) { await Refund(journal, refuntAmount) }
+
+    await db.journal.Save(journal)    
 }
 
 const Read = async function(data, in_, mode_)
@@ -444,12 +448,7 @@ const List = async function(data, in_, mode_)
 
 module.exports = 
 {
-      Create    
-    , MarkPayment
-    , MarkRefund
-    , Payout    
-    , Read
-    , List
-    , Refund
+      MarkPayment,  MarkRefund
+    , Create , Payout   , Read
+    , List   , Refund
 }
-

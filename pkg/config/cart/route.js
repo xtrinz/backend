@@ -46,8 +46,12 @@ router.get('/list', async (req, res, next) =>
         , Longitude : data.Address.Longitude
       }
     }
-
-    await tally.SetBill(data, src_loc, dest_loc)
+    const cords = 
+    {
+          Src  : src_loc
+        , Dest : dest_loc
+    }
+    data.Bill = await tally.Bill(data, cords)
 
     return res.status(Model.code.OK).json({
       Status  : Model.status.Success,

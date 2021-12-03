@@ -43,7 +43,9 @@ const Bill      = async function(order_, cords_)
                   + bill.Transit
                   + bill.Tax
 
-    bill.Total   = bill.Total.round()
+//    bill.Total   = bill.Total.round()
+
+    console.log('bill-genereted', { Bill: bill, Order: order_ , Cords: cords_ })
 
     return bill
 }
@@ -54,13 +56,7 @@ const Settle = async function(data, state)
   {
       In :
     {
-        Dynamic : 
-        { 
-          Payment : 
-          { 
-            Buyer : data.Order.Bill.TransitCost + data.Order.Bill.Total + data.Order.Bill.Tax 
-          } 
-        }
+        Dynamic : { Payment : { Buyer : data.Bill.Total }  }
       , Static  : { Penalty : { Buyer : 0, Store : 0, Agent : 0, Business : 0 } }
     }
     , Out :
@@ -71,17 +67,19 @@ const Settle = async function(data, state)
   }
   switch (state.Current)
   {
-    case states.TranistCompleted : // Alpha-Done
+    case states.Completed : // Alpha-Done
 
       data.Account.Out.Static.Payout  =
       { 
-          Store    : data.Order.Bill.Total
-        , Agent    : .75 * data.Order.Bill.TransitCost
-        , Business : .25 * data.Order.Bill.TransitCost
-        , Govt     : data.Order.Bill.Tax
+          Store    : data.Bill.Product
+        , Agent    : .75 * data.Bill.Transit
+        , Business : .25 * data.Bill.Transit
+        , Govt     : data.Bill.Tax
       }
 
     break
+
+    // Fix the rest
     case states.CargoCancelled   :
 
       switch(state.Previous)
@@ -91,19 +89,19 @@ const Settle = async function(data, state)
           data.Account.Out.Dynamic.Refund.Buyer
           data.Account.Out.Static.Payout  =
           { 
-              Store    : data.Order.Bill.Total
-            , Agent    : .75 * data.Order.Bill.TransitCost
-            , Business : .25 * data.Order.Bill.TransitCost
-            , Govt     : data.Order.Bill.Tax
+              Store    : data.Bill.Total
+            , Agent    : .75 * data.Bill.Transit
+            , Business : .25 * data.Bill.Transit
+            , Govt     : data.Bill.Tax
           }
     
           break
         case states.OrderAccepted:
           data.Account.In.Static.Penalty.Buyer  = 0 // Set penalty
           data.Account.Out.Dynamic.Refund.Buyer = 
-                  data.Order.Bill.TransitCost
-                + data.Order.Bill.Tax
-                + data.Order.Bill.Total // - penalty
+                  data.Bill.Transit
+                + data.Bill.Tax
+                + data.Bill.Total // - penalty
           data.Account.Out.Static.Payout        =
           {
               Store    : 0       // Analyse effort of store
@@ -115,9 +113,9 @@ const Settle = async function(data, state)
         case states.TransitAccepted:
           data.Account.In.Static.Penalty.Buyer  = 0 // Set penalty
           data.Account.Out.Dynamic.Refund.Buyer = 
-                  data.Order.Bill.TransitCost
-                + data.Order.Bill.Tax
-                + data.Order.Bill.Total // - penalty
+                  data.Bill.Transit
+                + data.Bill.Tax
+                + data.Bill.Total // - penalty
           data.Account.Out.Static.Payout        =
           {
               Store    : 0       // Analyse effort of store
@@ -134,9 +132,9 @@ const Settle = async function(data, state)
       data.Account.In.Static.Penalty.Store  = 0 // Set penalty
 
       data.Account.Out.Dynamic.Refund.Buyer =
-              data.Order.Bill.TransitCost
-            + data.Order.Bill.Tax
-            + data.Order.Bill.Total // + penalty / coupen
+              data.Bill.Transit
+            + data.Bill.Tax
+            + data.Bill.Total // + penalty / coupen
 
       data.Account.Out.Static.Payout        =
       {
@@ -162,9 +160,9 @@ const Settle = async function(data, state)
                 } 
 
           data.Account.Out.Dynamic.Refund.Buyer = 
-                  data.Order.Bill.TransitCost
-                + data.Order.Bill.Tax
-                + data.Order.Bill.Total // + add compensation
+                  data.Bill.Transit
+                + data.Bill.Tax
+                + data.Bill.Total // + add compensation
 
           data.Account.Out.Static.Payout        =
           {

@@ -57,74 +57,26 @@ function Payment(data)
 	this.Store 	  = async function(rcd)
 	{
 
-		rcd.Payment.TimeStamp.Webhook = this.Data.TXNDATE
-		rcd.Payment.ChannelRefID 	  = this.Data.TXNID
+		rcd.Payment.Time.Webhook = this.Data.TxnDate
+		rcd.Payment.RefID 	  	 = this.Data.TxnId
 
-		if(!rcd.Payment || (rcd.Payment && (rcd.Payment.Status == Model.states.Success)))	// To avoid COD/Payment collitions
-		{																			// or any other collitions
-			// TODO Test it, it is Critical
-			rcd.StaleFundEvents[fund.TransactionID] = 
-			{
-				Payment: 
-				{
-					  Channel       : Model.channel.Paytm
-					, TransactionID : Model.paytm.Order.format(String(this.Data.JournalID))
-					, Token         : ''
-					, ChannelRefID  : this.Data.BankTxnId
-					, Amount        : this.Data.Amount
-					, Status        : (this.Data.Status == Model.paytm.TxnSuccess)? Model.states.Success: Model.states.Failed
-					, TimeStamp     : { Token: '', Webhook: (new Date()).toISOString() }
-				}
-			}
-			await journal.Save(rcd)	// SAFE COMMIT
-
-			if(this.Data.Status != Model.paytm.TxnSuccess) return	// Event noted, No refund
-
-			const refunt_     =
-			{
-				JournalID    : this.Data.JournalID
-			  , ChannelRefID : this.Data.BankTxnId
-			  , Amount       : this.Data.Amount
-			}
-			console.log('refund-on-state-indication', { Journal : refunt_ })			
-			const txn_i       = await paytm.Refund(refunt_)
-			rcd.StaleFundEvents[fund.TransactionID]['Refund'] =
-			{
-				Channel       : Model.channel.Paytm
-			  , TransactionID : txn_i.ID
-			  , ChannelRefID  : txn_i.TxnID
-			  , Amount        : txn_i.Amount
-			  , Status        : txn_i.State
-			  , TimeStamp     : 
-			  {
-				  Init	  : (new Date()).toISOString()
-				, Webhook : ''
-			  }
-			}
-			await journal.Save(rcd)
-			console.log('refund-initiated', { Refund : rcd })
-		}
-		else
+		switch (this.Data.Status)
 		{
-			switch (this.Data.Status)
-			{
-				case Model.paytm.TxnSuccess:
+			case Model.paytm.TxnSuccess:
 
-					await (new Cart()).Flush(rcd.Buyer.ID)
+				await (new Cart()).Flush(rcd.Buyer.ID)
 
-					rcd.Payment.Status = Model.states.Success
-					rcd.Transit.Status = Model.states.Initiated
-					rcd.Transit.ID 	 = new ObjectId()
-					break
+				rcd.Payment.Status = Model.states.Success
+				rcd.Transit.Status = Model.states.Initiated
+				break
 
-				case Model.paytm.TxnFailure:
+			case Model.paytm.TxnFailure:
 
-					rcd.Payment.Status = Model.states.Failed		  
-					break
-			}
-			await journal.Save(rcd)			
+				rcd.Payment.Status = Model.states.Failed		  
+				break
 		}
-		return rcd.Transit.ID
+
+		await journal.Save(rcd)
 	}
 }
 

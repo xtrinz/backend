@@ -11,11 +11,11 @@ class Transit
       this.JournalID = journal._id
       this.Store 		 =
       {               
-          _id        : journal.Seller.ID
+          _id        : journal.Store.ID
         , SockID     : []
-        , Name       : journal.Seller.Name
-        , MobileNo   : journal.Seller.MobileNo
-        , Address    : journal.Seller.Address
+        , Name       : journal.Store.Name
+        , MobileNo   : journal.Store.MobileNo
+        , Address    : journal.Store.Address
       }               
       this.User 		 =
       {               

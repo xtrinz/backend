@@ -2,7 +2,7 @@
 
 const  otp 	 	= require('../infra/otp')
 	, Model	 	= require('../system/models')
-	, Journal	= require('../config/journal/driver')
+	, journal	= require('../config/journal/handlers')
 	, history	= require('./history')
 	, db 		= require('../config/exports')[Model.segment.db]
 	, { Emit } 	= require('./events')
@@ -11,8 +11,7 @@ const  otp 	 	= require('../infra/otp')
 
 const PayOut	 = async function(ctxt)
 {
-	let journal = new Journal()
-	await journal.PayOut(ctxt)
+	await journal.Payout(ctxt)
 }
 
 const ConfirmOTP = async function(o1, o2)

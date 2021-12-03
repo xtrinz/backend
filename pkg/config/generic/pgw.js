@@ -1,7 +1,7 @@
 
 const Model   = require('../../system/models')
     , router 	= require('express').Router()
-    , Journal = require('../journal/driver')
+    , journal = require('../journal/handlers')
     , Transit = require('../transit/driver')
 
 // Payment status indication
@@ -9,13 +9,12 @@ router.post('/payment', async (req, res, next) =>
 {
   try
   {
-    let   journal    = new Journal()
-    const transit_id = await journal.MarkPayment(req)
+    const rcd = await journal.MarkPayment(req)
     
-    if(transit_id)
+    if(rcd.Payment.Status = Model.states.Success)
     {
-      let transit = new Transit(journal.Data)
-      await transit.Init(transit_id)
+      let transit = new Transit(rcd)
+      await transit.Init(rcd.Transit.ID)
     }
 
     return res.status(Model.code.OK).json({
@@ -32,7 +31,6 @@ router.post('/refund', async (req, res, next) =>
   try
   {
 
-    let   journal = new Journal()
     await journal.MarkRefund(req)
 
     return res.status(Model.code.OK).json({
