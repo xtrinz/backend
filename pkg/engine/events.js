@@ -149,8 +149,4 @@ const Emit = async function(alert, ctxt)
 
 }
 
-module.exports =
-{
-      Emit        :   Emit
-    , SetChannel  :   SetChannel
-}
+module.exports = { Emit, SetChannel }

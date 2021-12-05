@@ -1,53 +1,38 @@
-const { code, status, states
-    ,   text, task, command } = require('../../system/models')
-    , router         = require('express').Router()
-    , { User }       = require('../user/driver')
+const Model     = require('../../system/models')
+    , router    = require('express').Router()
+    , Method    = require('./methods')
+    , Handler   = require('./handler')
 
 router.post('/register', async (req, res, next) => 
 {
   try
   {
-    let text_ = '', data_ = {}, user, info_
+    let text_ = '', data_ = {}, event_
+    let ctxt  = await Method.Context(req.body, res)
+
     switch (req.body.Task)
     {
-      case task.New:
-        user = new User(req.body)
-        await user.New()
-        text_ = text.OTPSendToMobileNo.format(req.body.MobileNo.slice(-4))
+      case Model.task.New:
+        event_ = Model.event.Create
+        text_  = Model.text.OTPSendToMobileNo.format(req.body.MobileNo.slice(-4))
         break
 
-      case task.ReadOTP:
-        user  = new User()
-        const resp = await user.ConfirmMobileNo(req.body)
-        text_         = text.OTPConfirmed
-        info_         = user.Data
-        info_.Command = resp.Command
-        data_         = { Command : info_.Command }
-        res.setHeader('authorization', resp.Token)
+      case Model.task.ReadOTP:
+        event_ = Model.event.Confirm
+        text_  = Model.text.OTPConfirmed
         break
 
-      case task.Register:
-        user          = new User()
-        info_         = req.body.User
-        await user.Register(req.body)
-        info_.Command = command.LoggedIn
-        data_         = { Command : info_.Command }        
-        text_         = text.Registered
+      case Model.task.Register:
+        event_ = Model.event.Register
+        text_  = Model.text.Registered
         break
     }
 
-    if(info_ && info_.State === states.Registered)
-    data_ = 
-    {
-        Name      : info_.Name
-      , MobileNo  : info_.MobileNo
-      , Email     : info_.Email
-      , Mode      : info_.Mode
-      , Command   : info_.Command
-    }
+    ctxt.Event =  event_
+    data_ = await Handler.Transition(ctxt)
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : text_,
       Data    : data_ })
 
@@ -63,11 +48,11 @@ router.get('/profile', async (req, res, next) => {
         Name      : req.body.User.Name
       , MobileNo  : req.body.User.MobileNo
       , Email     : req.body.User.Email
-      , Mode      : req.body.User.Mode
+      , Mode      : Model.mode.User
     }
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : '',
       Data    : data
     })
@@ -78,12 +63,20 @@ router.put('/profile', async (req, res, next) =>
 {
   try 
   {
-    const user  = new User()
-    await user.Edit(req.body)
 
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.ProfileUpdated,
+    let ctxt   =
+    {
+          User   : req.body.User
+        , Data   : req.body
+        , Return : {}
+        , Event  : Model.event.Edit
+    }
+
+    await Handler.Transition(ctxt)
+
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.ProfileUpdated,
       Data    : {}
     })
   } catch (err) { next(err) }

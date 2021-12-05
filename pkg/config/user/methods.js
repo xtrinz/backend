@@ -2,87 +2,80 @@ const otp   = require('../../infra/otp')
     , jwt   = require('../../infra/jwt')
     , Model = require('../../system/models')
     , db    = require('../exports')[Model.segment.db]
-    , Admin = require('./model')
+    , User  = require('./model')
+    , cart  = require('../cart/driver')
 
 const Context	= async function(data, resp)
 {
-    let admin_ = await db.admin.Get(data.MobileNo, Model.query.ByMobileNo)
-    if (!admin_)
+    let user_ = await db.user.Get(data.MobileNo, Model.query.ByMobileNo)
+    if (!user_)
     {
-        console.log('admin-not-found-setting-new-context', 
+        console.log('user-not-found-setting-new-context', 
         { 
             MobileNo: data.MobileNo 
         })
-        admin_ = new Admin({ MobileNo: data.MobileNo })
+        user_ = new User({ MobileNo: data.MobileNo })
     }
 
     let ctxt =
     {
-          Admin  : admin_
+          User   : user_
         , Data   : data
         , Return : resp
     }
-    console.log('admin-context', { Context: ctxt })
+    console.log('user-context', { Context: ctxt })
     return ctxt
 }
 
 const Create	= async function(ctxt)
 {
-    if(!process.env.ADMIN_MOB_NO
-                .split(' ')
-                .includes(ctxt.Admin.MobileNo))
-    {
-        console.log('unknown-seed', { Context: ctxt })
-        Model.Err_(Model.code.NOT_FOUND, Model.reason.Unauthorized)
-    }
-
     const otp_sms = new otp.OneTimePasswd({
-                    MobileNo: 	ctxt.Admin.MobileNo, 
+                    MobileNo: 	ctxt.User.MobileNo, 
                     Body: 	Model.message.OnAuth })
         , hash    = await otp_sms.Send(Model.gw.SMS)
 
-    ctxt.Admin.Otp   = hash
-    ctxt.Admin.State = Model.states.New
+    ctxt.User.Otp   = hash
+    ctxt.User.State = Model.states.New
 
-    await db.admin.Save(ctxt.Admin)
+    await db.user.Save(ctxt.User)
 
-    console.log('admin-created', { Context: ctxt })
+    console.log('user-created', { Context: ctxt })
 
     return {}
 }
 
 const Login		= async function(ctxt)
 {
-    console.log('admin-login', { Context: ctxt })
+    console.log('user-login', { Context: ctxt })
 
     const otp_sms = new otp.OneTimePasswd({
-                    MobileNo: 	ctxt.Admin.MobileNo, 
+                    MobileNo: 	ctxt.User.MobileNo, 
                     Body: 	    Model.message.OnAuth })
         , hash    = await otp_sms.Send(Model.gw.SMS)
 
-    ctxt.Admin.Otp = hash
-    await db.admin.Save(ctxt.Admin)
+    ctxt.User.Otp = hash
+    await db.user.Save(ctxt.User)
 
-    console.log('admin-login-otp-sent', { Context: ctxt })
+    console.log('user-login-otp-sent', { Context: ctxt })
     return {}
 }
 
 const Confirm   = async function (ctxt)
 {
     const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
-        , status = await otp_.Confirm(ctxt.Admin.Otp, ctxt.Data.OTP)
+        , status = await otp_.Confirm(ctxt.User.Otp, ctxt.Data.OTP)
     if (!status) 
     {
         console.log('otp-mismatch', { Context: ctxt })
         Model.Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
     }
 
-    const token = await jwt.Sign({ _id : ctxt.Admin._id, Mode : Model.mode.Admin })
+    const token = await jwt.Sign({ _id : ctxt.User._id, Mode : Model.mode.User })
 
-    ctxt.Admin.State = Model.states.MobConfirmed
-    ctxt.Admin.Otp   = ''
-    await db.admin.Save(ctxt.Admin)
-    console.log('admin-mobile-number-confirmed', { Admin: ctxt.Admin })
+    ctxt.User.State = Model.states.MobConfirmed
+    ctxt.User.Otp   = ''
+    await db.user.Save(ctxt.User)
+    console.log('user-mobile-number-confirmed', { User: ctxt.User })
 
     ctxt.Return.setHeader('authorization', token)
     let data_ = 
@@ -95,23 +88,24 @@ const Confirm   = async function (ctxt)
 const Token     = async function (ctxt)
 {
     const otp_   = new otp.OneTimePasswd({MobileNo: '', Body: ''})
-        , status = await otp_.Confirm(ctxt.Admin.Otp, ctxt.Data.OTP)
+        , status = await otp_.Confirm(ctxt.User.Otp, ctxt.Data.OTP)
     if (!status) 
     {
         console.log('otp-mismatch', { Context: ctxt })
         Model.Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
     }
 
-    console.log('admin-exists-logging-in', { Admin: ctxt.Admin })
+    console.log('user-exists-logging-in', { User: ctxt.User })
 
-    const token = await jwt.Sign({ _id : ctxt.Admin._id, Mode : Model.mode.Admin })
+    const token = await jwt.Sign({ _id : ctxt.User._id, Mode : Model.mode.User })
 
     ctxt.Return.setHeader('authorization', token)
     let data_ = 
     {
-        Name      : ctxt.Admin.Name
-      , MobileNo  : ctxt.Admin.MobileNo
-      , Mode      : ctxt.Admin.Mode
+        Name      : ctxt.User.Name
+      , MobileNo  : ctxt.User.MobileNo
+      , Email     : ctxt.User.Email      
+      , Mode      : Model.mode.User
       , Command   : Model.command.LoggedIn
     }
     return data_
@@ -119,20 +113,22 @@ const Token     = async function (ctxt)
 
 const Register  = async function (ctxt)
 {
-    ctxt.Admin.Name   = ctxt.Data.Name
-    ctxt.Admin.State  = Model.states.Registered
+    ctxt.User.CartID = await cart.Create(ctxt.User._id)
+    ctxt.User.Name   = ctxt.Data.Name
+    ctxt.User.Email  = ctxt.Data.Email
+    ctxt.User.State  = Model.states.Registered
 
-    await db.admin.Save(ctxt.Admin)
+    await db.user.Save(ctxt.User)
 
-    console.log('admin-registered', 
-    {  UserID  : ctxt.Admin._id 
-     , Name    : ctxt.Admin.Name })
+    console.log('user-registered', 
+    {  User  : ctxt.User })
 
     let data_ = 
     {
-        Name      : ctxt.Admin.Name
-      , MobileNo  : ctxt.Admin.MobileNo
-      , Mode      : ctxt.Admin.Mode
+        Name      : ctxt.User.Name
+      , MobileNo  : ctxt.User.MobileNo
+      , Email     : ctxt.User.Email
+      , Mode      : Model.mode.User
       , Command   : Model.command.LoggedIn
     }
     return data_    
@@ -141,7 +137,7 @@ const Register  = async function (ctxt)
 const Edit      = async function (ctxt)
 {
 
-    let rcd = { _id : ctxt.Admin._id }
+    let rcd = { _id : ctxt.User._id }
 
     if(ctxt.Data.Name ) rcd.Name = ctxt.Data.Name 
 
@@ -152,7 +148,7 @@ const Edit      = async function (ctxt)
       , coordinates : [ctxt.Data.Longitude.loc(), ctxt.Data.Latitude.loc()]
     }
 
-    await db.admin.Save(rcd)
+    await db.user.Save(rcd)
     console.log('profile-updated', {Context: ctxt})
 }
 

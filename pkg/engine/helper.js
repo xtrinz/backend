@@ -93,12 +93,7 @@ const ResetProduct = async function(Journal_id)
 
 module.exports =
 {
-      PayOut       : PayOut
-    , ConfirmOTP   : ConfirmOTP
-    , SendOTP      : SendOTP
-    , Save         : Save
-    , PingAdmin   : PingAdmin
-    , ResetAgent   : ResetAgent
-	, SetAgent 	   : SetAgent
-	, ResetProduct : ResetProduct
+      PayOut	, ConfirmOTP	, SendOTP
+	, Save		, PingAdmin 	, ResetAgent
+	, SetAgent	, ResetProduct
 }
