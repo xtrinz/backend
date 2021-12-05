@@ -27,4 +27,17 @@ module.exports =
         , [task.Enabled] : false          
         }
     }
-  }
+  , [verb.create]        :
+    {
+      [method.post]    :
+      {
+        [mode.User]    : true
+      , [mode.Agent]   : false
+      , [mode.Store]   : false
+      , [mode.Admin] 	 : false
+      , [mode.Enabled] : true
+      , [task.Enabled] : false
+      }
+    }
+    
+}

@@ -1,6 +1,28 @@
 const Model   = require('../../system/models')
     , router 	= require('express').Router()
     , journal = require('./handlers')
+    , Transit = require('../transit/driver')
+
+router.post('/create', async (req, res, next) =>
+{
+  try
+  {
+
+    const ret = await journal.Create(req.body)
+
+    if(req.body.IsCOD)
+    {
+      let transit = new Transit(ret.Journal)
+      await transit.Init(ret.Journal.Transit.ID)
+    }
+
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.PaymentInitiated,
+      Data    : ret.Response
+    })
+  } catch (err) { next(err) }
+})
 
 // List Journals
 router.get('/list', async (req, res, next) =>

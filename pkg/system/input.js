@@ -31,23 +31,6 @@ const Controller 		 = function()
         }
       }
     }
-  // Checkout
-  , [Model.resource.checkout]              : // TODO correct it root as rsrc and checkout as verb
-    {
-      [Model.verb.root]                :
-      {
-        [Model.method.post]            : 
-        {
-            'body'               : [ 'required', 'object' ]
-          , 'headers'               : [ 'required', 'object' ]            
-          , 'body.AddressID'     : [ 'required', 'mongoId']
-          , 'body.IsCOD'         : [ 'required', 'boolean' ]          
-          , 'body.Longitude'     : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
-          , 'body.Latitude'      : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
-          , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
-        }
-      }
-    }
 }
 
   , this.SetErr   = (rules) =>

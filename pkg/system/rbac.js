@@ -1,53 +1,36 @@
-const { resource: rsrc, verb, task, method, mode,
-        states, Err_, code, reason } = require('../system/models')
+const Model = require('../system/models')
 
-const Controller 		 = function()
+    , Controller 		 = function()
 {
 	this.Controller =
 	{
-      [rsrc.user]        : require('../tools/rules/access/user')
-    , [rsrc.agent]       : require('../tools/rules/access/agent')
-    , [rsrc.admin]       : require('../tools/rules/access/admin')    
-    , [rsrc.store]       : require('../tools/rules/access/store')
-    , [rsrc.product]     : require('../tools/rules/access/product')
-    , [rsrc.cart]        : require('../tools/rules/access/cart')
-    , [rsrc.note]        : require('../tools/rules/access/note')
-    , [rsrc.address]     : require('../tools/rules/access/address')
-    , [rsrc.journal]     : require('../tools/rules/access/journal')
-    , [rsrc.transit]     : require('../tools/rules/access/transit')
+      [Model.resource.user]        : require('../tools/rules/access/user')
+    , [Model.resource.agent]       : require('../tools/rules/access/agent')
+    , [Model.resource.admin]       : require('../tools/rules/access/admin')    
+    , [Model.resource.store]       : require('../tools/rules/access/store')
+    , [Model.resource.product]     : require('../tools/rules/access/product')
+    , [Model.resource.cart]        : require('../tools/rules/access/cart')
+    , [Model.resource.note]        : require('../tools/rules/access/note')
+    , [Model.resource.address]     : require('../tools/rules/access/address')
+    , [Model.resource.journal]     : require('../tools/rules/access/journal')
+    , [Model.resource.transit]     : require('../tools/rules/access/transit')
 
     // TODO Correct it
 
-  // Checkout
-  , [rsrc.checkout]      : // TODO correct it root as rsrc and checkout as verb
-    {
-      [verb.root]        :
-      {
-        [method.post]    :
-        {
-          [mode.User]    : true
-        , [mode.Agent]   : false
-        , [mode.Store]   : false
-        , [mode.Admin] 	 : false
-        , [mode.Enabled] : true
-        , [task.Enabled] : false
-        }
-      }
-    }
     // Cloudinary Sign
-  , [rsrc.cloudinary]    : // TODO correct it root as rsrc and checkout as verb
+  , [Model.resource.cloudinary]    : // TODO correct it root as rsrc and checkout as verb
     {
-      [verb.root]        :
+      [Model.verb.root]        :
       {
-        [method.post]    :
+        [Model.method.post]    :
         {
-          [mode.User]    : false
-        , [mode.Agent]   : false
-        , [mode.Store]   : true
-        , [mode.Admin] 	 : false
-        , [mode.Enabled] : true
-        , [task.Enabled] : false
-        , [states.State]: [ states.MobConfirmed, states.ToBeApproved, states.Registered ]        
+          [Model.mode.User]    : false
+        , [Model.mode.Agent]   : false
+        , [Model.mode.Store]   : true
+        , [Model.mode.Admin] 	 : false
+        , [Model.mode.Enabled] : true
+        , [Model.task.Enabled] : false
+        , [Model.states.State]: [ Model.states.MobConfirmed, Model.states.ToBeApproved, Model.states.Registered ]        
         }
       }
     }
@@ -67,26 +50,26 @@ const Controller 		 = function()
     if(!verbs)
     {
       console.log('resouce-not-found', opt_)
-      Err_(code.FORBIDDEN, reason.PermissionDenied)
+      Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
     }
     const methods = verbs[vrb]
     if(!methods)
     {
       console.log('verb-not-found', { Opts: opt_, Verb: verbs })
-      Err_(code.FORBIDDEN, reason.PermissionDenied)
+      Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
     }
     const res     = methods[mthd]
     if(!res)
     {
       console.log('method-not-found', { Opts: opt_, Methods: methods })
-      Err_(code.FORBIDDEN, reason.PermissionDenied)
+      Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
     }
 
-    if(!res[task.Enabled]) 
+    if(!res[Model.task.Enabled]) 
     {
       
-      if(!res[states.State]) 
-      res.State = states.Registered
+      if(!res[Model.states.State]) 
+      res.State = Model.states.Registered
       
       return res // === modes
     }
@@ -95,11 +78,11 @@ const Controller 		 = function()
     if(!modes)
     {
       console.log('mode-not-found', { Opts: opt_, Tasks: res })
-      Err_(code.FORBIDDEN, reason.PermissionDenied)
+      Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
     }
     
-    if(!modes[states.State]) 
-    modes.State = [ states.Registered ]
+    if(!modes[Model.states.State]) 
+    modes.State = [ Model.states.Registered ]
     
     return modes
 	}

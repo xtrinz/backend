@@ -375,6 +375,7 @@ module.exports =
 	verb:
 	{
 		  root					: '/'
+		, create				: 'create'
 		, add					: 'add'
 		, view					: 'view'
 		, list					: 'list'

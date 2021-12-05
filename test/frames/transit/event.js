@@ -23,7 +23,7 @@ let Checkout = function(user_, addr_, cart_, cod_)
       , Request           :
       {                     
           Method          : Method.POST
-        , Path            : '/v1/checkout'
+        , Path            : '/v1/journal/create'
         , Body            : 
         {                     
             Longitude     : addr.Longitude
