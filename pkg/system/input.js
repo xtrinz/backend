@@ -1,5 +1,6 @@
 const Model = require('../system/models')
     , niv   = require('node-input-validator')
+    , Log   = require('./log')
 
 const Controller 		 = function()
 {
@@ -68,25 +69,25 @@ const Controller 		 = function()
             , Params  : req.params
         }
         
-        console.log('iv-new-query', opt_)
+        Log('iv-new-query', opt_)
         const verbs   = this.Controller[src]
         if(!verbs)
         {
-            console.log('iv-resouce-not-found', opt_)
+            Log('iv-resouce-not-found', opt_)
             Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
         }
 
         const methods = verbs[vrb]
         if(!methods)
         {
-            console.log('iv-verb-not-found', { Opts: opt_, Verb: verbs })
+            Log('iv-verb-not-found', { Opts: opt_, Verb: verbs })
             Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
         }
 
         const rules     = methods[mthd]
         if(!rules)
         {
-            console.log('iv-method-not-found', { Opts: opt_, Methods: methods })
+            Log('iv-method-not-found', { Opts: opt_, Methods: methods })
             Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
         }
 
@@ -96,7 +97,7 @@ const Controller 		 = function()
         const matched = await v.check()
         if(!matched)
         {
-            console.log('iv-incorrect-input', { Opts: opt_, Rule: rules, Err: v.errors })
+            Log('iv-incorrect-input', { Opts: opt_, Rule: rules, Err: v.errors })
             Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
         }      
     }

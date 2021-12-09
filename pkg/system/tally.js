@@ -1,5 +1,6 @@
 const map         = require('../system/map')
     , { states }  = require('../system/models')
+    , Log         = require('./log')
 
 /**
  * Context of price per for unit subjects
@@ -47,7 +48,7 @@ const Bill      = async function(order_, cords_)
                   + bill.Transit
                   + bill.Tax
 
-    console.log('bill-genereted', { Bill: bill, Order: order_ , Cords: cords_ })
+    Log('bill-genereted', { Bill: bill, Order: order_ , Cords: cords_ })
 
     return bill
 }

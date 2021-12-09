@@ -2,25 +2,26 @@ const { users }             = require('../../system/database')
     , { query,
         Err_, code, reason} = require('../../system/models')
     , { ObjectId }          = require('mongodb')
+    , Log                  = require('../../system/logger')
 
 const Save       = async function(data)
 {
-    console.log('save-user', { User: data })
+    Log('save-user', { User: data })
     const query = { _id    : data._id }
         , act   = { $set   : data }
         , opt   = { upsert : true }
     const resp  = await users.updateOne(query, act, opt)
     if (!resp.acknowledged)
     {
-        console.log('user-save-failed', { User: data, Result: resp.result})
+        Log('user-save-failed', { User: data, Result: resp.result})
         Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
     }
-    console.log('user-saved', { User : data })
+    Log('user-saved', { User : data })
 }
 
 const Get = async function(param, qType)
 {
-    console.log('find-user', { Param: param, QType: qType} )
+    Log('find-user', { Param: param, QType: qType} )
     let query_
     switch (qType)
     {
@@ -31,26 +32,26 @@ const Get = async function(param, qType)
     let user = await users.findOne(query_)
     if (!user)
     {
-        console.log('user-not-found', { Query : query_ })
+        Log('user-not-found', { Query : query_ })
         return
     }
-    console.log('user-found', { User: user })
+    Log('user-found', { User: user })
     return user
 }
 
 const SockID = async function(user_id)
 {
-    console.log('get-user-sock-id', { UserID: user_id })
+    Log('get-user-sock-id', { UserID: user_id })
 
     const query = { _id: ObjectId(user_id), IsLive: true }
 
     let user = await users.findOne(query)
     if(!user)
     {
-        console.log('user-not-found', query)
+        Log('user-not-found', query)
         return []
     }
-    console.log('user-found', { User : user })
+    Log('user-found', { User : user })
     return user.SockID
 }
 

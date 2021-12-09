@@ -1,10 +1,11 @@
 const { verb, states, qtype } = require('../../system/models')
+    , Log                     = require('../../system/log')
 
 module.exports =
 {
     [verb.list]: function(in_)
     {
-        console.log('frame-agent-list-filter', { Input : in_ }) 
+        Log('frame-agent-list-filter', { Input : in_ }) 
         switch(in_.SearchType)
         {
             case qtype.NearList:
@@ -38,7 +39,7 @@ module.exports =
  
             break
         }
-        console.log('agent-list-filter', { Query: in_.Query })
+        Log('agent-list-filter', { Query: in_.Query })
     }
 
     , [verb.view]: {}

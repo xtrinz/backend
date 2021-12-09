@@ -3,21 +3,22 @@ const { Emit }  = require('./events')
 	, Model 	= require('../system/models')
 	, Task 	   	= require('./helper')
 	, db        = require('../config/exports')[Model.segment.db]
+	, Log 		= require('../system/log')
 
 // Notify | UpdateState | Payout | OTP
 const Init		= async function(ctxt)
 {
-	console.log('process-cargo-init', ctxt)
+	Log('process-cargo-init', ctxt)
 	await Emit(Model.alerts.NewOrder, ctxt)
 
 	await Task.Save(ctxt, Model.states.Initiated)
-	console.log('cargo-initialised', ctxt)
+	Log('cargo-initialised', ctxt)
 
 }
 
 const Cancel	=  async function(ctxt)
 {
-	console.log('process-cargo-cancellation', ctxt)
+	Log('process-cargo-cancellation', ctxt)
 	await Emit(Model.alerts.Cancelled, ctxt)
 
 	ctxt.IsLive = false
@@ -27,12 +28,12 @@ const Cancel	=  async function(ctxt)
 
 	await Task.ResetProduct(ctxt.JournalID)
 
-	console.log('cargo-cancelled', ctxt)
+	Log('cargo-cancelled', ctxt)
 }
 
 const Reject		= async function(ctxt)
 {
-	console.log('process-order-rejection', ctxt)
+	Log('process-order-rejection', ctxt)
 	await Emit(Model.alerts.Rejected, ctxt)
 
 	ctxt.IsLive = false
@@ -42,12 +43,12 @@ const Reject		= async function(ctxt)
 
 	await Task.ResetProduct(ctxt.JournalID)
 
-	console.log('order-rejected', ctxt)
+	Log('order-rejected', ctxt)
 }
 
 const OTP			 	= async function(ctxt)
 {
-	console.log('resend-otp', { Transit: ctxt })
+	Log('resend-otp', { Transit: ctxt })
 	switch (ctxt.State)
 	{
 		// To Authz-User
@@ -64,7 +65,7 @@ const OTP			 	= async function(ctxt)
 
 const Accept			=  async function(ctxt)
 {
-	console.log('process-order-acceptance', ctxt)
+	Log('process-order-acceptance', ctxt)
 	await Emit(Model.alerts.Accepted, ctxt)	// To User: Emit irrespective of it turns to hold
 
 	const agent = await db.agent.Nearby(
@@ -72,7 +73,7 @@ const Accept			=  async function(ctxt)
 			ctxt.Store.Address.Latitude)				// TODO set filed for not in list
 	if(!agent)
 	{
-		console.log('no-agents-order-on-hold', ctxt)
+		Log('no-agents-order-on-hold', ctxt)
 		await Task.PingAdmin(ctxt
 			, Model.states.OnHold
 			, Model.alerts.NoAgents)
@@ -82,12 +83,12 @@ const Accept			=  async function(ctxt)
 	await Emit(Model.alerts.NewTransit, ctxt)	// To Agents
 
 	await Task.Save(ctxt, Model.states.Assigned)
-	console.log('order-accepted-by-shop', ctxt)
+	Log('order-accepted-by-shop', ctxt)
 }
 
 const Ignore		= async function(ctxt)
 {
-	console.log('on-hold-transit-ignored', ctxt)
+	Log('on-hold-transit-ignored', ctxt)
 
 	await Task.PingAdmin(ctxt
 		, Model.states.OnHold
@@ -96,16 +97,16 @@ const Ignore		= async function(ctxt)
 
 const Ready			=  async function(ctxt)
 {
-	console.log('process-order-readiness', ctxt)
+	Log('process-order-readiness', ctxt)
 
 	await Emit(Model.alerts.Processed, ctxt)
 
-	console.log('order-processed-by-shop', ctxt)
+	Log('order-processed-by-shop', ctxt)
 }
 
 const Despatch		= async function(ctxt)
 {
-	console.log('process-order-despatchment', ctxt)
+	Log('process-order-despatchment', ctxt)
 	await Task.ConfirmOTP(ctxt.Agent.Otp, ctxt.Store.Otp)
 	
 	await Emit(Model.alerts.EnRoute, ctxt)
@@ -115,12 +116,12 @@ const Despatch		= async function(ctxt)
 		delete ctxt.Agent.Otp
 		delete ctxt.Store.Otp
 	await Task.Save(ctxt, Model.states.Despatched)
-	console.log('order-despatched', ctxt)
+	Log('order-despatched', ctxt)
 }
 
 const Assign		= async function(ctxt)
 {
-	console.log('agent-assignment-by-admin', ctxt)
+	Log('agent-assignment-by-admin', ctxt)
 
 	ctxt.Agent  = await Task.SetAgent(ctxt)
 
@@ -131,12 +132,12 @@ const Assign		= async function(ctxt)
 	ctxt.Agent.Otp = await Task.SendOTP(agent_.MobileNo)
 
 	await Task.Save(ctxt, Model.states.Accepted)
-	console.log('agent-assigned-by-admin', ctxt)
+	Log('agent-assigned-by-admin', ctxt)
 }
 
 const Terminate		= async function(ctxt)
 {
-	console.log('process-termination-by-admin', ctxt)
+	Log('process-termination-by-admin', ctxt)
 	await Emit(Model.alerts.Terminated, ctxt)
 
 	ctxt.IsLive = false
@@ -146,24 +147,24 @@ const Terminate		= async function(ctxt)
 
 	await Task.ResetProduct(ctxt.JournalID)
 
-	console.log('transit-completed', ctxt)
+	Log('transit-completed', ctxt)
 }
 
 const Commit		= async function(ctxt)
 {
-	console.log('process-transit-acceptace', ctxt)
+	Log('process-transit-acceptace', ctxt)
 	await Emit(Model.alerts.AgentReady, ctxt)
 
 	// To Authz@Shop
 	ctxt.Agent.Otp = await Task.SendOTP(ctxt.Agent.MobileNo)
 	
 	await Task.Save(ctxt, Model.states.Accepted)
-	console.log('transit-accepted', ctxt)
+	Log('transit-accepted', ctxt)
 }
 
 const Quit		= async function(ctxt)
 {
-	console.log('no-nearby-agents', ctxt)
+	Log('no-nearby-agents', ctxt)
 
 	await Task.PingAdmin(ctxt
 		, Model.states.OnHold
@@ -172,7 +173,7 @@ const Quit		= async function(ctxt)
 
 const Complete		= async function(ctxt)
 {
-	console.log('process-transit-completion', ctxt)
+	Log('process-transit-completion', ctxt)
 	await Task.ConfirmOTP(ctxt.User.Otp, ctxt.Agent.Otp)
 	
 	await Emit(Model.alerts.Delivered, ctxt)
@@ -182,7 +183,7 @@ const Complete		= async function(ctxt)
 	await Task.Save(ctxt, Model.states.Completed)
 
 	await Task.PayOut(ctxt)
-	console.log('transit-completed', ctxt)
+	Log('transit-completed', ctxt)
 }
 
 module.exports = 

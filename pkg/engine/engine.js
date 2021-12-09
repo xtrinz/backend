@@ -3,6 +3,7 @@ const { Err_ } 	   = require('../system/models')
 	, m	   		   = require('./methods'), e = Model.event, s = Model.states
 	, db           = require('../config/exports')[Model.segment.db]
 	, { ObjectId } = require('mongodb')
+	, Log      	   = require('../system/log')
 
 var Handler =
 {
@@ -64,7 +65,7 @@ var Timer =
 
 var TimerHandler =  async function (ctxt_id, event_)
 {
-	console.log('set-timeout-event', 
+	Log('set-timeout-event', 
 	{
 		  TransitID  : ctxt_id
 		, Event 	   : event_
@@ -77,7 +78,7 @@ var TimerHandler =  async function (ctxt_id, event_)
 			, ctxt   = await db.transit.Get(query_, Model.query.Custom)
 		if (!ctxt)
 		{
-			console.log('missing-context-aborting-timer-event', 
+			Log('missing-context-aborting-timer-event', 
 			{ 
 					TransitID    : ctxt_id
 				, Event 	   : event_
@@ -85,7 +86,7 @@ var TimerHandler =  async function (ctxt_id, event_)
 			})
 			return
 		}
-		console.log('trigger-timeout-event',
+		Log('trigger-timeout-event',
 		{ 
 			Transit    	   : ctxt
 			, Event 	   : event_
@@ -97,7 +98,7 @@ var TimerHandler =  async function (ctxt_id, event_)
 		try { await Transition(ctxt) }
 		catch(err)
 		{
-			console.log('exception-on-timer-event',
+			Log('exception-on-timer-event',
 			{ Error : err, Transit : ctxt, 
 				Event : ctxt.Event, Eve: eve_ 
 			})
@@ -107,7 +108,7 @@ var TimerHandler =  async function (ctxt_id, event_)
 		    eve_ = Timer[eve_.Event]
 		if(eve_ != undefined)
 		{
-			console.log('trigger-timeout-event-level-2', 
+			Log('trigger-timeout-event-level-2', 
 			{
 				  TransitID    : ctxt_id
 				, Event 	   : eve_.Event
@@ -122,7 +123,7 @@ var TimerHandler =  async function (ctxt_id, event_)
 
 var GetHandler = (state_, event_) =>
 {
-	console.log('new-event', { Event: event_, State: state_ }) 
+	Log('new-event', { Event: event_, State: state_ }) 
 	const hdlr = Handler[state_][event_]
 	return hdlr 
 }
@@ -135,7 +136,7 @@ var Transition = async function (ctxt)
 
 	if(!method_)
 	{
-		console.log('no-handler-found', { Event: event_, State: state_ })
+		Log('no-handler-found', { Event: event_, State: state_ })
 		Err_(Model.code.BAD_REQUEST,  Model.reason.NoHandlerFound)
 	}
 	await method_(ctxt)
@@ -143,7 +144,7 @@ var Transition = async function (ctxt)
 	let eve_ = Timer[event_]
 	if(eve_ != undefined)
 	{
-		console.log('trigger-timeout-event', 
+		Log('trigger-timeout-event', 
 		{
 			TransitID      : ctxt.id
 			, Event 	   : event_
@@ -152,7 +153,7 @@ var Transition = async function (ctxt)
 		//await TimerHandler(ctxt._id, event_)
 	}
 
-	console.log('transition-completed', { Transit: ctxt })
+	Log('transition-completed', { Transit: ctxt })
 }
 
 module.exports =

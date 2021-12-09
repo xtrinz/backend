@@ -1,5 +1,6 @@
 const { MongoClient } = require('mongodb')
 const { set }         = require('../system/models')
+    , Log             = require('./log')
 const client          = new MongoClient(process.env.DB_URL,
 {
   useNewUrlParser: true,
@@ -7,10 +8,10 @@ const client          = new MongoClient(process.env.DB_URL,
 })
 
 client.connect()
-      .then(result => console.log('db-connected', { URL  : result.s.url }))
+      .then(result => Log('db-connected', { URL  : result.s.url }))
       .catch(err => 
       {
-        console.log('db-connection-failed', {Error: err})
+        Log('db-connection-failed', {Error: err})
         process.exit(1)
       })
 

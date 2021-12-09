@@ -6,6 +6,7 @@ const  otp 	 	= require('../infra/otp')
 	, history	= require('./history')
 	, db 		= require('../config/exports')[Model.segment.db]
 	, { Emit } 	= require('./events')
+	, { Log } 	= require('../system/log')
 
 // Notify | UpdateState | Payout | OTP
 
@@ -51,7 +52,7 @@ const Save = async function(ctxt, state_)
 
 const PingAdmin = async function(ctxt, st, alert_)
 {
-    console.log('ping-admins', {State: st, Ctxt: ctxt})
+    Log('ping-admins', {State: st, Ctxt: ctxt})
 
 	const admin = await db.admin.Nearby(
           ctxt.Store.Address.Longitude
@@ -86,7 +87,7 @@ const SetAgent   = async function(ctxt)
 
 const ResetProduct = async function(Journal_id)
 {
-	console.log('reset-product-count-on-order-diffusion', { JournalID: Journal_id })
+	Log('reset-product-count-on-order-diffusion', { JournalID: Journal_id })
 	let journal_ = await db.journal.Get(Journal_id, Model.query.ByID)
 	await db.product.IncProdCount(journal_.Order.Products)
 }

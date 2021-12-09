@@ -11,10 +11,11 @@ const { ObjectId } = require('mongodb')
     , Tool         = require('../../tools/export')[Model.resource.journal]
     , { Cart }     = require('../cart/driver')
     , StoreM       = require('../store/methods')
+    , Log          = require('../../system/logger')
 
 const Context = async function(data)
 {
-    console.log('generate-context', { Data : data })
+    Log('generate-context', { Data : data })
 
     let query_ =
     {
@@ -26,7 +27,7 @@ const Context = async function(data)
     let ctxt = await db.journal.Find(query_)
     if(!ctxt)
     {
-        console.log('no-previous-context-framing-new', { Query : query_ })
+        Log('no-previous-context-framing-new', { Query : query_ })
         ctxt = 
         { 
               _id     : new ObjectId()
@@ -36,7 +37,7 @@ const Context = async function(data)
     }
     else
     {
-        console.log('previous-context-found-reframing', { Previous : ctxt })
+        Log('previous-context-found-reframing', { Previous : ctxt })
         ctxt = 
         { 
               _id     : ctxt._id
@@ -85,7 +86,7 @@ const Client     = async function (data)
     delete addr.IsDefault
     delete addr.Tag
 
-    console.log('the-client', { Client : client })
+    Log('the-client', { Client : client })
     return client
 }
 
@@ -102,7 +103,7 @@ const Store = async function(order)
 
     if(out.Status == Model.states.Closed)
     {
-        console.log('store-closed', { Store : out })
+        Log('store-closed', { Store : out })
         Err_(Model.code.BAD_REQUEST, Model.reason.StoreClosed)
     }
 
@@ -115,7 +116,7 @@ const Store = async function(order)
         , Address  : out.Address
     }
 
-    console.log('the-store', { Store : store })
+    Log('the-store', { Store : store })
     return store
 }
 
@@ -126,13 +127,13 @@ const Order = async function(client)
 
     if (!cart) 
     {
-        console.log('no-cart-found-for-user', { UserID : client.ID })
+        Log('no-cart-found-for-user', { UserID : client.ID })
         Err_(code.BAD_REQUEST, reason.CartNotFound)
     }
 
     if(!cart.Products.length)
     {
-        console.log('no-items-in-cart', { User : client })
+        Log('no-items-in-cart', { User : client })
         Model.Err_(Model.code.BAD_REQUEST, Model.reason.NoProductsFound)
     }    
 
@@ -151,13 +152,13 @@ const Order = async function(client)
 
         if (!product) 
         {
-            console.log('no-product-found-for-cart-item', { CartItem : item })
+            Log('no-product-found-for-cart-item', { CartItem : item })
             db.cart.Remove(client.ID, item.ProductID) // TODO find better solution
             Err_(code.BAD_REQUEST, reason.ProductNotFound)
         }
         if (item.Quantity > product.Quantity || !product.IsAvailable)
         { 
-            console.log('items-flagged', { User : client.ID })
+            Log('items-flagged', { User : client.ID })
             Model.Err_(Model.code.BAD_REQUEST, Model.reason.CartFlagged)                
         }
         if(!product.HasCOD) order_.HasCOD = false
@@ -173,7 +174,7 @@ const Order = async function(client)
         order_.StoreID = product.StoreID
     }
 
-    console.log('the-order', { Order : order_ })
+    Log('the-order', { Order : order_ })
     return order_
 }
 
@@ -217,7 +218,7 @@ const Paytm = async function(retry, bill, history, client, j_id)
         , Txn     : txn_i
         , Trial   : {}
     }
-    console.log('paytm-gateway-context', { Details : ret_ })
+    Log('paytm-gateway-context', { Details : ret_ })
     return ret_
 }
 
@@ -228,7 +229,7 @@ const COD = async function(order, bill, retry, history, j_id)
 
     if(!order.HasCOD)
     {
-        console.log('cod-not-allowed', { Order : order })
+        Log('cod-not-allowed', { Order : order })
         Model.Err_(Model.code.CONFLICT, Model.reason.HasItemsWithNoCOD)
     }
 
@@ -248,7 +249,7 @@ const COD = async function(order, bill, retry, history, j_id)
         , Trail   : retry ? history: {}
     }
 
-    console.log('cod-context', { Details : ret_ })
+    Log('cod-context', { Details : ret_ })
     return ret_
 }
 
@@ -278,7 +279,7 @@ const Payment = async function(client, store, order, cod, retry, history, j_id)
         , Path  : path_
         , Bill  : bill
     }
-    console.log('the-payment', { Details : ret_ })
+    Log('the-payment', { Details : ret_ })
     return ret_
 }
 
@@ -310,7 +311,7 @@ const Create    = async function(data)
     {     ret.Response = payment.Frame.Txn          }
     else 
     {
-        console.log('cod-context', { Details : payment.Frame })
+        Log('cod-context', { Details : payment.Frame })
         await (new Cart()).Flush(client.ID)
         journal.Transit.Status = Model.states.Running
         journal.Transit.State  = Model.states.Initiated
@@ -318,13 +319,13 @@ const Create    = async function(data)
 
     await db.journal.Save(journal)
 
-    console.log('the-checkout', { Return : ret, Journal : journal })
+    Log('the-checkout', { Return : ret, Journal : journal })
     return ret
 }
 
 const MarkPayment = async function(req)
 {
-    console.log('mark-payment-status', { Body: req.body })
+    Log('mark-payment-status', { Body: req.body })
 
     const ind = new event.Payment(req.body)
 
@@ -334,13 +335,13 @@ const MarkPayment = async function(req)
     
     await ind.Store(j_rcd)
 
-    console.log('payment-status-marked', { Journal : j_rcd })
+    Log('payment-status-marked', { Journal : j_rcd })
     return j_rcd
 }
 
 const MarkRefund = async function(req)
 {
-    console.log('mark-refund-status', { Body: req.body })
+    Log('mark-refund-status', { Body: req.body })
 
     const ind = new event.Refund(req.body, req.head.signature)
 
@@ -350,13 +351,13 @@ const MarkRefund = async function(req)
 
     await ind.Store(j_rcd)
 
-    console.log('refund-status-marked', { Journal : j_rcd })
+    Log('refund-status-marked', { Journal : j_rcd })
     return t_id
 }
 
 const Refund = async function(journal, refuntAmount)
 {
-    console.log('init-refund', { Journal : journal })
+    Log('init-refund', { Journal : journal })
 
     const date = new Date(), time = date.toISOString()
     // TODO add agent info, if terminated by admin/store
@@ -376,7 +377,7 @@ const Refund = async function(journal, refuntAmount)
         , Status    : txn_i.State
         , Time      : { Token : time, Webhook : '' }
     }
-    console.log('refund-initiated', { Refund : journal.Refund })
+    Log('refund-initiated', { Refund : journal.Refund })
 }
 
 const Payout = async function (ctxt)
@@ -384,7 +385,7 @@ const Payout = async function (ctxt)
     let journal = await db.journal.GetByID(ctxt.JournalID)
     if (!journal)
     {
-        console.log('journal-not-found', { JournalID : ctxt.JournalID })
+        Log('journal-not-found', { JournalID : ctxt.JournalID })
         Model.Err_(Model.code.NOT_FOUND, Model.reason.NoJournal)
     }
 
@@ -412,7 +413,7 @@ const Payout = async function (ctxt)
 
 const Read = async function(data, in_, mode_)
 {
-    console.log('read-journal', { Input: data, Client: in_ })
+    Log('read-journal', { Input: data, Client: in_ })
 
     let query_, proj, data_
 
@@ -429,7 +430,7 @@ const Read = async function(data, in_, mode_)
 
 const List = async function(data, in_, mode_)
 {
-    console.log('list-journal', { Input: data, Client: in_ })
+    Log('list-journal', { Input: data, Client: in_ })
 
     let query_, proj, data_, cond_
 

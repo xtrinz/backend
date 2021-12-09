@@ -3,6 +3,7 @@
 const axios                   = require('axios')
     , api_key                 = process.env.GOOGLE_KEY
     , { Err_, code , reason } = require('../system/models')
+    , Log                     = require('./log')
 
 const Distance = async function(cords_)
 {
@@ -18,9 +19,9 @@ const Distance = async function(cords_)
       {
 
         if(cords_.Src.Latitude == 0)
-        console.log('unset-cordinates', { Data: cords_ })
+        Log('unset-cordinates', { Data: cords_ })
         else
-        console.log('equal-src-and-destn', { Data: cords_ })
+        Log('equal-src-and-destn', { Data: cords_ })
 
         return 0
       }
@@ -42,11 +43,11 @@ const Distance = async function(cords_)
       url     : in_.Domain + in_.Path + in_.Query,
       headers : {}
     }
-    console.log('google-map-distance-query', { Query: config })
+    Log('google-map-distance-query', { Query: config })
     let res = await axios(config)
     if(!res || !res.data || res.data.status !== 'OK')
     {
-      console.log('map-api-request-failed', { Query: config, Response: res })
+      Log('map-api-request-failed', { Query: config, Response: res })
       Err_(code.INTERNAL_SERVER, reason.MapQueryFailed)
     }
 
@@ -58,11 +59,11 @@ const Distance = async function(cords_)
        res.data.rows[0].elements[0].distance)
     {
       let dist = res.data.rows[0].elements[0].distance
-      console.log('result : ', dist, dist.value / 1000)
+      Log('result : ', dist, dist.value / 1000)
       return dist.value / 1000
     }
 
-    console.log('map-api-incorrect-response-format', { Query: config, Response: JSON.stringify(res.data) })
+    Log('map-api-incorrect-response-format', { Query: config, Response: JSON.stringify(res.data) })
     Err_(code.INTERNAL_SERVER, reason.MapQueryFailed)
 }
 

@@ -2,15 +2,16 @@ const { ObjectId } = require('mongodb')
     , Model        = require('../../system/models')
     , db           = require('../exports')[Model.segment.db]
     , { Cart }     = require('./model')
+    , Log         = require('../../system/log')
 
 const Create      = async function (user_id)
 {
-    console.log('create-cart', { User: user_id })
+    Log('create-cart', { User: user_id })
     
     const resp = await db.cart.Get(user_id, Model.query.ByUserID )
     if(resp)
     {
-      console.log('cart-exists', { Cart: resp })
+      Log('cart-exists', { Cart: resp })
       return resp._id
     }
 
@@ -23,7 +24,7 @@ const Create      = async function (user_id)
 
 const Read        = async function (user_id)
 {
-  console.log('read-cart', { UserID : user_id })
+  Log('read-cart', { UserID : user_id })
   const items = await db.cart.Read(user_id)
   let data    =
   {
@@ -37,18 +38,18 @@ const Read        = async function (user_id)
 
 const Delete      = async function (user_id)
 {
-  console.log('delete-cart', { UserID: user_id })
+  Log('delete-cart', { UserID: user_id })
   db.cart.Delete(user_id)
 }
 
 const Flush       = async function(user_id)
 {
-  console.log('flush-cart', { UserID : user_id })
+  Log('flush-cart', { UserID : user_id })
 
   let cart       = await db.cart.Get(user_id, Model.query.ByUserID)
   if (!cart)
   {
-    console.log('cart-not-found', { UserID : user_id })
+    Log('cart-not-found', { UserID : user_id })
     Model.Err_(Model.code.BAD_REQUEST, Model.reason.CartNotFound)
   } 
 
@@ -71,7 +72,7 @@ const Flush       = async function(user_id)
 
 const Insert     = async function (cart_id, data)
 {
-  console.log('insert-product', {
+  Log('insert-product', {
       CartID: cart_id
     , Product: data })
 
@@ -82,14 +83,14 @@ const Insert     = async function (cart_id, data)
 
 const Update     = async function (data)
 {
-    console.log('update-product', data)
+    Log('update-product', data)
 
     await db.cart.Update(data)
 }
 
 const Remove  = async function (cart_id, product_id)
 {
-  console.log('remove-product', { 
+  Log('remove-product', { 
       CartID    : cart_id
     , ProductID : product_id })
 

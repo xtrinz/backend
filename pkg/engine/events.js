@@ -1,4 +1,5 @@
 const { alerts } = require('../system/models')
+    , Log      = require('../system/logger')
 
 let Channel
 const SetChannel = (io_) => { Channel = io_ }
@@ -138,14 +139,14 @@ const Emit = async function(alert, ctxt)
 
     if (!Ind.To.length)
     {
-        console.log('no-live-end-points-emission-dropped', Ind)
+        Log('no-live-end-points-emission-dropped', Ind)
         return
     }
-    console.log('emit-message', Ind)
+    Log('emit-message', Ind)
 
     await Channel.to(Ind.To).emit('Event', Ind.Msg) 
   } 
-  catch(err)  { console.log('emission-failed', err, Ind)        }
+  catch(err)  { Log('emission-failed', err, Ind)        }
 
 }
 

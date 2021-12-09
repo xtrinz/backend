@@ -1,5 +1,6 @@
 const Model = require('../../system/models')
 	, m	   	= require('./methods')
+	, Log	= require('../../system/log')
     , e     = Model.event
     , s     = Model.states
 
@@ -29,7 +30,7 @@ var Handler =
 
 var GetHandler = (state_, event_) =>
 {
-	console.log('new-event', { Event: event_, State: state_ }) 
+	Log('new-event', { Event: event_, State: state_ }) 
 	const hdlr = Handler[state_][event_]
 	return hdlr 
 }
@@ -42,12 +43,12 @@ var Transition = async function (ctxt)
 
 	if(!method_)
 	{
-		console.log('no-handler-found', { Event: event_, State: state_ })
+		Log('no-handler-found', { Event: event_, State: state_ })
 		Model.Err_(Model.code.BAD_REQUEST,  Model.reason.NoHandlerFound)
 	}
 	let data_ = await method_(ctxt)
 
-	console.log('transition-completed', { Transit: ctxt })
+	Log('transition-completed', { Transit: ctxt })
     return data_
 }
 

@@ -1,6 +1,6 @@
 const paytm = require('paytm-pg-node-sdk')
     , Model = require('../../system/models')
-
+    , Log   = require('../../system/log')
 class PayTM
 {
     static async CreateToken(j_id, price, user_)
@@ -20,7 +20,7 @@ class PayTM
         /**
          * Input : JournalID | NetPrice | User.Address/Email/Name/MobileNo
          */
-        console.log('paytm-create-token', { JournalID : j_id, Price: price, User: user_ })
+        Log('paytm-create-token', { JournalID : j_id, Price: price, User: user_ })
 
         const channelId = paytm.EChannelId.WEB
             , orderId   = Model.paytm.Order.format(String(j_id))
@@ -42,7 +42,7 @@ class PayTM
         try { resp = await paytm.Payment.createTxnToken(req) }
         catch (err)
         {
-            console.log('paytm-sdk-exepction-token-creation-failed', { Error : err, JournalID : j_id, Price: price, User: user_ })
+            Log('paytm-sdk-exepction-token-creation-failed', { Error : err, JournalID : j_id, Price: price, User: user_ })
             Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.TokenCreationFailed)
         }
 
@@ -53,11 +53,11 @@ class PayTM
   
         if(sts !== Model.paytm.Success)
         {
-            console.log('paytm-token-creation-failed', { Response : resp.responseObject.body, Request: req })
+            Log('paytm-token-creation-failed', { Response : resp.responseObject.body, Request: req })
             Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.TokenCreationFailed)
         }
         const txnToken = body.getTxnToken()
-        console.log('paytm-token-created', { JournalID : j_id, Price: price, User: user_, Resp : body })
+        Log('paytm-token-created', { JournalID : j_id, Price: price, User: user_, Resp : body })
 
         const txn_i =
         {
@@ -73,7 +73,7 @@ class PayTM
 
     static async PaymentStatus(data)
     {
-        console.log('paytm-check-payment-status', { Input : data })
+        Log('paytm-check-payment-status', { Input : data })
 
         let orderId                     = Model.paytm.Order.format(String(data.JournalID))
           , paymentStatusDetailBuilder  = new paytm.PaymentStatusDetailBuilder(orderId)
@@ -83,7 +83,7 @@ class PayTM
         try { resp = await paytm.Payment.getPaymentStatus(paymentStatusDetail) }
         catch (err)
         {
-            console.log('paytm-sdk-exepction-pyment-status-retrieval-failed', { Error : err, Input: data})
+            Log('paytm-sdk-exepction-pyment-status-retrieval-failed', { Error : err, Input: data})
             Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.StatusRetrievalFailed)
         }
 
@@ -97,14 +97,14 @@ class PayTM
           , JournalID : body.getOrderId().slice( Model.paytm.Order.length - 3)
           , Status  : (sts === Model.paytm.TxnSuccess)?  Model.status.Success : Model.status.Failed
         }
-        console.log('paytm-payment-status', { Input : data, Resp : ret })
+        Log('paytm-payment-status', { Input : data, Resp : ret })
 
         return ret        
     }
 
     static async Refund(data)
     {
-        console.log('paytm-refund', { Input : data })
+        Log('paytm-refund', { Input : data })
 
         const orderId      = Model.paytm.Order.format(String(data.JournalID))
             , refId        = Model.paytm.Refund.format(String(data.JournalID))
@@ -119,7 +119,7 @@ class PayTM
         try { resp = await paytm.Refund.initiateRefund(refundDetail) }
         catch (err)
         {
-            console.log('paytm-sdk-exepction-refund-failed', { Error : err, Input: data })
+            Log('paytm-sdk-exepction-refund-failed', { Error : err, Input: data })
             Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.TokenCreationFailed)
         }
 
@@ -130,7 +130,7 @@ class PayTM
   
         if(sts !== Model.paytm.RefundPending)
         {
-            console.log('paytm-token-creation-failed', { Response : resp, Body: body, Info: info, Sts: sts })
+            Log('paytm-token-creation-failed', { Response : resp, Body: body, Info: info, Sts: sts })
             Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.RefundFailed)
         }
 
@@ -142,13 +142,13 @@ class PayTM
           , State  : Model.paytm.RefundPending
         }
 
-        console.log('paytm-refund-initiated', { Input : data, Response : resp, TxnInfo: txn_i })
+        Log('paytm-refund-initiated', { Input : data, Response : resp, TxnInfo: txn_i })
         return txn_i
     }
 
     static async RefundStatus(data)
     {
-        console.log('paytm-check-refund-status', { Input : data })
+        Log('paytm-check-refund-status', { Input : data })
 
         const orderId                   = Model.paytm.Order.format(String(data.JournalID))
             , refId                     = Model.paytm.Refund.format(String(data.JournalID))
@@ -159,7 +159,7 @@ class PayTM
         try { resp = await paytm.Refund.getRefundStatus(refundStatusDetail) }
         catch (err)
         {
-            console.log('paytm-sdk-exepction-refund-status-retrieval-failed', { Error : err, Input: data})
+            Log('paytm-sdk-exepction-refund-status-retrieval-failed', { Error : err, Input: data})
             Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.RefundStatusRetrievalFailed)
         }
         let res   = resp.getResponseObject()
@@ -174,7 +174,7 @@ class PayTM
             JournalID : body.getOrderId().slice( Model.paytm.Order.length - 3)
           , Status    : res_sts
         }
-        console.log('paytm-refund-status', { Input : data, Resp : ret })
+        Log('paytm-refund-status', { Input : data, Resp : ret })
 
         return ret
     }

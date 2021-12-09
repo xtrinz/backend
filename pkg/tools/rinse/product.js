@@ -2,6 +2,7 @@ const cart            = require('../../config/cart/archive')
     , { verb, query,
         Err_, code,
         reason }      = require('../../system/models')
+        , Log         = require('../../system/log')
 
 module.exports =
 {
@@ -10,7 +11,7 @@ module.exports =
         let cart_ = await cart.Get(entity_.User._id, query.ByUserID)
         if(!cart_)
         {
-            console.log('No cart found for user', { UserID: entity_.User._id})
+            Log('No cart found for user', { UserID: entity_.User._id})
             Err_(code.NOT_FOUND, reason.CartNotFound)
         }
         for(let idx = 0; idx < data.length; idx++)
@@ -28,7 +29,7 @@ module.exports =
         let cart_ = await cart.Get(entity_.User._id, query.ByUserID)
         if(!cart_)
         {
-            console.log('No cart found for user', { UserID: entity_.User._id})
+            Log('No cart found for user', { UserID: entity_.User._id})
             Err_(code.NOT_FOUND, reason.CartNotFound)
         }
         for(let jdx = 0; jdx < cart_.Products.length; jdx++)

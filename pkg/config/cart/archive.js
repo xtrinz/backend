@@ -3,6 +3,7 @@ const { ObjectId }            = require('mongodb')
     , { Err_, code , reason
     , query, limits }         = require('../../system/models')
     , prod                    = require('../product/archive')
+    , Log                    = require('../../system/logger')
 
 const Save       = async function(data)
 {
@@ -12,16 +13,16 @@ const Save       = async function(data)
     const resp  = await carts.updateOne(key, act, opt)
     if (!resp.acknowledged)
     {
-        console.log('cart-save-failed',
+        Log('cart-save-failed',
         { Key: key, Action: act, Option: opt, Result: resp.result})
         Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
     }
-    console.log('cart-saved', { Cart: data })
+    Log('cart-saved', { Cart: data })
 }
 
 const Get = async function(id, mode)
 {
-  console.log('find-cart',{ ID: id, Mode: mode})
+  Log('find-cart',{ ID: id, Mode: mode})
 
   let key
   if (mode === query.ByUserID)  { key = { UserID : ObjectId(id) } }
@@ -30,10 +31,10 @@ const Get = async function(id, mode)
   let cart = await carts.findOne(key)
   if (!cart)
   {
-    console.log('cart-not-found', {Query: key})
+    Log('cart-not-found', {Query: key})
     return
   }
-  console.log('cart-found', { Cart: cart})
+  Log('cart-found', { Cart: cart})
   return cart
 }
 
@@ -77,7 +78,7 @@ const Read        = async function (user_id)
     data.StoreID = product.StoreID
   }
 
-  console.log('cart-read', data)
+  Log('cart-read', data)
   return data
 }
 
@@ -87,10 +88,10 @@ const Delete      = async function (user_id)
         , resp  = await carts.deleteOne(key);
     if (resp.deletedCount !== 1)
     {
-        console.log('cart-deletion-failed', { Key: key})
+        Log('cart-deletion-failed', { Key: key})
         Err_(code.INTERNAL_SERVER, reason.DBDeletionFailed)
     }
-    console.log('cart-deleted', { Key : key })
+    Log('cart-deleted', { Key : key })
 }
 
 
@@ -110,7 +111,7 @@ const Insert     = async function (cart_id, data)
   const resp2  = await carts.updateOne(key2, act, opt)
   if (!resp2.acknowledged)
   {
-      console.log('multi-store-purchase-clearance-failed',
+      Log('multi-store-purchase-clearance-failed',
       { Key: key2, Option: opt, Result: resp2.result})
       Err_(code.INTERNAL_SERVER, reason.DBUpdationFailed)
   }
@@ -118,14 +119,14 @@ const Insert     = async function (cart_id, data)
   const product_ = await prod.Get(data.ProductID, query.ByID)
   if (!product_)
   {
-    console.log('product-not-found-on-addn-to-cart', { Cart: cart_id, Data: data })
+    Log('product-not-found-on-addn-to-cart', { Cart: cart_id, Data: data })
     Err_(code.BAD_REQUEST, reason.ProductNotFound)
   }
   if(!product_.IsAvailable  ||
       product_.Quantity < 1 ||
       data.Quantity > product_.Quantity)
   {
-    console.log('product-not-available-or-insufficient', { Cart: cart_id, Data: data, Product: product_ })
+    Log('product-not-available-or-insufficient', { Cart: cart_id, Data: data, Product: product_ })
     Err_(code.BAD_REQUEST, reason.ProductUnavailable)
   }
 
@@ -137,7 +138,7 @@ const Insert     = async function (cart_id, data)
   const resp1 = await carts.findOne(key1)
   if(resp1)
   {
-    console.log('product-exists-in-cart', { Key: key1 })
+    Log('product-exists-in-cart', { Key: key1 })
     Err_(code.CONFLICT, reason.ProductExists)
   }
   data._id   = ObjectId(data.ProductID)
@@ -148,10 +149,10 @@ const Insert     = async function (cart_id, data)
       , resp = await carts.updateOne(key, opts)
   if (resp.modifiedCount !== 1) 
   {
-      console.log('product-insertion-failed', {Key: key, Option: opts })
+      Log('product-insertion-failed', {Key: key, Option: opts })
       Err_(code.INTERNAL_SERVER, reason.DBInsertionFailed)
   }
-  console.log('product-inserted', { Product: data})
+  Log('product-inserted', { Product: data})
 }
 
 const Update     = async function (data)
@@ -169,20 +170,20 @@ const Update     = async function (data)
   let elem_ = await carts.findOne(key1)
   if (!elem_)
   {
-      console.log('prodcuct-not-found-at-cart-for-update', { Key: key1 })
+      Log('prodcuct-not-found-at-cart-for-update', { Key: key1 })
       Err_(code.INTERNAL_SERVER, reason.ProductNotFound)
   }
 
   const product_ = await prod.Get(product_id, query.ByID)
   if (!product_)
   {
-    console.log('product-not-found-on-update-to-cart', { Cart: cart_id, ProductID: product_id, Quantity: qnty })
+    Log('product-not-found-on-update-to-cart', { Cart: cart_id, ProductID: product_id, Quantity: qnty })
     Err_(code.BAD_REQUEST, reason.ProductNotFound)
   }
 
   if(!product_.IsAvailable  || product_.Quantity < 1 || (qnty + elem_.Quantity) > product_.Quantity )
   {
-    console.log('product-not-available-or-insufficient', { Cart: cart_id, Product: product_ })
+    Log('product-not-available-or-insufficient', { Cart: cart_id, Product: product_ })
     Err_(code.BAD_REQUEST, reason.ProductUnavailable)
   }
 
@@ -197,10 +198,10 @@ const Update     = async function (data)
   const resp  = await carts.updateOne(key, opts)
   if (resp.modifiedCount !== 1) 
   {
-      console.log('product-update-failed', { Key: key, Option: opts })
+      Log('product-update-failed', { Key: key, Option: opts })
       Err_(code.INTERNAL_SERVER, reason.DBUpdationFailed)
   }
-  console.log('product-updated', { Key: key, Option: opts })
+  Log('product-updated', { Key: key, Option: opts })
 }
 
 const Remove  = async function (cart_id, product_id)
@@ -211,10 +212,10 @@ const Remove  = async function (cart_id, product_id)
   const resp  = await carts.updateOne(key, opts)
   if (resp.modifiedCount !== 1) 
   {
-      console.log('product-removal-failed', { Key: key, Option: opts })
+      Log('product-removal-failed', { Key: key, Option: opts })
       Err_(code.INTERNAL_SERVER, reason.DBRemovalFailed)
   }
-  console.log('product-removed', { Key: key, Option: opts })
+  Log('product-removed', { Key: key, Option: opts })
 }
 
 

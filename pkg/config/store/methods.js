@@ -5,6 +5,7 @@ const otp      = require('../../infra/otp')
     , Store    = require('./store')
     , ObjectId = require('mongodb').ObjectId
     , Tool     = require('../../tools/export')[Model.resource.store]
+    , Log      = require('../../system/log')
 
 const Context	= async function(data, resp)
 {
@@ -21,7 +22,7 @@ const Context	= async function(data, resp)
 
     if (!store_)
     {
-        console.log('store-not-found-setting-new-context', 
+        Log('store-not-found-setting-new-context', 
         { 
             MobileNo: data.MobileNo 
         })
@@ -37,13 +38,13 @@ const Context	= async function(data, resp)
         , Data   : data
         , Return : resp
     }
-    console.log('store-context', { Context: ctxt })
+    Log('store-context', { Context: ctxt })
     return ctxt
 }
 
 const Create	= async function(ctxt)
 {
-    console.log('create-store', { Context: ctxt })
+    Log('create-store', { Context: ctxt })
 
     const otp_sms = new otp.OneTimePasswd({
                     MobileNo: 	ctxt.Store.MobileNo, 
@@ -55,14 +56,14 @@ const Create	= async function(ctxt)
 
     await db.store.Save(ctxt.Store)
 
-    console.log('store-created', { Context: ctxt })
+    Log('store-created', { Context: ctxt })
 
     return {}
 }
 
 const Login		= async function(ctxt)
 {
-    console.log('store-login', { Context: ctxt })
+    Log('store-login', { Context: ctxt })
 
     const otp_sms = new otp.OneTimePasswd({
                     MobileNo: 	ctxt.Store.MobileNo, 
@@ -72,7 +73,7 @@ const Login		= async function(ctxt)
     ctxt.Store.Otp = hash
     await db.store.Save(ctxt.Store)
 
-    console.log('store-login-otp-sent', { Context: ctxt })
+    Log('store-login-otp-sent', { Context: ctxt })
 
     return {}
 }
@@ -83,7 +84,7 @@ const Confirm   = async function (ctxt)
         , status = await otp_.Confirm(ctxt.Store.Otp, ctxt.Data.OTP)
     if (!status) 
     {
-        console.log('otp-mismatch', { Context: ctxt })
+        Log('otp-mismatch', { Context: ctxt })
         Model.Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
     }
 
@@ -93,7 +94,7 @@ const Confirm   = async function (ctxt)
     ctxt.Store.Otp   = ''
     await db.store.Save(ctxt.Store)
 
-    console.log('store-mobile-number-confirmed', { Store: ctxt.Store })
+    Log('store-mobile-number-confirmed', { Store: ctxt.Store })
 
     ctxt.Return.setHeader('authorization', token)
     let data_ = 
@@ -109,11 +110,11 @@ const Token     = async function (ctxt)
         , status = await otp_.Confirm(ctxt.Store.Otp, ctxt.Data.OTP)
     if (!status) 
     {
-        console.log('otp-mismatch', { Context: ctxt })
+        Log('otp-mismatch', { Context: ctxt })
         Model.Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
     }
 
-    console.log('store-exists-logging-in', { Store: ctxt.Store })
+    Log('store-exists-logging-in', { Store: ctxt.Store })
 
     const token = await jwt.Sign({ _id : ctxt.Store._id, Mode : Model.mode.Store })
 
@@ -130,7 +131,7 @@ const Token     = async function (ctxt)
 
 const Register  = async function (ctxt)
 {
-    console.log('store-register', { Context: ctxt })
+    Log('store-register', { Context: ctxt })
 
     let store_ = new Store(ctxt.Data)
     store_.setID(ctxt.Store._id)
@@ -140,7 +141,7 @@ const Register  = async function (ctxt)
 
     await db.store.Save(ctxt.Store)
 
-    console.log('store-registered', { Context: ctxt })
+    Log('store-registered', { Context: ctxt })
 
     let in_ =
     {
@@ -155,7 +156,7 @@ const Register  = async function (ctxt)
 
 const Approve  = async function (ctxt)
 {
-    console.log('store-approve', { Context: ctxt })
+    Log('store-approve', { Context: ctxt })
 
     if(ctxt.Data.Action == Model.task.Deny)
     {
@@ -170,13 +171,13 @@ const Approve  = async function (ctxt)
 
     await db.store.Save(ctxt.Store)
 
-    console.log('admin-response-marked', { Store: ctxt.Store })
+    Log('admin-response-marked', { Store: ctxt.Store })
     return {}
 }
 
 const Edit = async function(data)
 {
-    console.log('edit-store', { Input : data })
+    Log('edit-store', { Input : data })
 
     let rcd = { _id : data.Store._id }
 
@@ -228,12 +229,12 @@ const Edit = async function(data)
     }
     // TODO MobileNo
     await db.store.Save(rcd)
-    console.log('store-updated', { Record: rcd })
+    Log('store-updated', { Record: rcd })
 }
 
 const Get      = async function (in_)
 {
-    console.log('read-store', { In: in_ })
+    Log('read-store', { In: in_ })
 
     let data, store_
     switch(in_.Mode)
@@ -246,7 +247,7 @@ const Get      = async function (in_)
         store_ = await db.store.Get(in_.ID, Model.query.ByID)
         if (!store_) 
         {
-            console.log('store-not-found', { In: in_ })
+            Log('store-not-found', { In: in_ })
             Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
         }
         break
@@ -255,12 +256,12 @@ const Get      = async function (in_)
         store_ = await db.store.Get(in_.ID, Model.query.ByID)
         if (!store_)
         {
-            console.log('store-not-found', { In: in_ })
+            Log('store-not-found', { In: in_ })
             Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
         }
         if (store_.State !== Model.states.Registered)
         {
-            console.log('store-has-not-registered', { In: in_ })
+            Log('store-has-not-registered', { In: in_ })
             Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
         }
         break
@@ -268,25 +269,25 @@ const Get      = async function (in_)
         store_ = await db.store.Get(in_.ID, Model.query.ByID)
         if (!store_)
         {
-            console.log('store-not-found', { In: in_ })
+            Log('store-not-found', { In: in_ })
             Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
         }
         if (store_.State !== Model.states.Registered)
         {
-            console.log('store-has-not-registered', { In: in_ })
+            Log('store-has-not-registered', { In: in_ })
             Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
         }
         break        
     }
 
     data = Tool.rinse[Model.verb.view][in_.Mode](store_)
-    console.log('store-read', { Store : data })
+    Log('store-read', { Store : data })
     return data
 }
 
 const List      = async  function(in_, mode_)
 {
-    console.log('list-store', { In : in_ })
+    Log('list-store', { In : in_ })
     let data, proj
 
     proj = { projection: Tool.project[Model.verb.view][mode_] }
@@ -297,7 +298,7 @@ const List      = async  function(in_, mode_)
 
     Tool.rinse[Model.verb.list](data)
 
-    console.log('store-list', { Stores : data, Mode: mode_ })
+    Log('store-list', { Stores : data, Mode: mode_ })
     return data
 }
 

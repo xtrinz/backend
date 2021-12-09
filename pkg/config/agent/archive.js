@@ -1,28 +1,29 @@
 const { agents }   = require('../../system/database')
     , Model        = require('../../system/models')
     , { ObjectId } = require('mongodb')
+    , Log          = require('../../system/logger')
 
 const Save       = async function(data)
 {
-    console.log('save-agent', { Agent: data })
+    Log('save-agent', { Agent: data })
     const query = { _id    : data._id }
         , act   = { $set   : data }
         , opt   = { upsert : true }
     const resp  = await agents.updateOne(query, act, opt)
     if (!resp.acknowledged)
     {
-        console.log('agent-save-failed', 
+        Log('agent-save-failed', 
         { Agent: data, Result: resp.result})
 
         Model.Err_(Model.code.INTERNAL_SERVER
                  , Model.reason.DBAdditionFailed)
     }
-    console.log('agent-saved', { Agent : data })
+    Log('agent-saved', { Agent : data })
 }
 
 const Get = async function(param, qType)
 {
-    console.log('find-agent', { Param: param, QType: qType} )
+    Log('find-agent', { Param: param, QType: qType} )
     let query_
     switch (qType)
     {
@@ -33,10 +34,10 @@ const Get = async function(param, qType)
     let agent = await agents.findOne(query_)
     if (!agent)
     {
-        console.log('agent-not-found', { Query : query_ })
+        Log('agent-not-found', { Query : query_ })
         return
     }
-    console.log('agent-found', { Agent: agent })
+    Log('agent-found', { Agent: agent })
     return agent
 }
 
@@ -46,7 +47,7 @@ const Nearby = async function(ln, lt)
     lt = lt.loc()
     let date_ = new Date()
 
-    console.log('list-nearby-live-agents', {Location: [ln, lt]} )
+    Log('list-nearby-live-agents', {Location: [ln, lt]} )
     const maxDist = 5000
         , proj    = { projection: { _id: 1, Name: 1, SockID: 1, MobileNo: 1 } }
         , query   =
@@ -68,10 +69,10 @@ const Nearby = async function(ln, lt)
     const agent_ = await agents.findOne(query, proj)
     if (!agent_)
     {
-        console.log('no-agent-found', { Location: [ln, lt]})
+        Log('no-agent-found', { Location: [ln, lt]})
         return
     }
-    console.log('agent-found', { Agent: agent_})
+    Log('agent-found', { Agent: agent_})
     return agent_
 }
 
@@ -89,11 +90,11 @@ const List = async function(data, proj)
                               .toArray()
     if (!data_.length && data.Page === 1)
     {
-        console.log('no-near-by-agents', { Query : query })
+        Log('no-near-by-agents', { Query : query })
         return data_
     }
 
-    console.log('near-by-agents', { Agents: data_ })
+    Log('near-by-agents', { Agents: data_ })
     return data_
 }
 

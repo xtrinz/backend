@@ -3,13 +3,14 @@ const otp   = require('../../infra/otp')
     , Model = require('../../system/models')
     , db    = require('../exports')[Model.segment.db]
     , Admin = require('./model')
+    , Log   = require('../../system/log')
 
 const Context	= async function(data, resp)
 {
     let admin_ = await db.admin.Get(data.MobileNo, Model.query.ByMobileNo)
     if (!admin_)
     {
-        console.log('admin-not-found-setting-new-context', 
+        Log('admin-not-found-setting-new-context', 
         { 
             MobileNo: data.MobileNo 
         })
@@ -22,7 +23,7 @@ const Context	= async function(data, resp)
         , Data   : data
         , Return : resp
     }
-    console.log('admin-context', { Context: ctxt })
+    Log('admin-context', { Context: ctxt })
     return ctxt
 }
 
@@ -32,7 +33,7 @@ const Create	= async function(ctxt)
                 .split(' ')
                 .includes(ctxt.Admin.MobileNo))
     {
-        console.log('unknown-seed', { Context: ctxt })
+        Log('unknown-seed', { Context: ctxt })
         Model.Err_(Model.code.NOT_FOUND, Model.reason.Unauthorized)
     }
 
@@ -46,14 +47,14 @@ const Create	= async function(ctxt)
 
     await db.admin.Save(ctxt.Admin)
 
-    console.log('admin-created', { Context: ctxt })
+    Log('admin-created', { Context: ctxt })
 
     return {}
 }
 
 const Login		= async function(ctxt)
 {
-    console.log('admin-login', { Context: ctxt })
+    Log('admin-login', { Context: ctxt })
 
     const otp_sms = new otp.OneTimePasswd({
                     MobileNo: 	ctxt.Admin.MobileNo, 
@@ -63,7 +64,7 @@ const Login		= async function(ctxt)
     ctxt.Admin.Otp = hash
     await db.admin.Save(ctxt.Admin)
 
-    console.log('admin-login-otp-sent', { Context: ctxt })
+    Log('admin-login-otp-sent', { Context: ctxt })
     return {}
 }
 
@@ -73,7 +74,7 @@ const Confirm   = async function (ctxt)
         , status = await otp_.Confirm(ctxt.Admin.Otp, ctxt.Data.OTP)
     if (!status) 
     {
-        console.log('otp-mismatch', { Context: ctxt })
+        Log('otp-mismatch', { Context: ctxt })
         Model.Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
     }
 
@@ -82,7 +83,7 @@ const Confirm   = async function (ctxt)
     ctxt.Admin.State = Model.states.MobConfirmed
     ctxt.Admin.Otp   = ''
     await db.admin.Save(ctxt.Admin)
-    console.log('admin-mobile-number-confirmed', { Admin: ctxt.Admin })
+    Log('admin-mobile-number-confirmed', { Admin: ctxt.Admin })
 
     ctxt.Return.setHeader('authorization', token)
     let data_ = 
@@ -98,11 +99,11 @@ const Token     = async function (ctxt)
         , status = await otp_.Confirm(ctxt.Admin.Otp, ctxt.Data.OTP)
     if (!status) 
     {
-        console.log('otp-mismatch', { Context: ctxt })
+        Log('otp-mismatch', { Context: ctxt })
         Model.Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
     }
 
-    console.log('admin-exists-logging-in', { Admin: ctxt.Admin })
+    Log('admin-exists-logging-in', { Admin: ctxt.Admin })
 
     const token = await jwt.Sign({ _id : ctxt.Admin._id, Mode : Model.mode.Admin })
 
@@ -124,7 +125,7 @@ const Register  = async function (ctxt)
 
     await db.admin.Save(ctxt.Admin)
 
-    console.log('admin-registered', 
+    Log('admin-registered', 
     {  UserID  : ctxt.Admin._id 
      , Name    : ctxt.Admin.Name })
 
@@ -153,7 +154,7 @@ const Edit      = async function (ctxt)
     }
 
     await db.admin.Save(rcd)
-    console.log('profile-updated', {Context: ctxt})
+    Log('profile-updated', {Context: ctxt})
 }
 
 module.exports =

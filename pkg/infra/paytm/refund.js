@@ -1,6 +1,7 @@
 const checksum = require("paytmchecksum")
     , Model    = require('../../system/models')	
 	, journal  = require('../../config/journal/archive')
+	, Log      = require('../../system/log')
 
 function Refund(data, signature)
 {
@@ -22,10 +23,10 @@ function Refund(data, signature)
         const sign = await checksum.verifySignature(body, process.env.PAYTM_KEY, this.Data.Checksum)
         if(!sign)
         {
-            console.log('refund-ind-unmatched-signature', { Body : body, Hash: this.Data.Checksum })
+            Log('refund-ind-unmatched-signature', { Body : body, Hash: this.Data.Checksum })
             Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidChecksum)
         }
-        console.log('refund-ind-unmatched-signature', { Req : body })
+        Log('refund-ind-unmatched-signature', { Req : body })
 	}
 
 	this.Authorize 	  = async function()
@@ -33,14 +34,14 @@ function Refund(data, signature)
 
 		if( process.env.PAYTM_MID !== this.Data.MId )
 		{
-			console.log('refund-ind-with-wrong-mid', { Ind : this.Data })
+			Log('refund-ind-with-wrong-mid', { Ind : this.Data })
             Model.Err_(Model.code.BAD_REQUEST, Model.reason.InvalidMid)
 		}
 
 		let rcd = await journal.GetByID(this.Data.JournalID)
 		if( !rcd )
 		{
-			console.log('journal-not-found', { Ind : this.Data })
+			Log('journal-not-found', { Ind : this.Data })
             Model.Err_(Model.code.BAD_REQUEST, Model.reason.JournalNotFound)
 		}
 

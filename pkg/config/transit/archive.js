@@ -1,10 +1,11 @@
 const { ObjectId } = require('mongodb')
     , { transits } = require('../../system/database')
     , Model        = require('../../system/models')
+    , Log         = require('../../system/logger')
 
 const Get = async function(param, qType)
 {
-    console.log('find-transit', { Param: param, QType: qType})
+    Log('find-transit', { Param: param, QType: qType})
     let query_
     switch (qType)
     {
@@ -14,23 +15,23 @@ const Get = async function(param, qType)
     let transit = await transits.findOne(query_)
     if (!transit)
     {
-        console.log('transit-not-found', { Query : query_, Type : qType })
+        Log('transit-not-found', { Query : query_, Type : qType })
         return
     }
-    console.log('transit-found', { Transits: transit })
+    Log('transit-found', { Transits: transit })
     return transit
 }
 
 const Save       = async function(data, upsert)
 {
-    console.log('save-transit', { Transit: data })
+    Log('save-transit', { Transit: data })
     const key  = { _id    : data._id, State: data.Return }
         , act  = { $set   : data     }
         , opt  = { upsert : upsert   }
         , resp = await transits.updateOne(key, act, opt)
     if (!resp.acknowledged)
     {
-        console.log('transit-save-failed',
+        Log('transit-save-failed',
         { 
               Key       : key
             , Action    : act
@@ -39,7 +40,7 @@ const Save       = async function(data, upsert)
         })
         Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.DBAdditionFailed)
     }
-    console.log('transit-saved', { Transit: data })
+    Log('transit-saved', { Transit: data })
 }
 
 const SetSockID  = async function(mode_, _id, sock_id)
@@ -67,7 +68,7 @@ const SetSockID  = async function(mode_, _id, sock_id)
     const resp = await transits.updateMany(key, act)
     if (!resp.acknowledged)
     {
-        console.log('set-socket-id-failed',
+        Log('set-socket-id-failed',
         { 
             Key     : key, 
             Value   : act,
@@ -75,12 +76,12 @@ const SetSockID  = async function(mode_, _id, sock_id)
         })
         Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.DBAdditionFailed)
     }
-    console.log('socket-id-set', { Mode: mode_, ID: _id, SockID: sock_id })
+    Log('socket-id-set', { Mode: mode_, ID: _id, SockID: sock_id })
 }
 
 const ClearSockID  = async function(mode_, _id, sock_id)
 {
-    console.log('pop-socket-id', { Mode: mode_, ID: _id, SockID: sock_id })
+    Log('pop-socket-id', { Mode: mode_, ID: _id, SockID: sock_id })
     let key, act
     switch(mode_)
     {
@@ -104,7 +105,7 @@ const ClearSockID  = async function(mode_, _id, sock_id)
     const resp = await transits.updateMany(key, act)
     if (!resp.acknowledged)
     {
-        console.log('pop-socket-id-failed',
+        Log('pop-socket-id-failed',
         { 
             Key     : key, 
             Value   : act,
@@ -112,7 +113,7 @@ const ClearSockID  = async function(mode_, _id, sock_id)
         })
         Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.DBAdditionFailed)
     }
-    console.log('socket-id-removed', { Mode: mode_, ID: _id, SockID: sock_id })
+    Log('socket-id-removed', { Mode: mode_, ID: _id, SockID: sock_id })
 }
 
 module.exports =

@@ -1,10 +1,11 @@
 const { verb, states } = require('../../system/models')
+, Log                     = require('../../system/log')
 
 module.exports =
 {
     [verb.list]: function(data)
     {
-        console.log('rinse-agent-list', { Data: data })
+        Log('rinse-agent-list', { Data: data })
         let now_               = new Date()
         for(let idx = 0; idx < data.length; idx++)
         {
@@ -24,7 +25,7 @@ module.exports =
     }
     , [verb.view]: function(in_)
     {
-        console.log('rinse-agent-data', { Data: in_ })
+        Log('rinse-agent-data', { Data: in_ })
         let now_ = new Date()
         if(!now_.is_today(in_.Status.SetOn))
         { in_.Status = states.OffDuty      }

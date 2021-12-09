@@ -11,6 +11,7 @@ const { Err, Err_, code, status
     , jwt                                 = require('../infra/jwt')
     , rbac                                = require('../system/rbac')
     , input                               = require('./input')
+    , Log                                 = require('./log')
 
 let   Server, io
 const SetServer = (server, io_) => { Server = server; io = io_ }
@@ -59,13 +60,13 @@ const Authnz = async function (req, res, next)
         let store = await db.store.Get(resp._id, query.ByID)
         if (!store)
         {
-            console.log('store-not-found', { StoreID: resp._id })
+            Log('store-not-found', { StoreID: resp._id })
             Err_(code.UNAUTHORIZED, reason.InvalidToken)
         }
 
         if (!mode_.State.includes(store.State))
         {
-          console.log('state-mismatch-for-store-auth', { Store: store, ModeState : mode_.State })
+          Log('state-mismatch-for-store-auth', { Store: store, ModeState : mode_.State })
           Err_(code.UNAUTHORIZED, reason.RegIncomplete)
         }
 
@@ -73,27 +74,27 @@ const Authnz = async function (req, res, next)
         req.query.StoreID = store._id        
         req.body.Mode     = resp.Mode
 
-        console.log('store-authenticated', { Store: store })
+        Log('store-authenticated', { Store: store })
       break
       case mode.Agent:
 
         let agent = await db.agent.Get(resp._id, query.ByID)
         if (!agent)
         {
-            console.log('agent-not-found', { AgentID: resp._id })
+            Log('agent-not-found', { AgentID: resp._id })
             Err_(code.UNAUTHORIZED, reason.InvalidToken)
         }
 
         if (!mode_.State.includes(agent.State))
         {
-          console.log('state-mismatch-for-agent-auth', { Agent: agent })
+          Log('state-mismatch-for-agent-auth', { Agent: agent })
           Err_(code.UNAUTHORIZED, reason.RegIncomplete)
         }
 
         req.body.Agent = agent
         req.body.Mode  = agent.Mode
 
-        console.log('agent-authenticated', { Agent: agent })    
+        Log('agent-authenticated', { Agent: agent })    
         break
 
       case mode.Admin:
@@ -101,20 +102,20 @@ const Authnz = async function (req, res, next)
         let admin = await db.admin.Get(resp._id, query.ByID)
         if (!admin)
         {
-            console.log('agent-not-found', { AdminID: resp._id })
+            Log('agent-not-found', { AdminID: resp._id })
             Err_(code.UNAUTHORIZED, reason.InvalidToken)
         }
 
         if (!mode_.State.includes(admin.State))
         {
-          console.log('state-mismatch-for-admin-auth', { Admin: admin })
+          Log('state-mismatch-for-admin-auth', { Admin: admin })
           Err_(code.UNAUTHORIZED, reason.RegIncomplete)
         }
 
         req.body.Admin = admin
         req.body.Mode  = mode.Admin
 
-        console.log('admin-authenticated', { Admin: admin })    
+        Log('admin-authenticated', { Admin: admin })    
         break        
 
       case mode.User:
@@ -122,20 +123,20 @@ const Authnz = async function (req, res, next)
         let user = await db.user.Get(resp._id, query.ByID)
         if (!user)
         {
-            console.log('user-not-found', { UserID: resp._id })
+            Log('user-not-found', { UserID: resp._id })
             Err_(code.UNAUTHORIZED, reason.InvalidToken)
         }
 
         if (!mode_.State.includes(user.State))
         {
-          console.log('state-mismatch-for-user-auth', { User: user })
+          Log('state-mismatch-for-user-auth', { User: user })
           Err_(code.UNAUTHORIZED, reason.RegIncomplete)
         }
 
         req.body.User = user
         req.body.Mode = user.Mode
 
-        console.log('user-authenticated', { User: user })  
+        Log('user-authenticated', { User: user })  
         break
     }
  
@@ -143,7 +144,7 @@ const Authnz = async function (req, res, next)
       next()
     else
     {
-      console.log('operation-not-permited', 
+      Log('operation-not-permited', 
       {   Body         : req.body
         , Query        : req.body
         , AllowedModes : mode_ })                     
@@ -156,7 +157,7 @@ const Forbidden = (req, res, next) =>
 {
   try 
   {
-    console.log('page-not-found')
+    Log('page-not-found')
     Err_(code.FORBIDDEN, reason.PageNotFound)
   } catch (err) { next(err) }
 }
@@ -165,13 +166,13 @@ const GracefulExit = async function ()
 {
   try 
   {
-    console.log('graceful-exit')
+    Log('graceful-exit')
     await new Promise((res)=>
     {
       io.close((err)=>
       {
-        if(!err) { res(1); console.log('socket-stopped') }
-        else console.log('socket-abruptly-terminated')
+        if(!err) { res(1); Log('socket-stopped') }
+        else Log('socket-abruptly-terminated')
       })
     })
 
@@ -179,8 +180,8 @@ const GracefulExit = async function ()
     {
       client.close((err)=>
       {
-        if(!err) { res(1); console.log('db-connection-closed') } 
-        else console.log('db-abruptly-disconnected')
+        if(!err) { res(1); Log('db-connection-closed') } 
+        else Log('db-abruptly-disconnected')
       })
     })
 
@@ -188,13 +189,13 @@ const GracefulExit = async function ()
     {
       Server.close((err)=>
       {
-        if(!err) { res(1); console.log('server-stopped') }
-        else console.log('server-abruptly-terminated')
+        if(!err) { res(1); Log('server-stopped') }
+        else Log('server-abruptly-terminated')
       })
     })
 
     process.exit(1)
-  } catch (err) { console.log(err) }
+  } catch (err) { Log(err) }
 }
 
 const ErrorHandler = function(err, req, res, next) 

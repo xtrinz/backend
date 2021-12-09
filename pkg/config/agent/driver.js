@@ -3,6 +3,7 @@ const Model        = require('../../system/models')
     , Infra        = require('../../infra/export')
     , { ObjectId } = require('mongodb')
     , db           = require('../exports')[Model.segment.db]
+    , Log         = require('../../system/log')
 class Agent
 {
     constructor (data)
@@ -65,7 +66,7 @@ class Agent
         this.Otp             = hash
         this.State           = Model.states.New
         await db.agent.Save(this)
-        console.log('agent-created', { Agent: this})
+        Log('agent-created', { Agent: this})
     }
 
     static async Confirm(data)
@@ -73,7 +74,7 @@ class Agent
         let agent_ = await db.agent.Get(data.MobileNo, Model.query.ByMobileNo)
         if (!agent_)
         {
-            console.log('agent-not-found', { Input: data })
+            Log('agent-not-found', { Input: data })
             Model.Err_(Model.code.BAD_REQUEST, Model.reason.AgentNotFound)
         }
 
@@ -81,7 +82,7 @@ class Agent
             , status = await otp_.Confirm(agent_.Otp, data.OTP)
         if (!status) 
         {
-            console.log('wrong-otp-on-confirm-agent', { Data: data })
+            Log('wrong-otp-on-confirm-agent', { Data: data })
             Model.Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
         }
 
@@ -98,7 +99,7 @@ class Agent
             agent_.State === Model.states.ToBeCorrected )
         {
             ret_.Command = Model.command.LoggedIn
-            console.log('agent-exists', { Agent: agent_ })
+            Log('agent-exists', { Agent: agent_ })
         }
         else
         {
@@ -106,7 +107,7 @@ class Agent
             agent_.Otp   = ''
             ret_.Command = Model.command.Register
             await db.agent.Save(agent_)
-            console.log('agent-confirmed', { Agent: agent_ })
+            Log('agent-confirmed', { Agent: agent_ })
         }
 
         return ret_
@@ -117,7 +118,7 @@ class Agent
 
         if (data.Agent.State !== Model.states.MobConfirmed)
         {
-            console.log('bad-state-for-register', { Agent : data.Agent })
+            Log('bad-state-for-register', { Agent : data.Agent })
             Model.Err_(Model.code.BAD_REQUEST, Model.reason.MobileNoNotConfirmed)
         }
 
@@ -131,12 +132,12 @@ class Agent
         data.Agent.State    = Model.states.ToBeApproved
 
         await db.agent.Save(data.Agent)
-        console.log('set-agent-for-approval', { Agent : data.Agent})
+        Log('set-agent-for-approval', { Agent : data.Agent})
     }
 
     static async Approve(data)
     {
-        console.log('agent-approval', { Agent: data })
+        Log('agent-approval', { Agent: data })
     
         let agent_ = await db.agent.Get(data.AgentID, Model.query.ByID)
         if (!agent_ || agent_.State !== Model.states.ToBeApproved)
@@ -159,7 +160,7 @@ class Agent
         }
     
         await db.agent.Save(agent_)
-        console.log('agent-admin-response-marked', { Agent: agent_ })
+        Log('agent-admin-response-marked', { Agent: agent_ })
     }
 
     static async Edit(data)
@@ -194,12 +195,12 @@ class Agent
         }
 
         await db.agent.Save(rcd)
-        console.log('profile-updated', {Agent: rcd })
+        Log('profile-updated', {Agent: rcd })
     }
 
     static async List(in_)
     {
-        console.log('list-agents', { In : in_ })
+        Log('list-agents', { In : in_ })
 
         let proj = { projection:  Tool.project[Model.verb.view][Model.mode.Admin] }
 
@@ -209,13 +210,13 @@ class Agent
         
         Tool.rinse[Model.verb.list](data)
             
-        console.log('agent-list', { Agents : data })
+        Log('agent-list', { Agents : data })
         return data
     }    
 
     static async View(in_)
     {
-        console.log('view-agent', { In : in_ })
+        Log('view-agent', { In : in_ })
 
         Tool.rinse[Model.verb.view](in_)
         const data = 
@@ -227,7 +228,7 @@ class Agent
           , Status    : in_.Status
         }
 
-        console.log('agent-data', { Agent : data })
+        Log('agent-data', { Agent : data })
         return data
     }    
 

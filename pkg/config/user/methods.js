@@ -4,13 +4,14 @@ const otp   = require('../../infra/otp')
     , db    = require('../exports')[Model.segment.db]
     , User  = require('./model')
     , cart  = require('../cart/driver')
+    , Log   = require('../../system/log')
 
 const Context	= async function(data, resp)
 {
     let user_ = await db.user.Get(data.MobileNo, Model.query.ByMobileNo)
     if (!user_)
     {
-        console.log('user-not-found-setting-new-context', 
+        Log('user-not-found-setting-new-context', 
         { 
             MobileNo: data.MobileNo 
         })
@@ -23,7 +24,7 @@ const Context	= async function(data, resp)
         , Data   : data
         , Return : resp
     }
-    console.log('user-context', { Context: ctxt })
+    Log('user-context', { Context: ctxt })
     return ctxt
 }
 
@@ -39,14 +40,14 @@ const Create	= async function(ctxt)
 
     await db.user.Save(ctxt.User)
 
-    console.log('user-created', { Context: ctxt })
+    Log('user-created', { Context: ctxt })
 
     return {}
 }
 
 const Login		= async function(ctxt)
 {
-    console.log('user-login', { Context: ctxt })
+    Log('user-login', { Context: ctxt })
 
     const otp_sms = new otp.OneTimePasswd({
                     MobileNo: 	ctxt.User.MobileNo, 
@@ -56,7 +57,7 @@ const Login		= async function(ctxt)
     ctxt.User.Otp = hash
     await db.user.Save(ctxt.User)
 
-    console.log('user-login-otp-sent', { Context: ctxt })
+    Log('user-login-otp-sent', { Context: ctxt })
     return {}
 }
 
@@ -66,7 +67,7 @@ const Confirm   = async function (ctxt)
         , status = await otp_.Confirm(ctxt.User.Otp, ctxt.Data.OTP)
     if (!status) 
     {
-        console.log('otp-mismatch', { Context: ctxt })
+        Log('otp-mismatch', { Context: ctxt })
         Model.Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
     }
 
@@ -75,7 +76,7 @@ const Confirm   = async function (ctxt)
     ctxt.User.State = Model.states.MobConfirmed
     ctxt.User.Otp   = ''
     await db.user.Save(ctxt.User)
-    console.log('user-mobile-number-confirmed', { User: ctxt.User })
+    Log('user-mobile-number-confirmed', { User: ctxt.User })
 
     ctxt.Return.setHeader('authorization', token)
     let data_ = 
@@ -91,11 +92,11 @@ const Token     = async function (ctxt)
         , status = await otp_.Confirm(ctxt.User.Otp, ctxt.Data.OTP)
     if (!status) 
     {
-        console.log('otp-mismatch', { Context: ctxt })
+        Log('otp-mismatch', { Context: ctxt })
         Model.Err_(Model.code.BAD_REQUEST, Model.reason.OtpRejected)
     }
 
-    console.log('user-exists-logging-in', { User: ctxt.User })
+    Log('user-exists-logging-in', { User: ctxt.User })
 
     const token = await jwt.Sign({ _id : ctxt.User._id, Mode : Model.mode.User })
 
@@ -120,7 +121,7 @@ const Register  = async function (ctxt)
 
     await db.user.Save(ctxt.User)
 
-    console.log('user-registered', 
+    Log('user-registered', 
     {  User  : ctxt.User })
 
     let data_ = 
@@ -149,7 +150,7 @@ const Edit      = async function (ctxt)
     }
 
     await db.user.Save(rcd)
-    console.log('profile-updated', {Context: ctxt})
+    Log('profile-updated', {Context: ctxt})
 }
 
 module.exports =

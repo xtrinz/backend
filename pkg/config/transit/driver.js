@@ -2,6 +2,7 @@
 const engine   = require('../../engine/engine')
     , Model    = require('../../system/models')
     , db       = require('../exports')[Model.segment.db]
+    , Log     = require('../../system/log')
 
 class Transit
 {
@@ -56,7 +57,7 @@ class Transit
         this.OrderedAt    = (new Date()).toISOString()
 
         await engine.Transition(this)
-        console.log('transit-initialised', { Data: this })
+        Log('transit-initialised', { Data: this })
     }
 
 }

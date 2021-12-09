@@ -1,6 +1,7 @@
 const { ObjectId }           = require('mongodb')
     , { users }              = require('../../system/database')
     , { Err_, code, reason } = require('../../system/models')
+    , Log                   = require('../../system/logger')
 
 const Insert     = async function (user_id, addr)
 {
@@ -9,10 +10,10 @@ const Insert     = async function (user_id, addr)
     const resp    = await users.updateOne(query, opts)
     if (resp.modifiedCount !== 1) 
     {
-        console.log('address-insertion-failed', { Query: query, Options: opts } )
+        Log('address-insertion-failed', { Query: query, Options: opts } )
         Err_(code.INTERNAL_SERVER, reason.DBInsertionFailed)
     }
-    console.log('address-inserted', { Query: query, Options: opts })
+    Log('address-inserted', { Query: query, Options: opts })
 }
 
 const Read     = async function (user_id, addr_id)
@@ -27,7 +28,7 @@ const Read     = async function (user_id, addr_id)
     let resp = await users.findOne(query, proj)
     if (!resp)
     {
-        console.log('no-address-found', { Query: query, Projection: proj } )
+        Log('no-address-found', { Query: query, Projection: proj } )
         Err_(code.NOT_FOUND, reason.AddressNotFound)
     }
     
@@ -39,7 +40,7 @@ const Read     = async function (user_id, addr_id)
     resp.AddressID = resp._id
     delete resp._id
 
-    console.log('address-read', { Address: resp })
+    Log('address-read', { Address: resp })
     return resp
 }
 
@@ -59,7 +60,7 @@ const List     = async function (user_id)
         delete addr._id
     })
 
-    console.log('address-list', {Addresses : resp.AddressList })
+    Log('address-list', {Addresses : resp.AddressList })
     return resp.AddressList
 }
 
@@ -74,10 +75,10 @@ const Update     = async function (user_id, data)
         , resp  = await users.updateOne(query, opts)
     if (resp.modifiedCount !== 1) 
     {
-        console.log('address-update-failed', { Query: query, Options: opts })
+        Log('address-update-failed', { Query: query, Options: opts })
         Err_(code.INTERNAL_SERVER, reason.DBUpdationFailed)
     }
-    console.log('address-updated', { Query: query, Options: opts })
+    Log('address-updated', { Query: query, Options: opts })
 }
 
 const ResetDefault = async function (user_id)
@@ -86,7 +87,7 @@ const ResetDefault = async function (user_id)
     const query = { _id  : ObjectId(user_id), 'AddressList.IsDefault': true }
         , opts  = { $set : { 'AddressList.$.IsDefault': false } }
     
-    console.log('reset-default-address-flag', { Query: query, Options: opts })
+    Log('reset-default-address-flag', { Query: query, Options: opts })
 
     await users.updateOne(query, opts)
 }
@@ -99,10 +100,10 @@ const Remove      = async function (user_id, addr_id)
     const resp  = await users.updateOne(query, opts)
     if (resp.modifiedCount !== 1) 
     {
-        console.log('address-removal-failed', { Query: query, Options: opts })
+        Log('address-removal-failed', { Query: query, Options: opts })
         Err_(code.INTERNAL_SERVER, reason.DBRemovalFailed)
     }
-    console.log('address-removed', { Query: query, Options: opts })
+    Log('address-removed', { Query: query, Options: opts })
 }
 
 module.exports = 

@@ -3,6 +3,7 @@ const { ObjectId, ObjectID } = require('mongodb')
     , Model                  = require('../../system/models')
     , db                     = require('../exports')[Model.segment.db]
     , rinse                  = require('../../tools/rinse/product')
+    , Log                    = require('../../system/log')
 
 function Product(data)
 {
@@ -43,12 +44,12 @@ function Product(data)
         this.Data._id = new ObjectID()
          
         await db.product.Save(this.Data)
-        console.log('new-product-added', { Product: this.Data})
+        Log('new-product-added', { Product: this.Data})
     }
 
     this.Read           = async function (product_id, entity_)
     {
-        console.log('read-product', { ProductID : product_id })
+        Log('read-product', { ProductID : product_id })
 
         const product = await db.product.Get(product_id, Model.query.ByID)
         if (!product) Err_(Model.code.BAD_REQUEST, Model.reason.ProductNotFound)
@@ -68,7 +69,7 @@ function Product(data)
 
     this.List           = async function (in_, entity_)
     {
-        console.log('list-product', { Data : in_ })
+        Log('list-product', { Data : in_ })
         
         in_.Query = {}
 
@@ -87,14 +88,14 @@ function Product(data)
         if(entity_.Mode === Model.mode.User)
         await rinse[Model.verb.list](entity_, data)
 
-        console.log('product-list', { Data : data })
+        Log('product-list', { Data : data })
 
         return data
     }    
 
     this.Modify      = async function (data)
     {
-        console.log('modify-product', { ProductID: data.ProductID })
+        Log('modify-product', { ProductID: data.ProductID })
 
         prod = await db.product.Get(data.ProductID, Model.query.ByID)
         if (!prod) Err_(Model.code.BAD_REQUEST, Model.reason.ProductNotFound)
@@ -130,7 +131,7 @@ function Product(data)
         act[ '$set' ] = prod
         await db.product.Update(prod._id, act)
 
-        console.log('product-modified', { Product: this.Data })
+        Log('product-modified', { Product: this.Data })
     }
 
 }

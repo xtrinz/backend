@@ -1,6 +1,8 @@
 const paytm                          = require('paytm-pg-node-sdk')
     , { paytm: pgw }                 = require('../../system/models')
 
+    , Log                            = require('../../system/log')
+
     , env                    = (process.env.PAYTM_ENV === pgw.DEFAULT)?
                                 paytm.LibraryConstants.PRODUCTION_ENVIRONMENT :
                                 paytm.LibraryConstants.STAGING_ENVIRONMENT
@@ -8,7 +10,7 @@ const paytm                          = require('paytm-pg-node-sdk')
                                 pgw.WEBSTAGING :
                                 pgw.DEFAULT
 
-console.log('init-payment-gateway', { Env: env, WebSite: website})
+Log('init-payment-gateway', { Env: env, WebSite: website})
 
 
 paytm.Config.logName  = '[PAYTM]'

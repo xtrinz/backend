@@ -1,4 +1,5 @@
 const Model = require('../system/models')
+      , Log = require('./log')
 
     , Controller 		 = function()
 {
@@ -45,23 +46,23 @@ const Model = require('../system/models')
       , Method  : mthd
       , Task    : tsk
     }
-    console.log('new-query', opt_)
+    Log('new-query', opt_)
     const verbs   = this.Controller[src]
     if(!verbs)
     {
-      console.log('resouce-not-found', opt_)
+      Log('resouce-not-found', opt_)
       Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
     }
     const methods = verbs[vrb]
     if(!methods)
     {
-      console.log('verb-not-found', { Opts: opt_, Verb: verbs })
+      Log('verb-not-found', { Opts: opt_, Verb: verbs })
       Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
     }
     const res     = methods[mthd]
     if(!res)
     {
-      console.log('method-not-found', { Opts: opt_, Methods: methods })
+      Log('method-not-found', { Opts: opt_, Methods: methods })
       Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
     }
 
@@ -77,7 +78,7 @@ const Model = require('../system/models')
     const modes   = res[tsk]
     if(!modes)
     {
-      console.log('mode-not-found', { Opts: opt_, Tasks: res })
+      Log('mode-not-found', { Opts: opt_, Tasks: res })
       Model.Err_(Model.code.FORBIDDEN, Model.reason.PermissionDenied)
     }
     

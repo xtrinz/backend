@@ -1,10 +1,11 @@
 const { ObjectId } = require('mongodb')
     , { stores }   = require('../../system/database')
     , Model        = require('../../system/models')
+    , Log          = require('../../system/logger')
 
 const Save       = async function(data)
 {
-    console.log('save-store', data)
+    Log('save-store', data)
     const query = { _id    : data._id }
         , act   = { $set   : data }
         , opt   = { upsert : true }
@@ -12,7 +13,7 @@ const Save       = async function(data)
     const resp  = await stores.updateOne(query, act, opt)
     if (!resp.acknowledged)
     {
-        console.log('store-save-failed',
+        Log('store-save-failed',
         { 
               Query     : query
             , Action    : act
@@ -21,12 +22,12 @@ const Save       = async function(data)
         })
         Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.DBAdditionFailed)
     }
-    console.log('store-saved', { Store : data })
+    Log('store-saved', { Store : data })
 }
 
 const Get = async function(param, qType)
 {
-    console.log('find-store', { Param: param, QType: qType})
+    Log('find-store', { Param: param, QType: qType})
     let query_
     switch (qType)
     {
@@ -37,10 +38,10 @@ const Get = async function(param, qType)
     let store = await stores.findOne(query_)
     if (!store)
     {
-        console.log('store-not-found', {Query : query_, Type: qType })
+        Log('store-not-found', {Query : query_, Type: qType })
         return
     }
-    console.log('store-found', { Sotre: store })
+    Log('store-found', { Sotre: store })
     return store
 }
 
@@ -58,33 +59,33 @@ const List = async function(data, proj)
                               .toArray()
     if (!data_.length && data.Page === 1)
     {
-        console.log('no-near-by-stores', { Query : query })
+        Log('no-near-by-stores', { Query : query })
         return data_
     }
 
-    console.log('near-by-stores', { Stores: data_ })
+    Log('near-by-stores', { Stores: data_ })
     return data_
 }
 
 const SockID = async function(store_id)
 {
-    console.log('get-store-sock-id', { StoreID: store_id })
+    Log('get-store-sock-id', { StoreID: store_id })
 
     const query = { _id: ObjectId(store_id), IsLive: true }
 
     let store = await stores.findOne(query)
     if(!store)
     {
-        console.log('store-not-found', query)
+        Log('store-not-found', query)
         return []
     }
-    console.log('store-found', { User : store })
+    Log('store-found', { User : store })
     return store.SockID
 }
 
 const Location = async function(store_id)
 {
-    console.log('get-store-location', { StoreID: store_id })
+    Log('get-store-location', { StoreID: store_id })
 
     store_ = await Get(store_id, Model.query.ByID)
     if (!store_) Model.Err_(Model.code.BAD_REQUEST, Model.reason.StoreNotFound)
@@ -94,7 +95,7 @@ const Location = async function(store_id)
       , Latitude  : store_.Address.Location.coordinates[1].toFixed(6)
     }
 
-    console.log('store-location-found', { StoreID: store_id, Loc : data })
+    Log('store-location-found', { StoreID: store_id, Loc : data })
     return data
 }
 
