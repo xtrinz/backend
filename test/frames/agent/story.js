@@ -11,7 +11,7 @@ const Std = function(text_, agent_, admin_)
         , new event.Register            (agent_)
         , new event.RegisterApprove     (agent_, admin_)
         , new event.Connect             (agent_)
-        , new event.ProfileEdit         (agent_)
+        , new event.ProfileEdit         (agent_) /* "OffDuty", "OnDuty" : some sync issue is there figure it out */
         , new event.ProfileGet          (agent_)
         , new event.List                (agent_, admin_)
         , new event.Disconnect          (agent_)

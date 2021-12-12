@@ -72,29 +72,19 @@ const { Test, TestSuite } = require('./lib/driver')
   let cases =
   [
         admin.story.Std('Add Admin ',               admin_1)
-
     ,    user.story.Std('Add Client',              client_1)
-
     ,   agent.story.Std('Add Agent ',               agent_1,       admin_1)
-
     ,   store.story.Std('Add Store ',               store_1,       admin_1,     client_1)
-
     ,    note.story.Std('Set Notes',                  note_,       admin_1,     client_1,   store_1)
-
     , product.story.Std('Add Product',              store_1,     product_1,     client_1)
-
     , address.story.Std('Set Client Address', client_1_addr,                    client_1)
-
     ,    cart.story.Std('Add Product to Cart', client_1,         product_1, client_1_addr,                 store_1)
-
     , transit.story.Std(client_1,             client_1_addr,       agent_1,                 store_1)
-
     , journal.story.Std(client_1,                   store_1,       agent_1,       admin_1,  client_1_addr)
-
-    //,    user.story.Disconnect(client_1)
-    //,   agent.story.Disconnect(agent_1)
-    //,   admin.story.Disconnect(admin_1)    
-    //,   store.story.Disconnect(store_1)
+    ,    user.story.Disconnect(client_1)
+    ,   agent.story.Disconnect(agent_1)
+    ,   admin.story.Disconnect(admin_1)    
+    ,   store.story.Disconnect(store_1)
   ]
   cases.forEach((test)=> suite_1.AddCase(test))
 

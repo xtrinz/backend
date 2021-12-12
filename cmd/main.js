@@ -57,13 +57,12 @@ app.use( v.v1.slash(rsrc.root)    , common   )
 app.use( adptr.Forbidden                )
 app.use( adptr.ErrorHandler             )
 
-const excp_ = (err) => Log('unhandled-expeption', { Err: err } )
-process.on('unhandledRejection', excp_)
 const sce_  =
 [ 
       'uncaughtException' //, 'exit'
     , 'SIGINT'            //, 'SIGKILL'
 //  , 'SIGTERM'
+    , 'unhandledRejection'
 ]
 sce_.forEach((type) => process.on(type, adptr.GracefulExit))
 

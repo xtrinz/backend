@@ -1,63 +1,55 @@
-const Model  = require('../../system/models')
-    , router = require('express').Router()
-    , Agent  = require('../agent/driver')
+const router 	= require('express').Router()
+    , Model   = require('../../system/models')
+    , Method  = require('./methods')
+    , Handler = require('./handler')
 
-router.post('/register', async (req, res, next) => 
+router.post('/register', async (req, res, next) =>
 {
   try
   {
-    let text_ = '', data_ = {}, agent, info_
+
+    let text_ = '', data_ = {}, event_
+    let ctxt  = await Method.Context(req.body, res)
+
     switch (req.body.Task)
     {
       case Model.task.New:
-        agent = new Agent(req.body)
-        await agent.Create()
-        text_ = Model.text.OTPGenerated
+        event_ = Model.event.Create
+        text_  = Model.text.OTPGenerated
         break
 
       case Model.task.ReadOTP:
-        const resp    = await Agent.Confirm(req.body)
-        text_         = Model.text.OTPConfirmed
-        info_         = resp.Agent
-        info_.Command = resp.Command
-        data_         = { Command : info_.Command }
-        res.setHeader('authorization', resp.Token)
+        event_ = Model.event.Confirm
+        text_  = Model.text.OTPConfirmed
         break
 
       case Model.task.Register:
-        info_         = req.body.Agent
-        await Agent.Register(req.body)
-        info_.Command = Model.command.LoggedIn
-        data_         = { Command : info_.Command }        
-        text_         = Model.text.Registered
+        event_ = Model.event.Register
+        text_  = Model.text.Registered
         break
 
       case Model.task.Approve:
-        await Agent.Approve(req.body)
-        text_ = Model.text.Approved
+        event_ = Model.event.Approve
+        text_  = Model.text.Approved
         break
     }
-  
-    if(info_ && (info_.State === Model.states.Registered  ||
-                info_.State === Model.states.ToBeApproved ))
-    {
-      data_         = await Agent.View(info_)
-      data_.Command = info_.Command
-    }
 
+    ctxt.Event =  event_
+    data_      = await Handler.Transition(ctxt)
+    
     return res.status(Model.code.OK).json({
       Status  : Model.status.Success,
       Text    : text_,
-      Data    : data_ })
-
-  } catch(err) { next(err) }
+      Data    : data_
+    })
+  } catch (err) { next(err) }
 })
 
 // Read Profile
 router.get('/view', async (req, res, next) => {
   try
   {
-    const data = await Agent.View(req.body.Agent)
+    const data = await Method.View(req.body.Agent)
 
     return res.status(Model.code.OK).json({
       Status  : Model.status.Success,
@@ -71,7 +63,7 @@ router.get('/list', async (req, res, next) =>
 {
     try 
     {
-      const data = await Agent.List(req.query)
+      const data = await Method.List(req.query)
       
       return res.status(Model.code.OK).json({
         Status  : Model.status.Success,
@@ -85,7 +77,13 @@ router.put('/edit', async (req, res, next) =>
 {
   try 
   {
-    await Agent.Edit(req.body)
+
+    req.body.Task = Model.task.EditProfile
+
+    let ctxt   = await Method.Context(req.body, res)
+    ctxt.Event = Model.event.Edit
+
+    await Handler.Transition(ctxt)
 
     return res.status(Model.code.OK).json({
       Status  : Model.status.Success,

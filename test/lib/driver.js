@@ -1,6 +1,6 @@
 const compare                = require('./compare')
     , { Rest, Socket, Type, Method } = require('./medium')
-    , { db }                     = require('../../pkg/system/database')
+    , { db, Connect }                     = require('../../pkg/system/database')
 
 const prints = 
 {
@@ -57,13 +57,14 @@ function TestRig()
         for(let suite_ =0; suite_ < this.TestSuites.length; suite_++)
         {
             await new Promise((resolve) => setTimeout(resolve, 2));
-            // db().database.dropDatabase()
-            // db().stores.createIndex({ Location: "2dsphere" })
-            // db().users.createIndex( { Location: "2dsphere" }) 
-            // db().agents.createIndex( { Location: "2dsphere" })             
-            // db().products.createIndex({ Location: '2dsphere' })
-            // db().stores.createIndex({ Name: "text", Description: "text" } )      
-            // db().products.createIndex({ Name: "text", Description: "text", Category: 'text' })                 
+            await Connect()
+            db().database.dropDatabase()
+            db().stores.createIndex({ Location: "2dsphere" })
+            db().users.createIndex( { Location: "2dsphere" }) 
+            db().agents.createIndex( { Location: "2dsphere" })             
+            db().products.createIndex({ Location: '2dsphere' })
+            db().stores.createIndex({ Name: "text", Description: "text" } )      
+            db().products.createIndex({ Name: "text", Description: "text", Category: 'text' })                 
             await new Promise((resolve) => setTimeout(resolve, 30));
             
             let suite = this.TestSuites[suite_], failed = false
@@ -105,7 +106,7 @@ function TestRig()
         console.log('\nFailed: ', this.FailedCnt   )
         console.log('Total : '  , this.TestSuites.length)
 
-        await db.client.close()
+        await db().client.close()
     }
 }
 

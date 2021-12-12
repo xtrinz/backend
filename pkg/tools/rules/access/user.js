@@ -35,7 +35,7 @@ module.exports =
             , [task.Enabled] : true        
         }
     }
-    , [verb.profile]      :
+    , [verb.edit]      :
     {
           [method.put]    : 
         { 
@@ -46,7 +46,10 @@ module.exports =
             , [mode.Enabled]: true
             , [task.Enabled]: false                    
         }
-        , [method.get]    : 
+    }                
+    , [verb.view]      :
+    {
+          [method.get]    : 
         { 
               [mode.User]     : true
             , [mode.Agent]    : true
@@ -55,5 +58,5 @@ module.exports =
             , [mode.Enabled]  : true
             , [task.Enabled]  : false        
         } 
-    }                
+    }                    
 }

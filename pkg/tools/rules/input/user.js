@@ -14,7 +14,15 @@ module.exports =
         , 'body.Email'       : [ 'email' ]
       }
     }
-  , [verb.profile]      :
+  , [verb.view]      :
+    {
+        [method.get]    : 
+        {
+          'headers'                 : [ 'required', 'object' ] 
+        , 'headers.authorization'   : [ 'required', 'string', [ 'length', 500, 8 ] ]
+        } 
+    }                
+    , [verb.edit]      :
     {
         [method.put]    : 
         {
@@ -26,10 +34,5 @@ module.exports =
           , 'body.Latitude'         : [ 'numeric', [ 'between', -90, 90 ] ]  
           , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
         }
-      , [method.get]    : 
-        {
-          'headers'                 : [ 'required', 'object' ] 
-        , 'headers.authorization'   : [ 'required', 'string', [ 'length', 500, 8 ] ]
-        } 
-    }                
+    }                    
   }
