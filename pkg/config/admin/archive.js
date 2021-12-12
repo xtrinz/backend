@@ -1,7 +1,7 @@
-const { admins }    = require('../../system/database')
+const { db }        = require('../../system/database')
     , Model         = require('../../system/models')
     , { ObjectId }  = require('mongodb')
-    , Log          = require('../../system/logger')
+    , Log          = require('../../system/log')
 
 const Save       = async function(data)
 {
@@ -9,7 +9,7 @@ const Save       = async function(data)
     const query = { _id    : data._id }
         , act   = { $set   : data }
         , opt   = { upsert : true }
-    const resp  = await admins.updateOne(query, act, opt)
+    const resp  = await db().admins.updateOne(query, act, opt)
     if (!resp.acknowledged)
     {
         Log('admin-save-failed', { Admin: data, Result: resp.result})
@@ -28,7 +28,7 @@ const Get = async function(param, qType)
         case Model.query.ByMobileNo : query_ = { MobileNo: param }      ; break;
         case Model.query.ByMail     : query_ = { Email: param }         ; break;
     }
-    let admin = await admins.findOne(query_)
+    let admin = await db().admins.findOne(query_)
     if (!admin)
     {
         Log('admin-not-found', { Query : query_ })
@@ -54,7 +54,7 @@ const Nearby = async function(ln, lt)
             , Mode    : Model.mode.Admin
         }
 
-    const admin_ = await admins.findOne(query, proj)
+    const admin_ = await db().admins.findOne(query, proj)
     if (!admin_)
     {
         Log('admin-not-found', { Location: [ln, lt]})

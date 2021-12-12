@@ -100,7 +100,7 @@ const Connect = async function(socket_)
       socket_a.disconnect()
     }
 
-    console.info('client-connected', { Client : data, SockID : socket_.id })
+    Log('client-connected', { Client : data, SockID : socket_.id })
 
   } catch(err) 
   {
@@ -197,7 +197,7 @@ const Disconnect = async function(socket_)
 
     await socket.Remove(data, sckt.Mode, socket_.id)
 
-    console.info('client-disconnected', { Client : data, SockID : socket_.id })
+    Log('client-disconnected', { Client : data, SockID : socket_.id })
   }
   catch(err)
   { Log('client-disconnection-failed', {Err : err }) }

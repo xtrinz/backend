@@ -91,9 +91,8 @@ module.exports =
 	},
 	text:
 	{
-		OTPSendToMobileNo           : 'OTP has been send to number ending with {0}'
+		  OTPGenerated           	: 'OTP Generated'
 		, OTPSend                   : 'OTP Send'
-		, OTPSendVia                : 'OTP send via {0}'
 		, OTPConfirmed              : 'OTP confirmed'
 		, Registered                : 'Registered'
 		, Approved                  : 'Approved'
@@ -220,7 +219,7 @@ module.exports =
 	command:
 	{
 		  Register 				: 'Register'
-		, LoggedIn 				: 'LoggedIn'
+		, LoggedIn 				: 'Logged In'
 	},
 	refund:
 	{

@@ -1,5 +1,5 @@
 const { alerts } = require('../system/models')
-    , Log      = require('../system/logger')
+    , Log      = require('../system/log')
 
 let Channel
 const SetChannel = (io_) => { Channel = io_ }

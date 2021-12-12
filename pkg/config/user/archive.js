@@ -1,8 +1,8 @@
-const { users }             = require('../../system/database')
+const { db }             = require('../../system/database')
     , { query,
         Err_, code, reason} = require('../../system/models')
     , { ObjectId }          = require('mongodb')
-    , Log                  = require('../../system/logger')
+    , Log                  = require('../../system/log')
 
 const Save       = async function(data)
 {
@@ -10,7 +10,7 @@ const Save       = async function(data)
     const query = { _id    : data._id }
         , act   = { $set   : data }
         , opt   = { upsert : true }
-    const resp  = await users.updateOne(query, act, opt)
+    const resp  = await db().users.updateOne(query, act, opt)
     if (!resp.acknowledged)
     {
         Log('user-save-failed', { User: data, Result: resp.result})
@@ -29,7 +29,7 @@ const Get = async function(param, qType)
         case query.ByMobileNo : query_ = { MobileNo: param }      ; break;
         case query.ByMail     : query_ = { Email: param }         ; break;
     }
-    let user = await users.findOne(query_)
+    let user = await db().users.findOne(query_)
     if (!user)
     {
         Log('user-not-found', { Query : query_ })
@@ -45,7 +45,7 @@ const SockID = async function(user_id)
 
     const query = { _id: ObjectId(user_id), IsLive: true }
 
-    let user = await users.findOne(query)
+    let user = await db().users.findOne(query)
     if(!user)
     {
         Log('user-not-found', query)

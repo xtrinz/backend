@@ -1,17 +1,10 @@
-const { Err, Err_, code, status
-    , reason , mode, query }              = require('./models')
-    , { client }                          = require('./database')
-    , db                                  =
-    {
-        store                             : require('../config/store/archive')
-      , user                              : require('../config/user/archive')
-      , agent                             : require('../config/agent/archive')
-      , admin                             : require('../config/admin/archive')            
-    }
-    , jwt                                 = require('../infra/jwt')
-    , rbac                                = require('../system/rbac')
-    , input                               = require('./input')
-    , Log                                 = require('./log')
+const   Model        = require('./models')
+    , { db: _db }    = require('./database')
+    , db             = require('../config/exports')[Model.segment.db]
+    , jwt            = require('../infra/jwt')
+    , rbac           = require('../system/rbac')
+    , input          = require('./input')
+    , Log            = require('./log')
 
 let   Server, io
 const SetServer = (server, io_) => { Server = server; io = io_ }
@@ -41,7 +34,7 @@ const Authnz = async function (req, res, next)
         , task_     = (req.body && req.body.Task)? req.body.Task: 'None'
         , mode_     = acc_ctrlr.HasAccess(objs[0], objs[1], req.method, task_)
 
-    if(!mode_[mode.Enabled]) 
+    if(!mode_[Model.mode.Enabled]) 
     {
       next()
       return
@@ -55,19 +48,19 @@ const Authnz = async function (req, res, next)
 
     switch(resp.Mode)
     {
-      case mode.Store:
+      case Model.mode.Store:
 
-        let store = await db.store.Get(resp._id, query.ByID)
+        let store = await db.store.Get(resp._id, Model.query.ByID)
         if (!store)
         {
             Log('store-not-found', { StoreID: resp._id })
-            Err_(code.UNAUTHORIZED, reason.InvalidToken)
+            Model.Err_(Model.code.UNAUTHORIZED, Model.reason.InvalidToken)
         }
 
         if (!mode_.State.includes(store.State))
         {
           Log('state-mismatch-for-store-auth', { Store: store, ModeState : mode_.State })
-          Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+          Model.Err_(Model.code.UNAUTHORIZED, Model.reason.RegIncomplete)
         }
 
         req.body.Store    = store
@@ -76,19 +69,19 @@ const Authnz = async function (req, res, next)
 
         Log('store-authenticated', { Store: store })
       break
-      case mode.Agent:
+      case Model.mode.Agent:
 
-        let agent = await db.agent.Get(resp._id, query.ByID)
+        let agent = await db.agent.Get(resp._id, Model.query.ByID)
         if (!agent)
         {
             Log('agent-not-found', { AgentID: resp._id })
-            Err_(code.UNAUTHORIZED, reason.InvalidToken)
+            Model.Err_(Model.code.UNAUTHORIZED, Model.reason.InvalidToken)
         }
 
         if (!mode_.State.includes(agent.State))
         {
           Log('state-mismatch-for-agent-auth', { Agent: agent })
-          Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+          Model.Err_(Model.code.UNAUTHORIZED, Model.reason.RegIncomplete)
         }
 
         req.body.Agent = agent
@@ -97,40 +90,40 @@ const Authnz = async function (req, res, next)
         Log('agent-authenticated', { Agent: agent })    
         break
 
-      case mode.Admin:
+      case Model.mode.Admin:
 
-        let admin = await db.admin.Get(resp._id, query.ByID)
+        let admin = await db.admin.Get(resp._id, Model.query.ByID)
         if (!admin)
         {
             Log('agent-not-found', { AdminID: resp._id })
-            Err_(code.UNAUTHORIZED, reason.InvalidToken)
+            Model.Err_(Model.code.UNAUTHORIZED, Model.reason.InvalidToken)
         }
 
         if (!mode_.State.includes(admin.State))
         {
           Log('state-mismatch-for-admin-auth', { Admin: admin })
-          Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+          Model.Err_(Model.code.UNAUTHORIZED, Model.reason.RegIncomplete)
         }
 
         req.body.Admin = admin
-        req.body.Mode  = mode.Admin
+        req.body.Mode  = Model.mode.Admin
 
         Log('admin-authenticated', { Admin: admin })    
         break        
 
-      case mode.User:
+      case Model.mode.User:
 
-        let user = await db.user.Get(resp._id, query.ByID)
+        let user = await db.user.Get(resp._id, Model.query.ByID)
         if (!user)
         {
             Log('user-not-found', { UserID: resp._id })
-            Err_(code.UNAUTHORIZED, reason.InvalidToken)
+            Model.Err_(Model.code.UNAUTHORIZED, Model.reason.InvalidToken)
         }
 
         if (!mode_.State.includes(user.State))
         {
           Log('state-mismatch-for-user-auth', { User: user })
-          Err_(code.UNAUTHORIZED, reason.RegIncomplete)
+          Model.Err_(Model.code.UNAUTHORIZED, Model.reason.RegIncomplete)
         }
 
         req.body.User = user
@@ -148,7 +141,7 @@ const Authnz = async function (req, res, next)
       {   Body         : req.body
         , Query        : req.body
         , AllowedModes : mode_ })                     
-      Err_(code.UNAUTHORIZED, reason.PermissionDenied)    
+      Model.Err_(Model.code.UNAUTHORIZED, Model.reason.PermissionDenied)    
     }
   } catch (err) { next(err) }
 }
@@ -158,7 +151,7 @@ const Forbidden = (req, res, next) =>
   try 
   {
     Log('page-not-found')
-    Err_(code.FORBIDDEN, reason.PageNotFound)
+    Model.Err_(Model.code.FORBIDDEN, Model.reason.PageNotFound)
   } catch (err) { next(err) }
 }
 
@@ -167,41 +160,45 @@ const GracefulExit = async function ()
   try 
   {
     Log('graceful-exit')
-    await new Promise((res)=>
+    await new Promise((res, rej)=>
     {
       io.close((err)=>
       {
         if(!err) { res(1); Log('socket-stopped') }
-        else Log('socket-abruptly-terminated')
+        else     { Log('socket-abruptly-terminated'); rej(1) }
       })
     })
 
-    await new Promise((res)=>
+    await new Promise((res, rej)=>
     {
-      client.close((err)=>
+      _db().client.close((err)=>
       {
         if(!err) { res(1); Log('db-connection-closed') } 
-        else Log('db-abruptly-disconnected')
+        else     { Log('db-abruptly-disconnected'); rej(1) }
       })
     })
 
-    await new Promise((res)=>
+    await new Promise((res, rej)=>
     {
       Server.close((err)=>
       {
         if(!err) { res(1); Log('server-stopped') }
-        else Log('server-abruptly-terminated')
+        else     { Log('server-abruptly-terminated'); rej(1) }
       })
     })
 
     process.exit(1)
-  } catch (err) { Log(err) }
+  } catch (err) 
+  {
+    Log(err)
+    process.exit(1) 
+  }
 }
 
 const ErrorHandler = function(err, req, res, next) 
 {
-  console.error('return-err', err)
-  if (err instanceof Err)
+  Log('return-err', err)
+  if (err instanceof Model.Err)
   {
     res.status(err.Code).json({
       Status  : err.Status,
@@ -210,9 +207,9 @@ const ErrorHandler = function(err, req, res, next)
     })
     return
   }
-  res.status(code.INTERNAL_SERVER).json({
-    Status  : status.Failed,
-    Text    : reason.Unknown,
+  res.status(Model.code.INTERNAL_SERVER).json({
+    Status  : Model.status.Failed,
+    Text    : Model.reason.Unknown,
     Data    : {}
   })
 }

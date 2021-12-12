@@ -1,7 +1,7 @@
 const { ObjectId } = require('mongodb')
-    , { transits } = require('../../system/database')
+    , { db } = require('../../system/database')
     , Model        = require('../../system/models')
-    , Log         = require('../../system/logger')
+    , Log         = require('../../system/log')
 
 const Get = async function(param, qType)
 {
@@ -12,7 +12,7 @@ const Get = async function(param, qType)
         case Model.query.ByID   : query_ = { _id: ObjectId(param) } ; break;
         case Model.query.Custom : query_ = param                    ; break;
     }
-    let transit = await transits.findOne(query_)
+    let transit = await db().transits.findOne(query_)
     if (!transit)
     {
         Log('transit-not-found', { Query : query_, Type : qType })
@@ -28,7 +28,7 @@ const Save       = async function(data, upsert)
     const key  = { _id    : data._id, State: data.Return }
         , act  = { $set   : data     }
         , opt  = { upsert : upsert   }
-        , resp = await transits.updateOne(key, act, opt)
+        , resp = await db().transits.updateOne(key, act, opt)
     if (!resp.acknowledged)
     {
         Log('transit-save-failed',
@@ -65,7 +65,7 @@ const SetSockID  = async function(mode_, _id, sock_id)
             act = { $push       : { 'User.SockID' : sock_id } }
             break
     }
-    const resp = await transits.updateMany(key, act)
+    const resp = await db().transits.updateMany(key, act)
     if (!resp.acknowledged)
     {
         Log('set-socket-id-failed',
@@ -102,7 +102,7 @@ const ClearSockID  = async function(mode_, _id, sock_id)
             act = { $push       : { 'User.SockID' : sock_id } }
             break
     }
-    const resp = await transits.updateMany(key, act)
+    const resp = await db().transits.updateMany(key, act)
     if (!resp.acknowledged)
     {
         Log('pop-socket-id-failed',

@@ -14,7 +14,7 @@ router.post('/register', async (req, res, next) =>
     {
       case Model.task.New:
         event_ = Model.event.Create
-        text_  = Model.text.OTPSendToMobileNo.format(req.body.MobileNo.slice(-4))
+        text_  = Model.text.OTPGenerated
         break
 
       case Model.task.ReadOTP:
@@ -40,7 +40,7 @@ router.post('/register', async (req, res, next) =>
 })
 
 // Read Profile
-router.get('/profile', async (req, res, next) => {
+router.get('/view', async (req, res, next) => {
   try {
 
     const data = 
@@ -59,7 +59,7 @@ router.get('/profile', async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-router.put('/profile', async (req, res, next) =>
+router.put('/edit', async (req, res, next) =>
 {
   try 
   {

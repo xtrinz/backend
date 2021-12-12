@@ -11,7 +11,7 @@ const { ObjectId } = require('mongodb')
     , Tool         = require('../../tools/export')[Model.resource.journal]
     , { Cart }     = require('../cart/driver')
     , StoreM       = require('../store/methods')
-    , Log          = require('../../system/logger')
+    , Log          = require('../../system/log')
 
 const Context = async function(data)
 {
@@ -329,10 +329,11 @@ const MarkPayment = async function(req)
 
     const ind = new event.Payment(req.body)
 
-    await ind.CheckSign(req.body)
+    // TODO await ind.CheckSign(req.body)
 
     let j_rcd  = await ind.Authorize(req.body)
     
+    console.log('journal-record', { Journal : j_rcd })
     await ind.Store(j_rcd)
 
     Log('payment-status-marked', { Journal : j_rcd })

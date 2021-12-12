@@ -29,9 +29,7 @@ let RegisterNew = function(name)
         {
             Code       : Model.code.OK
           , Status     : Model.status.Success
-          , Text       : Model.text.OTPSendToMobileNo.format(
-                          user.MobileNo.substr(
-                          user.MobileNo.length - 4))
+          , Text       : Model.text.OTPGenerated
           , Data       : {}
         }
       }
@@ -174,7 +172,7 @@ let ProfileGet = function(name)
       , Request         :
       {
           Method        : Method.GET
-        , Path          : '/v1/user/profile'
+        , Path          : '/v1/user/view'
         , Body          : {}
         , Header        :
         {
@@ -212,7 +210,7 @@ let ProfileEdit =  function(name)
       , Request         :
       {                   
           Method        : Method.PUT
-        , Path          : '/v1/user/profile'
+        , Path          : '/v1/user/edit'
         , Body          : 
         {                   
             Name        : user.Name

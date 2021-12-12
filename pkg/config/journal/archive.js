@@ -1,15 +1,15 @@
 const { ObjectId }                  = require('mongodb')
     , { Err_, code, reason, dbset } = require('../../system/models')
-    , { journals }                  = require('../../system/database')
-    , Log                           = require('../../system/logger')
+    , Log                           = require('../../system/log')
+    , { db }                        = require('../../system/database')
 
-const GetByID    = async function(_id)
+const GetByID    = async function(id)
 {
-    Log('find-journal-by-id', { ID : _id })
+    Log('find-journal-by-id', { ID : id })
 
-    const query = { _id : ObjectId(_id) }
+    const query = { _id : ObjectId(id) }
 
-    let journal = await journals.findOne(query)
+    let journal = await db().journals.findOne(query)    
     if (!journal)
     {
       Log('journal-not-found', { ID : query })
@@ -24,7 +24,7 @@ const Find    = async function(query)
 {
     Log('find-journal-by-custom-query', { Query : query})
 
-    const journal = await journals.findOne(query)
+    const journal = await db().journals.findOne(query)
     if (!journal)
     {
       Log('journal-not-found-by-custom-query', { Query : query })
@@ -38,7 +38,7 @@ const Get    = async function(query, proj)
 {
     Log('find-journal-by-custom-query', { Query : query, Projection : proj })
 
-    const journal = await journals.findOne(query, proj)
+    const journal = await db().journals.findOne(query, proj)
     if (!journal)
     {
       Log('journal-not-found-by-custom-query', { Query : query, Projection : proj })
@@ -54,7 +54,7 @@ const GetMany    = async function(query, proj, cond_)
 
     const skip = (cond_.Page > 0)? (cond_.Page - 1) * cond_.Limit : 0
         , lmt  = (cond_.Limit > dbset.Limit)? dbset.Limit : cond_.Limit 
-        , resp = await journals.find(query, proj)
+        , resp = await db().journals.find(query, proj)
                                .skip(skip)
                                .limit(lmt)
                                .toArray()
@@ -73,7 +73,7 @@ const Save       = async function(data)
     const query = { _id    : data._id }
         , act   = { $set   : data     }
         , opt   = { upsert : true     }
-    const resp  = await journals.updateOne(query, act, opt)
+    const resp  = await db().journals.updateOne(query, act, opt)
     if (!resp.acknowledged)
     {
         Log('journal-save-failed', { 

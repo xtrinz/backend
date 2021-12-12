@@ -56,6 +56,8 @@ function Payment(data)
 	this.Store 	  = async function(rcd)
 	{
 
+		console.log('store-payment-response', { Ind : this.Data })
+
 		rcd.Payment.Time.Webhook = this.Data.TxnDate
 		rcd.Payment.RefID 	  	 = this.Data.TxnId
 

@@ -1,9 +1,9 @@
 const { ObjectId }           = require('mongodb')
     , { Err_, code, reason
     , query, dbset, mode, verb }   = require('../../system/models')
-    , { products }           = require('../../system/database')
+    , { db }           = require('../../system/database')
     , project                = require('../../tools/project/product')
-    , Log                    = require('../../system/logger')
+    , Log                    = require('../../system/log')
 
 const Save      = async function(data)
 {
@@ -11,7 +11,7 @@ const Save      = async function(data)
     const key   = { _id    : data._id }
         , act   = { $set   : data }
         , opt   = { upsert : true }
-    const resp  = await products.updateOne(key, act, opt)
+    const resp  = await db().products.updateOne(key, act, opt)
 
     if (!resp.acknowledged)
     {
@@ -31,7 +31,7 @@ const Update      = async function(Id, act)
     Log('save-product', { ID: Id, Act: act })
     const key   = { _id    : Id }
 
-    const resp  = await products.updateOne(key, act)
+    const resp  = await db().products.updateOne(key, act)
     if (!resp.acknowledged)
     {
         Log('product-save-failed', { 
@@ -53,7 +53,7 @@ const Get        = async function(param, qType)
         case query.ByID   : query_ = { _id: ObjectId(param) } ; break;
         case query.Custom : query_ = param                    ; break;
     }
-    let product = await products.findOne(query_)
+    let product = await db().products.findOne(query_)
     if (!product)
     {
         Log('product-not-found', { Query: query_, Type: qType })
@@ -76,7 +76,7 @@ const ReadAll         = async function (data, mode_)
 
     if(mode_ === mode.User) query.Quantity = { $gt : 0 }
 
-    const products_ = await products.find(query)
+    const products_ = await db().products.find(query)
                                     .project(proj)
                                     .skip(skip)
                                     .limit(lmt)
@@ -109,7 +109,7 @@ const DecProdCount         = async function (prod)
             }
         })
     })
-    const resp = await products.bulkWrite(qry_)
+    const resp = await db().products.bulkWrite(qry_)
     if (!resp.acknowledged)
     {
         Log('product-count-decrement-failed', { Query : qry_ })
@@ -132,7 +132,7 @@ const IncProdCount         = async function (prod)
             }
         })
     })
-    const resp = await products.bulkWrite(qry_)
+    const resp = await db().products.bulkWrite(qry_)
     if (!resp.acknowledged)
     {
         Log('product-count-increment-failed', { Query : qry_ })
@@ -147,7 +147,7 @@ const UpdateMany = async function (store_id, data)
     let qry_ = { StoreID : ObjectId(store_id) }
       , op   = { $set: data }
 
-    const resp = await products.updateMany(qry_, op)
+    const resp = await db().products.updateMany(qry_, op)
     if (!resp.acknowledged)
     {
         Log('product-updation-failed', { Query : qry_ })
@@ -163,7 +163,7 @@ const Remove      = async function (data)
         StoreID : ObjectId(data.Store._id), 
         _id     : ObjectId(data.ProductID)
     }
-    const resp  = await products.deleteOne(query);
+    const resp  = await db().products.deleteOne(query);
     if (resp.deletedCount !== 1)
     {
         Log('product-deletion-failed', query)

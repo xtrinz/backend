@@ -32,9 +32,7 @@ let RegisterNew = function(name)
         {
             Code       : code.OK
           , Status     : status.Success
-          , Text       : text.OTPSendToMobileNo.format(
-                          agent.MobileNo.substr(
-                          agent.MobileNo.length - 4))
+          , Text       : text.OTPGenerated
           , Data       : {}
         }
       }

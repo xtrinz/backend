@@ -14,7 +14,7 @@ router.post('/register', async (req, res, next) =>
     {
       case Model.task.New:
         event_ = Model.event.Create
-        text_  = Model.text.OTPSendToMobileNo.format(req.body.MobileNo.slice(-4))
+        text_  = Model.text.OTPGenerated
         break
 
       case Model.task.ReadOTP:

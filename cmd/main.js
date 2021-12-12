@@ -1,5 +1,9 @@
-                 require('./settings')
+      require('./settings')
+      require('../pkg/system/database').Connect()
+
 const express  = require('express')
+    , helmet   = require('helmet')
+    , compress = require('compression')
     , fs       = require('fs')
     , app      = express()
     , https    = require('https')
@@ -25,10 +29,13 @@ const express  = require('express')
     }          = require('../pkg/system/models')
     , options  =
     {
-          key  : fs.readFileSync('cert/server.key')
-        , cert : fs.readFileSync('cert/server.crt')
+          key  : fs.readFileSync(process.env.CERT_PATH + 'server.key')
+        , cert : fs.readFileSync(process.env.CERT_PATH + 'server.crt')
     }
+    , Log      = require('../pkg/system/log')
 
+app.use(compress())
+app.use(helmet())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
@@ -50,7 +57,7 @@ app.use( v.v1.slash(rsrc.root)    , common   )
 app.use( adptr.Forbidden                )
 app.use( adptr.ErrorHandler             )
 
-const excp_ = (err) => console.log(err)
+const excp_ = (err) => Log('unhandled-expeption', { Err: err } )
 process.on('unhandledRejection', excp_)
 const sce_  =
 [ 
@@ -60,7 +67,7 @@ const sce_  =
 ]
 sce_.forEach((type) => process.on(type, adptr.GracefulExit))
 
-const server_ = () => console.log('server-started', {Port : port})
+const server_ = () => Log('server-started', {Port : port})
     , server  = https.createServer(options, app)
     , io      = require('socket.io')(server)
     , socket  = require('../pkg/config/socket/handle')

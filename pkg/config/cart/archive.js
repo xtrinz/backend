@@ -1,16 +1,16 @@
 const { ObjectId }            = require('mongodb')
-    , { carts }               = require('../../system/database')
+    , { db }               = require('../../system/database')
     , { Err_, code , reason
     , query, limits }         = require('../../system/models')
     , prod                    = require('../product/archive')
-    , Log                    = require('../../system/logger')
+    , Log                    = require('../../system/log')
 
 const Save       = async function(data)
 {
     const key   = { _id : data._id }
         , act   = { $set : data    }
         , opt   = { upsert : true  }
-    const resp  = await carts.updateOne(key, act, opt)
+    const resp  = await db().carts.updateOne(key, act, opt)
     if (!resp.acknowledged)
     {
         Log('cart-save-failed',
@@ -28,7 +28,7 @@ const Get = async function(id, mode)
   if (mode === query.ByUserID)  { key = { UserID : ObjectId(id) } }
   if (mode === query.ByID)      { key = { _id    : ObjectId(id) } }
 
-  let cart = await carts.findOne(key)
+  let cart = await db().carts.findOne(key)
   if (!cart)
   {
     Log('cart-not-found', {Query: key})
@@ -85,7 +85,7 @@ const Read        = async function (user_id)
 const Delete      = async function (user_id)
 {
     const key   = { UserID: ObjectId(user_id) }
-        , resp  = await carts.deleteOne(key);
+        , resp  = await db().carts.deleteOne(key);
     if (resp.deletedCount !== 1)
     {
         Log('cart-deletion-failed', { Key: key})
@@ -108,7 +108,7 @@ const Insert     = async function (cart_id, data)
     } // To Avoid multiple shop entry
     , act   = { $set : { Products : [] }    }
     , opt   = { upsert : false  }
-  const resp2  = await carts.updateOne(key2, act, opt)
+  const resp2  = await db().carts.updateOne(key2, act, opt)
   if (!resp2.acknowledged)
   {
       Log('multi-store-purchase-clearance-failed',
@@ -135,7 +135,7 @@ const Insert     = async function (cart_id, data)
       _id                : ObjectId(cart_id),
       'Products._id'     : ObjectId(data.ProductID)
     }
-  const resp1 = await carts.findOne(key1)
+  const resp1 = await db().carts.findOne(key1)
   if(resp1)
   {
     Log('product-exists-in-cart', { Key: key1 })
@@ -146,7 +146,7 @@ const Insert     = async function (cart_id, data)
   const key  = { _id : ObjectId(cart_id)}
       , opts = { $push: { Products: { $each: [ data ], $slice: limits.ProductCount }  } } 
       // TO-DO This shitf array on over flow, correct it with better methods 
-      , resp = await carts.updateOne(key, opts)
+      , resp = await db().carts.updateOne(key, opts)
   if (resp.modifiedCount !== 1) 
   {
       Log('product-insertion-failed', {Key: key, Option: opts })
@@ -167,7 +167,7 @@ const Update     = async function (data)
     _id      : ObjectId(cart_id),
     Products : { $elemMatch: { _id : ObjectId(product_id) } }
   }
-  let elem_ = await carts.findOne(key1)
+  let elem_ = await db().carts.findOne(key1)
   if (!elem_)
   {
       Log('prodcuct-not-found-at-cart-for-update', { Key: key1 })
@@ -195,7 +195,7 @@ const Update     = async function (data)
         }
         , opts  = { $inc: { 'Products.$.Quantity': qnty }  }
 
-  const resp  = await carts.updateOne(key, opts)
+  const resp  = await db().carts.updateOne(key, opts)
   if (resp.modifiedCount !== 1) 
   {
       Log('product-update-failed', { Key: key, Option: opts })
@@ -209,7 +209,7 @@ const Remove  = async function (cart_id, product_id)
   const  key = { _id: ObjectId(cart_id) }
       , opts = { $pull: { Products: { _id: ObjectId(product_id) } } }
 
-  const resp  = await carts.updateOne(key, opts)
+  const resp  = await db().carts.updateOne(key, opts)
   if (resp.modifiedCount !== 1) 
   {
       Log('product-removal-failed', { Key: key, Option: opts })

@@ -1,7 +1,7 @@
 const { ObjectId } = require('mongodb')
-    , { stores }   = require('../../system/database')
+    , { db }   = require('../../system/database')
     , Model        = require('../../system/models')
-    , Log          = require('../../system/logger')
+    , Log          = require('../../system/log')
 
 const Save       = async function(data)
 {
@@ -10,7 +10,7 @@ const Save       = async function(data)
         , act   = { $set   : data }
         , opt   = { upsert : true }
 
-    const resp  = await stores.updateOne(query, act, opt)
+    const resp  = await db().stores.updateOne(query, act, opt)
     if (!resp.acknowledged)
     {
         Log('store-save-failed',
@@ -35,7 +35,7 @@ const Get = async function(param, qType)
         case Model.query.ByMobileNo : query_ = { MobileNo: param }  ; break;        
         case Model.query.Custom : query_ = param                    ; break;
     }
-    let store = await stores.findOne(query_)
+    let store = await db().stores.findOne(query_)
     if (!store)
     {
         Log('store-not-found', {Query : query_, Type: qType })
@@ -53,7 +53,7 @@ const List = async function(data, proj)
         , skip  = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
         , lmt   = (data.Limit > Model.dbset.Limit)? Model.dbset.Limit : data.Limit
 
-    const data_ = await stores.find(query, proj)
+    const data_ = await db().stores.find(query, proj)
                               .skip(skip)
                               .limit(lmt)
                               .toArray()
@@ -73,7 +73,7 @@ const SockID = async function(store_id)
 
     const query = { _id: ObjectId(store_id), IsLive: true }
 
-    let store = await stores.findOne(query)
+    let store = await db().stores.findOne(query)
     if(!store)
     {
         Log('store-not-found', query)

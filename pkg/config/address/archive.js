@@ -1,13 +1,13 @@
 const { ObjectId }           = require('mongodb')
-    , { users }              = require('../../system/database')
+    , { db }                 = require('../../system/database')
     , { Err_, code, reason } = require('../../system/models')
-    , Log                   = require('../../system/logger')
+    , Log                    = require('../../system/log')
 
 const Insert     = async function (user_id, addr)
 {
     const query   = { _id: ObjectId(user_id) }
         , opts    = { $push: { AddressList: addr } }
-    const resp    = await users.updateOne(query, opts)
+    const resp    = await db().users.updateOne(query, opts)
     if (resp.modifiedCount !== 1) 
     {
         Log('address-insertion-failed', { Query: query, Options: opts } )
@@ -25,7 +25,7 @@ const Read     = async function (user_id, addr_id)
         }
         , proj  = { projection: {'AddressList.$': 1} }
 
-    let resp = await users.findOne(query, proj)
+    let resp = await db().users.findOne(query, proj)
     if (!resp)
     {
         Log('no-address-found', { Query: query, Projection: proj } )
@@ -48,7 +48,7 @@ const List     = async function (user_id)
 {
     const query = { _id: ObjectId(user_id) }
         , opt   = { $project  : { 'AddressList': 1 } }
-        , resp  = await users.findOne(query, opt)
+        , resp  = await db().users.findOne(query, opt)
 
     resp.AddressList.forEach((addr)=>
     {
@@ -72,7 +72,7 @@ const Update     = async function (user_id, data)
             'AddressList._id' : ObjectId(data._id)
         }
         , opts  = { $set : { 'AddressList.$': data } }
-        , resp  = await users.updateOne(query, opts)
+        , resp  = await db().users.updateOne(query, opts)
     if (resp.modifiedCount !== 1) 
     {
         Log('address-update-failed', { Query: query, Options: opts })
@@ -89,7 +89,7 @@ const ResetDefault = async function (user_id)
     
     Log('reset-default-address-flag', { Query: query, Options: opts })
 
-    await users.updateOne(query, opts)
+    await db().users.updateOne(query, opts)
 }
 
 const Remove      = async function (user_id, addr_id)
@@ -97,7 +97,7 @@ const Remove      = async function (user_id, addr_id)
     const query = { _id: ObjectId(user_id) }
         , opts  = { $pull: { AddressList: {_id: ObjectId(addr_id)} } }
 
-    const resp  = await users.updateOne(query, opts)
+    const resp  = await db().users.updateOne(query, opts)
     if (resp.modifiedCount !== 1) 
     {
         Log('address-removal-failed', { Query: query, Options: opts })

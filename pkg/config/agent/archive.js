@@ -1,7 +1,7 @@
-const { agents }   = require('../../system/database')
+const { db }   = require('../../system/database')
     , Model        = require('../../system/models')
     , { ObjectId } = require('mongodb')
-    , Log          = require('../../system/logger')
+    , Log          = require('../../system/log')
 
 const Save       = async function(data)
 {
@@ -9,7 +9,7 @@ const Save       = async function(data)
     const query = { _id    : data._id }
         , act   = { $set   : data }
         , opt   = { upsert : true }
-    const resp  = await agents.updateOne(query, act, opt)
+    const resp  = await db().agents.updateOne(query, act, opt)
     if (!resp.acknowledged)
     {
         Log('agent-save-failed', 
@@ -31,7 +31,7 @@ const Get = async function(param, qType)
         case Model.query.ByMobileNo : query_ = { MobileNo: param }      ; break;
         case Model.query.ByMail     : query_ = { Email: param }         ; break;
     }
-    let agent = await agents.findOne(query_)
+    let agent = await db().agents.findOne(query_)
     if (!agent)
     {
         Log('agent-not-found', { Query : query_ })
@@ -66,7 +66,7 @@ const Nearby = async function(ln, lt)
             , 'Status.SetOn.Month' : date_.getMonth()
             , 'Status.SetOn.Year'  : date_.getFullYear()
         }
-    const agent_ = await agents.findOne(query, proj)
+    const agent_ = await db().agents.findOne(query, proj)
     if (!agent_)
     {
         Log('no-agent-found', { Location: [ln, lt]})
@@ -84,7 +84,7 @@ const List = async function(data, proj)
         , skip  = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
         , lmt   = (data.Limit > Model.dbset.Limit)? Model.dbset.Limit : data.Limit
 
-    const data_ = await agents.find(query, proj)
+    const data_ = await db().agents.find(query, proj)
                               .skip(skip)
                               .limit(lmt)
                               .toArray()

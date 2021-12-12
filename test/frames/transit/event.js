@@ -113,7 +113,7 @@ let ConfirmPayment = function(cart_)
     }
 
     delete templ.Request.Body.CHECKSUMHASH
-    var paytmChecksum = await PaytmChecksum.generateSignature(templ.Request.Body, process.env.PAYTM_KEY)
+    var paytmChecksum = '123' // await PaytmChecksum.generateSignature(templ.Request.Body, process.env.PAYTM_KEY)
     templ.Request.Body.CHECKSUMHASH = paytmChecksum
 
     return templ
