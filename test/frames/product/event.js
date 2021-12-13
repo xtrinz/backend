@@ -102,7 +102,7 @@ let View = function(user_, store_, product_)
                 , Type      : '' // COLOR / SIZE
             }           
             , IsAvailable   : true 
-            , VolumeBase  : product.VolumeBase
+            , VolumeBase    : product.VolumeBase
             , Unit          : product.Unit            
           }
         }

@@ -1,18 +1,20 @@
-const { code, text, status } = require('../../system/models')
-    , router 	               = require('express').Router()
-    , { Product }            = require('../product/driver')
-    , db                     = require('../product/archive')
+const Model   = require('../../system/models')
+    , router 	= require('express').Router()
+    , Product = require('../product/model')
+    , Method  = require('../product/methods')
+    , db      = require('../product/archive')
 
 router.post('/add', async (req, res, next) => {
   try
   {
+
     let product = new Product(req.body)
-    await product.Add()
+    await Method.Add(product)
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.ProductAdded,
-      Data    : { ProductID: product.Data._id }
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.ProductAdded,
+      Data    : { ProductID: product._id }
     })
   } catch (err) { next(err) }
 })
@@ -21,11 +23,11 @@ router.get('/list', async (req, res, next) =>
 {
   try
   {
-    let product = new Product()
-    const data  = await product.List(req.query, req.body)
+
+    const data  = await Method.List(req.query, req.body)
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : '',
       Data    : data
     })
@@ -36,11 +38,11 @@ router.get('/view', async (req, res, next) =>
 {
   try
   {
-    let product = new Product()
-    const data  = await product.Read(req.query.ProductID, req.body)
+
+    const data  = await Method.Read(req.query.ProductID, req.body)
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
       Text    : '',
       Data    : data
     })
@@ -50,12 +52,12 @@ router.get('/view', async (req, res, next) =>
 router.post('/modify', async (req, res, next) => {
   try
   {
-    let product = new Product()
-    await product.Modify(req.body)
+
+    await Method.Modify(req.body)
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.ProductUpdated,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.ProductUpdated,
       Data    : {}
     })
   } catch (err) { next(err) }
@@ -66,11 +68,12 @@ router.delete('/remove', async (req, res, next) =>
 {
   try
   {
+
     await db.Remove(req.body)
     
-    return res.status(code.OK).json({
-      Status  : status.Success,
-      Text    : text.ProductRemoved,
+    return res.status(Model.code.OK).json({
+      Status  : Model.status.Success,
+      Text    : Model.text.ProductRemoved,
       Data    : {}
     })
   } catch (err) { next(err) }
