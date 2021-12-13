@@ -42,7 +42,11 @@ const Read        = async function (user_id)
 {
 
   let cart = await Get(user_id, query.ByUserID)
-  if (!cart)                 Err_(code.BAD_REQUEST, reason.CartNotFound)
+  if (!cart)
+  {
+    Log('fatal-error-cart-not-found', { UserID: user_id })
+    Err_(code.BAD_REQUEST, reason.CartNotFound)
+  }
 
   let data = 
   {
@@ -57,7 +61,11 @@ const Read        = async function (user_id)
     const item    = cart.Products[i]
         , product = await prod.Get(item.ProductID, query.ByID)
 
-    if (!product) Err_(code.BAD_REQUEST, reason.ProductNotFound)
+    if (!product) 
+    {
+      Log('fatal-error-item-not-found', { ProductId : ProductID, UserID: user_id, Cart: cart }) // TODO handle properly
+      Err_(code.BAD_REQUEST, reason.ProductNotFound)
+    }
 
     let flag      = false
     if (item.Quantity > product.Quantity || !product.IsAvailable)

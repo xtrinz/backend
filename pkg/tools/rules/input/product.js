@@ -41,7 +41,7 @@ module.exports =
     }
   , [verb.modify]              :
     {
-      [method.post]            :
+      [method.put]            :
       {
           'body'               : [ 'required', 'object' ]
         , 'headers'               : [ 'required', 'object' ]            

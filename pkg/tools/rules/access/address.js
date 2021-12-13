@@ -41,7 +41,7 @@ module.exports =
     }
   , [verb.modify]       :
     {
-        [method.post]   : 
+        [method.put]   : 
         { 
           [mode.User]   : true
         , [mode.Agent]  : false

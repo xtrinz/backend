@@ -51,7 +51,7 @@ router.get('/list', async (req, res, next) =>
 })
 
 // Modify address
-router.post('/modify', async (req, res, next) => {
+router.put('/modify', async (req, res, next) => {
   try
   {
     await addr.Update(req.body)

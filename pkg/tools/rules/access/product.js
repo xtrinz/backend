@@ -1,5 +1,5 @@
 const {   verb, task, method
-    , mode, states }    = require('../../../system/models')
+    , mode }    = require('../../../system/models')
 
 module.exports = 
 {
@@ -41,7 +41,7 @@ module.exports =
     }
   , [verb.modify]       :
     {
-        [method.post]   : 
+        [method.put]   : 
         { 
           [mode.User]   : false
         , [mode.Agent]  : false

@@ -49,7 +49,7 @@ router.get('/list', async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-router.post('/modify', async (req, res, next) => {
+router.put('/modify', async (req, res, next) => {
   try
   {
 

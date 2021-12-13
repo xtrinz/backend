@@ -6,7 +6,6 @@ const cart      = require('../cart/driver')
     , Model     = require('../../system/models')
     , db        = require('../exports')[Model.segment.db]
 
-// Insert product
 router.post('/insert', async (req, res, next) => {
   try
   {
@@ -21,7 +20,6 @@ router.post('/insert', async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-// List products
 router.get('/list', async (req, res, next) =>
 {
   try
@@ -61,7 +59,6 @@ router.get('/list', async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-// Update product
 router.post('/modify', async (req, res, next) => {
   try
   {
@@ -82,7 +79,6 @@ router.post('/modify', async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-// Remove product
 router.delete('/remove', async (req, res, next) =>
 {
   try

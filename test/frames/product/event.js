@@ -178,7 +178,7 @@ let Modify = function(store_, product_)
       , Describe              : 'Product Modify'
       , Request               :
       {
-            Method            : Method.POST
+            Method            : Method.PUT
           , Path              : '/v1/product/modify'
           , Body              : 
           {

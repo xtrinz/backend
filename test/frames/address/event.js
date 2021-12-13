@@ -163,7 +163,7 @@ let Update = function(user_, addr_)
       , Describe             : 'Address Update'
       , Request              :
       {
-            Method           : Method.POST
+            Method           : Method.PUT
           , Path             : '/v1/address/modify'
           , Body             : 
           {
