@@ -1,9 +1,8 @@
-const { ObjectId, ObjectID } = require('mongodb')
-    , { Err_ }               = require('../../system/models')
-    , Model                  = require('../../system/models')
-    , db                     = require('../exports')[Model.segment.db]
-    , rinse                  = require('../../tools/rinse/product')
-    , Log                    = require('../../system/log')
+const { ObjectId } = require('mongodb')
+    , Model        = require('../../system/models')
+    , db           = require('../exports')[Model.segment.db]
+    , rinse        = require('../../tools/rinse/product')
+    , Log          = require('../../system/log')
 
 function Product(data)
 {
@@ -18,8 +17,7 @@ function Product(data)
         , Quantity     : data.Quantity
         , Description  : data.Description
         , Category     : data.Category
-        , PricePerGV   : data.PricePerGV
-        , GroundVolume : data.GroundVolume
+        , VolumeBase   : data.VolumeBase
         , Unit         : data.Unit
         , IsAvailable  : true
         , HasCOD       : data.HasCOD
@@ -39,9 +37,9 @@ function Product(data)
             , Name    : this.Data.Name
         }
         , product = await db.product.Get(key, Model.query.Custom)
-        if (product) Err_(Model.code.BAD_REQUEST, Model.reason.ProductExists)
+        if (product) Model.Err_(Model.code.BAD_REQUEST, Model.reason.ProductExists)
          
-        this.Data._id = new ObjectID()
+        this.Data._id = new ObjectId()
          
         await db.product.Save(this.Data)
         Log('new-product-added', { Product: this.Data})
@@ -52,7 +50,7 @@ function Product(data)
         Log('read-product', { ProductID : product_id })
 
         const product = await db.product.Get(product_id, Model.query.ByID)
-        if (!product) Err_(Model.code.BAD_REQUEST, Model.reason.ProductNotFound)
+        if (!product) Model.Err_(Model.code.BAD_REQUEST, Model.reason.ProductNotFound)
 
         product.IsAvailable        
         delete product.Location
@@ -98,7 +96,7 @@ function Product(data)
         Log('modify-product', { ProductID: data.ProductID })
 
         prod = await db.product.Get(data.ProductID, Model.query.ByID)
-        if (!prod) Err_(Model.code.BAD_REQUEST, Model.reason.ProductNotFound)
+        if (!prod) Model.Err_(Model.code.BAD_REQUEST, Model.reason.ProductNotFound)
 
         prod.Name          = (data.Name)?           data.Name                  : prod.Name
         prod.Image         = (data.Image)?          data.Image                 : prod.Image
@@ -109,8 +107,7 @@ function Product(data)
         prod.Variants.Type = (data.Type)?           data.Type                  : prod.Variants.Type
         prod.IsAvailable   = (data.IsAvailable != undefined)? data.IsAvailable : prod.IsAvailable
         prod.HasCOD        = (data.HasCOD != undefined)? data.HasCOD           : prod.HasCOD
-        prod.PricePerGV    = (data.PricePerGV)?    data.PricePerGV             : prod.PricePerGV
-        prod.GroundVolume  = (data.GroundVolume)?  data.GroundVolume           : prod.GroundVolume 
+        prod.VolumeBase  = (data.VolumeBase)?  data.VolumeBase           : prod.VolumeBase 
         prod.Unit          = (data.Unit)?          data.Unit                   : prod.Unit
         prod.Location      = data.Store.Address.Location
 

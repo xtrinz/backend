@@ -23,8 +23,7 @@ let RegisterNew = function(name)
           {
               Task     : task.New
             , MobileNo : admin.MobileNo
-            , Mode     : admin.Mode       
-          }
+            }
           , Header     : {}
         }
         , Skip         : []

@@ -29,8 +29,7 @@ let Add = function(store_, product_)
                 , Quantity      : product.Quantity
                 , Description   : product.Description
                 , Category      : product.Category
-                , PricePerGV    : product.PricePerGV
-                , GroundVolume  : product.GroundVolume
+                , VolumeBase    : product.VolumeBase
                 , Unit          : product.Unit
                 , HasCOD        : product.HasCOD
             }
@@ -103,8 +102,7 @@ let View = function(user_, store_, product_)
                 , Type      : '' // COLOR / SIZE
             }           
             , IsAvailable   : true 
-            , PricePerGV    : product.PricePerGV
-            , GroundVolume  : product.GroundVolume
+            , VolumeBase  : product.VolumeBase
             , Unit          : product.Unit            
           }
         }
@@ -162,8 +160,7 @@ let List = function(user_, store_, product_)
             , Description   : product.Description
             , Category      : product.Category
             , IsAvailable   : true
-            , PricePerGV    : product.PricePerGV
-            , GroundVolume  : product.GroundVolume
+            , VolumeBase    : product.VolumeBase
             , Unit          : product.Unit            
         }]
       }
@@ -196,9 +193,8 @@ let Modify = function(store_, product_)
               , Price         : 200
               , Quantity      : product.Quantity
               , Description   : product.Description
-              , Category    : product.Category
-              , PricePerGV    : product.PricePerGV
-              , GroundVolume  : product.GroundVolume
+              , Category      : product.Category
+              , VolumeBase    : product.VolumeBase
               , Unit          : product.Unit
               , HasCOD        : product.HasCOD              
           }

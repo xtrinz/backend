@@ -22,8 +22,7 @@ let RegisterNew = function(name)
           , Body       : 
           {
               Task     : task.New
-            , MobileNo : agent.MobileNo
-            , Mode     : agent.Mode       
+            , MobileNo : agent.MobileNo  
           }
           , Header     : {}
         }
