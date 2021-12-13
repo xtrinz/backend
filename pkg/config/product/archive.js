@@ -1,9 +1,8 @@
-const { ObjectId }           = require('mongodb')
-    , { Err_, code, reason
-    , query, dbset, mode, verb }   = require('../../system/models')
-    , { db }           = require('../../system/database')
-    , project                = require('../../tools/project/product')
-    , Log                    = require('../../system/log')
+const { ObjectId }  = require('mongodb')
+    , Model         = require('../../system/models')
+    , { db }        = require('../../system/database')
+    , project       = require('../../tools/project/product')
+    , Log           = require('../../system/log')
 
 const Save      = async function(data)
 {
@@ -15,13 +14,12 @@ const Save      = async function(data)
 
     if (!resp.acknowledged)
     {
-        Log('product-save-failed', { 
-            Key         : key
-            , Action    : act
-            , Options   : opt
-            , Result    : resp.result })
-
-        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
+        Log('product-save-failed', 
+        {
+              Key     : key, Action : act
+            , Options : opt, Result : resp.result 
+        })
+        Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.DBAdditionFailed)
     }
     Log('product-saved', { Product : data })
 }
@@ -39,7 +37,7 @@ const Update      = async function(Id, act)
             , Action    : act
             , Result    : resp.result })
 
-        Err_(code.INTERNAL_SERVER, reason.DBAdditionFailed)
+        Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.DBAdditionFailed)
     }
     Log('product-saved', { ID: Id, Act: act })
 }
@@ -50,8 +48,8 @@ const Get        = async function(param, qType)
     let query_
     switch (qType)
     {
-        case query.ByID   : query_ = { _id: ObjectId(param) } ; break;
-        case query.Custom : query_ = param                    ; break;
+        case Model.query.ByID   : query_ = { _id: ObjectId(param) } ; break;
+        case Model.query.Custom : query_ = param                    ; break;
     }
     let product = await db().products.findOne(query_)
     if (!product)
@@ -69,21 +67,21 @@ const ReadAll         = async function (data, mode_)
     data.Page  = data.Page.loc()
     data.Limit = data.Limit.loc()
     Log('find-all-product-by-store-id', { Data: data, Mode: mode_ })    
-    const proj   = project[verb.view]
-        , query  = data.Query
+    const proj   = project[Model.verb.view]
+        , query_  = data.Query
         , skip   = (data.Page > 0)? (data.Page - 1) * data.Limit : 0
-        , lmt    = (data.Limit > dbset.Limit)? dbset.Limit : data.Limit
+        , lmt    = (data.Limit > Model.dbset.Limit)? Model.dbset.Limit : data.Limit
 
-    if(mode_ === mode.User) query.Quantity = { $gt : 0 }
+    if(mode_ === Model.mode.User) query_.Quantity = { $gt : 0 }
 
-    const products_ = await db().products.find(query)
+    const products_ = await db().products.find(query_)
                                     .project(proj)
                                     .skip(skip)
                                     .limit(lmt)
                                     .toArray()
     if (!products_.length)
     {
-        Log('no-product-found', { Query : query, Project: project })
+        Log('no-product-found', { Query : query_, Project: project })
         return products_
     }
     for(let idx = 0; idx < products_.length; idx++)
@@ -151,35 +149,30 @@ const UpdateMany = async function (store_id, data)
     if (!resp.acknowledged)
     {
         Log('product-updation-failed', { Query : qry_ })
-        Err_(code.INTERNAL_SERVER, reason.DBUpdationFailed)
+        Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.DBUpdationFailed)
     }
     Log('products-updated', { StoreId: store_id, Data: data })
 }
 
 const Remove      = async function (data)
 {
-    const query = 
+    const query_ = 
     {
         StoreID : ObjectId(data.Store._id), 
         _id     : ObjectId(data.ProductID)
     }
-    const resp  = await db().products.deleteOne(query);
+    const resp  = await db().products.deleteOne(query_);
     if (resp.deletedCount !== 1)
     {
-        Log('product-deletion-failed', query)
-        Err_(code.INTERNAL_SERVER, reason.DBDeletionFailed)
+        Log('product-deletion-failed', query_)
+        Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.DBDeletionFailed)
     }
-    Log('product-deleted', query)
+    Log('product-deleted', query_)
 }
 
 module.exports = 
 {
-      Save         : Save
-    , Get          : Get
-    , Update       : Update
-    , ReadAll      : ReadAll
-    , DecProdCount : DecProdCount
-    , IncProdCount : IncProdCount
-    , UpdateMany   : UpdateMany
-    , Remove       : Remove
+      Save          , Get          , Update
+    , ReadAll       , DecProdCount
+    , IncProdCount  , UpdateMany   , Remove
 }

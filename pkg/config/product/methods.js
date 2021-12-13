@@ -76,20 +76,18 @@ const Modify      = async function (data)
     prod = await db.product.Get(data.ProductID, Model.query.ByID)
     if (!prod) 
     {
-        
+        console.log('product-not-found', { Data: data })
         Model.Err_(Model.code.BAD_REQUEST, Model.reason.ProductNotFound)
     }
-    prod.Name          = (data.Name)?           data.Name                  : prod.Name
-    prod.Image         = (data.Image)?          data.Image                 : prod.Image
-    prod.Price         = (data.Price)?          data.Price                 : prod.Price
-    prod.Description   = (data.Description)?    data.Description           : prod.Description
-    prod.Category      = (data.Category)?       data.Category              : prod.Category
-    prod.Variants.Id   = (data.VariantID)?      data.VariantID             : prod.Variants.Id
-    prod.Variants.Type = (data.Type)?           data.Type                  : prod.Variants.Type
-    prod.IsAvailable   = (data.IsAvailable != undefined)? data.IsAvailable : prod.IsAvailable
-    prod.HasCOD        = (data.HasCOD != undefined)? data.HasCOD           : prod.HasCOD
-    prod.VolumeBase    = (data.VolumeBase)?  data.VolumeBase           : prod.VolumeBase 
-    prod.Unit          = (data.Unit)?          data.Unit                   : prod.Unit
+    prod.Name          = (data.Name)?                       data.Name        : prod.Name
+    prod.Image         = (data.Image)?                      data.Image       : prod.Image
+    prod.Price         = (data.Price)?                      data.Price       : prod.Price
+    prod.Description   = (data.Description)?                data.Description : prod.Description
+    prod.Category      = (data.Category)?                   data.Category    : prod.Category
+    prod.IsAvailable   = (data.IsAvailable != undefined)?   data.IsAvailable : prod.IsAvailable
+    prod.HasCOD        = (data.HasCOD != undefined)?        data.HasCOD      : prod.HasCOD
+    prod.VolumeBase    = (data.VolumeBase)?                 data.VolumeBase  : prod.VolumeBase 
+    prod.Unit          = (data.Unit)?                       data.Unit        : prod.Unit
     prod.Location      = data.Store.Address.Location
 
     let act = {}

@@ -16,11 +16,6 @@ class Product
         this.Unit         = data.Unit
         this.IsAvailable  = true
         this.HasCOD       = data.HasCOD
-        this.Variants     = 
-        {
-                Id    : ''
-            , Type    : '' // COLOR / SIZE
-        }
         this.Location     = data.Store.Address.Location     
     }
 }

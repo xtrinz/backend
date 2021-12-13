@@ -95,12 +95,7 @@ let View = function(user_, store_, product_)
             , Quantity      : product.Quantity
             , CountAtCart   : 0
             , Description   : product.Description
-            , Category      : product.Category
-            , Variants      : 
-            {
-                    Id      : ''
-                , Type      : '' // COLOR / SIZE
-            }           
+            , Category      : product.Category          
             , IsAvailable   : true 
             , VolumeBase    : product.VolumeBase
             , Unit          : product.Unit            

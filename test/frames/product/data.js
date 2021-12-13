@@ -15,10 +15,6 @@ let Product = function()
   this.VolumeBase    = 30
   this.Unit          = 'kg'
   this.HasCOD        = true
-  this.Variants      =
-  {
-        Type    : 'COLOR'
-  }
 
   Product.Products[this.Name] = this
 }

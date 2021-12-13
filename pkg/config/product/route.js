@@ -19,12 +19,12 @@ router.post('/add', async (req, res, next) => {
   } catch (err) { next(err) }
 })
 
-router.get('/list', async (req, res, next) =>
+router.get('/view', async (req, res, next) =>
 {
   try
   {
 
-    const data  = await Method.List(req.query, req.body)
+    const data  = await Method.Read(req.query.ProductID, req.body)
     
     return res.status(Model.code.OK).json({
       Status  : Model.status.Success,
@@ -34,12 +34,12 @@ router.get('/list', async (req, res, next) =>
   } catch (err) { next(err) }
 })
 
-router.get('/view', async (req, res, next) =>
+router.get('/list', async (req, res, next) =>
 {
   try
   {
 
-    const data  = await Method.Read(req.query.ProductID, req.body)
+    const data  = await Method.List(req.query, req.body)
     
     return res.status(Model.code.OK).json({
       Status  : Model.status.Success,
