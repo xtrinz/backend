@@ -1,12 +1,10 @@
 
 const { ObjectId } = require('mongodb')
     , router       = require('express').Router()
-    , { Transit }  = require('../transit/driver')
     , engine       = require('../../engine/engine')
-    , { Err_  }    = require('../../system/models')
     , Model        = require('../../system/models')
     , db           = require('../transit/archive')
-    , Log         = require('../../system/log')
+    , Log          = require('../../system/log')
 
 router.post('/user', async (req, res, next) =>
 {
@@ -15,11 +13,15 @@ router.post('/user', async (req, res, next) =>
         let query_ =
           {
               'User._id' : ObjectId(req.body.User._id),
-              _id  : ObjectId(req.body.TransitID)
+                    _id  : ObjectId(req.body.TransitID)
           }
           , text_ , event_
           , trans_ = await db.Get(query_, Model.query.Custom)
-        if (!trans_) Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
+        if (!trans_)
+        {
+          Log('transit-not-found', { Query: query_, Request: req.body })
+          Model.Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
+        }
 
         switch(req.body.Task)
         {
@@ -53,7 +55,7 @@ router.post('/store', async (req, res, next) =>
         if (!trans_) 
         {
           Log('transit-not-found', { Query: query_, Request: req.body })
-          Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
+          Model.Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
         }
         let event_, text_
         switch(req.body.Task)
@@ -97,14 +99,14 @@ router.post('/agent', async (req, res, next) =>
     {
         const query_ = 
         {
-              _id         : ObjectId(req.body.TransitID)
+                     _id  : ObjectId(req.body.TransitID)
             , 'Agent._id' : ObjectId(req.body.Agent._id) 
         }
         let trans_   = await db.Get(query_, Model.query.Custom)
         if (!trans_) 
         {
           Log('transit-not-found', { Query: query_, Request: req.body })
-          Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
+          Model.Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
         }
 
         let event_, text_
@@ -162,8 +164,12 @@ router.post('/admin', async (req, res, next) =>
         
         const query_ = { _id   : ObjectId(req.body.TransitID) }
             , trans_ = await db.Get(query_, Model.query.Custom)
-        if (!trans_) Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
-        
+        if (!trans_) 
+        {
+          Log('transit-not-found', { Query: query_, Request: req.body })
+          Model.Err_(Model.code.BAD_REQUEST,  Model.reason.TransitNotFound)
+        }
+
         let event_, text_
         switch(req.body.Task)
         { 

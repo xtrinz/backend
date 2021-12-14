@@ -31,9 +31,7 @@ module.exports =
           'body'                  : [ 'required', 'object' ]
         , 'headers'               : [ 'required', 'object' ]            
         , 'body.AddressID'        : [ 'required', 'mongoId']
-        , 'body.IsCOD'            : [ 'required', 'boolean' ]          
-        , 'body.Longitude'        : [ 'required', 'numeric', [ 'between', -180, 180 ] ]
-        , 'body.Latitude'         : [ 'required', 'numeric', [ 'between', -90, 90 ] ]
+        , 'body.IsCOD'            : [ 'required', 'boolean' ]
         , 'headers.authorization' : [ 'required', 'string', [ 'length', 500, 8 ] ]
       }
     }

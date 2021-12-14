@@ -10,7 +10,7 @@ module.exports =
             , Type        : 1
             , Image       : 1
             , Status      : 1
-            , Time        : 1
+            , ClosingTime : 1
             , Description : 1 
         }
         , [mode.Admin]:
@@ -22,7 +22,7 @@ module.exports =
             , Image       : 1
             , State       : 1
             , Status      : 1
-            , Time        : 1
+            , ClosingTime : 1
             , Description : 1
         }
     }

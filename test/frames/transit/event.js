@@ -26,9 +26,7 @@ let Checkout = function(user_, addr_, cart_, cod_)
         , Path            : '/v1/journal/create'
         , Body            : 
         {                     
-            Longitude     : addr.Longitude
-          , Latitude      : addr.Latitude
-          , AddressID     : addr.ID
+            AddressID     : addr.ID
           , IsCOD         : (this.COD)? true: false
         }                     
         , Header          : { Authorization: user.Token }

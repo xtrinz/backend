@@ -113,11 +113,7 @@ let Register = function(name)
             , Description     : store.Description
             , MobileNo        : store.MobileNo
             , Email           : store.Email
-            , Time            :
-            {
-                Open          : store.Time.Open
-              , Close         : store.Time.Close
-            }
+            , ClosingTime     : store.ClosingTime
             , Address         :
             {
                   Line1       : store.Address.Line1
@@ -160,11 +156,7 @@ let Register = function(name)
               , State      : store.Address.State
               , Country    : store.Address.Country
             }
-            , Time         :
-            {
-                Open       : store.Time.Open
-              , Close      : store.Time.Close
-            }
+            , ClosingTime  : store.ClosingTime
             , Email        : store.Email
             , State        : 'ToBeApproved'
             , Status       : states.Closed
@@ -259,11 +251,7 @@ let Read =   function(user_, store_)
             , State      : store.Address.State
             , Country    : store.Address.Country
           }
-          , Time         :
-          {
-              Open       : store.Time.Open
-            , Close      : store.Time.Close
-          }
+          , ClosingTime  : store.ClosingTime          
           , Status       : store.Status
         }
       }
@@ -312,11 +300,7 @@ let List = function(user_, store_)
             , Image       : store.Image
             , Description : store.Description            
             , Type        : store.Type
-            , Time        :
-            {
-                Open      : store.Time.Open
-              , Close     : store.Time.Close
-            }
+            , ClosingTime : store.ClosingTime            
             , Status      : store.Status
           }]
       }
@@ -350,11 +334,7 @@ let Edit = function(store_)
           , Description : store.Description
           , Longitude   : store.Longitude
           , Latitude    : store.Latitude
-          , Time        :
-          {
-              Open      : store.Time.Open
-            , Close     : store.Time.Close
-          }
+          , ClosingTime : store.ClosingTime
           , Status      : store.Status
           //, Refeed      : true
         }

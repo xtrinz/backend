@@ -55,16 +55,13 @@ String.prototype.loc = function()
     return x
 }
 
-// Returns whether the time is in given span
-// lb = { Hour: 8, Minute: 15 }
-// ub = { Hour: 9, Minute: 30 }
-Date.prototype.is_now = function(lb, ub)
+// Returns whether the time has touched the target
+Date.prototype.is_below = function(target)
 {
     const today = new Date()
-    return (today.getHours()   >= lb.Hour)   &&
-           (today.getHours()   <= ub.Hour)   &&
-           (today.getMinutes() >= lb.Minute) &&
-           (today.getMinutes() <= ub.Minute)
+    return (today.getHours()     < target.Hour)   ||
+           ((today.getHours()   == target.Hour)   &&
+            (today.getMinutes() <= target.Minute)  )
 }
 
 Date.prototype.is_today = function(date_)

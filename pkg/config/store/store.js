@@ -45,18 +45,10 @@ class Store
             , State       : data.Address.State
             , Country     : data.Address.Country
         }
-        this.Time         =
+        this.ClosingTime  =
         {
-            Open          : 
-            { 
-                  Hour    : data.Time.Open.Hour
-                , Minute  : data.Time.Open.Minute 
-            }
-          , Close         : 
-            { 
-                  Hour    : data.Time.Close.Hour
-                , Minute  : data.Time.Close.Minute
-            }
+              Hour        : data.ClosingTime.Hour
+            , Minute      : data.ClosingTime.Minute
         }
         this.IsLive       = false
         this.Status       =

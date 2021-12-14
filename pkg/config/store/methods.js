@@ -190,6 +190,7 @@ const Edit = async function(data)
     if(data.Type)        rcd.Type        = data.Type
     if(data.Name)        rcd.Name        = data.Name
     if(data.Description) rcd.Description = data.Description        
+    if(data.ClosingTime) rcd.ClosingTime = data.ClosingTime
     if(data.Longitude && data.Latitude)  
             rcd[ 'Address.Location' ] = 
             { 
@@ -199,6 +200,7 @@ const Edit = async function(data)
     if(data.Address)  rcd.Address  = data.Address
     if(data.Status)
     {
+        // TODO return error if after ClosingTime
         let now_  = new Date()
         let date_ = 
         {
@@ -214,7 +216,6 @@ const Edit = async function(data)
             , SetOn   : date_
         }
     }
-    if(data.Time)     rcd.Time     = data.Time
     if(data.Longitude && data.Latitude)
     {
         const data_ = 

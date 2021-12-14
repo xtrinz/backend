@@ -12,11 +12,8 @@ let Store = function()
   this.Description  = 'Store Description'
   this.MobileNo     = '+9100110011{0}'.format(('00' + Store.Count).substr(-2))
   this.Email        = this.Name.toLowerCase() + '@' + this.Name.toLowerCase() + '.com'
-  this.Time         =
-  {
-      Open          : { Hour: 0, Minute: 00 }
-    , Close         : { Hour: 23, Minute: 59 }
-  }
+  this.ClosingTime  = { Hour: 23, Minute: 59 }
+
   this.Status       = states.Running
   this.OTP 	        = ''
   this.State        = states.Registered
