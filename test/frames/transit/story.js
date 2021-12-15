@@ -3,7 +3,7 @@ const event        = require('./event')
     , { AddUser }  = require('../user/story')
     , { Obj }      = require('../data')
 
-const Std = function(user_, addr_, agent_, store_)
+const Std = function(user_, agent_, store_, addr_)
 {
     let cart_   = user_
     let tc      = new TestCase('Transit Process')

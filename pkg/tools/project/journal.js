@@ -6,23 +6,24 @@ module.exports =
     {
         [mode.User]:
         {
-            _id                   : 1  
-         , 'Date'                 : 1  
+            _id                         : 1  
+         , 'Date'                       : 1  
          
-         , 'Buyer.Address'        : 1
+         , 'Buyer.Address'              : 1
 
-         , 'Agent.Name'           : 1  , 'Agent.MobileNo'       : 1
+         , 'Agent.Name'                 : 1  , 'Agent.MobileNo'       : 1
 
-         , 'Store.ID'             : 1  , 'Store.Name'           : 1
-         , 'Store.Address'        : 1  , 'Store.Image'          : 1
+         , 'Store.ID'                   : 1  , 'Store.Name'           : 1
+         , 'Store.Address'              : 1  , 'Store.Image'          : 1
 
-         , 'Order.Products'       : 1  , 'Bill'                 : 1
+         , 'Order.Products.Quantity'    : 1
+         , 'Order.Products.Name'        : 1  , 'Bill'                 : 1
 
-         , 'Payment.Channel'      : 1  , 'Payment.Amount'       : 1
-         , 'Payment.Status'       : 1  , 'Payment.Time.Webhook' : 1
+         , 'Payment.Channel'            : 1  , 'Payment.Amount'       : 1
+         , 'Payment.Status'             : 1  , 'Payment.Time.Webhook' : 1
 
-         , 'Transit.ID'           : 1  , 'Transit.Status'       : 1
-         , 'Transit.State'        : 1
+         , 'Transit.ID'                 : 1  , 'Transit.Status'       : 1
+         , 'Transit.State'              : 1
        }
 
        , [mode.Agent]:

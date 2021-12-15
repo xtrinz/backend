@@ -1,38 +1,35 @@
-let Journal = function(user, address, store, cart, agent)
+let Journal = function(user, address, store, agent)
 {
   Journal.Count++
+  let cart        = cartOg.data.Cart.Carts[user.Name]
 
   this.JournalID  = ''
   this.Buyer      =
   { 
-        ID        : user.ID 
+        ID        : ''
       , Name      : user.Name
-      , Address   : address.Address
-      , Longitude : address.Longitude
-      , Latitude  : address.Latitude
       , MobileNo  : user.MobileNo 
+      , Address   : address
   }
   this.Store      =
   { 
-        ID        : store.ID 
+        ID        : ''
       , Name      : store.Name
+      , MobileNo  : store.MobileNo
+      , Image     : store.Image 
       , Address   : store.Address
-      , Image     : store.Image
-      , Longitude : store.Longitude
-      , Latitude  : store.Latitude
-      , MobileNo  : store.MobileNo 
   }
   this.Agent      = 
   { 
-        ID        : agent.ID 
+        ID        : '' 
       , Name      : agent.Name
       , MobileNo  : agent.MobileNo 
   }  
   this.Order      = 
   { 
         Products  : cart.Products
-      , Bill      : cart.Bill 
   }
+  this.Bill       = cart.Bill 
   this.Payment    =
   { 
         Channel   : 'Paytm'
@@ -42,18 +39,15 @@ let Journal = function(user, address, store, cart, agent)
   }
   this.Transit    =
   {
-        ID        : user.TransitID 
+        ID        : ''
       , Status    : 'Closed'
-      , State     : 'Completed' 
+      , State     : 'Completed'
   }
   Journal.Journals[user.Name]  = this
   Journal.Journals[store.Name] = this
 }
 
-Journal.Count      = 0
-Journal.Journals   = {}
+Journal.Count     = 0
+Journal.Journals  = {}
 
-module.exports =
-{
-    Journal  : Journal
-}
+module.exports = Journal

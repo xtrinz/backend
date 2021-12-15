@@ -1,30 +1,24 @@
-const event        = require('./event')
+const view         = require('./view')
+    , list         = require('./list')
     , { TestCase } = require('../../lib/driver')
-    , { source }   = require('../../../pkg/system/models')
 
-    , Std = function(user_, store_, agent_, admin_, dest_addr_)
+    , Std = function(journal_)
 {
-    let cart_    = user_
-    let journal_ = user_
     let tc       = new TestCase('Journal')
     let journal =
     [
-        new event.View (journal_, user_, store_, agent_, cart_, admin_, source.User,  dest_addr_)
-      //, new event.View (journal_, user_, store_, agent_, cart_, admin_, source.Store, dest_addr_)
-      //, new event.View (journal_, user_, store_, agent_, cart_, admin_, source.Agent, dest_addr_)
-      //, new event.View (journal_, user_, store_, agent_, cart_, admin_, source.Admin, dest_addr_)
-      //
-      //, new event.List (journal_, user_, store_, agent_, cart_, admin_, source.User,  dest_addr_)
-      //, new event.List (journal_, user_, store_, agent_, cart_, admin_, source.Store, dest_addr_)
-      //, new event.List (journal_, user_, store_, agent_, cart_, admin_, source.Agent, dest_addr_)
-      //, new event.List (journal_, user_, store_, agent_, cart_, admin_, source.Admin, dest_addr_)
+        new view.User  (journal_)
+      //, new view.Agent (journal_)
+      //, new view.Store (journal_)
+      //, new view.Admin (journal_)
+      //, new list.User  (journal_)
+      //, new list.Agent (journal_)
+      //, new list.Store (journal_)
+      //, new list.Admin (journal_)
 
     ]
     journal.forEach((step) => tc.AddStep(step))
     return tc
 }
 
-module.exports = 
-{
-    Std     : Std
-}
+module.exports = { Std }

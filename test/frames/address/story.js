@@ -1,7 +1,7 @@
 const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
 
-const Std = function(text_, addr_, user_)
+const Std = function(text_, user_, addr_)
 {
         let tc = new TestCase(text_)
     const steps =

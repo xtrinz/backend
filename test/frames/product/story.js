@@ -1,7 +1,7 @@
 const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
 
-    , Std = function(text_, store_, product_, user_)
+    , Std = function(text_, user_, store_, product_)
 {
     let tc     = new TestCase(text_)
     let prod =

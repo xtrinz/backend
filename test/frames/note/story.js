@@ -2,7 +2,7 @@ const store = require('../../../pkg/tools/project/store')
 const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
 
-const Std = function(text_, note_, admin_, user_, store_)
+const Std = function(text_, admin_, user_, store_, note_)
 {
         let tc = new TestCase(text_)
     const steps =
