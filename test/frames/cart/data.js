@@ -5,7 +5,7 @@ let Cart = function(user)
   Cart.Count++
 
   this.ID         = ''
-  this.UserName   = user
+  this.Name       = user
   this.Products   = [] // { ProductID, Name, Image, Price, Quantity } 
   this.Bill       = 
   {               
@@ -45,7 +45,7 @@ let Cart = function(user)
     this.Bill.Total       += prod.Price * prod.Quantity
     this.Bill.Total        = this.Bill.Total.round()
 
-    Cart.Carts[this.UserName] = this
+    Cart.Carts[this.Name] = this
   }
 
   this.RemoveProduct = function(product_)
@@ -69,10 +69,10 @@ let Cart = function(user)
     this.Bill.Product     -= prod.Price * prod.Quantity
     this.Bill.Total       -= prod.Price * prod.Quantity
 
-    Cart.Carts[this.UserName] = this
+    Cart.Carts[this.Name] = this
   }
 
-  Cart.Carts[this.UserName] = this
+  Cart.Carts[this.Name] = this
 }
 
 Cart.Count = 0

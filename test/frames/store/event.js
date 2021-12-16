@@ -45,9 +45,10 @@ let RegisterNew = function(store_)
     }
 }
 
-let RegisterReadOTP = function(store_) 
+let RegisterReadOTP = function(store_, journal_) 
 {
   this.StoreID  = store_
+  this.JournalID = journal_
   this.Data     = function()
   {
     let store = data.Get(data.Obj.Store, this.StoreID)
@@ -81,11 +82,17 @@ let RegisterReadOTP = function(store_)
   }
   this.PostSet        = async function(res_)
   {
-    let store   = data.Get(data.Obj.Store, this.StoreID)
+    let journal = data.Get(data.Obj.Journal, this.JournalID)
+
+    let store   = data.Get(data.Obj.Store,   this.StoreID)
       , data_   = await jwt.Verify(res_.Data.Token)
     store.ID    = data_._id
     store.Token = res_.Data.Token
     data.Set(data.Obj.Store, this.StoreID, store)
+
+    journal.Store.ID = store.ID
+
+    data.Set(data.Obj.Journal, this.JournalID, journal)
   }  
 }
 
@@ -380,7 +387,7 @@ let Connect = function(store_)
     }
 }
 
-let Disconnect = function(store_) 
+let Dsc = function(store_) 
 {
     this.ID     = store_
     this.Data   = function()
@@ -389,7 +396,7 @@ let Disconnect = function(store_)
       let templ =      
       {
           Type          : Type.Event
-        , Describe      : 'Store Socket Disconnect'
+        , Describe      : 'Store Socket Dsc'
         , Method        : Method.DISCONNECT
         , Authorization : {}
         , Socket        : store.Socket
@@ -412,5 +419,5 @@ module.exports =
     , List            // Read store
     , Edit
     , Connect
-    , Disconnect
+    , Dsc
 }

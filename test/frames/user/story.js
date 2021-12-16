@@ -1,19 +1,19 @@
 const event         = require('./event')
     , { TestCase }  = require('../../lib/driver')
 
-const Std = function(desc_, user_)
+const Std = function(desc_, user_, journal_)
 {
     let tc    = new TestCase(desc_)
     const steps_ =
     [
-          new event.RegisterNew         (user_)
-        , new event.RegisterReadOTP     (user_)
-        , new event.Register            (user_)
-        , new event.Connect             (user_)
-        , new event.ProfileGet          (user_)
-        , new event.ProfileEdit         (user_)
-        , new event.Disconnect          (user_)
-        , new event.Connect             (user_)
+          new event.RegisterNew         (user_          )
+        , new event.RegisterReadOTP     (user_, journal_)
+        , new event.Register            (user_          )
+        , new event.Connect             (user_          )
+        , new event.ProfileGet          (user_          )
+        , new event.ProfileEdit         (user_          )
+        , new event.Dsc                 (user_          )
+        , new event.Connect             (user_          )
     ]
     steps_.forEach((step)=> {tc.AddStep(step) })
     return tc
@@ -34,13 +34,13 @@ const AddUser = function(tc, user_)
     return tc
 }
 
-const Disconnect = function()
+const Dsc = function()
 {
-    let tc     = new TestCase('Disconnect Socket Clients')
+    let tc     = new TestCase('Dsc Socket Clients')
     let steps_ = []
 
     let args = Array.prototype.slice.call(arguments)
-    args.forEach((user)=> { steps_.push(new event.Disconnect (user)) })
+    args.forEach((user)=> { steps_.push(new event.Dsc (user)) })
     
     steps_.forEach((step)=> {tc.AddStep(step) })
     return tc
@@ -50,5 +50,5 @@ module.exports =
 {
       Std        : Std
     , AddUser    : AddUser
-    , Disconnect : Disconnect
+    , Dsc : Dsc
 }

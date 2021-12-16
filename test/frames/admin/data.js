@@ -1,15 +1,15 @@
-const { states } = require("../../../pkg/system/models")
+const { states, mode } = require("../../../pkg/system/models")
 
-let Admin = function(mode)
+let Admin = function()
 {
   Admin.Count++
   let off = 90
 
   this.MobileNo    = '+9100110011{0}'.format(('00' + (Admin.Count + off)).substr(-2))
-  this.Name        = mode + Admin.Count
-  this.Email       = this.Name.toLowerCase() + '@' + mode.toLowerCase() + '.com'
+  this.Name        = mode.Admin + Admin.Count
+  this.Email       = this.Name.toLowerCase() + '@' + (mode.Admin).toLowerCase() + '.com'
   this.Password    = 'Password' + this.Name
-  this.Mode        = mode
+  this.Mode        = mode.Admin
   this.Token       = ''
   this.Socket      = ''
   this.Channel     = ''

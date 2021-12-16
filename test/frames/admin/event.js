@@ -5,12 +5,12 @@ const { task, code, status
     , data                     = require('../data')
     , jwt                      = require('../../../pkg/infra/jwt')
 
-let RegisterNew = function(name) 
+let RegisterNew  = function(admin) 
 {
-    this.ID     = name
-    this.Data   = function()
+    this.AdminID = admin
+    this.Data    = function()
     {
-      let admin  = data.Get(data.Obj.Admin, this.ID)
+      let admin  = data.Get(data.Obj.Admin, this.AdminID)
       let templ =
       {
           Type         : Type.Rest
@@ -41,18 +41,19 @@ let RegisterNew = function(name)
     this.PostSet        = async function(res_)
     {
       let resp  = await read()
-        , admin  = data.Get(data.Obj.Admin, this.ID)
-      admin.OTP  = resp.Data.OTP
-      data.Set(data.Obj.Admin, this.ID, admin)
+        , admin = data.Get(data.Obj.Admin, this.AdminID)
+      admin.OTP = resp.Data.OTP
+      data.Set(data.Obj.Admin, this.AdminID, admin)
     }
 }
 
-let RegisterReadOTP = function(name) 
+let RegisterReadOTP = function(admin, journal) 
 {
-    this.ID     = name
-    this.Data   = function()
+    this.AdminID   = admin
+    this.JournalID = journal
+    this.Data      = function()
     {
-      let admin  = data.Get(data.Obj.Admin, this.ID)
+      let admin  = data.Get(data.Obj.Admin, this.AdminID)
       let templ =
       {
           Type         : Type.Rest
@@ -82,20 +83,26 @@ let RegisterReadOTP = function(name)
   }
   this.PostSet        = async function(res_)
   {
-    let admin   = data.Get(data.Obj.Admin, this.ID)
+    let journal = data.Get(data.Obj.Journal, this.JournalID)
+
+    let admin   = data.Get(data.Obj.Admin,   this.AdminID)
       , data_   = await jwt.Verify(res_.Data.Token)
     admin.ID    = data_._id
     admin.Token = res_.Data.Token
-    data.Set(data.Obj.Admin, this.ID, admin)
+    data.Set(data.Obj.Admin, this.AdminID, admin)
+
+    journal.Admin.ID = admin.ID
+
+    data.Set(data.Obj.Journal, this.JournalID, journal)
   }
 }
 
-let Register = function(name) 
+let Register = function(admin) 
 {
-    this.ID     = name
+    this.AdminID     = admin
     this.Data   = function()
     {
-      let admin  = data.Get(data.Obj.Admin, this.ID)
+      let admin  = data.Get(data.Obj.Admin, this.AdminID)
       let templ =      
       {
           Type            : Type.Rest
@@ -135,12 +142,12 @@ let Register = function(name)
     }
 }
 
-let Connect = function(name) 
+let Connect = function(admin) 
 {
-    this.ID     = name
+    this.AdminID     = admin
     this.Data   = function()
     {
-      let admin  = data.Get(data.Obj.Admin, this.ID)
+      let admin  = data.Get(data.Obj.Admin, this.AdminID)
       let templ =      
       {
           Type          : Type.Event
@@ -155,20 +162,20 @@ let Connect = function(name)
     }
     this.PostSet        = async function(res_)
     {
-      if(this.ID.startsWith('Agent1')) { await read() }
-      let admin    = data.Get(data.Obj.Admin, this.ID)
+      if(this.AdminID.startsWith('Agent1')) { await read() }
+      let admin    = data.Get(data.Obj.Admin, this.AdminID)
       admin.Socket = res_.Socket
       admin.Channel= res_.Channel
-      data.Set(data.Obj.Admin, this.ID, admin)
+      data.Set(data.Obj.Admin, this.AdminID, admin)
     }
 }
 
-let ProfileGet = function(name) 
+let ProfileGet = function(admin) 
 {
-  this.ID     = name
+  this.AdminID     = admin
   this.Data   = function()
   {
-    let admin  = data.Get(data.Obj.Admin, this.ID)
+    let admin  = data.Get(data.Obj.Admin, this.AdminID)
     let templ =
     {
         Type            : Type.Rest
@@ -200,12 +207,12 @@ let ProfileGet = function(name)
   }
 }
 
-let ProfileEdit =  function(name) 
+let ProfileEdit =  function(admin) 
 {
-  this.ID     = name
+  this.AdminID     = admin
   this.Data   = function()
   {
-    let admin  = data.Get(data.Obj.Admin, this.ID)
+    let admin  = data.Get(data.Obj.Admin, this.AdminID)
     let templ =
     {
         Type            : Type.Rest
@@ -237,16 +244,16 @@ let ProfileEdit =  function(name)
   }
 }
 
-let Disconnect = function(name) 
+let Dsc = function(admin) 
 {
-    this.ID     = name
+    this.AdminID     = admin
     this.Data   = function()
     {
-      let admin  = data.Get(data.Obj.Admin, this.ID)
+      let admin  = data.Get(data.Obj.Admin, this.AdminID)
       let templ =      
       {
           Type          : Type.Event
-        , Describe      : 'Admin Socket Disconnect'
+        , Describe      : 'Admin Socket Dsc'
         , Method        : Method.DISCONNECT
         , Authorization : {}
         , Socket        : admin.Socket
@@ -265,5 +272,5 @@ module.exports =
     , Connect
     , ProfileGet
     , ProfileEdit
-    , Disconnect
+    , Dsc
 }

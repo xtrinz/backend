@@ -1,9 +1,8 @@
 const event        = require('./event')
     , { TestCase } = require('../../lib/driver')
 
-    , Std = function(text_, user_, store_, product_, addr_)
+    , Std = function(text_, user_, store_, product_, addr_, cart_)
 {
-    let cart_   = user_
     let tc      = new TestCase(text_)
     const steps =
     [

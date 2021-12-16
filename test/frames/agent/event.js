@@ -5,12 +5,12 @@ const { task, code, status
     , data                     = require('../data')
     , jwt                      = require('../../../pkg/infra/jwt')
 
-let RegisterNew = function(name) 
+let RegisterNew = function(agent) 
 {
-    this.ID     = name
+    this.AgentID     = agent
     this.Data   = function()
     {
-      let agent  = data.Get(data.Obj.Agent, this.ID)
+      let agent  = data.Get(data.Obj.Agent, this.AgentID)
       let templ =
       {
           Type         : Type.Rest
@@ -41,18 +41,19 @@ let RegisterNew = function(name)
     this.PostSet        = async function(res_)
     {
       let resp  = await read()
-        , agent  = data.Get(data.Obj.Agent, this.ID)
+        , agent  = data.Get(data.Obj.Agent, this.AgentID)
       agent.OTP  = resp.Data.OTP
-      data.Set(data.Obj.Agent, this.ID, agent)
+      data.Set(data.Obj.Agent, this.AgentID, agent)
     }
 }
 
-let RegisterReadOTP = function(name) 
+let RegisterReadOTP = function(agent, journal) 
 {
-    this.ID     = name
+    this.AgentID     = agent
+    this.JournalID   = journal
     this.Data   = function()
     {
-      let agent  = data.Get(data.Obj.Agent, this.ID)
+      let agent  = data.Get(data.Obj.Agent, this.AgentID)
       let templ =
       {
           Type         : Type.Rest
@@ -82,20 +83,26 @@ let RegisterReadOTP = function(name)
   }
   this.PostSet        = async function(res_)
   {
-    let agent   = data.Get(data.Obj.Agent, this.ID)
+    let journal = data.Get(data.Obj.Journal, this.JournalID)
+
+    let agent   = data.Get(data.Obj.Agent,   this.AgentID)
       , data_   = await jwt.Verify(res_.Data.Token)
     agent.ID    = data_._id
     agent.Token = res_.Data.Token
-    data.Set(data.Obj.Agent, this.ID, agent)
+    data.Set(data.Obj.Agent, this.AgentID, agent)
+
+    journal.Agent.ID = agent.ID
+
+    data.Set(data.Obj.Journal, this.JournalID, journal)
   }
 }
 
-let Register = function(name) 
+let Register = function(agent) 
 {
-    this.ID     = name
+    this.AgentID     = agent
     this.Data   = function()
     {
-      let agent  = data.Get(data.Obj.Agent, this.ID)
+      let agent  = data.Get(data.Obj.Agent, this.AgentID)
       let templ =      
       {
           Type            : Type.Rest
@@ -180,12 +187,12 @@ let RegisterApprove =  function(agent_, admin_)
 }
 
 
-let Connect = function(name) 
+let Connect = function(agent) 
 {
-    this.ID     = name
+    this.AgentID     = agent
     this.Data   = function()
     {
-      let agent  = data.Get(data.Obj.Agent, this.ID)
+      let agent  = data.Get(data.Obj.Agent, this.AgentID)
       let templ =      
       {
           Type          : Type.Event
@@ -200,20 +207,20 @@ let Connect = function(name)
     }
     this.PostSet        = async function(res_)
     {
-      if(this.ID.startsWith('Agent1')) { await read() }
-      let agent    = data.Get(data.Obj.Agent, this.ID)
+      if(this.AgentID.startsWith('Agent1')) { await read() }
+      let agent    = data.Get(data.Obj.Agent, this.AgentID)
       agent.Socket = res_.Socket
       agent.Channel= res_.Channel
-      data.Set(data.Obj.Agent, this.ID, agent)
+      data.Set(data.Obj.Agent, this.AgentID, agent)
     }
 }
 
-let ProfileGet = function(name) 
+let ProfileGet = function(agent) 
 {
-  this.ID     = name
+  this.AgentID     = agent
   this.Data   = function()
   {
-    let agent  = data.Get(data.Obj.Agent, this.ID)
+    let agent  = data.Get(data.Obj.Agent, this.AgentID)
     let templ =
     {
         Type            : Type.Rest
@@ -297,12 +304,12 @@ let List = function(agent_, admin_)
   }
 }
 
-let ProfileEdit =  function(name) 
+let ProfileEdit =  function(agent) 
 {
-  this.ID     = name
+  this.AgentID     = agent
   this.Data   = function()
   {
-    let agent  = data.Get(data.Obj.Agent, this.ID)
+    let agent  = data.Get(data.Obj.Agent, this.AgentID)
     let templ =
     {
         Type            : Type.Rest
@@ -336,16 +343,16 @@ let ProfileEdit =  function(name)
   }
 }
 
-let Disconnect = function(name) 
+let Dsc = function(agent) 
 {
-    this.ID     = name
+    this.AgentID     = agent
     this.Data   = function()
     {
-      let agent  = data.Get(data.Obj.Agent, this.ID)
+      let agent  = data.Get(data.Obj.Agent, this.AgentID)
       let templ =      
       {
           Type          : Type.Event
-        , Describe      : 'Agent Socket Disconnect'
+        , Describe      : 'Agent Socket Dsc'
         , Method        : Method.DISCONNECT
         , Authorization : {}
         , Socket        : agent.Socket
@@ -366,5 +373,5 @@ module.exports =
     , ProfileGet
     , List
     , ProfileEdit
-    , Disconnect
+    , Dsc
 }

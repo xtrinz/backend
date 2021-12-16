@@ -79,7 +79,7 @@ const Type   =
         let result = SockQ[socket.id].shift() 
         return result
     }
-    , Disconnect : async function(socket)
+    , Dsc : async function(socket)
     {
         delete SockQ[socket.id]
         await socket.disconnect()

@@ -1,20 +1,20 @@
-const { Cart } = require('../cart/data')
+const { mode } = require("../../../pkg/system/models")
 
-let User = function(mode)
+let User = function()
 {
-  User.Count[mode]++
+  User.Count[mode.User]++
   let off
-  switch(mode)
+  switch(mode.User)
   {
   case 'Admin': off = 0 ; break;
   case 'User' : off = 30; break;
   case 'Agent': off = 60; break;
   }
-  this.MobileNo    = '+9100110011{0}'.format(('00' + (User.Count[mode] + off)).substr(-2))
-  this.Name        = mode + User.Count[mode]
-  this.Email       = this.Name.toLowerCase() + '@' + mode.toLowerCase() + '.com'
+  this.MobileNo    = '+9100110011{0}'.format(('00' + (User.Count[mode.User] + off)).substr(-2))
+  this.Name        = mode.User + User.Count[mode.User]
+  this.Email       = this.Name.toLowerCase() + '@' + mode.User.toLowerCase() + '.com'
   this.Password    = 'Password' + this.Name
-  this.Mode        = mode
+  this.Mode        = mode.User
   this.Token       = ''
   this.Socket      = ''
   this.Channel     = ''
@@ -22,8 +22,6 @@ let User = function(mode)
   this.TransitID   = ''
   this.Latitude    = '17.20000'
   this.Longitude   = '17.20000'
-
-  new Cart(this.Name) // Create a cart for the user
 
   User.Users[this.Name] = this
 }

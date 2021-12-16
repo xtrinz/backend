@@ -47,7 +47,7 @@ function TestRig()
                         console.log(prints.Failed, '\n\nExpected : ', data.Event, '\nReceived : ', resp)
                         return { Status: false, Data: resp  }
                     case Method.DISCONNECT :
-                        await Socket.Disconnect(data.Socket)
+                        await Socket.Dsc(data.Socket)
                         return { Status: true,  Data: {}    }
                 }
         }
