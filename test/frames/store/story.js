@@ -31,8 +31,4 @@ const Dsc = function()
     return tc
 }
 
-module.exports = 
-{
-      Std        : Std
-    , Dsc : Dsc
-}
+module.exports = { Std, Dsc }

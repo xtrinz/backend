@@ -1,6 +1,6 @@
-const { Method, Type }       = require('../../lib/medium')
-    , { code, status, text } = require('../../../pkg/system/models')
-    , data                   = require('../data')
+const { Method, Type } = require('../../lib/medium')
+    , Model            = require('../../../pkg/system/models')
+    , data             = require('../data')
 
 let Add = function(store_, product_) 
 {
@@ -38,9 +38,9 @@ let Add = function(store_, product_)
         , Skip                  : [ 'ProductID' ]
         , Response              :
         {
-              Code              : code.OK
-            , Status            : status.Success
-            , Text              : text.ProductAdded
+              Code              : Model.code.OK
+            , Status            : Model.status.Success
+            , Text              : Model.text.ProductAdded
             , Data              : { ProductID : '' }
         }
       }
@@ -82,8 +82,8 @@ let View = function(user_, store_, product_)
         }
         , Response              :
         {
-            Code              : code.OK
-          , Status            : status.Success
+            Code              : Model.code.OK
+          , Status            : Model.status.Success
           , Text              : ''
           , Data              :
           {
@@ -140,8 +140,8 @@ let List = function(user_, store_, product_)
       }
       , Response              :
       {
-          Code              : code.OK
-        , Status            : status.Success
+          Code              : Model.code.OK
+        , Status            : Model.status.Success
         , Text              : ''
         , Data              :
         [{
@@ -197,9 +197,9 @@ let Modify = function(store_, product_)
       }
       , Response              :
       {
-            Code              : code.OK
-          , Status            : status.Success
-          , Text              : text.ProductUpdated
+            Code              : Model.code.OK
+          , Status            : Model.status.Success
+          , Text              : Model.text.ProductUpdated
           , Data              : {}
       }
     }
@@ -231,9 +231,9 @@ let Remove = function(store_, product_)
       }
       , Response              :
       {
-            Code              : code.OK
-          , Status            : status.Success
-          , Text              : text.ProductRemoved
+            Code              : Model.code.OK
+          , Status            : Model.status.Success
+          , Text              : Model.text.ProductRemoved
           , Data              : {}
       }
     }
@@ -241,11 +241,4 @@ let Remove = function(store_, product_)
   }
 }
 
-module.exports =
-{
-    Add
-  , View
-  , List
-  , Modify
-  , Remove
-}
+module.exports = { Add, View, List, Modify, Remove }

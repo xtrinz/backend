@@ -1,8 +1,8 @@
-const { Method, Type }             = require('../../lib/medium')
-    , data                         = require('../data')
-    , { read }                     = require('../../lib/driver')
-    , { code, status, text, task, command, states } = require('../../../pkg/system/models')
-    , jwt                          = require('../../../pkg/infra/jwt')
+const { Method, Type } = require('../../lib/medium')
+    , data             = require('../data')
+    , { read }         = require('../../lib/driver')
+    , Model            = require('../../../pkg/system/models')
+    , jwt              = require('../../../pkg/infra/jwt')
 
 let RegisterNew = function(store_) 
 {
@@ -20,16 +20,16 @@ let RegisterNew = function(store_)
             , Path              : '/v1/store/register'
             , Body              : 
             {
-                Task            : task.New
+                Task            : Model.task.New
               , MobileNo        : store.MobileNo
             }
             , Header            : {}
         }
         , Response              :
         {
-              Code              : code.OK
-            , Status            : status.Success
-            , Text              : text.OTPGenerated
+              Code              : Model.code.OK
+            , Status            : Model.status.Success
+            , Text              : Model.text.OTPGenerated
             , Data              : {}
         }
       }
@@ -62,7 +62,7 @@ let RegisterReadOTP = function(store_, journal_)
           , Path       : '/v1/store/register'
           , Body       : 
           {
-              Task     : task.ReadOTP
+              Task     : Model.task.ReadOTP
             , MobileNo : store.MobileNo
             , OTP      : store.OTP
           }
@@ -71,10 +71,10 @@ let RegisterReadOTP = function(store_, journal_)
         , Skip         : [ 'Token' ]
         , Response     :
         {
-            Code       : code.OK
-          , Status     : status.Success
-          , Text       : text.OTPConfirmed
-          , Data       : { Token : '', Command: command.Register }
+            Code       : Model.code.OK
+          , Status     : Model.status.Success
+          , Text       : Model.text.OTPConfirmed
+          , Data       : { Token : '', Command: Model.command.Register }
         }
 
     } 
@@ -112,7 +112,7 @@ let Register = function(name)
           , Path          : '/v1/store/register'
           , Body          : 
           {
-              Task            : task.Register
+              Task            : Model.task.Register
             , Name            : store.Name
             , Image           : store.Image
             , Type            : store.Type
@@ -140,9 +140,9 @@ let Register = function(name)
         }
         , Response        :
         {
-            Code          : code.OK
-          , Status        : status.Success
-          , Text          : text.Registered
+            Code          : Model.code.OK
+          , Status        : Model.status.Success
+          , Text          : Model.text.Registered
           , Data          :
           {
               StoreID      : store.ID
@@ -166,8 +166,8 @@ let Register = function(name)
             , ClosingTime  : store.ClosingTime
             , Email        : store.Email
             , State        : 'ToBeApproved'
-            , Status       : states.Closed
-            , Command      : command.LoggedIn
+            , Status       : Model.states.Closed
+            , Command      : Model.command.LoggedIn
           }
         }
       }
@@ -193,10 +193,10 @@ let RegisterApprove =  function(admin_, store_)
         , Path          : '/v1/store/register'
         , Body          : 
         {
-            Task        : task.Approve
+            Task        : Model.task.Approve
           , StoreID     : store.ID
-          , Action      : task.Approve
-        //, Action      : task.Deny
+          , Action      : Model.task.Approve
+        //, Action      : Model.task.Deny
         //, Text        : "Please correct ASDF Field"
         }
         , Header        :
@@ -206,9 +206,9 @@ let RegisterApprove =  function(admin_, store_)
       }
       , Response        :
       {
-          Code          : code.OK
-        , Status        : status.Success
-        , Text          : text.Approved
+          Code          : Model.code.OK
+        , Status        : Model.status.Success
+        , Text          : Model.text.Approved
         , Data          : {}
       }
     }
@@ -238,8 +238,8 @@ let Read =   function(user_, store_)
       }
       , Response         :
       {
-          Code           : code.OK
-        , Status         : status.Success
+          Code           : Model.code.OK
+        , Status         : Model.status.Success
         , Text           : ''
         , Data           :
         {
@@ -297,8 +297,8 @@ let List = function(user_, store_)
       }
       , Response        :
       {
-          Code          : code.OK
-        , Status        : status.Success
+          Code          : Model.code.OK
+        , Status        : Model.status.Success
         , Text          : ''
         , Data          :
           [{
@@ -349,9 +349,9 @@ let Edit = function(store_)
       }
       , Response        :
       {
-          Code          : code.OK
-        , Status        : status.Success
-        , Text          : text.ProfileUpdated
+          Code          : Model.code.OK
+        , Status        : Model.status.Success
+        , Text          : Model.text.ProfileUpdated
         , Data          : {}
       }
     }

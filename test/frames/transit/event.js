@@ -1,9 +1,8 @@
-const { Method, Type }        = require('../../lib/medium')
-    , data                    = require('../data')
-    , { read }                = require('../../lib/driver')
-    , { code, status, text
-    , alerts, task, paytm }   = require('../../../pkg/system/models')
-    , PaytmChecksum           = require('paytmchecksum')
+const { Method, Type } = require('../../lib/medium')
+    , data             = require('../data')
+    , { read }         = require('../../lib/driver')
+    , Model            = require('../../../pkg/system/models')
+    , PaytmChecksum    = require('paytmchecksum')
 
 let Checkout = function(user_, addr_, cart_, cod_) 
 {
@@ -34,9 +33,9 @@ let Checkout = function(user_, addr_, cart_, cod_)
       , Skip              : [ 'Data' ]                    
       , Response          :
       {                       
-          Code            : code.OK
-        , Status          : status.Success
-        , Text            : text.PaymentInitiated
+          Code            : Model.code.OK
+        , Status          : Model.status.Success
+        , Text            : Model.text.PaymentInitiated
         , Data            :
         {
               Token       : ''
@@ -93,7 +92,7 @@ let ConfirmPayment = function(cart_)
             ORDERID      : cart.Paytm.OrderID
           , TXNID        : cart.Paytm.OrderID
           , TXNDATE      : String(Date.now())
-          , STATUS       : paytm.TxnSuccess
+          , STATUS       : Model.paytm.TxnSuccess
           , BANKTXNID    : cart.Paytm.OrderID
           , MID          : cart.Paytm.MID
           , TXNAMOUNT    : cart.Paytm.Amount
@@ -103,8 +102,8 @@ let ConfirmPayment = function(cart_)
       }              
       , Response :
       {              
-          Code   : code.OK
-        , Status : status.Success
+          Code   : Model.code.OK
+        , Status : Model.status.Success
         , Text   : ''
         , Data   : {}
       }
@@ -144,7 +143,7 @@ let NewOrder = function(name, mode_)
         , Skip          : [ 'TransitID' ]
         , Event         : 
         {
-            Type : alerts.NewOrder
+            Type : Model.alerts.NewOrder
           , Data : { TransitID : '' }
         }
       }
@@ -187,15 +186,15 @@ let CancelByUser = function(user_)
           , Body            : 
           {
                 TransitID   : user.TransitID
-              , Task        : task.Cancel
+              , Task        : Model.task.Cancel
           }
           , Header          : { Authorization: user.Token }
       }
       , Response            :
       {
-            Code            : code.OK
-          , Status          : status.Success
-          , Text            : alerts.Cancelled
+            Code            : Model.code.OK
+          , Status          : Model.status.Success
+          , Text            : Model.alerts.Cancelled
           , Data            : {}
       }
     }
@@ -218,7 +217,7 @@ let Cancelled = function(store_)
       , Socket        : store.Socket
       , Event         : 
       {
-          Type : alerts.Cancelled
+          Type : Model.alerts.Cancelled
         , Data : { TransitID : store.TransitID }
       }
     }
@@ -243,15 +242,15 @@ let RejectedByStore = function(store_)
           , Body            : 
           {
                 TransitID   : staff.TransitID
-              , Task        : task.Reject
+              , Task        : Model.task.Reject
           }
           , Header          : { Authorization: store.Token }
       }
       , Response            :
       {
-            Code            : code.OK
-          , Status          : status.Success
-          , Text            : alerts.Rejected
+            Code            : Model.code.OK
+          , Status          : Model.status.Success
+          , Text            : Model.alerts.Rejected
           , Data            : {}
       }
     }
@@ -274,7 +273,7 @@ let Rejected = function(user_)
       , Socket        : user.Socket
       , Event         : 
       {
-          Type : alerts.Rejected
+          Type : Model.alerts.Rejected
         , Data : { TransitID : user.TransitID }
       }
     }
@@ -300,15 +299,15 @@ let StoreAccept = function(store_, agent_)
           , Body            : 
           {
                 TransitID   : store.TransitID
-              , Task        : task.Accept
+              , Task        : Model.task.Accept
           }
           , Header          : { Authorization: store.Token }
       }
       , Response            :
       {
-            Code            : code.OK
-          , Status          : status.Success
-          , Text            : alerts.Accepted
+            Code            : Model.code.OK
+          , Status          : Model.status.Success
+          , Text            : Model.alerts.Accepted
           , Data            : {}
       }
     }
@@ -332,7 +331,7 @@ let NewTransit = function(agent_)
       , Skip          : [ 'TransitID' ]
       , Event         : 
       {
-          Type : alerts.NewTransit
+          Type : Model.alerts.NewTransit
         , Data : { TransitID : '' }
       }
     }
@@ -372,7 +371,7 @@ let Accepted  = function(name, mode_)
       , Socket        : in_.Socket
       , Event         : 
       {
-          Type : alerts.Accepted
+          Type : Model.alerts.Accepted
         , Data : { TransitID : in_.TransitID }
       }
     }
@@ -397,15 +396,15 @@ let AgentIgnore = function(agent_)
           , Body            : 
           {
                 TransitID   : agent.TransitID
-              , Task        : task.Ignore
+              , Task        : Model.task.Ignore
           }
           , Header          : { Authorization: agent.Token }
       }
       , Response            :
       {
-            Code            : code.OK
-          , Status          : status.Success
-          , Text            : alerts.Ignored
+            Code            : Model.code.OK
+          , Status          : Model.status.Success
+          , Text            : Model.alerts.Ignored
           , Data            : {}
       }
     }
@@ -429,7 +428,7 @@ let NoAgents = function(admin_)
       , Skip          : [ 'TransitID' ]
       , Event         : 
       {
-          Type : alerts.NoAgents
+          Type : Model.alerts.NoAgents
         , Data : { TransitID : admin.TransitID }
       }
     }
@@ -456,15 +455,15 @@ let AgentAccept =  function(agent_, store_)
           , Body            : 
           {
                 TransitID   : agent.TransitID
-              , Task        : task.Accept
+              , Task        : Model.task.Accept
           }
           , Header          : { Authorization: agent.Token }
       }
       , Response            :
       {
-            Code            : code.OK
-          , Status          : status.Success
-          , Text            : alerts.Accepted
+            Code            : Model.code.OK
+          , Status          : Model.status.Success
+          , Text            : Model.alerts.Accepted
           , Data            : {}
       }
     }
@@ -504,7 +503,7 @@ let AgentReady = function(name_, mode_)
       , Socket        : in_.Socket
       , Event         : 
       {
-          Type : alerts.AgentReady
+          Type : Model.alerts.AgentReady
         , Data : { TransitID : in_.TransitID }
       }
     }
@@ -531,15 +530,15 @@ let StoreDespatch = function(store_, agent_)
         {                
               TransitID  : staff.TransitID
             , OTP        : staff.OTP
-            , Task       : task.Despatch
+            , Task       : Model.task.Despatch
         }                 
         , Header         : { Authorization: staff.Token }
       }                  
       , Response         :
       {                    
-            Code         : code.OK
-          , Status       : status.Success
-          , Text         : alerts.EnRoute
+            Code         : Model.code.OK
+          , Status       : Model.status.Success
+          , Text         : Model.alerts.EnRoute
           , Data         : {}
       }
     }
@@ -580,7 +579,7 @@ let EnRoute = function(name_, mode_)
       , Socket        : data_.Socket
       , Event         : 
       {
-          Type : alerts.EnRoute
+          Type : Model.alerts.EnRoute
         , Data : { TransitID : data_.TransitID }
       }
     }
@@ -606,15 +605,15 @@ let AgentComplete = function(agent_)
           {
                 OTP         : agent.OTP
               , TransitID   : agent.TransitID
-              , Task        : task.Complete
+              , Task        : Model.task.Complete
           }
           , Header          : { Authorization: agent.Token }
       }
       , Response            :
       {
-            Code            : code.OK
-          , Status          : status.Success
-          , Text            : alerts.Delivered
+            Code            : Model.code.OK
+          , Status          : Model.status.Success
+          , Text            : Model.alerts.Delivered
           , Data            : {}
       }
     }
@@ -646,7 +645,7 @@ let Delivered = function(name_, mode_)
       , Socket        : in_.Socket
       , Event         : 
       {
-          Type : alerts.Delivered
+          Type : Model.alerts.Delivered
         , Data : { TransitID : in_.TransitID }
       }
     }
@@ -673,9 +672,9 @@ let Refund = function(cart_)
         {
             orderId       : cart.Paytm.OrderID
           , txnId         : '12345'
-          , refundId      : paytm.Order.format(data.orderId.slice( cart.Paytm.OrderID.length - 3))
+          , refundId      : Model.paytm.Order.format(data.orderId.slice( cart.Paytm.OrderID.length - 3))
           , txnTimestamp  : String(Date.now())
-          , status        : paytm.RefundSuccess
+          , status        : Model.paytm.RefundSuccess
           , mid           : cart.Paytm.MID
           , refundAmount  : cart.Paytm.Amount
         }
@@ -686,8 +685,8 @@ let Refund = function(cart_)
       }              
       , Response :
       {              
-          Code   : code.OK
-        , Status : status.Success
+          Code   : Model.code.OK
+        , Status : Model.status.Success
         , Text   : ''
         , Data   : {}
       }
@@ -702,23 +701,11 @@ let Refund = function(cart_)
 
 module.exports =
 {
-      Checkout
-    , ConfirmPayment
-    , NewOrder
-    , CancelByUser
-    , Cancelled
-    , RejectedByStore
-    , Rejected
-    , StoreAccept
-    , NewTransit
-    , Accepted
-    , AgentIgnore
-    , NoAgents
-    , AgentAccept
-    , AgentReady
-    , StoreDespatch
-    , EnRoute
-    , AgentComplete
-    , Delivered
+      Checkout     , ConfirmPayment , NewOrder
+    , CancelByUser , Cancelled      , RejectedByStore
+    , Rejected     , StoreAccept    , NewTransit
+    , Accepted     , AgentIgnore    , NoAgents
+    , AgentAccept  , AgentReady     , StoreDespatch
+    , EnRoute      , AgentComplete  , Delivered
     , Refund
 }
