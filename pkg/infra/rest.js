@@ -1,6 +1,6 @@
 const qs   = require('querystring')
     , http = require('http')
-    , Log  = require('../system/log')
+    , Log  = require('../sys/log')
 
 function Client(in_)
 {

@@ -1,6 +1,8 @@
-const compare                = require('./compare')
+const compare                        = require('./compare')
     , { Rest, Socket, Type, Method } = require('./medium')
-    , { db, Connect }                     = require('../../pkg/system/database')
+    , { db, Connect, SetDB }         = require('../../pkg/sys/database')
+    , { Reset }                      = require('../etc/data')
+    , ledger                         = require( '../../pkg/pipe/fin/ledger/driver')
 
 const prints = 
 {
@@ -59,12 +61,8 @@ function TestRig()
             await new Promise((resolve) => setTimeout(resolve, 2));
             await Connect()
             db().database.dropDatabase()
-            db().stores.createIndex({ Location: "2dsphere" })
-            db().users.createIndex( { Location: "2dsphere" }) 
-            db().agents.createIndex( { Location: "2dsphere" })             
-            db().products.createIndex({ Location: '2dsphere' })
-            db().stores.createIndex({ Name: "text", Description: "text" } )      
-            db().products.createIndex({ Name: "text", Description: "text", Category: 'text' })                 
+            SetDB(db().client)
+            await ledger.System()
             await new Promise((resolve) => setTimeout(resolve, 30));
             
             let suite = this.TestSuites[suite_], failed = false

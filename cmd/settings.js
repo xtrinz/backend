@@ -1,7 +1,7 @@
                           require("dotenv").config()             // Read environment vars
                           require('../pkg/infra/paytm/setttings')
 const { version  : v
-    , resource : rsrc } = require('../pkg/system/models')
+    , resource : rsrc } = require('../pkg/sys/models')
 
 // Set string formater utility function
 // "{0}".format("1") : {0} get replaced with "1"
@@ -105,4 +105,11 @@ Date.prototype.diff_in = function(iso_, min)
         , end = new Date( iso_ )
     const diff  = (end - now) / ( 1000 * 60 )
     return diff < min
+}
+
+Number.prototype.cut = function(x)
+{
+    let val = this
+         val *= x
+    return val.round()
 }

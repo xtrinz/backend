@@ -1,7 +1,7 @@
 const checksum = require("paytmchecksum")
-    , Model    = require('../../system/models')	
-	, journal  = require('../../config/journal/archive')
-	, Log      = require('../../system/log')
+    , Model    = require('../../sys/models')	
+	, journal  = require('../../pipe/run/journal/archive')
+	, Log      = require('../../sys/log')
 
 function Refund(data, signature)
 {
@@ -48,9 +48,9 @@ function Refund(data, signature)
 		// TODO : Match Price
 	}
 
-	this.Store 	  = async function(rcd)
+	this.Seller 	  = async function(rcd)
 	{
-		rcd.Refund.TimeStamp.Webhook 	= Date.now()
+		rcd.Refund.TimeStamp.Webhook 	= Date.now().toISOString()
 		rcd.Refund.TxnId  				= this.Data.txnId
 		switch (this.Data.Status)
 		{

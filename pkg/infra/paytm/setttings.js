@@ -1,7 +1,7 @@
 const paytm                          = require('paytm-pg-node-sdk')
-    , { paytm: pgw }                 = require('../../system/models')
+    , { paytm: pgw }                 = require('../../sys/models')
 
-    , Log                            = require('../../system/log')
+    , Log                            = require('../../sys/log')
 
     , env                    = (process.env.PAYTM_ENV === pgw.DEFAULT)?
                                 paytm.LibraryConstants.PRODUCTION_ENVIRONMENT :

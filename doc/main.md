@@ -16,3 +16,34 @@ Build essentials :
 
 
 Paytm, Twilio, Google are blocked for testing
+
+Directory Struct :
+
+pkg/
+├── infra
+│   └── paytm
+├── pipe
+│   ├── fin
+│   │   ├── address
+│   │   ├── cart
+│   │   ├── generic
+│   │   ├── note
+│   │   └── product
+│   ├── role
+│   │   ├── agent
+│   │   ├── arbiter
+│   │   ├── client
+│   │   ├── seller
+│   │   └── socket
+│   └── run
+│       ├── core
+│       ├── journal
+│       └── transit
+├── sys
+└── tool
+    ├── filter
+    ├── project
+    ├── rinse
+    └── rules
+        ├── access
+        └── input

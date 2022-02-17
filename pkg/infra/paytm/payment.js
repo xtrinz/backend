@@ -1,8 +1,8 @@
 const checksum  = require("paytmchecksum")
-    , Model  	= require('../../system/models')
-	, journal	= require('../../config/journal/archive')
-	, cart 		= require('../../config/cart/driver')
-    , Log       = require('../../system/log')
+    , Model  	= require('../../sys/models')
+	, journal	= require('../../pipe/run/journal/archive')
+	, cart 		= require('../../pipe/fin/cart/driver')
+    , Log       = require('../../sys/log')
 
 function Payment(data)
 {
@@ -53,11 +53,12 @@ function Payment(data)
 		return rcd
 	}
 
-	this.Store 	  = async function(rcd)
+	this.Record 	  = async function(rcd)
 	{
 
-		console.log('store-payment-response', { Ind : this.Data })
+		console.log('record-payment-response', { Ind : this.Data })
 
+		rcd.Time.Webhook 		 = this.Data.TxnDate
 		rcd.Payment.Time.Webhook = this.Data.TxnDate
 		rcd.Payment.RefID 	  	 = this.Data.TxnId
 
@@ -65,7 +66,7 @@ function Payment(data)
 		{
 			case Model.paytm.TxnSuccess:
 
-				await cart.Flush(rcd.Buyer.ID)
+				await cart.Flush(rcd.Client.ID)
 
 				rcd.Payment.Status = Model.states.Success
 				rcd.Transit.Status = Model.states.Initiated

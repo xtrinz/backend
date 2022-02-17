@@ -1,9 +1,9 @@
 const paytm = require('paytm-pg-node-sdk')
-    , Model = require('../../system/models')
-    , Log   = require('../../system/log')
+    , Model = require('../../sys/models')
+    , Log   = require('../../sys/log')
 class PayTM
 {
-    static async CreateToken(j_id, price, user_)
+    static async CreateToken(j_id, price, client_)
     {
 
       const txn_i1 =
@@ -18,9 +18,9 @@ class PayTM
       return txn_i1
       /** TODO blocked for testing */
         /**
-         * Input : JournalID | NetPrice | User.Address/Email/Name/MobileNo
+         * Input : JournalID | NetPrice | Client.Address/Email/Name/MobileNo
          */
-        Log('paytm-create-token', { JournalID : j_id, Price: price, User: user_ })
+        Log('paytm-create-token', { JournalID : j_id, Price: price, Client: client_ })
 
         const channelId = paytm.EChannelId.WEB
             , orderId   = Model.paytm.Order.format(String(j_id))
@@ -28,21 +28,21 @@ class PayTM
 
             , txnAmount = paytm.Money.constructWithCurrencyAndValue(paytm.EnumCurrency.INR, amnt)
 
-            , user      = new paytm.UserInfo(String(user_.ID))
-              user.setAddress   (JSON.stringify(user_.Address))
-              user.setEmail     (user_.Email)
-              user.setFirstName (user_.Name)
-              user.setMobile    (user_.MobileNo)
-              user.setPincode   (user_.Address.PostalCode) //.toString())
+            , client      = new paytm.ClientInfo(String(client_.ID))
+              client.setAddress   (JSON.stringify(client_.Address))
+              client.setEmail     (client_.Email)
+              client.setFirstName (client_.Name)
+              client.setMobile    (client_.MobileNo)
+              client.setPincode   (client_.Address.PostalCode) //.toString())
 
-        let payment = new paytm.PaymentDetailBuilder(channelId, orderId, txnAmount, user)
+        let payment = new paytm.PaymentDetailBuilder(channelId, orderId, txnAmount, client)
           , req     = payment.build()
           , resp    = {}
         
         try { resp = await paytm.Payment.createTxnToken(req) }
         catch (err)
         {
-            Log('paytm-sdk-exepction-token-creation-failed', { Error : err, JournalID : j_id, Price: price, User: user_ })
+            Log('paytm-sdk-exepction-token-creation-failed', { Error : err, JournalID : j_id, Price: price, Client: client_ })
             Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.TokenCreationFailed)
         }
 
@@ -57,7 +57,7 @@ class PayTM
             Model.Err_(Model.code.INTERNAL_SERVER, Model.reason.TokenCreationFailed)
         }
         const txnToken = body.getTxnToken()
-        Log('paytm-token-created', { JournalID : j_id, Price: price, User: user_, Resp : body })
+        Log('paytm-token-created', { JournalID : j_id, Price: price, Client: client_, Resp : body })
 
         const txn_i =
         {

@@ -3,9 +3,9 @@ const twilio_sid   = process.env.TWILIO_SID
     , twilio       = require('twilio')(twilio_sid, twilio_token)
     ,  nodemailer  = require('nodemailer')
     , bcrypt       = require('bcryptjs')
-    , test         = require('../system/test')
-    , { gw }       = require('../system/models')
-    , Log          = require('../system/log')
+    , test         = require('../sys/test')
+    , { gw }       = require('../sys/models')
+    , Log          = require('../sys/log')
 
 function OneTimePasswd(data)
 {
@@ -87,7 +87,7 @@ function OneTimePasswd(data)
     const svc = nodemailer.createTransport(
     {
       service: 'gmail', // ?less secure of gmail enabled. catche access enabled
-      auth: { user: process.env.TWILIO_EMAIL, pass: process.env.TWILIO_EMAIL_PASS }
+      auth: { client: process.env.TWILIO_EMAIL, pass: process.env.TWILIO_EMAIL_PASS }
     })
     try { await svc.sendMail(email) }
     catch(err) 
