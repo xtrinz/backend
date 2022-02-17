@@ -1,191 +1,87 @@
-                  require('./lib/settings')
+                require('./lib/settings')
 const { Test, TestSuite } = require('./lib/driver')
-    , user      =
-    {
-        data  : require('./frames/user/data')
-      , story : require('./frames/user/story')
-    }
-    , store     =
-    {
-        data  : require('./frames/store/data')
-      , story : require('./frames/store/story')
-    }
-    , product   =
-    {
-        data  : require('./frames/product/data')
-      , story : require('./frames/product/story')        
-    }
-    , address   =
-    {
-        data  : require('./frames/address/data')
-      , story : require('./frames/address/story')        
-    }
-    , cart      =
-    {
-        data  : require('./frames/cart/data')
-      , story : require('./frames/cart/story')        
-    }
-    , transit   =
-    {
-        story : require('./frames/transit/story')        
-    }
-    , journal   =
-    {
-        data    : require('./frames/journal/data')
-      , story   : require('./frames/journal/story')        
-    }
+    , client    = { data  : require('./etc/role/client/data' ) , story : require('./etc/role/client/story' ) }
+    , agent     = { data  : require('./etc/role/agent/data'  ) , story : require('./etc/role/agent/story'  ) }    
+    , arbiter   = { data  : require('./etc/role/arbiter/data') , story : require('./etc/role/arbiter/story') }        
+    , seller    = { data  : require('./etc/role/seller/data' ) , story : require('./etc/role/seller/story' ) }
+    , note      = { data  : require('./etc/fin/note/data'   )  , story : require('./etc/fin/note/story'    ) }
+    , product   = { data  : require('./etc/fin/product/data')  , story : require('./etc/fin/product/story' ) }
+    , address   = { data  : require('./etc/fin/address/data')  , story : require('./etc/fin/address/story' ) }
+    , cart      = { data  : require('./etc/fin/cart/data'   )  , story : require('./etc/fin/cart/story'    ) }
+    , transit   = {                                              story : require('./etc/run/transit/story')  }
+    , journal   = { data  : require('./etc/run/journal/data')  , story : require('./etc/run/journal/story')  }
 
-  let admin_1       = new    user.data.User    ('Admin')
-    , user_1_owner  = new    user.data.User    ('User')
-    , user_3_buyer  = new    user.data.User    ('User')
-    , agent_1       = new    user.data.User    ('Agent')
-    , store_1       = new   store.data.Store   ()
-    , product_1     = new product.data.Product ()
-    , addr_1_user_3 = new address.data.Address ()
-    
-    new journal.data.Journal (user_3_buyer, addr_1_user_3, store_1, cart.data.Cart.Carts[user_3_buyer.Name], agent_1)
+  let arbiter_1 = new arbiter.data.Arbiter ()
+    ,    note_1 = new    note.data.Note    ()
+    ,  client_1 = new  client.data.Client  ()
+    ,   agent_1 = new   agent.data.Agent   ()
+    ,   agent_2 = new   agent.data.Agent   ()    
+    ,  seller_1 = new  seller.data.Seller  ()
+    , product_1 = new product.data.Product ()
+    ,    addr_1 = new address.data.Address ()
+    ,    cart_1 = new    cart.data.Cart    (client_1.Name)    
+    , journal_1 = new journal.data.Journal (client_1, addr_1, seller_1, agent_1, cart_1, arbiter_1)
 
-  let user_4_owner  = new    user.data.User    ('User')
-    , user_6_buyer  = new    user.data.User    ('User')
-    , agent_2       = new    user.data.User    ('Agent')
-    , store_2       = new   store.data.Store   ()
-    , product_2     = new product.data.Product ()
-    , addr_1_user_6 = new address.data.Address ()
+      arbiter_1 = arbiter_1.Name
+         note_1 =    note_1.Name
+       client_1 =  client_1.Name
+         cart_1 =    cart_1.Name // belongs to client 1
+        agent_1 =   agent_1.Name
+        agent_2 =   agent_2.Name        
+       seller_1 =  seller_1.Name
+      product_1 = product_1.Name
+         addr_1 =    addr_1.Name
+      journal_1 = journal_1.Name
 
-  var suite_1 = new TestSuite('End to End Process')
   let cases =
   [
-         user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name, addr_1_user_3.Address.Name, store_1.Name)
-    , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, store_1.Name)
-    , journal.story.Std(user_3_buyer.Name, store_1.Name, agent_1.Name, admin_1.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
-    ,   store.story.Disconnect(store_1.Name)
+    //   arbiter.story.Std('Add Arbiter ',        arbiter_1,                                                        journal_1         )
+    // ,  client.story.Std('Add Client',                     client_1,                                              journal_1         )
+    // ,   agent.story.Std('Add Agent 1',         arbiter_1,           agent_1,                                     journal_1         )
+    // ,   agent.story.AddAgent('Add Agent 2',    arbiter_1,           agent_2,                                                       )    
+      seller.story.Std('Add Seller ',         arbiter_1, client_1,          seller_1,                           journal_1         )
+    // ,    note.story.Std('Set Notes',           arbiter_1, client_1,          seller_1, note_1                                      )
+    // , product.story.Std('Add Product',                    client_1,          seller_1,        product_1,         journal_1         )
+    // , address.story.Std('Set Client Address',             client_1,                                      addr_1, journal_1         )
+    // ,    cart.story.Std('Add Product to Cart',            client_1,          seller_1,        product_1, addr_1, journal_1, cart_1 )
+    // , 'Here You Place Transit'
+    // , journal.story.Std(                                                                                         journal_1         )
+    // ,  client.story.Dsc(                                  client_1                                                                 )
+    // ,   agent.story.Dsc(                                            agent_1                                                        )
+    // , arbiter.story.Dsc(                       arbiter_1                                                                           )
+    // ,  seller.story.Dsc(                                                     seller_1                                              )
   ]
-  cases.forEach((test)=> suite_1.AddCase(test))
 
-  var suite_2 = new TestSuite('E2E Cancel By User')
-  cases =
+  let desc =
   [
-         user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancelByUser(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+      'End to End Process'          , 'Cash on Delivery'          , 'Immediate Cancel'
+    , 'Cancelled After Assigned'    , 'Cancelled After Commit'    , 'Immediate Rejection'
+    , 'Rejected After Assigned'     , 'Rejected After Commit'     , 'That man Ignored it'
   ]
-  cases.forEach((test)=> suite_2.AddCase(test))
 
-  var suite_3 = new TestSuite('E2E Cancel By User After Store Acceptance')
-  cases =
+  let dots =
   [
-         user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancelByUserAfterAceptance(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
+      transit.story.Std     (                   arbiter_1, client_1, agent_1, seller_1,                   addr_1, journal_1         )
+    // , transit.story.COD     (                   arbiter_1, client_1, agent_1, seller_1,                   addr_1, journal_1         )
+    // , transit.story.CancelA (                   arbiter_1, client_1, agent_1, seller_1,                   addr_1, journal_1         )
+    // , transit.story.CancelB (                   arbiter_1, client_1, agent_1, seller_1,                   addr_1, journal_1         )
+    // , transit.story.CancelC (                   arbiter_1, client_1, agent_1, seller_1,                   addr_1, journal_1         )
+    // , transit.story.RejectA (                   arbiter_1, client_1, agent_1, seller_1,                   addr_1, journal_1         )
+    // , transit.story.RejectB (                   arbiter_1, client_1, agent_1, seller_1,                   addr_1, journal_1         )
+    // , transit.story.RejectC (                   arbiter_1, client_1, agent_1, seller_1,                   addr_1, journal_1         )
+    // , transit.story.Ignore  (                   arbiter_1, client_1, agent_1, seller_1,                   addr_1, journal_1         )
   ]
-  cases.forEach((test)=> suite_3.AddCase(test))
 
+  dots.forEach((dot, idx)=> {
 
-  var suite_4 = new TestSuite('E2E Cancel By User After Agent Accepted The Transit')
-  cases =
-  [
-         user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancelByUserAfterTransitAceptance(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
-  ]
-  cases.forEach((test)=> suite_4.AddCase(test))
+    let suite_x =  new TestSuite(desc[idx])
+    let plan    = [ ...cases ]
 
-  var suite_5 = new TestSuite('E2E Cancel By Store After Init')
-  cases =
-  [
-         user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancellationByStoreAfterInit(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
-  ]
-  cases.forEach((test)=> suite_5.AddCase(test))
+    //plan[9] = dot
+    plan.forEach((test)=> suite_x.AddCase(test))  
 
-  var suite_6 = new TestSuite('E2E Cancel By Store After Accepting the order')
-  cases =
-  [
-         user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancellationByStoreAfterOrderAcceptance(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
-  ]
-  cases.forEach((test)=> suite_6.AddCase(test))
+    Test.AddTestSuite(suite_x) 
 
-  var suite_7 = new TestSuite('E2E Cancel By Store After Accepting the Transit')
-  cases =
-  [
-         user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.CancellationByStoreAfterTransitAcceptance(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
-  ]
-  cases.forEach((test)=> suite_7.AddCase(test))
-
-  var suite_8 = new TestSuite('Ignored By Last Agent')
-  cases =
-  [
-         user.story.Std(admin_1.Name )
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name )
-    , transit.story.IgnoredByLastAgent(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name, admin_1.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
-  ]
-  cases.forEach((test)=> suite_8.AddCase(test))
-
-  var suite_9 = new TestSuite('Multi Store Purchase Error')
-  cases =
-  [
-         user.story.Std(admin_1.Name )
-
-    ,   store.story.Std(admin_1.Name, user_1_owner.Name, user_1_owner.Name, store_1.Name )
-    , product.story.Std(user_1_owner.Name, store_1.Name, product_1.Name )
-
-    ,   store.story.Std(admin_1.Name, user_4_owner.Name, user_4_owner.Name, store_2.Name )
-    , product.story.Std(user_4_owner.Name, store_2.Name, product_2.Name )
-
-    , address.story.Std(addr_1_user_3.Address.Name, user_3_buyer.Name )
-    ,    cart.story.Std(user_3_buyer.Name, product_1.Name, addr_1_user_3.Address.Name, store_1.Name)
-
-    ,    cart.story.Std(user_3_buyer.Name, product_2.Name, addr_1_user_3.Address.Name, store_2.Name)
-    , transit.story.Std(user_3_buyer.Name, addr_1_user_3.Address.Name, agent_1.Name, user_1_owner.Name, user_1_owner.Name)
-    ,    user.story.Disconnect(user_1_owner.Name, user_1_owner.Name, user_3_buyer.Name, agent_1.Name, admin_1.Name)
-    ]
-    cases.forEach((test)=> suite_9.AddCase(test))
-
-    Test.AddTestSuite(suite_1)
-//  Test.AddTestSuite(suite_2)
-//  Test.AddTestSuite(suite_3)
-//  Test.AddTestSuite(suite_4)
-//  Test.AddTestSuite(suite_5)
-//  Test.AddTestSuite(suite_6)
-//  Test.AddTestSuite(suite_7)
-//  Test.AddTestSuite(suite_8)
+  })
 
   Test.Run()

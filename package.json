@@ -4,7 +4,7 @@
   "description": "A transit mgmt sw",
   "main": "cmd/main.js",
   "scripts": {
-    "start": "nodemon cmd/main.js",
+    "start": "node cmd/main.js",
     "test": "echo \"Project X\n---------\" && node test/main.js",
     "clean": "rm -rf node_modules && rm package-lock.json",
     "cdeps": "echo \"Circular Deps\n\" && node aid/cdeps.js"
@@ -14,25 +14,32 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.27.1",
+    "compression": "^1.7.4",
+    "deepcopy": "^2.1.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-validator": "^6.10.0",
     "fs": "^0.0.1-security",
+    "helmet": "^4.6.0",
     "https": "^1.0.0",
+    "json-stringify-safe": "^5.0.1",
     "jsonwebtoken": "^8.5.1",
-    "mongodb": "^3.6.3",
+    "mongodb": "^4.1.3",
     "node-input-validator": "^4.4.1",
     "nodemailer": "^6.4.17",
     "paytm-pg-node-sdk": "^1.0.4",
     "paytmchecksum": "^1.5.0",
     "querystring": "^0.2.1",
+    "redis": "^4.0.0",
+    "remove-field": "^1.0.0",
     "socket.io": "^4.0.1",
-    "stripe": "^8.141.0",
     "twilio": "^3.54.1"
   },
   "devDependencies": {
     "http": "^0.0.1-security",
     "madge": "^4.0.2",
+    "rus-diff": "^1.1.0",
     "socket.io-client": "^4.1.2"
   }
 }

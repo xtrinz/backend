@@ -3,8 +3,9 @@ const twilio_sid   = process.env.TWILIO_SID
     , twilio       = require('twilio')(twilio_sid, twilio_token)
     ,  nodemailer  = require('nodemailer')
     , bcrypt       = require('bcryptjs')
-    , test         = require('../system/test')
-    , { gw }       = require('../system/models')
+    , test         = require('../sys/test')
+    , { gw }       = require('../sys/models')
+    , Log          = require('../sys/log')
 
 function OneTimePasswd(data)
 {
@@ -28,8 +29,8 @@ function OneTimePasswd(data)
   this.Confirm = async function (hash, otp)
   {
     const result = await bcrypt.compare(otp, hash)
-    if(!result) console.log('wrong-otp')
-    else console.log('otp-confirmed')
+    if(!result) Log('wrong-otp')
+    else Log('otp-confirmed')
     return result
   }
   
@@ -37,7 +38,7 @@ function OneTimePasswd(data)
   {
     if (retries <= 0 || !this.Data.MobileNo) 
     {
-      if (!this.Data.MobileNo) {console.log('no-mobile-no', this.Data)}
+      if (!this.Data.MobileNo) {Log('no-mobile-no', this.Data)}
       return false
     }
     
@@ -52,7 +53,7 @@ function OneTimePasswd(data)
     catch(err) 
     {
       // TODO add a sleep here
-      console.log('sms-transmission-failed', 
+      Log('sms-transmission-failed', 
           { 
             Data      : this.Data,
             Error     : 
@@ -71,7 +72,7 @@ function OneTimePasswd(data)
   {
     if (retries <= 0 || !this.Data.EmailID)
     {
-      if (!this.Data.EmailID) {console.log('no-mail-id', this.Data)}
+      if (!this.Data.EmailID) {Log('no-mail-id', this.Data)}
       return false
     }
 
@@ -86,13 +87,13 @@ function OneTimePasswd(data)
     const svc = nodemailer.createTransport(
     {
       service: 'gmail', // ?less secure of gmail enabled. catche access enabled
-      auth: { user: process.env.TWILIO_EMAIL, pass: process.env.TWILIO_EMAIL_PASS }
+      auth: { client: process.env.TWILIO_EMAIL, pass: process.env.TWILIO_EMAIL_PASS }
     })
     try { await svc.sendMail(email) }
     catch(err) 
     {
       // TODO add a sleep here
-      console.log('email-transmission-failed',
+      Log('email-transmission-failed',
       { 
         Data      : this.Data,
         Error     : 
@@ -109,9 +110,9 @@ function OneTimePasswd(data)
 
   this.Send = async function (opts) 
   { 
-    console.log('send-otp', { MobileNo : this.Data.MobileNo, Email : this.Data.EmailID, Options: opts})
+    Log('send-otp', { MobileNo : this.Data.MobileNo, Email : this.Data.EmailID, Options: opts})
     this.GenOtp(this.Data.OtpLen)
-    console.log('####OTP-blocked-for-testing-purpose###', this.Otp, ">>####")    
+    Log('####OTP-blocked-for-testing-purpose###', this.Otp, ">>####")    
     /*//
     switch (opts)
     {
@@ -122,7 +123,7 @@ function OneTimePasswd(data)
 
     let   salt = this.Data.OtpLen
         , hash = await bcrypt.hash(this.Otp, salt)
-    console.log('otp-send', { MobileNo : this.Data.MobileNo, Email : this.Data.EmailID})
+    Log('otp-send', { MobileNo : this.Data.MobileNo, Email : this.Data.EmailID})
     return hash
   }
 }

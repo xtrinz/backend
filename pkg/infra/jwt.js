@@ -1,6 +1,7 @@
 const jwt                     = require('jsonwebtoken')
     , jwt_secret              = process.env.JWT_KEY
-    , { Err_, code, reason }  = require('../system/models')
+    , { Err_, code, reason }  = require('../sys/models')
+    , Log                     = require('../sys/log')
 
     , Sign       = async function(data)
     {
@@ -15,7 +16,10 @@ const jwt                     = require('jsonwebtoken')
         const res = await jwt.verify(token, jwt_secret)
 
         if (!res || !res._id || !res.Mode) 
-        Err_(code.BAD_REQUEST, reason.InvalidToken)
+        {
+            Log('invalid-token', { Data: res })
+            Err_(code.BAD_REQUEST, reason.InvalidToken)
+        }
         return res
     }
 

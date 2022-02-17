@@ -13,7 +13,7 @@ const Type   =
 
     , https  = require('https')
     , ca     = { ca: fs.readFileSync('cert/ca.crt') } 
-    , opt_g  = { host : 'localhost', port : process.env.PORT, ca: fs.readFileSync('cert/ca.crt'), ...ca }
+    , opt_g  = { host : process.env.SERVER, port : process.env.PORT, ca: fs.readFileSync('cert/ca.crt'), ...ca }
 
     , Method =
 {
@@ -79,7 +79,7 @@ const Type   =
         let result = SockQ[socket.id].shift() 
         return result
     }
-    , Disconnect : async function(socket)
+    , Dsc : async function(socket)
     {
         delete SockQ[socket.id]
         await socket.disconnect()

@@ -1,5 +1,6 @@
 const qs   = require('querystring')
     , http = require('http')
+    , Log  = require('../sys/log')
 
 function Client(in_)
 {
@@ -23,7 +24,7 @@ function Client(in_)
     }
     this.Fetch      = async function()
     {
-        console.log(this.Options())
+        Log(this.Options())
         let resp = await new Promise((resolve, reject) =>
         {
             const req = http.request(this.Options(), (res) =>
@@ -53,7 +54,7 @@ let req = {
 }
 
 let r = new Client(req)
-r.Fetch().then((res) => { console.log(res) })
+r.Fetch().then((res) => { Log(res) })
 */
 
 module.exports = { Client : Client }

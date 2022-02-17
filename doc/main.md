@@ -13,3 +13,37 @@ Build essentials :
         Runs the server
     4. npm test
         Executes the test cases
+
+
+Paytm, Twilio, Google are blocked for testing
+
+Directory Struct :
+
+pkg/
+├── infra
+│   └── paytm
+├── pipe
+│   ├── fin
+│   │   ├── address
+│   │   ├── cart
+│   │   ├── generic
+│   │   ├── note
+│   │   └── product
+│   ├── role
+│   │   ├── agent
+│   │   ├── arbiter
+│   │   ├── client
+│   │   ├── seller
+│   │   └── socket
+│   └── run
+│       ├── core
+│       ├── journal
+│       └── transit
+├── sys
+└── tool
+    ├── filter
+    ├── project
+    ├── rinse
+    └── rules
+        ├── access
+        └── input

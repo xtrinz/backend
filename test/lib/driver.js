@@ -1,6 +1,8 @@
-const compare                = require('./compare')
+const compare                        = require('./compare')
     , { Rest, Socket, Type, Method } = require('./medium')
-    , db                     = require('../../pkg/system/database')
+    , { db, Connect, SetDB }         = require('../../pkg/sys/database')
+    , { Reset }                      = require('../etc/data')
+    , ledger                         = require( '../../pkg/pipe/fin/ledger/driver')
 
 const prints = 
 {
@@ -29,8 +31,8 @@ function TestRig()
                 if(sts) { return { Status: true, Data: resp } }
 
                 // console.log(data.Request.Body, data.Response.Data, resp.Data)
-                
-                console.log(prints.Failed, '\n\nExpected : ', data.Response, '\nReceived : ', resp)
+                // console.log(prints.Failed, JSON.stringify(rusDiff(data.Response, resp)))
+                console.log(prints.Failed, '\n\nExpected : ',JSON.stringify(data.Response), '\nReceived : ', JSON.stringify(resp))
                 return { Status: false, Data: resp }
             case Type.Event:
                 switch(data.Method)
@@ -47,7 +49,7 @@ function TestRig()
                         console.log(prints.Failed, '\n\nExpected : ', data.Event, '\nReceived : ', resp)
                         return { Status: false, Data: resp  }
                     case Method.DISCONNECT :
-                        await Socket.Disconnect(data.Socket)
+                        await Socket.Dsc(data.Socket)
                         return { Status: true,  Data: {}    }
                 }
         }
@@ -57,10 +59,11 @@ function TestRig()
         for(let suite_ =0; suite_ < this.TestSuites.length; suite_++)
         {
             await new Promise((resolve) => setTimeout(resolve, 2));
-            db.database.dropDatabase()
-            db.stores.createIndex({ Location: "2dsphere" })
-            db.users.createIndex({ Location: "2dsphere" })            
-            await new Promise((resolve) => setTimeout(resolve, 2));
+            await Connect()
+            db().database.dropDatabase()
+            SetDB(db().client)
+            await ledger.System()
+            await new Promise((resolve) => setTimeout(resolve, 30));
             
             let suite = this.TestSuites[suite_], failed = false
             let net_step_cnt = 0
@@ -101,7 +104,7 @@ function TestRig()
         console.log('\nFailed: ', this.FailedCnt   )
         console.log('Total : '  , this.TestSuites.length)
 
-        await db.client.close()
+        await db().client.close()
     }
 }
 
