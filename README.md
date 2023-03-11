@@ -21,24 +21,24 @@ Directory Struct :
 
 pkg/</br>
 ├── infra</br>
-│   └── paytm</br>
+│___└── paytm</br>
 ├── pipe</br>
-│   ├── fin</br>
-│   │   ├── address</br>
-│   │   ├── cart</br>
-│   │   ├── generic</br>
-│   │   ├── note</br>
-│   │   └── product</br>
-│   ├── role</br>
-│   │   ├── agent</br>
-│   │   ├── arbiter</br>
-│   │   ├── client</br>
-│   │   ├── seller</br>
-│   │   └── socket</br>
-│   └── run</br>
-│       ├── core</br>
-│       ├── journal</br>
-│       └── transit</br>
+│___├── fin</br>
+│___│___├── address</br>
+│___│___├── cart</br>
+│___│___├── generic</br>
+│___│___├── note</br>
+│___│___└── product</br>
+│___├── role</br>
+│___│___├── agent</br>
+│___│___├── arbiter</br>
+│___│___├── client</br>
+│___│___├── seller</br>
+│___│___└── socket</br>
+│___└── run</br>
+│___    ├── core</br>
+│___    ├── journal</br>
+│___    └── transit</br>
 ├── sys</br>
 └── tool</br>
     ├── filter</br>
