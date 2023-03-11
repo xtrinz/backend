@@ -19,31 +19,31 @@ Caution: Paytm, Twilio, Google APIs are not enabled.
 
 Directory Struct :
 
-pkg/__
-├── infra__
-│   └── paytm__
-├── pipe__
-│   ├── fin__
-│   │   ├── address__
-│   │   ├── cart__
-│   │   ├── generic__
-│   │   ├── note__
-│   │   └── product__
-│   ├── role__
-│   │   ├── agent__
-│   │   ├── arbiter__
-│   │   ├── client__
-│   │   ├── seller__
-│   │   └── socket__
-│   └── run__
-│       ├── core__
-│       ├── journal__
-│       └── transit__
-├── sys__
-└── tool__
-    ├── filter__
-    ├── project__
-    ├── rinse__
-    └── rules__
-        ├── access__
-        └── input__
+pkg/</br>
+├── infra</br>
+│   └── paytm</br>
+├── pipe</br>
+│   ├── fin</br>
+│   │   ├── address</br>
+│   │   ├── cart</br>
+│   │   ├── generic</br>
+│   │   ├── note</br>
+│   │   └── product</br>
+│   ├── role</br>
+│   │   ├── agent</br>
+│   │   ├── arbiter</br>
+│   │   ├── client</br>
+│   │   ├── seller</br>
+│   │   └── socket</br>
+│   └── run</br>
+│       ├── core</br>
+│       ├── journal</br>
+│       └── transit</br>
+├── sys</br>
+└── tool</br>
+    ├── filter</br>
+    ├── project</br>
+    ├── rinse</br>
+    └── rules</br>
+        ├── access</br>
+        └── input</br>
