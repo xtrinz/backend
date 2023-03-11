@@ -16,3 +16,7 @@ Build essentials :
 
 
 Caution: Paytm, Twilio, Google APIs are not enabled.
+
+Flow Diagram (Transit):
+
+<img width="656" alt="achieved" src="https://user-images.githubusercontent.com/64341003/224478738-98a34568-2b97-4de1-b6d0-3ba4253430fa.PNG">
